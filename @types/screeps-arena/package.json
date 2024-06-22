@@ -1,0 +1,30 @@
+{
+    "name": "@types/screeps-arena",
+    "version": "0.0.1",
+    "description": "TypeScript definitions for screeps-arena",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/screeps-arena",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "thmsn",
+            "url": "https://github.com/thmsndk",
+            "githubUsername": "thmsndk"
+        },
+        {
+            "name": "Skyler Kehren",
+            "url": "https://github.com/pyrodogg",
+            "githubUsername": "pyrodogg"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/screeps-arena"
+    },
+    "scripts": {},
+    "dependencies": {},
+    "typesPublisherContentHash": "23b9a34aceee5950cf0b203a2a2ce5bb014c143e48b44596fdc133605ed92b3a",
+    "typeScriptVersion": "3.8"
+}

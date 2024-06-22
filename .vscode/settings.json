@@ -1,0 +1,19 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true,
+    "source.fixAll": false
+  },
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "editor.formatOnSave": true,
+  "editor.renderWhitespace": "boundary",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "search.exclude": {
+    "_book/**": true,
+    ".rpt2_cache/**": true,
+    "dist/**": true,
+    "node_modules/**": true,
+    "typings/**": true
+  },
+  "typescript.tsdk": "./node_modules/typescript/lib"
+}

@@ -1,0 +1,10 @@
+module.exports = {
+  tabWidth: 2,
+  useTabs: false,
+  singleQuote: false,
+  semicolon: true,
+  printWidth: 80,
+  importFormatting: "oneline",
+  arrowParens: "avoid",
+  endOfLine: "auto"
+};

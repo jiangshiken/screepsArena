@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "lib": [
+      "esnext",
+      "dom"
+    ],
+    "target": "es2017",
+    "moduleResolution": "Node",
+    "outDir": "dist",
+    "baseUrl": "src/",
+    "sourceMap": true,
+    "strict": true,
+    "experimentalDecorators": true,
+    "noImplicitReturns": true,
+    "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": false,
+    "typeRoots": [
+      "./node_modules/@types",
+      "@types/"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/arena_alpha_spawn_and_swamp",
+    "src/arena_alpha_spawn_and_swamp_Games_00",
+    "src/arena_capture_the_flag",
+    "src/arena_capture_the_flag_calvin",
+    "src/arena_sas_masterkeze",
+    "src/common",
+  ]
+}

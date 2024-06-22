@@ -1,0 +1,162 @@
+// intent冲突组 author: masterkeze
+export const intentGroup: CreepIntent[][] = [["attack", "build", "rh", "heal"], ["ra", "rma", "build", "rh"]]
+// Action author: masterkeze
+export interface Action {
+	getTarget: () => GameObject | undefined,
+	handleTarget: (creep: Creep, target: GameObject) => void
+	intents: CreepIntent[],
+}
+
+// /**
+//  * author: masterkeze
+//  * 拿到可以进行的操作
+//  * 主要用于分支条件的终止，保底操作的应用
+//  * @returns
+//  */
+// getAvailableIntents(): CreepIntent[] {
+// 	let intents: CreepIntent[] = [];
+// 	if (this.getHealthyBodiesNum("move")) {
+// 		// 不考虑fatigue，因为可能被拖拽
+// 		intents.push("move")
+// 		intents.push("pull")
+// 	}
+// 	if (this.getHealthyBodiesNum("attack") > 0) {
+// 		intents.push("attack")
+// 	}
+// 	if (this.getHealthyBodiesNum("heal") > 0) {
+// 		intents.push("heal")
+// 		intents.push("rh")
+// 	}
+// 	if (this.getHealthyBodiesNum("ranged_attack") > 0) {
+// 		intents.push("ra")
+// 		intents.push("rma")
+// 	}
+// 	if (this.getHealthyBodiesNum("work") > 0) {
+// 		intents.push("build")
+// 	}
+// 	if (this.getHealthyBodiesNum("carry") > 0) {
+// 		intents.push("transfer")
+// 		intents.push("withdraw")
+// 		intents.push("drop")
+// 		intents.push("pickup")
+// 	}
+// 	return intents
+// }
+// /**
+//  * author: masterkeze
+//  * 校验intent, 执行行为, 更新可用intent
+//  * @param intents
+//  * @param action
+//  * @returns
+//  */
+// runAction(intents: CreepIntent[], action: Action): CreepIntent[] {
+// 	if (action.intents.find(i => !intents.includes(i))) return intents;
+// 	let newIntents = JSON.parse(JSON.stringify(intents)) as CreepIntent[];
+// 	const target = action.getTarget();
+// 	if (target) {
+// 		action.handleTarget(this.master, target);
+// 		for (const usedIntent of action.intents) {
+// 			for (const group of intentGroup) {
+// 				if (group.includes(usedIntent)) {
+// 					newIntents = newIntents.filter(i => !group.includes(i));
+// 				}
+// 			}
+// 			newIntents = newIntents.filter(i => i != usedIntent);
+// 		}
+// 	}
+// 	return newIntents;
+// }
+// runActions(actions: Action[], intents: CreepIntent[] = []) {
+// 	intents = intents.length == 0 ? this.getAvailableIntents() : intents;
+// 	for (const action of actions) {
+// 		intents = this.runAction(intents, action);
+// 	}
+// }
+
+// 	/**
+// 	 * author: masterkeze
+// 	 * 在特定方向，特定距离上锁定敌人，目标位置是该方向上，最远的，可以站立的位置
+// 	 * @param  {Creep} target
+// 	 * @param  {DirectionConstant} direction
+// 	 * @param  {number} distance
+// 	 */
+// 	lockEnemyInDirection(target: Creep, direction: DirectionConstant, distance: number) {
+// 		const reverseDir = getReverseDirection(direction);
+// 		const availablePositions: Pos[] = [];
+// 		let newPos = { x: target.x, y: target.y };
+// 		let lastPos = { x: target.x, y: target.y };
+// 		for (let i = 1; i <= distance; i++) {
+// 			newPos = AddDirection(lastPos, reverseDir);
+// 			if (validPos(newPos) && !customBlocked(newPos, true, true)) {
+// 				availablePositions.push(newPos);
+// 			}
+// 			lastPos = newPos;
+// 		}
+// 		availablePositions.reverse();
+// 		const moveTarget = availablePositions[0];
+// 		if (!moveTarget) return false;
+// 		if (this.master.getRangeTo(moveTarget) == 0) return true;
+// 		const trueDistance = getRange(moveTarget, target);
+// 		const cDis = getRange(this.master, target);
+// 		const flee = cDis < trueDistance;
+// 		// 比锁定距离近了，先控制距离，满速优先走沼泽
+// 		if (flee) {
+// 			this.master.moveTo(target,
+// 				{
+// 					flee,
+// 					range: trueDistance,
+// 					swampCost: this.isFullSpeed() ? 1 : this.getMoveTimeByTerrain(true, false),
+// 					plainCost: this.isFullSpeed() ? 2 : this.getMoveTimeByTerrain(false, false)
+// 				});
+
+// 		} else {
+// 			let matrix = new CostMatrix();
+// 			setMatrixByLambda(matrix, (x, y) => {
+// 				if (getRange(target, { x, y }) === trueDistance - 1) return 255;
+// 				return 0;
+// 			});
+// 			this.master.moveTo(moveTarget, {
+// 				costMatrix: matrix,
+// 				swampCost: this.isFullSpeed() ? 1 : this.getMoveTimeByTerrain(true, false),
+// 				plainCost: this.isFullSpeed() ? 2 : this.getMoveTimeByTerrain(false, false)
+// 			});
+// 		}
+// 		return true;
+// 	}
+// 	/**
+// 	 * author: masterkeze
+// 	 * 追击（锁定+靠近）
+// 	 * @param  {Creep} target
+// 	 * @param  {DirectionConstant} direction
+// 	 * @param  {number} distance
+// 	 */
+// 	pursuitEnemyInDirection(target: Creep, direction: DirectionConstant, distance: number) {
+// 		const range = this.master.getRangeTo(target);
+// 		const cDir = getDirectionByPos(this.master, target);
+// 		if (range <= 1) {
+// 			this.master.moveTo(target);
+// 			return;
+// 		}
+// 		if (cDir == direction) {
+// 			this.lockEnemyInDirection(target, direction, range - 1);
+// 		} else {
+// 			this.lockEnemyInDirection(target, direction, distance);
+// 		}
+// 	}
+// 	/**
+// 	 * author: masterkeze
+// 	 * 截停（锁定+不远离保护目标）
+// 	 * @param  {Creep} enemy
+// 	 * @param  {RoomPosition} protect
+// 	 * @param  {number} distance
+// 	 */
+// 	interceptEnemy(enemy: Creep, protect: RoomPosition, distance: number) {
+// 		const range = enemy.getRangeTo(protect);
+// 		const cDir = getDirectionByPos(protect, enemy);
+// 		if (range <= 1) {
+// 			this.master.moveTo(enemy);
+// 			return;
+// 		}
+// 		this.lockEnemyInDirection(enemy, cDir, Math.min(range - 1, distance));
+// 	}
+// }

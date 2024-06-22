@@ -1,0 +1,101 @@
+get creeps check if at spawn move to loop start
+stdAttacker protect into rampart not flee
+test harvest task
+builder block at fill extension
+#quick ranged robot 1h9r1a2h
+#timeAssignRush
+    2t10m6a,1t10m6a,10m6a....13m4a
+    a healer
+    use same distance assign
+#standardStra
+    predict node
+    #taskSys
+        drop container to task
+        trans energy to task
+        action conflict,include move drop/pick attack ...
+            the action should not be used directly ,but
+            passing a filter,to decide which action to do
+        useWT ,if WT exhaust ,that end the task
+    #macro operation
+        energy exist point value
+    #find path
+        change move map not traverse 100x100 ,
+            to traverse creep for every n tick
+        block can trans to possibility,low when not 1
+        minimap searchpath ,my path finding algorthm
+    #creep type
+        MARHW spawn with proportion
+        liner proportion with my best prop and opponent prop
+        circle prop,cooperate feature
+    #move strategy
+        predict event
+        long-term short-term stra
+        core function return remain WT
+#robotStra.harvestStrategy
+    robot cost around wall to 50 but not 255
+    find out why robot block at middle
+    cancel everlast snake ,change to temparary snake
+    set targetAssemblePos to harvable
+        if tick>=1700 go attack enemySpawn
+    if there is enemy ,shot
+        else drop container and static build and withdraw energy and fill extension
+    if no extension ,create extension at 1 range of builder and 2 range of assemblePos
+    base build attacker of 1A2M,if RPS num>=3
+#robotStra
+    catch low speed
+    pull not work
+    fight mathi 32 ,timeout initCM()
+    extend Shape
+    anti enemySpawn rampart
+    macro part of robotPart
+#armed builder
+    flee sum force by range in area
+#turtle
+    builderMove
+        hasCS
+            tick>500
+                builderControl but inRam
+                assignBlock
+            tick<=500
+        noCS
+            inRam
+    defenderMove
+        inRam
+        assignBlock
+    destroy low hp ram
+    extra Ram of 8 corner
+    assignBlock
+        if both in ram ,exchange
+        if not use recursion
+mover not work
+#little revise and error
+    wantMove has pos
+    use constructor replace doInit?
+    builder out of ram
+    harvester not drop all at full producer
+    builder not fill extension
+	    self is producer?
+    mover take task weight
+	    pull friend weight
+	attacking high taunt friend enemy has high taunt
+    pipeNotWorking
+    not correct builder SAS loc
+    SAS use store sasList in every 5x5 verical left
+    pipe idle drop and rewithdraw
+    healer and attacker not move
+#timeout
+	trylinkHarvable findClosestByPath time out
+	turn timeCpx to spaceCpx
+#moverLogic
+	mover weight
+		distance to startPos
+        pull fatigue
+            weight=force/need fatigue
+#general logic
+	use the this tick action to gene all new
+	maps .by the current action list
+	predict enemy move and attack
+	update all predict maps.that is in short
+	time tick,like +1,+2..or in specific tick
+	like 1500,1800.
+    use the feedback to decide the action of this tick.

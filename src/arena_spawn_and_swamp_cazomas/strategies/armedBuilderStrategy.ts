@@ -1,0 +1,106 @@
+/**
+ Module: armedBuilderStrategy
+ Author: 820491047
+ CreateDate:   2023.1.13
+ UpDateDate:   2023.1.13
+ version 0.0.0
+*/
+import { CARRY } from "game/constants";
+import { StructureExtension } from "game/prototypes";
+
+import { createCS } from "../constructionSite";
+import { builderStandard } from "../roles/builder";
+import { defender_rampart } from "../roles/defender";
+import { harvester } from "../roles/harvester";
+import { jamer } from "../roles/jamer";
+import { resourceDestroyer } from "../roles/resourceDestroyer";
+import { spawnRusher } from "../roles/spawnRusher";
+import { sasVariables } from "../SASVariables";
+import { EEB, resetStartGateAvoidFromEnemies, spawn, spawnAndExtensionsEnergy } from "../spawn";
+import { spawnBySpawnTypeList, SpawnType } from "../spawnTypeList";
+import { displayPos } from "../util_attackable";
+import { TB } from "../util_autoBodys";
+import { enemyArmyReduce, enemyBuilderBonus, ticksBonus, totalInferiorityBonus, totalSuperiorityRateReduce } from "../util_bonus";
+import { addStrategyTick, strategyTick, tick } from "../util_game";
+import { myConstructionSites, myExtensions } from "../util_gameObjectInitialize";
+import { MGR, multiplyVector, plusVector } from "../util_pos";
+import { SA, SAN } from "../util_visual";
+import { useStandardTurtling } from "./turtle";
+
+/**use a bunch of builder with ATTACK part to confuse enemy and harve huge
+ * amount of energy
+*/
+export function useArmedBuilderStrategy() {
+	const st = strategyTick
+	const TKB2_2 = ticksBonus(200, 2);
+	const TKB2_4 = ticksBonus(200, 4);
+	const TKB4_4 = ticksBonus(400, 4);
+	const TKB4_2 = ticksBonus(400, 2);
+	const TSRR = totalSuperiorityRateReduce();
+	const EBB1p7 = enemyBuilderBonus(1.7);
+	const EAR = enemyArmyReduce(1.5)
+	const TG800_3 = tick >= 800 ? 3 : 1//tick greater than 1000
+	const TG1500_3 = tick >= 1500 ? 3 : 1
+	const extraExtBonus = tick <= 400
+		&& (myExtensions.find(i => MGR(i, spawn) <= 7) !== undefined
+			|| myConstructionSites.find(i => MGR(i, spawn) <= 7 && i.structure instanceof StructureExtension) !== undefined)
+		? 2.5 : 1
+	const TG300_1p5 = tick >= 300 ? 1.5 : 1
+	const TIB = totalInferiorityBonus();
+	if (tick === 1) {
+		createCS(plusVector(multiplyVector({ x: 4, y: 2 }, sasVariables.leftRate()), spawn), StructureExtension, 11)
+	}
+	SAN(displayPos(), "extraExtBonus", extraExtBonus)
+	SA(displayPos(), "spawnAndExtensionsEnergy(spawn)=" + spawnAndExtensionsEnergy(spawn))
+	resetStartGateAvoidFromEnemies()
+	useStandardTurtling(st, 1)
+	const spawnTypeList: SpawnType[] = [
+		//150+600+100+240=1090
+		new SpawnType(builderStandard, 1 * TKB4_2 * extraExtBonus * EEB(1090, 2.5), TB("12M3CW3A"),
+			fri => fri.filter(i => i.role === builderStandard).length),
+		//150+500+100+240=990
+		new SpawnType(builderStandard, 1 * TKB4_2 * EEB(990, 2), TB("10M3CW3A"),
+			fri => fri.filter(i => i.role === builderStandard).length),
+		//150+250+100+80=580
+		new SpawnType(builderStandard, 1 * TG300_1p5 * TKB4_2 * EEB(530, 1.4), TB("5M3CWA"),
+			fri => fri.filter(i => i.role === builderStandard).length),
+		//100+200+100+80=480
+		new SpawnType(builderStandard, 1 * TG300_1p5 * EEB(480, 1.2), TB("4M2CWA"),
+			fri => fri.filter(i => i.role === builderStandard).length),
+		//50+150+100+80=380
+		new SpawnType(builderStandard, 1 * TG300_1p5 * EEB(380, 1.1), TB("3MCWA"),
+			fri => fri.filter(i => i.role === builderStandard).length),
+		//280
+		new SpawnType(defender_rampart, 0.6 * TIB * EEB(280, 1.8), TB("ARM"),
+			fri => fri.filter(i => i.role === defender_rampart).length),
+		//50
+		new SpawnType(jamer, 0.8 * TKB2_4 * TKB4_4 * EBB1p7 * TSRR * EEB(50, 1.2), TB("M"),
+			fri => fri.filter(i => i.role === jamer).length),
+		//100
+		new SpawnType(resourceDestroyer, 0.4 * TKB2_2 * TKB4_2 * EBB1p7 * TSRR * EEB(100, 1.2), TB("CM"),
+			fri => fri.filter(i => i.role === resourceDestroyer).length),
+		// //500
+		// new SpawnType(stdHealer, 0.15 * EEB(500, 1.4), TB("5MH"),
+		// 	fri => fri.filter(i => i.role === stdHealer).length),
+		// //400
+		// new SpawnType(stdShoter, 0.3 * EEB(400, 1.4), TB("5MR"),
+		// 	fri => fri.filter(i => i.role === stdShoter).length),
+		//330
+		new SpawnType(spawnRusher, 0.5 * EAR * TG800_3 * TG1500_3 * EEB(330, 1.4), TB("5MA"),
+			fri => fri.filter(i => i.role === spawnRusher).length),
+		//230
+		new SpawnType(spawnRusher, 0.5 * EAR * TG800_3 * TG1500_3 * EEB(230, 1.1), TB("3MA"),
+			fri => fri.filter(i => i.role === spawnRusher).length),
+		// //330
+		// new SpawnType(spawnStealer, 0.5 * EAR * EEB(330, 1.4), TB("5MA"),
+		// 	fri => fri.filter(i => i.role === spawnStealer).length),
+		//10+100+80
+		// new SpawnType(stdAttacker, 0.12 * TKB2_4 * EEB(190, 1.4), TB("T2MA"),
+		// 	fri => fri.filter(i => i.role === stdAttacker).length),
+		//200
+		new SpawnType(harvester, 0.4 * EEB(200, 1.4), TB("3CM"),
+			fri => fri.filter(i => i.role === harvester && i.getBodiesNum(CARRY) >= 2).length),
+	]
+	spawnBySpawnTypeList(spawnTypeList)
+	addStrategyTick()
+}
