@@ -64,6 +64,10 @@ export function newPullTask(
 		new PullTask(master, tarCre, tarPos, nextStep);
 	}
 }
+export let pullGoSawmp: Boolean = false
+export function setPullGoSwamp(b: Boolean) {
+	pullGoSawmp = b
+}
 /**
  * Task of pull ,the creep will pull a creep to a position
  * @param nextStep the pos creep will go next ,
@@ -106,7 +110,13 @@ export class PullTask extends Task_Cre {
 				//if is pulling
 				SA(this.master, "is pulling");
 				if (!this.moveTask2) {
-					this.moveTask2 = new FindPathAndMoveTask(this.master, this.tarPos);
+					if (pullGoSawmp === true) {
+						this.moveTask2 = new FindPathAndMoveTask(this.master, this.tarPos, 5, {
+							plainCost: 5, swampCost: 0.1
+						});
+					} else {
+						this.moveTask2 = new FindPathAndMoveTask(this.master, this.tarPos);
+					}
 				} else if (this.moveTask2.complete) {
 					//master at pos
 					SA(this.master, "this.moveTask2.complete end");
@@ -161,6 +171,13 @@ export class PullTarsTask extends Task_Cre {
 			ot.end();
 			return this;
 		}
+	}
+	end(): void {
+		super.end()
+		this.master.tasks.find(i => i instanceof PullTask)?.end()
+		// for (let tar of this.tarCres) {
+		// 	tar.tasks.find(i => i instanceof PullTask)?.end()
+		// }
 	}
 	loop_task(): void {
 		// if have pull task

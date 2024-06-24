@@ -11,22 +11,23 @@ import { ConstructionSite, Creep, GameObject, Resource, Structure, StructureCont
 import { findClosestByPath, findClosestByRange, findPath, getDirection, getRange, getTerrainAt, getTicks } from "game/utils";
 
 // import { CS, getMaxWorthCSS, getMyCSs, progress } from "../utils_pincer";
+import { sasVariables } from "./SASVariables";
 import { CS, getMaxWorthCSS, getMyCSs, progress } from "./constructionSite";
 import { getForceMapValue, isBlockGameObject, moveMatrix, setMoveMapAndMatrixBlock } from "./maps";
-import { sasVariables } from "./SASVariables";
-import { displayPos, getMyContainers, getRess, inRampart, isOppoContainer, Res, spawnPos, validRes } from "./util_attackable";
-import { BodyCre } from "./util_bodyParts";
 import { ct, et, ptSum } from "./util_CPU";
+import { StNumber, divide0, divideReduce, divide_ab0, invalid, last, nst, pow2, ranGet, remove, removeIf, valid } from "./util_JS";
+import { Selecter, wc } from "./util_WT";
+import { Res, displayPos, getMyContainers, getRess, inRampart, isOppoContainer, spawnPos, validRes } from "./util_attackable";
+import { BodyCre } from "./util_bodyParts";
 import { Event, Event_C, Event_Number, Event_Pos, validEvent } from "./util_event";
 import { S, SOA } from "./util_export";
 import { tick } from "./util_game";
-import { constructionSites, containers, creeps, Harvable, isMyGO, isMyRampart, isMySpawn, isOppoRampart, isOppoSpawn, myStructures, oppoStructures, OwnedStructure, resources, spawns, structures, walls } from "./util_gameObjectInitialize";
-import { divide0, divideReduce, divide_ab0, invalid, last, nst, pow2, ranGet, remove, removeIf, StNumber, valid } from "./util_JS";
+import { Harvable, OwnedStructure, constructionSites, containers, creeps, isMyGO, isMyRampart, isMySpawn, isOppoRampart, isOppoSpawn, myStructures, oppoStructures, resources, spawns, structures, walls } from "./util_gameObjectInitialize";
 import { findGO, hasGO, overallMap } from "./util_overallMap";
-import { atPos, COO, getRangePoss, inRangeVector, invalidPos, MGR, midPoint, minusVector, multiplyVector, myGetRange, plusVector, Pos, pos00, Pos_C, roundVector, validPos, X_axisDistance } from "./util_pos";
-import { findTask, findTaskByFilter, HasTasks, MultiTask, Task, Task_C, useTasks } from "./util_task";
-import { drawLineComplex, drawLineLight, drawPoly, drawPolyLight, getOpacity, PS, SA } from "./util_visual";
-import { Selecter, wc } from "./util_WT";
+import { Kerob, getGuessPlayer } from "./util_player";
+import { Adj, COO, MGR, Pos, Pos_C, X_axisDistance, atPos, getRangePoss, inRangeVector, invalidPos, midPoint, minusVector, multiplyVector, myGetRange, plusVector, pos00, roundVector, validPos } from "./util_pos";
+import { HasTasks, MultiTask, Task, Task_C, findTask, findTaskByFilter, useTasks } from "./util_task";
+import { PS, SA, drawLineComplex, drawLineLight, drawPoly, drawPolyLight, getOpacity } from "./util_visual";
 
 export const defFindPathResult: FindPathResult = {
 	path: [], ops: 0, cost: 0, incomplete: true
@@ -388,7 +389,7 @@ export class Cre implements HasTasks {
 	}
 	/** find path and move */
 	moveToNormal(tar: Pos, op: FindPathOpts | null = null) {
-		SA(this.master, "moveToNormal" + COO(tar))
+		// SA(this.master, "moveToNormal" + COO(tar))
 		this.wantMove = new Event_C();
 		let mop;
 		if (op === null) {
@@ -407,7 +408,7 @@ export class Cre implements HasTasks {
 	normalPull(tar: Cre, direct: boolean = false): boolean {
 		if (myGetRange(this, tar) <= 1) {
 			//draw green line
-			drawLineComplex(this, tar, 0.25, "#00ff00");
+			drawLineComplex(this, tar, 0.5, "#00ff00");
 			//pull
 			this.master.pull(tar.master);
 			//set Event
@@ -1804,11 +1805,18 @@ export class Battle {
 		if (this.master.getBodies(ATTACK).length > 0) {
 			// SA(this,"melee 2")
 			let tars = oppoUnits.filter(i => myGetRange(this.master, i) <= 1);
+
 			let tar = findMaxTaunt(tars).unit;
 			if (tar != undefined && exist(tar)) {
 				// SA(this,"melee 3")
 				this.attackNormal(tar);
 				return true;
+			} else if (getGuessPlayer() === Kerob) {
+				const wallTar = walls.find(i => Adj(i, this.master))
+				if (wallTar) {
+					SA(this.master, "AW")
+					this.attackNormal(wallTar);
+				}
 			}
 		}
 		return false;
@@ -1818,7 +1826,8 @@ export class Battle {
 	*/
 	fight(): boolean {
 		SA(this.master, "fight")
-		if (hasOppoUnitAround(this.master, 1)) {
+		if (hasOppoUnitAround(this.master, 1)
+			|| getGuessPlayer() === Kerob && walls.find(i => Adj(i, this.master)) !== undefined) {
 			//if can attack
 			if (this.master.getHealthyBodies(ATTACK).length > 0) {
 				let tars1 = oppoUnits.filter(i => MGR(this.master, i) <= 1);
@@ -2007,7 +2016,7 @@ export class Macro {
 				typeRate = 1
 			} else if (producer instanceof StructureExtension) {
 				if (MGR(producer, spawnPos) <= 7) {
-					typeRate = 1.5
+					typeRate = 0.75
 				} else {
 					typeRate = 0.5
 				}
@@ -2494,7 +2503,7 @@ export class Cre_pathFinder {
 	moveTo_Basic(tar: Pos): void {
 		setMoveMapAndMatrixBlock(tar);
 		this.master.moveTargetNextPos = new Event_Pos(tar)
-		SA(this.master, "moveTo_Basic=" + COO(tar))
+		// SA(this.master, "moveTo_Basic=" + COO(tar))
 		this.master.master.moveTo(tar);
 	}
 	//move to ,use move() that use direction,not find path

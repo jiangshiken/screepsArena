@@ -46,6 +46,7 @@ export const Tigga: Player = new Player("Tigga");
 export const Dooms: Player = new Player("Dooms");
 export const MathI: Player = new Player("MathI");
 export const Capta: Player = new Player("Capta");
+export const Kerob: Player = new Player("Kerob");
 export const Other: Player = new Player("Other");
 export const startWaitTick = 44;
 export let currentGuessPlayer = Other;
@@ -65,12 +66,21 @@ export function identifyOpponent() {
 			addSupport(Tigga, "0", 0.5)
 		}
 	}
+	//identify Kerob
+	if (tick <= startWaitTick) {
+		const scanEn0 = creeps.find(i => isOppoGO(i) && arrayEquals(getBodyArrayOfCreep(i), TB("4M3R")))
+		if (scanEn0 !== undefined) {
+			SA(displayPos(), "Kerob triggered")
+			addSupport(Kerob, "0", 1)
+		}
+	}
 	//identify dooms
 	if (tick <= startWaitTick) {
 		const scanEn0 = creeps.find(i => isOppoGO(i) && arrayEquals(getBodyArrayOfCreep(i), TB("C")))
 		if (scanEn0) {
 			SA(displayPos(), "dooms triggered")
-			addSupport(Dooms, "0", 0.5)
+			// addSupport(Dooms, "0", 0.5)
+			addSupport(Kerob, "0", 0.5)
 		}
 	}
 	//

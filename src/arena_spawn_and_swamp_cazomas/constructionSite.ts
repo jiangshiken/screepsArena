@@ -129,7 +129,7 @@ export function createCS_wait(pos: Pos,
  * at the position ,it will not work.rampart and no rampart will be seperate,
  * that you can create an rampart `ConstructionSite` and a no rampart `ConstructionSite`
  * at same position at most.if the number of `ConstructionSite` on this map is over 10,
- * it will remove one of it of the lest {@link CS.wt} of the {@link CS}
+ * it will remove one of it of the lest of the {@link CS}
  */
 export function createCS(
 	pos: Pos,

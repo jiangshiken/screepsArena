@@ -3,13 +3,14 @@ import { getSpawns } from "./spawn";
 import { displayPos, inRampart, spawnPos } from "./util_attackable";
 import { rangeDecreaseBonus } from "./util_bonus";
 import { ct, et, getCPUPercent, lowCPUMode, pt, ptSum } from "./util_CPU";
-import { Attackable, blocked, calculateForce, Cre, cres, getArmies, getEnemyArmies, GO, isTerrainSwamp, isTerrainWall, my, myGO, oppo, Unit } from "./util_Cre";
+import { Attackable, blocked, calculateForce, Cre, cres, exist, getArmies, getEnemyArmies, GO, isTerrainSwamp, isTerrainWall, my, myGO, oppo, Unit } from "./util_Cre";
 import { S } from "./util_export";
 import { tick } from "./util_game";
 import { isMyRampart, isMySpawn, isOppoRampart, isOppoSpawn, ramparts, spawns } from "./util_gameObjectInitialize";
 import { divide0, goInDoubleRange, randomBool, relu } from "./util_JS";
 import { MyMap } from "./util_MyMap";
 import { overallMap } from "./util_overallMap";
+import { getGuessPlayer, Kerob } from "./util_player";
 import { getRangePoss, MGR, Pos, pos00, setMatrixByLambda } from "./util_pos";
 import { drawMyMap, PS, SA, SAN } from "./util_visual";
 /**
@@ -114,6 +115,7 @@ export function isBlockGameObject(go: GO, containerBlock: boolean = false, my?: 
 		my = myGO(go)
 	}
 	return (
+		exist(go) &&
 		(go instanceof Structure || go instanceof Cre) &&
 		!(
 			(go instanceof StructureRampart && my)
@@ -148,6 +150,10 @@ export function getBlockRate(att: Attackable): number {
 export let moveCostForceRate = 0.5
 export function set_moveCostForceRate(d: number) {
 	moveCostForceRate = d
+}
+export let swampFirst: boolean = false
+export function set_swampFirst(b: boolean) {
+	swampFirst = b
 }
 /**
  * set the value of move map
@@ -245,8 +251,11 @@ export function setMoveMap() {
 					SAN(pos, "blockRate", blockRate)
 				}
 				//swamp cost
-				const swampRate = isTerrainSwamp(pos) ? 3 : 1;
-				const forceRate = 1 + relu(moveCostForceRate * (forceMapExtraCost + 1));
+				const swampRate = swampFirst ?
+					(isTerrainSwamp(pos) ? 1 : 10)
+					: (isTerrainSwamp(pos) ? 3 : 1);
+				const forceRate = getGuessPlayer() === Kerob ?
+					1 : (1 + relu(moveCostForceRate * (forceMapExtraCost + 1)));
 				cost += moveMapSetRate * swampRate * forceRate;
 				//set
 				const realCost = Math.ceil(goInDoubleRange(cost, 0, 255))

@@ -15,11 +15,11 @@ import { useStandardStrategy } from "./strategies/standard";
 import { spawnStartHarvester } from "./strategies/strategyTool";
 import { useTurtleStrategy } from "./strategies/turtle";
 import { useTest } from "./testMode";
-import { displayPos } from "./util_attackable";
 import { ct, lowCPUMode, pt } from "./util_CPU";
 import { set_spawnDps } from "./util_Cre";
+import { displayPos } from "./util_attackable";
 import { P, tick } from "./util_game";
-import { Dooms, getGuessPlayer, identifyOpponent, startWaitTick, Tigga } from "./util_player";
+import { Dooms, Kerob, Tigga, getGuessPlayer, identifyOpponent, startWaitTick } from "./util_player";
 import { SA } from "./util_visual";
 import { showHealthBars } from "./util_visual_Cre";
 
@@ -63,7 +63,15 @@ export function loop(): void {
 	} else {
 		const gp = getGuessPlayer()
 		if (gp === Tigga) {
-			set_snakePartsTotalNum(8)
+			set_snakePartsTotalNum(7)
+
+			// set_HealerMode(true)
+			useMod = snakeRushStrategy
+			// useMod = standardStrategy
+			set_spawnDps(30000)
+		} else if (gp === Kerob) {
+			set_snakePartsTotalNum(7)
+
 			// set_HealerMode(true)
 			useMod = snakeRushStrategy
 			// useMod = standardStrategy
