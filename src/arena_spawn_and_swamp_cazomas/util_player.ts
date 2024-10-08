@@ -73,6 +73,11 @@ export function identifyOpponent() {
 			SA(displayPos(), "Kerob triggered")
 			addSupport(Kerob, "0", 1)
 		}
+		const scanEn1 = creeps.find(i => isOppoGO(i) && arrayEquals(getBodyArrayOfCreep(i), TB("2M3R2M")))
+		if (scanEn1 !== undefined) {
+			SA(displayPos(), "Kerob triggered")
+			addSupport(Kerob, "0", 1)
+		}
 	}
 	//identify dooms
 	if (tick <= startWaitTick) {

@@ -5,14 +5,14 @@
  UpDateDate:   2023.1.10
  version 0.0.0
 */
-import { WORK } from "game/constants";
+import { ATTACK, WORK } from "game/constants";
 import { ConstructionSite } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
 import { cpuBreakJudge, fleeWeakComplex, givePositionToImpartantFriend } from "../army";
 import { getProgressRate } from "../constructionSite";
 import { inOppoRampart } from "../util_attackable";
-import { blocked, Cre, enemies, hasEnemyAround_lamb, Role } from "../util_Cre";
+import { blocked, Cre, enemies, friends, hasEnemyAround_lamb, Role } from "../util_Cre";
 import { tick } from "../util_game";
 import { oppoConstructionSites } from "../util_gameObjectInitialize";
 import { divideReduce } from "../util_JS";
@@ -22,6 +22,19 @@ import { SA } from "../util_visual";
 /**used to jam the opponent's construction site*/
 export const jamer: Role = new Role("jamer", jamerJob)
 export function jamerJob(cre: Cre) {
+	SA(cre, "I'm jamer")
+	const leader=friends.find(i=>i.getBodiesNum(ATTACK)>=9)
+	if(leader){
+		if(leader.upgrade.isPush === true){
+			cre.MTJ(leader)
+		}else{
+			cre.moveAndBePulled(leader)
+		}
+	}else{
+		jamerOldJob(cre)
+	}
+}
+export function jamerOldJob(cre: Cre) {
 	SA(cre, "I'm jamer")
 	if (inOppoRampart(cre)) {
 		SA(cre, "inOppoRampart")

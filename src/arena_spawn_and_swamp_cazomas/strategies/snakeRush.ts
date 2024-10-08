@@ -18,13 +18,13 @@ import { setMoveMapSetRate, set_moveCostForceRate, set_swampFirst } from "../map
 import { PullTarsTask, setPullGoSwamp } from "../pullTasks";
 import { enemyRampartIsHealthy } from "../ramparts";
 import { builderTurtle } from "../roles/builder";
-import { shortDistanceFight, stdShoter } from "../roles/fighters_std";
+import { shortDistanceFight } from "../roles/fighters_std";
 import { jamer } from "../roles/jamer";
 import { toughDefender } from "../roles/toughDefender";
 import { enemySpawn, getBodiesCost, inEnBaseRan, inMyBaseRan, resetStartGateAvoidFromEnemies, spawn, spawnAndExtensionsEnergy, spawnCleared, spawnCreep, spawnCreep_ifHasEnergy } from "../spawn";
 import { ct, et } from "../util_CPU";
 import { Cre, Role, blocked, calculateForce, cres, damaged, defendInArea, enemies, enemyAWeight, exchangePos, exist, friends, getDamagedRate, getEnemyArmies, getEnemyThreats, getTaunt, hasEnemyThreatAround, hasThreat, isHealer, myUnits, oppo, oppoUnits, setEnRamAroundCost, sumForceByArr } from "../util_Cre";
-import { invalid, ranBool, relu, sum } from "../util_JS";
+import { invalid, sum } from "../util_JS";
 import { best, maxWorth_lamb } from "../util_WT";
 import { displayPos, inRampart } from "../util_attackable";
 import { TB } from "../util_autoBodys";
@@ -703,7 +703,7 @@ export function useSnakeRushStrategy() {
 	//spawn jamer
 	if (spawnJamer) {
 		if (st === 1) {
-			for (let i = 0; i < 2; i++) {
+			for (let i = 0; i < 6; i++) {
 				spawnCreep(TB("M"), jamer)
 			}
 		}
@@ -748,7 +748,8 @@ export function useSnakeRushStrategy() {
 	if (st >= 300 && snakeGo && spawnCleared(spawn)) {
 		//250+160
 		SA(displayPos(), "supply stdShoter")
-		spawnCreep(TB("5MR"), stdShoter);
+		// spawnCreep(TB("5MR"), stdShoter);
+		spawnCreep(TB("M"), jamer)
 	}
 	//
 	command()
@@ -785,9 +786,9 @@ function command() {
 						typeBonus = 3
 					} else {
 						if (i.getBodiesNum(WORK) > 0) {
-							typeBonus = 4
+							typeBonus = 1
 						}else if(MGR(i,enemySpawn)<=7 && i.getBodiesNum(ATTACK)>=2){
-							typeBonus= 0.1
+							typeBonus= 0.3
 						} else if (i.getBodiesNum(ATTACK) + i.getBodiesNum(RANGED_ATTACK) <= 1) {
 							typeBonus = 0.01
 						} else if (Adj(i, enemySpawn) && MGR(i, spawn) >= 90) {
@@ -799,14 +800,18 @@ function command() {
 				} else if (i instanceof StructureExtension) {
 					if (getGuessPlayer() === Tigga) {
 						typeBonus = 0.015
-					} else {
+					} else if (getGuessPlayer() === Dooms) {
+						typeBonus = 10
+					}  else {
 						typeBonus = 0.15
 					}
 					// typeExtra = 0.15
 				} else if (i instanceof StructureSpawn) {
 					if (getGuessPlayer() === Tigga) {
 						typeBonus = 100
-					} else {
+					} else if (getGuessPlayer() === Dooms) {
+						typeBonus = 10
+					}  else {
 						typeBonus = 0.02
 					}
 					// typeExtra = getTicks() <= 630 ? 100 : 0.5
@@ -824,10 +829,11 @@ function command() {
 			const hasThreated = snakeParts.find(sp =>
 				threats.find(i => Adj(i, sp)) !== undefined
 			) !== undefined
-			const potentialThreat=sum(threats.filter(i=>MGR(i,head)<=4),i=>i.getBodiesNum(ATTACK))
-				+sum(threats.filter(i=>MGR(i,head)>4 && MGR(i,head)<=10),i=>0.5*i.getBodiesNum(ATTACK));
-			const ifRetreat=!ranBool(1/(1+0.5*relu(potentialThreat-3)))
-			SA(head,"potThreat="+potentialThreat+" ifRetreat="+ifRetreat)
+			// const potentialThreat=sum(threats.filter(i=>MGR(i,head)<=3),i=>i.getBodiesNum(ATTACK))
+			// 	+sum(threats.filter(i=>MGR(i,head)>3 && MGR(i,head)<=8),i=>0.25*i.getBodiesNum(ATTACK));
+			// const ifRetreat=!ranBool(1/(1+0.125*relu(potentialThreat-4)))
+			// SA(head,"potThreat="+potentialThreat+" ifRetreat="+ifRetreat)
+			const ifRetreat=false
 			const tarDistance = target ? MGR(head, target) : 1
 			const hasMelee = enemies.find(i => i.getBodiesNum(ATTACK) >= 3 && MGR(i, head) <= 5) != undefined
 			const pureRangedBias = getGuessPlayer() === Tigga ? 500 : (
@@ -877,10 +883,24 @@ function command() {
 						new PullTarsTask(head, sortedFollowers, target, undefined, false);
 					}
 				} else {
-					SA(head, "O")
-					const followers = snakeParts.filter(i => i !== head);
-					const sortedFollowers = followers.sort((a, b) => spInd(a) - spInd(b))
-					new PullTarsTask(head, sortedFollowers, target, undefined, false);
+					let ifChase:boolean
+					if(target instanceof Cre && target.getBodiesNum(ATTACK)===0){
+						ifChase=true
+					}else if(target instanceof Cre && target.getBodiesNum(WORK)>0 && inRampart(target)){
+						ifChase=false
+					}else if(target instanceof Cre && target.getBodiesNum(WORK)>0 && !inRampart(target)){
+						ifChase=true
+					}else{
+						ifChase=false
+					}
+					if(Adj(head,target) && !ifChase){
+						head.stop()
+					}else{
+						SA(head, "O")
+						const followers = snakeParts.filter(i => i !== head);
+						const sortedFollowers = followers.sort((a, b) => spInd(a) - spInd(b))
+						new PullTarsTask(head, sortedFollowers, target, undefined, false);
+					}
 				}
 			} else {
 				SA(head, "NO TARGET")
@@ -905,7 +925,7 @@ function supplyToughDefender(defenderNum:number=2) {
 			if (getGuessPlayer() === Tigga) {
 				restPart = TB("M4A")
 			} else if (getGuessPlayer() === Dooms) {
-				restPart = TB("MAR")
+				restPart = TB("MA")
 			} else if (getGuessPlayer() === Kerob) {
 				restPart = TB("MAR")
 			} else if (aRate > 0.6) {
@@ -919,7 +939,7 @@ function supplyToughDefender(defenderNum:number=2) {
 				restPart = TB("M2R")
 			}
 			const restCost = getBodiesCost(restPart)
-			const TNum_beforeRange = Math.min(Math.floor((myEnergy - restCost) / 10), 20)
+			const TNum_beforeRange = Math.min(Math.floor((myEnergy - restCost) / 10), getGuessPlayer() === Dooms?10:20)
 			const TNumLimit = Math.floor(range / 3 + 4)
 			const TNum = Math.min(TNumLimit, TNum_beforeRange)
 			SAN(displayPos(), "TNum", TNum)
@@ -935,7 +955,7 @@ function supplyToughDefender(defenderNum:number=2) {
 			} else if (getGuessPlayer() === Kerob) {
 				spawnCreep_ifHasEnergy(TB("20TM2AR"), toughDefender);
 			} else if (getGuessPlayer() === Dooms) {
-				spawnCreep_ifHasEnergy(TB("30TMRA"), toughDefender);
+				spawnCreep_ifHasEnergy(TB("10TMA"), toughDefender);
 			} else if (aRate > 0.6) {
 				//150+150+240=540
 				spawnCreep_ifHasEnergy(TB("20TM4A"), toughDefender);
