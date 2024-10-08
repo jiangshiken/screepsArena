@@ -61,7 +61,7 @@ export function useStandardTurtling(st: number, strength: number = 0) {
 	// supply
 	supplyHarvester(st);
 	// supplyHarvester
-	supplyRoads()
+	supplyRoads(true)
 	//
 	const startRebuildTick = 200;
 	let transRebuildTime: number;
@@ -79,13 +79,13 @@ export function useStandardTurtling(st: number, strength: number = 0) {
 	if (st >= startRebuildTick && st <= transRebuildTime) {
 		reBuildBaseRampart();
 	}
-	if (st >= transRebuildTime) {
-		let leftRate = sasVariables.leftRate();
-		supplyCS({ x: spawn.x - leftRate, y: spawn.y + 1 }, StructureRampart, 9);
-		supplyCS({ x: spawn.x - leftRate, y: spawn.y - 1 }, StructureRampart, 9);
-		supplyCS({ x: spawn.x + leftRate, y: spawn.y + 1 }, StructureRampart, 8);
-		supplyCS({ x: spawn.x + leftRate, y: spawn.y - 1 }, StructureRampart, 8);
-	}
+	// if (st >= transRebuildTime) {
+	// 	let leftRate = sasVariables.leftRate();
+	// 	supplyCS({ x: spawn.x - leftRate, y: spawn.y + 1 }, StructureRampart, 9);
+	// 	supplyCS({ x: spawn.x - leftRate, y: spawn.y - 1 }, StructureRampart, 9);
+	// 	supplyCS({ x: spawn.x + leftRate, y: spawn.y + 1 }, StructureRampart, 8);
+	// 	supplyCS({ x: spawn.x + leftRate, y: spawn.y - 1 }, StructureRampart, 8);
+	// }
 	if (st == 150) {
 		//defender
 		if (strength <= 0) {
@@ -332,14 +332,23 @@ function supplyRamparts() {
 	}
 }
 /**supply the roads around the base*/
-export function supplyRoads() {
-	const rectPos = getRangePoss(spawn, 2).filter(i =>
-		MGR(spawn, i) === 2
-		&& X_axisDistance(spawn, i) === 2
-		&& Y_axisDistance(spawn, i) <= 1)
-	// const crossPos = getRangePoss(spawn, 2).filter(i => MGR(spawn, i) === 2 && absRange(spawn, i) === 2)
-	// const rangePos = getRangePoss(spawn, 1).concat(rectPos, crossPos)
-	const rangePos = getRangePoss(spawn, 1).concat(rectPos)
+export function supplyRoads(simpleRoad:boolean=false) {
+	let rangePos
+	if(simpleRoad){
+		rangePos=getRangePoss(spawn, 1).filter(i=>
+			X_axisDistance(spawn, i) === 0
+			|| Y_axisDistance(spawn, i) ===0
+		)
+
+	}else{
+		const rectPos = getRangePoss(spawn, 2).filter(i =>
+			MGR(spawn, i) === 2
+			&& X_axisDistance(spawn, i) === 2
+			&& Y_axisDistance(spawn, i) <= 1)
+		// const crossPos = getRangePoss(spawn, 2).filter(i => MGR(spawn, i) === 2 && absRange(spawn, i) === 2)
+		// const rangePos = getRangePoss(spawn, 1).concat(rectPos, crossPos)
+		rangePos = getRangePoss(spawn, 1).concat(rectPos)
+	}
 	for (let pos of rangePos) {
 		if (!atPos(pos, spawn)) {
 			if (supplyCS(pos, StructureRoad, 9)) {

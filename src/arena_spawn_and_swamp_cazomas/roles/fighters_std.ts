@@ -97,8 +97,12 @@ export function stdShoterFleeAttack(cre: Cre) {
 }
 /**flee of shoter from ranged enemy*/
 export function stdShoterFleeRanged(cre: Cre): boolean {
-	if (!cre.flee(4, 8)) {
-		return cre.flee(10, 20);
+	if (!cre.flee(5, 8)) {
+		if (!cre.flee(7, 13)) {
+			return cre.flee(12, 20);
+		}else {
+			return true;
+		}
 	} else {
 		return true;
 	}

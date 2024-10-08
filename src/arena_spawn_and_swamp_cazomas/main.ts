@@ -85,9 +85,8 @@ export function loop(): void {
 				useMod = turtleStrategy
 			} else if (antiDoomsMode === 1) {
 				//use snake
-				set_spawnDps(100)
-				set_harvesterNotFleeAtStart(true)
-				set_snakePartsTotalNum(8)
+				// set_harvesterNotFleeAtStart(true)
+				set_snakePartsTotalNum(7)
 				useMod = snakeRushStrategy
 			} else {
 				//use standard

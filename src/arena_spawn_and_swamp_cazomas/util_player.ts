@@ -79,8 +79,7 @@ export function identifyOpponent() {
 		const scanEn0 = creeps.find(i => isOppoGO(i) && arrayEquals(getBodyArrayOfCreep(i), TB("C")))
 		if (scanEn0) {
 			SA(displayPos(), "dooms triggered")
-			// addSupport(Dooms, "0", 0.5)
-			addSupport(Kerob, "0", 0.5)
+			addSupport(Dooms, "0", 0.5)
 		}
 	}
 	//

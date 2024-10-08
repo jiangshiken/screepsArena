@@ -96,6 +96,9 @@ export function isNaN(value: number) {
 export function ran(i: number): number {
 	return Math.floor(Math.random() * i);
 }
+export function ranBool(n:number):boolean{
+	return Math.random()<n
+}
 /**
  * return a random element from the array
  */
