@@ -12,23 +12,31 @@ import { findClosestByRange } from "game/utils";
 import { cpuBreakJudge, fleeWeakComplex, givePositionToImpartantFriend } from "../army";
 import { getProgressRate } from "../constructionSite";
 import { inOppoRampart } from "../util_attackable";
-import { blocked, Cre, enemies, friends, hasEnemyAround_lamb, Role } from "../util_Cre";
+import { blocked, Cre, enemies, friends, hasEnemyAround_lamb, hasThreat, Role } from "../util_Cre";
 import { tick } from "../util_game";
 import { oppoConstructionSites } from "../util_gameObjectInitialize";
 import { divideReduce } from "../util_JS";
-import { atPos, COO, MGR, midPoint } from "../util_pos";
+import { Adj, atPos, COO, InShotRan, MGR, midPoint } from "../util_pos";
 import { SA } from "../util_visual";
 
 /**used to jam the opponent's construction site*/
 export const jamer: Role = new Role("jamer", jamerJob)
 export function jamerJob(cre: Cre) {
-	SA(cre, "I'm jamer")
+	SA(cre, "I'm jamer "+(cre.role===jamer))
 	const leader=friends.find(i=>i.getBodiesNum(ATTACK)>=9)
 	if(leader){
-		if(leader.upgrade.isPush === true){
-			cre.MTJ(leader)
+		if(friends.filter(i=>Adj(i,leader) && i.role===jamer).length>=3 && !Adj(cre,leader)){
+			if(enemies.filter(i=>hasThreat(i) && InShotRan(i,cre)).length>0){
+				fleeWeakComplex(cre)
+			}else{
+				cre.stop()
+			}
 		}else{
-			cre.moveAndBePulled(leader)
+			if(leader.upgrade.isPush === true){
+				cre.MTJ(leader)
+			}else{
+				cre.moveAndBePulled(leader)
+			}
 		}
 	}else{
 		jamerOldJob(cre)

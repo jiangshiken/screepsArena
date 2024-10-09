@@ -1587,7 +1587,7 @@ export class Battle {
 	}
 	/** try shot or rangedHeal */
 	shotAndRestore(): boolean {
-		SA(this.master, "shotAndRestore");
+		// SA(this.master, "shotAndRestore");
 		let tars = oppoUnits.filter(i => myGetRange(this.master, i) <= 3);
 		let tarFriends = friends.filter(i => myGetRange(this.master, i) <= 3);
 		let UTShot = findMaxTaunt(tars);
@@ -1846,20 +1846,20 @@ export class Battle {
 				let tauntH = 12 * HNum * findMaxTaunt(tarFriends, true, this.master).taunt;
 				if (tauntA >= tauntH || this.master.pureMeleeMode) {
 					// if (tauntA + tauntR >= tauntR + tauntH) {
-					SA(this.master, "melee and shot");
+					// SA(this.master, "melee and shot");
 					let successMelee = this.melee();
 					let successShot = this.shot();
 					return successMelee || successShot;
 				} else {
-					SA(this.master, "sr1");
+					// SA(this.master, "sr1");
 					return this.shotAndRestore();
 				}
 			} else {
-				SA(this.master, "sr2");
+				// SA(this.master, "sr2");
 				return this.shotAndRestore();
 			}
 		} else {
-			SA(this.master, "sr3");
+			// SA(this.master, "sr3");
 			return this.shotAndRestore();
 		}
 	}
@@ -2444,7 +2444,7 @@ export class MoveTask extends Task_Cre {
 		if (pt) pt.end();
 	}
 	loop_task(): void {
-		SA(this.master, "MoveTask")
+		// SA(this.master, "MoveTask")
 		drawLineLight(this.master, this.tar);
 		if (this.pause)
 			return;
@@ -2659,7 +2659,7 @@ export class FindPathAndMoveTask extends MoveTask {
 	}
 	loop_task(): void {
 		let st = ct();
-		SA(this.master, "findPath loop")
+		// SA(this.master, "findPath loop")
 		if (invalidPos(this.tar)) {
 			this.end();
 		}
@@ -2678,7 +2678,7 @@ export class FindPathAndMoveTask extends MoveTask {
 			calEventNumberCPUTime(this.master.role, t, false);
 	}
 	findPath_task(master: Cre, tar: Pos): Pos[] {
-		SA(this.master, "findPath_task")
+		// SA(this.master, "findPath_task")
 		let sRtn: FindPathResult = master.crePathFinder ? master.crePathFinder.getDecideSearchRtnByCre(this.tar, this.op) :
 			defFindPathResult
 		let path: Pos[] = sRtn.path;

@@ -16,7 +16,6 @@ import { spawnStartHarvester } from "./strategies/strategyTool";
 import { useTurtleStrategy } from "./strategies/turtle";
 import { useTest } from "./testMode";
 import { ct, lowCPUMode, pt } from "./util_CPU";
-import { set_spawnDps } from "./util_Cre";
 import { displayPos } from "./util_attackable";
 import { P, tick } from "./util_game";
 import { Dooms, Kerob, Tigga, getGuessPlayer, identifyOpponent, startWaitTick } from "./util_player";
@@ -31,6 +30,7 @@ const standardStrategy: string = "standardStrategy";
 const turtleStrategy: string = "turtleStrategy";
 const snakeRushStrategy: string = "snakeRushStrategy";
 const armedBuilderStrategy: string = "armedBuilderStrategy";
+const tailStrategy: string = "tailStrategy";
 //functions
 /**the loop function*/
 export function loop(): void {
@@ -63,12 +63,10 @@ export function loop(): void {
 	} else {
 		const gp = getGuessPlayer()
 		if (gp === Tigga) {
-			set_snakePartsTotalNum(7)
-
-			// set_HealerMode(true)
-			useMod = snakeRushStrategy
-			// useMod = standardStrategy
-			set_spawnDps(30000)
+			useMod=turtleStrategy
+			// set_snakePartsTotalNum(7)
+			// useMod = snakeRushStrategy
+			// set_spawnDps(30000)
 		} else if (gp === Kerob) {
 			set_snakePartsTotalNum(7)
 
@@ -101,6 +99,7 @@ export function loop(): void {
 
 	//main strategy
 	const st = ct();
+	// useMod=testMod
 	if (useMod == standardStrategy) {
 		useStandardStrategy();
 	} else if (useMod === testMod) {
@@ -111,7 +110,9 @@ export function loop(): void {
 		useSnakeRushStrategy()
 	} else if (useMod === armedBuilderStrategy) {
 		useArmedBuilderStrategy()
-	} else {
+	} else if(useMod===tailStrategy){
+		useTailStrategy();
+	}else{
 		SA(displayPos(), "no mode")
 	}
 	pt("mainStrategy", st);

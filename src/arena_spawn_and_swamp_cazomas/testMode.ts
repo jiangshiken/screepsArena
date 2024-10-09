@@ -66,7 +66,7 @@ export function tester_PFC_Job(cre: Cre) {
 	const pos2 = plusVector(spawn, { x: 1, y: 0 })
 	const pos3 = plusVector(spawn, { x: 2, y: 0 })
 	const pos4 = plusVector(spawn, { x: 1, y: 1 })
-	const testTick = 30
+	const testTick = 50
 	if (tick <= testTick) {
 		if (cre.getBodiesNum(TOUGH) > 0) {
 			cre.master.moveTo(pos1)
@@ -160,7 +160,7 @@ const PFC2: string = "PFC2"
 const NOS: string = "NOS"
 export function useTest() {
 	//change mode here
-	const mode = NOS
+	const mode = PFC2
 	//
 	if (mode === "MSS") {
 		if (tick === 1) {

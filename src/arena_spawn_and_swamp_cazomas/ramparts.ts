@@ -42,7 +42,7 @@ export function setRamMoveMapValue() {
 		i => enemyRampartIsHealthy(i, true) && !atPos(i, enemySpawn)
 	);
 	for (let ram of enRams) {
-		SA(ram, "try cal ram")
+		// SA(ram, "try cal ram")
 		const roundPoss = getRangePoss(ram, 1);
 		const creepInRam: Cre | undefined = <Cre>(
 			overallMap.get(ram).find(i => i instanceof Cre)
@@ -71,7 +71,7 @@ export function rampartIsHealthy(ram: StructureRampart, isMy: boolean = true, us
 		const extraBiasSafeReduce = 400
 		// const extraBias = 50 * ANum + 16 * RANum;
 		if (print) {
-			SA(ram, "extraBias=" + extraBias);
+			// SA(ram, "extraBias=" + extraBias);
 		}
 		if (useExtra) {
 			return hits(ram) >= rampartHealthBias0 + relu(extraBias - extraBiasSafeReduce);

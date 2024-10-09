@@ -11,7 +11,7 @@ import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
 import { CostMatrix, searchPath } from "game/path-finder";
 import { findClosestByRange } from "game/utils";
 
-import { StructureExtension, StructureSpawn } from "game/prototypes";
+import { StructureExtension, StructureRampart, StructureSpawn } from "game/prototypes";
 import { sasVariables } from "../SASVariables";
 import { createCS } from "../constructionSite";
 import { setMoveMapSetRate, set_moveCostForceRate, set_swampFirst } from "../maps";
@@ -117,7 +117,10 @@ export function snakePartJob(cre: Cre) {
 	//snake wait to rush
 	if (!snakeGo) {
 		//if not go to attack enemy spawn
-		if (tick >= assembleTick) {
+		if(getGuessPlayer()===Tigga){
+			const tar = assemblePoint(cre);
+			cre.MTJ_follow(tar);
+		}else if (tick >= assembleTick) {
 			const tar = assemblePoint(cre);
 			cre.MTJ_follow(tar);
 		} else {
@@ -146,6 +149,7 @@ export function snakePartJob(cre: Cre) {
 		}
 	} else if (getGuessPlayer() === Tigga || getGuessPlayer() === Kerob|| getGuessPlayer() === Dooms) {
 		SA(cre, "SP")
+
 	} else if (leader !== undefined) {
 		//if on the way to enemy spawn
 		const j0 = !exist(leader);
@@ -532,18 +536,19 @@ export function decideSpawnPart(ind: number) {
 		const currentType = "8MA3RM"
 		const currentType2 = "9M2A2RM"
 		//100+1120+50=1270
-		const tigga0 = getGuessPlayer() === Tigga ? "2M14AM" :
+		const tigga0 = getGuessPlayer() === Tigga ? "10M" :
 			(getGuessPlayer() === Dooms?"M11AM":"MR9AM")
 		// const tigga0 = "M11AM"
-		//900+320+50=1270
-		const tigga1 = getGuessPlayer() === Tigga ? "2M" : "5M3H"
+		//300+640+50=990
+		const tigga1 = getGuessPlayer() === Tigga ? "6M8AM": "5M3H"
+		const tiggaType="9M"
 		// const tigga1 = "5M3H"
 		//900
-		const tigga2 = getGuessPlayer() === Tigga ? "17M" : "14M"
-		const tigga3 = tigga2
-		const tigga4 = tigga2
-		const tigga5 = getGuessPlayer() === Tigga ? tigga2 : "14MH"
-		const tigga6 = getGuessPlayer() === Tigga ? "16M" : tigga2
+		const tigga2 = getGuessPlayer() === Tigga ? tiggaType : "14M"
+		const tigga3 = getGuessPlayer() === Tigga ? tiggaType : "14M"
+		const tigga4 = getGuessPlayer() === Tigga ? tiggaType : "14M"
+		const tigga5 = getGuessPlayer() === Tigga ? tiggaType  :"14MH"
+		const tigga6 = getGuessPlayer() === Tigga ? tiggaType : "14M"
 		const tigga7 = ""
 		//TIGGA
 		//M=3+6+17*5=94
@@ -692,8 +697,11 @@ export function useSnakeRushStrategy() {
 	setEnRamAroundCost(70);
 	SA(displayPos(), "enemyAWeight()=" + enemyAWeight());
 	//defend spawn
-	if(getGuessPlayer() === Tigga
-		||getGuessPlayer() === Dooms){
+	if(getGuessPlayer() === Tigga){
+		if (snakeGo) {
+			supplyToughDefender(2)
+		}
+	}else if(getGuessPlayer() === Dooms){
 		if (snakeGo) {
 			supplyToughDefender(1)
 		}
@@ -715,10 +723,11 @@ export function useSnakeRushStrategy() {
 			// spawnCreep(TB("10M2R"), stdShoter)
 			// // }
 			// spawnCreep(TB("10M2H"), stdHealer)
-			spawnCreep(TB("AMCW"), builderTurtle)
-			createCS({ x: spawn.x, y: spawn.y + 2 }, StructureExtension)
-			createCS({ x: spawn.x - 1, y: spawn.y + 2 }, StructureExtension)
-			createCS({ x: spawn.x + 1, y: spawn.y + 2 }, StructureExtension)
+			spawnCreep(TB("MACW"), builderTurtle)
+			createCS({ x: spawn.x, y: spawn.y }, StructureRampart)
+			// createCS({ x: spawn.x, y: spawn.y + 2 }, StructureExtension)
+			// createCS({ x: spawn.x - 1, y: spawn.y + 2 }, StructureExtension)
+			// createCS({ x: spawn.x + 1, y: spawn.y + 2 }, StructureExtension)
 			// spawnCreep(TB("2TRM"), toughDefender)
 		}
 	}
@@ -760,9 +769,10 @@ export function useSnakeRushStrategy() {
 function command() {
 	if (snakeGo) {
 		set_swampFirst(true)
-		const head = snakeParts.find(i => i.getBodiesNum(ATTACK) >= 1)
+		const head = snakeParts.find(i => snakeIndex(i)===0)//i.getBodiesNum(ATTACK) >= 1)
+		const second = snakeParts.find(i =>snakeIndex(i)===1)// i.getBodiesNum(HEAL) >= 3||
 		const tail = best(snakeParts, i => snakeIndex(i))
-		if (head && tail) {
+		if (head && tail && second) {
 			setPullGoSwamp(true)
 			SA(head, "HEAD")
 			SA(tail, "TAIL")
@@ -801,7 +811,7 @@ function command() {
 					if (getGuessPlayer() === Tigga) {
 						typeBonus = 0.015
 					} else if (getGuessPlayer() === Dooms) {
-						typeBonus = 10
+						typeBonus = 2
 					}  else {
 						typeBonus = 0.15
 					}
@@ -816,15 +826,17 @@ function command() {
 					}
 					// typeExtra = getTicks() <= 630 ? 100 : 0.5
 				}
+				const X_axisDistanceBonus=1+0.05*X_axisDistance(i,enemySpawn)
 				const damageRate=getDamagedRate(head)
 				const disBonus = 1 / (1 + (0.1+4*damageRate) * MGR(i, head))
 				const sameBonus = head.upgrade.currentTarget === i ? 2 : 1
 				const tauntBonus = 1 + 0.1*getTaunt(i).value
-
-				const final = disBonus * sameBonus * typeBonus * tauntBonus
-				SA(i, 'T=' +final+ "tyb"+typeBonus+"disb="+disBonus+"ttb="+tauntBonus)
+				const final = disBonus * sameBonus * typeBonus * tauntBonus*X_axisDistanceBonus
+				SA(i, 'T=' +final+ " tyb="+typeBonus+" disb="+disBonus+" ttb="+tauntBonus+' xb='+X_axisDistanceBonus)
 				return final
 			})
+			if(target)
+				drawLineComplex(head,target,1,"#ee3333","dashed")
 			head.upgrade.currentTarget = target
 			const hasThreated = snakeParts.find(sp =>
 				threats.find(i => Adj(i, sp)) !== undefined
@@ -841,15 +853,40 @@ function command() {
 			const damaged = sum(snakeParts, sp => sp.hitsMax - sp.hits) >= 36 * (tarDistance + 2)
 				+ (hasMelee ? 0 : pureRangedBias)
 			if (getGuessPlayer() === Tigga) {
-				if (Adj(head, enemySpawn)) {
-					const followers = snakeParts.filter(i => i !== head);
-					for (let fol of followers) {
-						fol.MTJ_stop(enemySpawn)
+				if (Adj(second, enemySpawn)) {
+					// const followers = snakeParts.filter(i => snakeIndex(i)>0 && snakeIndex(i)<=2);
+					// const sortedFollowers = followers.sort((a, b) => spInd(a) - spInd(b))
+					// const rest = snakeParts.filter(i => snakeIndex(i)>=3);
+					// for (let fol of rest) {
+						// 	fol.stop()
+						// }
+						// // head.stop()
+						// // head.tasks.find(i => i instanceof PullTarsTask)?.end()
+						// const pos1
+						// new PullTarsTask(head, sortedFollowers, enemySpawn, undefined, false);
+					const rest = snakeParts.filter(i => snakeIndex(i)!==1);
+					let exc=false
+					for (let fol of rest) {
+						const threatEn=enemies.find(i=>Adj(i,second) && hasThreat(i))
+						if(threatEn){
+							SA(second,'THREAT')
+							if(Adj(fol,second)&& !Adj(fol,threatEn)){
+								SA(fol,'EXC')
+								fol.exchangePos_setAppointment(second)
+								exc=true
+							}else{
+								fol.MTJ_stop(enemySpawn)
+							}
+						}else{
+							fol.MTJ_stop(enemySpawn)
+						}
 					}
-					head.stop()
+					if(!exc){
+						second.stop()
+					}
 					head.tasks.find(i => i instanceof PullTarsTask)?.end()
 					tail.tasks.find(i => i instanceof PullTarsTask)?.end()
-					SA(head, "ATT")
+					SA(second, "ATT")
 				} else if (target) {
 					SA(head, "PUSH")
 					head.upgrade.isPush = true
@@ -860,16 +897,24 @@ function command() {
 				} else {
 					SA(head, "NO TARGET")
 				}
-			} else if (hasThreated || damaged||ifRetreat) {
+			}else  if (!Adj(second,head)){
+				tail.tasks.find(i => i instanceof PullTarsTask)?.end()
+				head.tasks.find(i => i instanceof PullTarsTask)?.end()
+				const followers = snakeParts.filter(i => i !== head && i!==second);
+				const sortedFollowers = followers.sort((a, b) => spInd(a) - spInd(b))
+				new PullTarsTask(second, sortedFollowers, head, undefined, false);
+			}else if (hasThreated || damaged||ifRetreat) {
 				SA(head, "BACK")
 				head.upgrade.isPush = false
+				second.tasks.find(i => i instanceof PullTarsTask)?.end()
 				head.tasks.find(i => i instanceof PullTarsTask)?.end()
 				const followers = snakeParts.filter(i => i !== tail);
 				const sortedFollowers = followers.sort((a, b) => spInd(b) - spInd(a))
 				new PullTarsTask(tail, sortedFollowers, spawn, undefined, false);
-			} else if (target) {
+			} else if(target){
 				SA(head, "PUSH")
 				head.upgrade.isPush = true
+				second.tasks.find(i => i instanceof PullTarsTask)?.end()
 				tail.tasks.find(i => i instanceof PullTarsTask)?.end()
 				if (Adj(target, enemySpawn)) {
 					if (Adj(head, target)) {
@@ -923,9 +968,9 @@ function supplyToughDefender(defenderNum:number=2) {
 			const myEnergy = spawnAndExtensionsEnergy(spawn)
 			let restPart
 			if (getGuessPlayer() === Tigga) {
-				restPart = TB("M4A")
+				restPart = TB("MA3H")
 			} else if (getGuessPlayer() === Dooms) {
-				restPart = TB("MA")
+				restPart = TB("MRA")
 			} else if (getGuessPlayer() === Kerob) {
 				restPart = TB("MAR")
 			} else if (aRate > 0.6) {
@@ -939,7 +984,9 @@ function supplyToughDefender(defenderNum:number=2) {
 				restPart = TB("M2R")
 			}
 			const restCost = getBodiesCost(restPart)
-			const TNum_beforeRange = Math.min(Math.floor((myEnergy - restCost) / 10), getGuessPlayer() === Dooms?10:20)
+			const TNum_beforeRange = Math.min(Math.floor((myEnergy - restCost) / 10),
+				 getGuessPlayer() === Dooms?10:
+				(getGuessPlayer() === Tigga?8:20))
 			const TNumLimit = Math.floor(range / 3 + 4)
 			const TNum = Math.min(TNumLimit, TNum_beforeRange)
 			SAN(displayPos(), "TNum", TNum)
@@ -951,11 +998,11 @@ function supplyToughDefender(defenderNum:number=2) {
 			}
 		} else {
 			if (getGuessPlayer() === Tigga) {
-				spawnCreep_ifHasEnergy(TB("20TM4A"), toughDefender);
+				spawnCreep_ifHasEnergy(TB("10TMA3H"), toughDefender);
 			} else if (getGuessPlayer() === Kerob) {
 				spawnCreep_ifHasEnergy(TB("20TM2AR"), toughDefender);
 			} else if (getGuessPlayer() === Dooms) {
-				spawnCreep_ifHasEnergy(TB("10TMA"), toughDefender);
+				spawnCreep_ifHasEnergy(TB("10TMRA"), toughDefender);
 			} else if (aRate > 0.6) {
 				//150+150+240=540
 				spawnCreep_ifHasEnergy(TB("20TM4A"), toughDefender);

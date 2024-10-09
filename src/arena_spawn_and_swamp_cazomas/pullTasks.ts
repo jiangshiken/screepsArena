@@ -196,7 +196,7 @@ export class PullTarsTask extends Task_Cre {
 			let tar = tarCres[i];
 			let tarNext = tarCres[i + 1];
 			//
-			SA(this.master, "try pull tar");
+			// SA(this.master, "try pull tar");
 			// let pulling=tar.pullTar(tarNext);
 			let pulling = tarNext.moveAndBePulled(tar);
 			if (!pulling) {
