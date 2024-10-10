@@ -5,7 +5,7 @@
  UpDateDate:   2023.1.10
  version 0.0.0
 */
-import { ATTACK, WORK } from "game/constants";
+import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
 import { ConstructionSite } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
@@ -23,7 +23,8 @@ import { SA } from "../util_visual";
 export const jamer: Role = new Role("jamer", jamerJob)
 export function jamerJob(cre: Cre) {
 	SA(cre, "I'm jamer "+(cre.role===jamer))
-	const leader=friends.find(i=>i.getBodiesNum(ATTACK)>=9)
+	const leader=friends.find(i=>i.getBodiesNum(ATTACK)>=9
+		||i.getBodiesNum(RANGED_ATTACK)>=5)
 	if(leader){
 		if(friends.filter(i=>Adj(i,leader) && i.role===jamer).length>=3 && !Adj(cre,leader)){
 			if(enemies.filter(i=>hasThreat(i) && InShotRan(i,cre)).length>0){
