@@ -230,6 +230,9 @@ export class Cre implements HasTasks {
 		this.crePathFinder = new Cre_pathFinder(this)
 		//TODO add member attribute
 	}
+	extraMessage():any{
+		return this.spawnInfo?.extraMessage
+	}
 	appointMovementIsActived(): boolean {
 		return validEvent(this.appointmentMovement, 0)
 	}

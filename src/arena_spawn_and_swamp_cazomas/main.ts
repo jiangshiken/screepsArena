@@ -13,6 +13,7 @@ import { useArmedBuilderStrategy } from "./strategies/armedBuilderStrategy";
 import { set_snakePartsTotalNum, useSnakeRushStrategy } from "./strategies/snakeRush";
 import { useStandardStrategy } from "./strategies/standard";
 import { spawnStartHarvester } from "./strategies/strategyTool";
+import { useTailStrategy } from "./strategies/tailStrategy";
 import { useTurtleStrategy } from "./strategies/turtle";
 import { useTest } from "./testMode";
 import { ct, lowCPUMode, pt } from "./util_CPU";
@@ -63,7 +64,8 @@ export function loop(): void {
 	} else {
 		const gp = getGuessPlayer()
 		if (gp === Tigga) {
-			useMod=turtleStrategy
+			// useMod=turtleStrategy
+			useMod=tailStrategy
 			// set_snakePartsTotalNum(7)
 			// useMod = snakeRushStrategy
 			// set_spawnDps(30000)
