@@ -9,9 +9,9 @@ import { enemySpawn, spawn, spawnCleared, spawnCreep } from "../spawn";
 import { inRampart } from "../util_attackable";
 import { TB } from "../util_autoBodys";
 import { Cre, enemies, friends, getDamagedRate, getTaunt, hasThreat, oppoUnits, Role, Unit } from "../util_Cre";
-import { ranBool, sum } from "../util_JS";
+import { DND2, ranBool, sum } from "../util_JS";
 import { Dooms, getGuessPlayer, Tigga } from "../util_player";
-import { Adj, MGR, X_axisDistance } from "../util_pos";
+import { Adj, MGR } from "../util_pos";
 import { drawLineComplex, SA } from "../util_visual";
 import { best } from "../util_WT";
 const group1:Cre[]=[]
@@ -25,8 +25,8 @@ class TailInfo{
     }
 }
 export function useTailStrategy(){
-    set_moveCostForceRate(0.1)
-    setMoveMapSetRate(0.04);
+    set_moveCostForceRate(0.001)
+    setMoveMapSetRate(0.0004);
     if(getTicks()===50){
         //400
         spawnCreep(TB('5MCW'),builderStandard)
@@ -34,16 +34,21 @@ export function useTailStrategy(){
             // for (let i = 0; i < 2; i++) {
             //     spawnCreep(TB('M'),jamer)
             // }
-            if(g<=1){
-                //50+900+50
-                spawnCreep(TB('M6RM'),tailMelee,new TailInfo(g,0))
+            if(g<=0){
+                //750+160+50
+                spawnCreep(TB('5R2AM'),tailMelee,new TailInfo(g,0))
+                spawnCreep(TB('5MHM'),tailHealer,new TailInfo(g,1))
+                spawnCreep(TB('3M'),tailPart,new TailInfo(g,2))
+                for (let i = 0; i < 12; i++) {
+                    spawnCreep(TB('M'),tailPart,new TailInfo(g,3+i))
+                }
             }else{
                 spawnCreep(TB('3M10AM'),tailMelee,new TailInfo(g,0))
-            }
-            spawnCreep(TB('4M3HM'),tailHealer,new TailInfo(g,1))
-            spawnCreep(TB('2M'),tailPart,new TailInfo(g,2))
-            for (let i = 0; i < 12; i++) {
-                spawnCreep(TB('M'),tailPart,new TailInfo(g,3+i))
+                spawnCreep(TB('4M3HM'),tailHealer,new TailInfo(g,1))
+                spawnCreep(TB('4M'),tailPart,new TailInfo(g,2))
+                for (let i = 0; i < 10; i++) {
+                    spawnCreep(TB('M'),tailPart,new TailInfo(g,3+i))
+                }
             }
         }
     }
@@ -125,15 +130,15 @@ function tailMeleeJob(cre:Cre){
             }
             // typeExtra = getTicks() <= 630 ? 100 : 0.5
         }
-        const X_axisDistanceBonus=1+0.05*X_axisDistance(tar,enemySpawn)
+        const enSpawnBonus=1+0.1*MGR(tar,enemySpawn)
         const damageRate=getDamagedRate(cre)
-        const disBonus = 1 / (1 + (0.1+4*damageRate) * MGR(tar, cre))
+        const disBonus = 1 / (1 + (0.4+4*damageRate) * MGR(tar, cre))
         const sameBonus = cre.upgrade.currentTarget === tar ? 2 : 1
         const otherLeaders=friends.filter(i=>i.role===tailMelee && i!==cre)
-        const linkBonus=1+otherLeaders.filter(i=>i.upgrade.currentTarget === tar).length
+        const linkBonus=1+3*otherLeaders.filter(i=>i.upgrade.currentTarget === tar).length
         const tauntBonus = 1 + 0.1*getTaunt(tar).value
-        const final = disBonus * sameBonus*linkBonus * typeBonus * tauntBonus*X_axisDistanceBonus
-        SA(tar, 'T=' +final+ " lkb="+linkBonus+" tyb="+typeBonus+" disb="+disBonus+" ttb="+tauntBonus+' xb='+X_axisDistanceBonus)
+        const final = disBonus * sameBonus*linkBonus * typeBonus * tauntBonus*enSpawnBonus
+        SA(tar, 'T=' +DND2(final)+ " lkb="+DND2(linkBonus)+" tyb="+DND2(typeBonus)+" disb="+DND2(disBonus)+" ttb="+DND2(tauntBonus)+' xb='+DND2(enSpawnBonus))
         return final
     })
     if(target){
@@ -146,7 +151,7 @@ function tailMeleeJob(cre:Cre){
         const tail = best(myGroup, i => tailIndex(i))
         const second= myGroup.find(i=>tailIndex(i)===1)
         const head = best(myGroup, i => -tailIndex(i))
-        const enemyThreats=enemies.filter(i=>hasThreat(cre)&& MGR(cre,i)<=16)
+        const enemyThreats=enemies.filter(i=>hasThreat(cre)&& MGR(cre,i)<=25)
         const enemyMelees=enemyThreats.filter(i=>i.getBodiesNum(ATTACK)>=2)
         const closestThreat=best(enemyThreats,i=>-MGR(i,cre))
         const closestThreatDis=closestThreat?MGR(closestThreat,cre):50
@@ -163,18 +168,23 @@ function tailMeleeJob(cre:Cre){
 				head.upgrade.isPush === true ? 600 : 0)
 			const damaged = sum([head,second], i => i.hitsMax - i.hits) >= 36 * (tarDistance + 2)
 				+ (hasMelee ? 0 : pureRangedBias)
-            const tailsHasThreat = myTailParts.find(mem =>
+            const tailHasThreat = myTailParts.find(mem =>
                 enemyThreats.find(i => Adj(i, mem))!==undefined
             )!==undefined
             const frontHasThreat=enemyMelees.find(i=>Adj(i,head))!==undefined
             ||enemyMelees.find(i=>Adj(i,second))!==undefined
+            const XAxisThreat=enemyThreats.find(i=>
+                MGR(i,enemySpawn)>MGR(cre,enemySpawn)+3)!==undefined
             if (!Adj(second,head)){
                 SA(cre,'linkHead')
 				head.tasks.find(i => i instanceof PullTarsTask)?.end()
 				const followers = myGroup.filter(i => i !== head && i!==second);
 				const sortedFollowers = followers.sort((a, b) => tailIndex(a) - tailIndex(b))
 				new PullTarsTask(second, sortedFollowers, head);
-			}else if(damaged||tailsHasThreat||frontHasThreat){
+			}else if(damaged||tailHasThreat||frontHasThreat){
+                fleeAction(cre,myGroup,head,tail,second)
+            }else if(XAxisThreat){
+                SA(cre,'XAxisTt')
                 fleeAction(cre,myGroup,head,tail,second)
             }else{
                 let ifChase:boolean
@@ -193,6 +203,8 @@ function tailMeleeJob(cre:Cre){
                 }else if(head.getBodiesNum(ATTACK)===0){
                     const hasMeleeEnemy=enemies.find(i=>MGR(i,cre)<=4
                         && i.getBodiesNum(ATTACK)>=2)!==undefined
+                    SA(cre,'hasMelee='+hasMeleeEnemy)
+                    SA(cre,'closestThreatDis='+closestThreatDis)
                     if(closestThreatDis<=2){
                         if(hasMeleeEnemy){
                             fleeAction(cre,myGroup,head,tail,second)
@@ -257,11 +269,14 @@ function fleeAction(cre:Cre,myGroup:Cre[],head:Cre,tail:Cre,second:Cre){
             ,i=>-tailIndex(i));
     head.tasks.find(i => i instanceof PullTarsTask)?.end()
     if(fatigueHolder){
+        SA(fatigueHolder,"fatigueHolder")
         const followers=myGroup.filter(i=>tailIndex(i)<tailIndex(fatigueHolder))
         const sortedFollowers = followers.sort((a, b) => tailIndex(b) - tailIndex(a))
         const fatigueHolderNext=myGroup.find(i=>tailIndex(i)===tailIndex(fatigueHolder)+1)
         if(fatigueHolderNext){
+            SA(fatigueHolderNext,"fatigueHolderNext")
             new PullTarsTask(fatigueHolder,sortedFollowers,fatigueHolderNext)
+            fatigueHolder.master.moveTo(fatigueHolderNext)
             const followers2=myGroup.filter(i=>tailIndex(i)>tailIndex(fatigueHolder))
             const sortedFollowers2 = followers2.sort((a, b) => tailIndex(b) - tailIndex(a))
             new PullTarsTask(tail,sortedFollowers2,spawn)
@@ -296,7 +311,7 @@ function tailShoterJob(cre:Cre){
     }
 }
 function tailPartJob(cre:Cre){
-    SA(cre,"tailPartJob")
+    // SA(cre,"tailPartJob")
 
 }
 function command() {

@@ -12,7 +12,7 @@ import { MyMap } from "./util_MyMap";
 import { overallMap } from "./util_overallMap";
 import { getGuessPlayer, Kerob } from "./util_player";
 import { getRangePoss, MGR, Pos, pos00, setMatrixByLambda } from "./util_pos";
-import { drawMyMap, PS, SA, SAN } from "./util_visual";
+import { drawMyMap, PS, SA } from "./util_visual";
 /**
  Module: maps
  Author: 820491047
@@ -248,7 +248,7 @@ export function setMoveMap() {
 				if (isBlocked) {
 					let blockRate = getBlockRateAtPos(pos)
 					cost += blockRate;
-					SAN(pos, "blockRate", blockRate)
+					// SAN(pos, "blockRate", blockRate)
 				}
 				//swamp cost
 				const swampRate = swampFirst ?
@@ -420,7 +420,7 @@ export function setMiniForceMap() {
 		const influentRangePlus = 45 * unitSpeed_miniForce;
 		const rangeScanExtra = army.getBodiesNum(RANGED_ATTACK) > 0 ? 3 : 0
 		let scanSize = 8 + rangeScanExtra + Math.floor(influentRangePlus);
-		SAN(army, "scanSize", scanSize)
+		// SAN(army, "scanSize", scanSize)
 		if (!sasVariables.inResourceArea(army)) {
 			SA(army, "not in resource area")
 			scanSize = Math.min(scanSize, 12)

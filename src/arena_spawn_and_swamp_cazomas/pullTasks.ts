@@ -99,16 +99,16 @@ export class PullTask extends Task_Cre {
 		return <Cre>this.master;
 	}
 	loop_task(): void {
-		SA(this.master, "do PullTask");
+		// SA(this.master, "do PullTask");
 		if (
 			(this.moveTask1 && this.moveTask1.complete) ||
 			myGetRange(this.master, this.tarCre) <= 1
 		) {
-			SA(this.master, "this.moveTask1.complete");
+			// SA(this.master, "this.moveTask1.complete");
 			let ptRtn = this.master.normalPull(this.tarCre);
 			if (ptRtn) {
 				//if is pulling
-				SA(this.master, "is pulling");
+				// SA(this.master, "is pulling");
 				if (!this.moveTask2) {
 					if (pullGoSawmp === true) {
 						this.moveTask2 = new FindPathAndMoveTask(this.master, this.tarPos, 5, {
@@ -119,13 +119,13 @@ export class PullTask extends Task_Cre {
 					}
 				} else if (this.moveTask2.complete) {
 					//master at pos
-					SA(this.master, "this.moveTask2.complete end");
+					// SA(this.master, "this.moveTask2.complete end");
 					if (this.nextStep) this.master.moveToNormal(this.nextStep);
 					else moveToRandomEmptyAround(this.master);
 					this.end();
 				} else if (atPos(this.tarCre, this.tarPos)) {
 					//tar at pos
-					SA(this.master, "pull task end");
+					// SA(this.master, "pull task end");
 					this.end();
 				} else {
 					//wait moveTask2 complete
@@ -136,7 +136,7 @@ export class PullTask extends Task_Cre {
 			}
 		} else {
 			//do mis 1, move to tarCre
-			SA(this.master, "this.tarCre=" + COO(this.tarCre));
+			// SA(this.master, "this.tarCre=" + COO(this.tarCre));
 		}
 	}
 }
