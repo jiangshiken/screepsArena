@@ -23,6 +23,11 @@ import { SA } from "../util_visual";
 export const jamer: Role = new Role("jamer", jamerJob)
 export function jamerJob(cre: Cre) {
 	SA(cre, "I'm jamer "+(cre.role===jamer))
+	const use_oldJamer=true
+	if(use_oldJamer){
+		jamerOldJob(cre)
+		return
+	}
 	const leader=friends.find(i=>i.getBodiesNum(ATTACK)>=9
 		||i.getBodiesNum(RANGED_ATTACK)>=5)
 	if(leader){

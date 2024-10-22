@@ -118,6 +118,7 @@ export function loop(): void {
 		SA(displayPos(), "no mode")
 	}
 	pt("mainStrategy", st);
+
 	//loop end
 	loopEnd();
 }

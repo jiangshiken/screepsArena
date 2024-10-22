@@ -45,7 +45,8 @@ export function newPullTask(
 	master: Cre,
 	tarCre: Cre,
 	tarPos: Pos,
-	nextStep?: Pos
+	nextStep?: Pos,
+	leaderStop:boolean=false
 ) {
 	let oldT = <PullTask>findTask(master, PullTask);
 	let newTask: boolean;
@@ -61,7 +62,7 @@ export function newPullTask(
 		newTask = true;
 	}
 	if (newTask) {
-		new PullTask(master, tarCre, tarPos, nextStep);
+		new PullTask(master, tarCre, tarPos, nextStep,leaderStop);
 	}
 }
 export let pullGoSawmp: Boolean = false
@@ -79,11 +80,13 @@ export class PullTask extends Task_Cre {
 	nextStep: Pos | undefined;
 	moveTask1: FindPathAndMoveTask | undefined = undefined;
 	moveTask2: FindPathAndMoveTask | undefined = undefined;
-	constructor(master: Cre, tarCre: Cre, tarPos: Pos, nextStep?: Pos) {
+	leaderStop:boolean
+	constructor(master: Cre, tarCre: Cre, tarPos: Pos, nextStep?: Pos,leaderStop:boolean=false) {
 		super(master);
 		this.tarCre = tarCre;
 		this.tarPos = tarPos;
 		this.nextStep = nextStep;
+		this.leaderStop=leaderStop
 		//cancel old task
 		var ot = this.master.tasks.find(
 			task => task instanceof PullTask && task != this
@@ -95,6 +98,11 @@ export class PullTask extends Task_Cre {
 		//
 		this.moveTask1 = new FindPathAndMoveTask(this.master, this.tarCre);
 	}
+	end(){
+		super.end()
+		this.moveTask1?.end()
+		this.moveTask2?.end()
+	}
 	getMaster(): Cre {
 		return <Cre>this.master;
 	}
@@ -105,7 +113,7 @@ export class PullTask extends Task_Cre {
 			myGetRange(this.master, this.tarCre) <= 1
 		) {
 			// SA(this.master, "this.moveTask1.complete");
-			let ptRtn = this.master.normalPull(this.tarCre);
+			let ptRtn = this.master.normalPull(this.tarCre,this.leaderStop);
 			if (ptRtn) {
 				//if is pulling
 				// SA(this.master, "is pulling");
@@ -150,12 +158,14 @@ export class PullTarsTask extends Task_Cre {
 	tarPos: Pos;
 	nextStep: Pos | undefined;
 	useLeaderPull: boolean;
+	leaderStop:boolean;
 	constructor(
 		master: Cre,
 		tarCres: Cre[],
 		tarPos: Pos,
 		nextStep?: Pos,
-		useLeaderPull: boolean = true
+		useLeaderPull: boolean = true,
+		leaderStop:boolean=false//for direct move of leader
 	) {
 		super(master);
 		SA(master, "new PullTarsTask");
@@ -163,6 +173,7 @@ export class PullTarsTask extends Task_Cre {
 		this.tarPos = tarPos;
 		this.nextStep = nextStep;
 		this.useLeaderPull = useLeaderPull;
+		this.leaderStop=leaderStop
 		//cancel old task
 		var ot = this.master.tasks.find(
 			task => task instanceof PullTarsTask && task != this
@@ -225,7 +236,7 @@ export class PullTarsTask extends Task_Cre {
 			SA(this.master, "tarCres[0]=" + COO(tarCres[0]));
 			SA(this.master, "this.tarPos=" + COO(this.tarPos));
 			SA(this.master, "this.nextStep=" + COO(this.nextStep));
-			newPullTask(this.master, tarCres[0], this.tarPos, this.nextStep);
+			newPullTask(this.master, tarCres[0], this.tarPos, this.nextStep,this.leaderStop);
 		} else if (creIdle) {
 			//this is idle,approach first
 			this.master.MTJ(tarCres[0]);

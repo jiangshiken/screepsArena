@@ -65,6 +65,7 @@ export let setMoveMapOn: boolean = true
 export function set_setMoveMapOn(b: boolean) {
 	setMoveMapOn = b
 }
+/**for turtle */
 export let setMoveMapAvoidFarOn: boolean = false
 export function set_setMoveMapAvoidFarOn(b: boolean) {
 	setMoveMapAvoidFarOn = b
@@ -87,7 +88,9 @@ export function loopStart_maps() {
 	}
 	let st8 = ct();
 	if (setMiniForceMapOn && (!lowCPUMode || lowCPUMode && randomBool(0.1))) {
-		setMiniForceMap();
+		if(useForceMap){
+			setMiniForceMap();
+		}
 	}
 	pt("setMiniForceMap", st8);
 	if (getCPUPercent() > mapCPULimit) {
@@ -129,7 +132,7 @@ export function getBlockRate(att: Attackable): number {
 		if (oppo(att)) {
 			return 10 + 5 * moveMapSetRate * calculateForce(att).value
 		} else {
-			return 40
+			return 255
 		}
 	} else if (att instanceof StructureRampart) {
 		if (oppo(att)) {
@@ -154,6 +157,10 @@ export function set_moveCostForceRate(d: number) {
 export let swampFirst: boolean = false
 export function set_swampFirst(b: boolean) {
 	swampFirst = b
+}
+export let useForceMap=false
+export function set_useForceMap(b:boolean){
+	useForceMap=b
 }
 /**
  * set the value of move map
@@ -182,27 +189,29 @@ export function setMoveMap() {
 	const st_moveMapRefreshActiveMap = ct();
 	//
 	const avoidFarRange = 3
-	const units = (<Unit[]>cres).concat(spawns)
-	for (let u of units) {
-		if (setMoveMapAvoidFarOn) {
-			if (MGR(spawnPos, u) >= avoidFarRange) {
-				continue;
+	if(useForceMap){
+		const units = (<Unit[]>cres).concat(spawns)
+		for (let u of units) {
+			if (setMoveMapAvoidFarOn) {
+				if (MGR(spawnPos, u) >= avoidFarRange) {
+					continue;
+				}
 			}
+			if (getCPUPercent() > mapCPULimit) {
+				PS("CPU BREAK " + S(u));
+				return;
+			}
+			const range = 3;
+			moveMapRefreshActiveMap.setByLambda_realIndex_area(
+				u => 1,
+				{ x: u.x - range, y: u.y - range },
+				{ x: u.x + range + 1, y: u.y + range + 1 }
+			);
 		}
-		if (getCPUPercent() > mapCPULimit) {
-			PS("CPU BREAK " + S(u));
-			return;
-		}
-		const range = 3;
-		moveMapRefreshActiveMap.setByLambda_realIndex_area(
-			u => 1,
-			{ x: u.x - range, y: u.y - range },
-			{ x: u.x + range + 1, y: u.y + range + 1 }
-		);
-	}
-	pt("	moveMapRefreshActiveMap", st_moveMapRefreshActiveMap)
-	// drawMyMap(miniActiveMap,pos00,poshh)
+		pt("	moveMapRefreshActiveMap", st_moveMapRefreshActiveMap)
+		// drawMyMap(miniActiveMap,pos00,poshh)
 
+	}
 	let setMoveMapMainFunc = ct();
 	let calCount = 0;
 	for (let i = 0; i < 100; i++) {

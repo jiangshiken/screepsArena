@@ -48,6 +48,7 @@ export function loopEnd() {
 	}
 	doLongProgress()
 	printCPU();
+	append_largeSizeText("LEN")
 	loopEnd_visual();
 	pt("loop end other", st1);
 }
@@ -113,6 +114,10 @@ function switchLowCPUMode() {
 		PS("switchExtra=" + switchExtra)
 	}
 }
+export let useAvoidEnRam=false
+export function set_useAvoidEnRam(b:boolean){
+	useAvoidEnRam=b
+}
 export function loopStart() {
 	PS("loopStart start");
 	setTick(getTicks())
@@ -140,7 +145,9 @@ export function loopStart() {
 	pt("area0", st4);
 	// if (!lowCPUMode) {
 	loopStart_maps();
-	setRamMoveMapValue()
+	if(useAvoidEnRam){
+		setRamMoveMapValue()
+	}
 	setMoveMatrix();
 	// } else {
 	// 	loopStart_maps();
@@ -243,12 +250,14 @@ export function printCPU() {
 	const heapK = Math.floor(heap.total_heap_size / 1000);
 	const maxHeapK = Math.floor(heap.heap_size_limit / 1000);
 	PS(`HeapUsed\t ${heapK} K\t/ ${maxHeapK}K`);
+	SA(displayPos(),`HeapUsed\t ${heapK} K\t/ ${maxHeapK}K`);
 	// P(`Used ${heap.total_heap_size} / ${heap.heap_size_limit}`);
 	const cpu = getCpuTime();
 	const maxCpu = arenaInfo.cpuTimeLimit;
 	const cpuK = Math.floor(cpu / 1000);
 	const maxCpuK = Math.floor(maxCpu / 1000);
 	PS("cpu=\t" + cpuK + "K\t/ " + maxCpuK + "K");
+	SA(displayPos(),"cpu=\t" + cpuK + "K\t/ " + maxCpuK + "K");
 }
 function displayRoleCPU() {
 	ptSum("sum_snakePart0", sum_snakePart0)

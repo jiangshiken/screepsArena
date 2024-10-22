@@ -408,7 +408,7 @@ export class Cre implements HasTasks {
 		}
 	}
 	/** pull  */
-	normalPull(tar: Cre, direct: boolean = false): boolean {
+	normalPull(tar: Cre, direct: boolean = false,leaderStop:boolean=false): boolean {
 		if (myGetRange(this, tar) <= 1) {
 			//draw green line
 			drawLineComplex(this, tar, 0.5, "#00ff00");
