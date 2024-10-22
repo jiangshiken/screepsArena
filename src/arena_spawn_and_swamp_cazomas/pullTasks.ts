@@ -107,18 +107,21 @@ export class PullTask extends Task_Cre {
 		return <Cre>this.master;
 	}
 	loop_task(): void {
-		// SA(this.master, "do PullTask");
+		SA(this.master, "do PullTask");
 		if (
 			(this.moveTask1 && this.moveTask1.complete) ||
 			myGetRange(this.master, this.tarCre) <= 1
 		) {
-			// SA(this.master, "this.moveTask1.complete");
-			let ptRtn = this.master.normalPull(this.tarCre,this.leaderStop);
+			SA(this.master, "this.moveTask1.complete");
+			this.moveTask1?.end()
+			let ptRtn = this.master.normalPull(this.tarCre,false);
 			if (ptRtn) {
 				//if is pulling
-				// SA(this.master, "is pulling");
+				SA(this.master, "is pulling");
 				if (!this.moveTask2) {
-					if (pullGoSawmp === true) {
+					if(this.leaderStop){
+						SA(this.master, "leaderStop");
+					}else if (pullGoSawmp === true) {
 						this.moveTask2 = new FindPathAndMoveTask(this.master, this.tarPos, 5, {
 							plainCost: 5, swampCost: 0.1
 						});
@@ -127,19 +130,18 @@ export class PullTask extends Task_Cre {
 					}
 				} else if (this.moveTask2.complete) {
 					//master at pos
-					// SA(this.master, "this.moveTask2.complete end");
+					SA(this.master, "this.moveTask2.complete end");
 					if (this.nextStep) this.master.moveToNormal(this.nextStep);
 					else moveToRandomEmptyAround(this.master);
 					this.end();
 				} else if (atPos(this.tarCre, this.tarPos)) {
 					//tar at pos
-					// SA(this.master, "pull task end");
+					SA(this.master, "pull task end");
 					this.end();
 				} else {
 					//wait moveTask2 complete
 				}
 			} else {
-				// P("not pulled end");
 				this.end();
 			}
 		} else {
@@ -207,14 +209,12 @@ export class PullTarsTask extends Task_Cre {
 			let tar = tarCres[i];
 			let tarNext = tarCres[i + 1];
 			//
-			// SA(this.master, "try pull tar");
+			SA(this.master, "try pull tar");
 			// let pulling=tar.pullTar(tarNext);
 			let pulling = tarNext.moveAndBePulled(tar);
 			if (!pulling) {
 				allPulling = false;
 				let tarSpeed = tarNext.getSpeed();
-				// let tarSpeed=tar.getSpeed()
-				// if(creIdle || tarSpeed<1||!tarNext.hasMoveBodyPart()){
 				if (
 					this.useLeaderPull &&
 					creIdle &&
@@ -225,7 +225,6 @@ export class PullTarsTask extends Task_Cre {
 					SA(this.master, "tar=" + COO(tar));
 					SA(this.master, "tarNext=" + COO(tarNext));
 					newPullTask(this.master, tarNext, tar);
-					// newPullTask(this.master,tar,tarNext)
 					creIdle = false;
 				}
 			}

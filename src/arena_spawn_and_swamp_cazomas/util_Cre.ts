@@ -408,7 +408,7 @@ export class Cre implements HasTasks {
 		}
 	}
 	/** pull  */
-	normalPull(tar: Cre, direct: boolean = false,leaderStop:boolean=false): boolean {
+	normalPull(tar: Cre, direct: boolean = false): boolean {
 		if (myGetRange(this, tar) <= 1) {
 			//draw green line
 			drawLineComplex(this, tar, 0.5, "#00ff00");
@@ -2512,6 +2512,7 @@ export class Cre_pathFinder {
 	//move to ,use move() that use direction,not find path
 	moveTo_Basic_Direct(tar: Pos): void {
 		setMoveMapAndMatrixBlock(tar);
+		SA(this.master,"moveTo_Basic_Direct")
 		this.master.moveTargetNextPos = new Event_Pos(tar)
 		const dx = tar.x - this.master.x;
 		const dy = tar.y - this.master.y;
