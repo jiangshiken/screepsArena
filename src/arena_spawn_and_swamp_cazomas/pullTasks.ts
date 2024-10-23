@@ -65,9 +65,13 @@ export function newPullTask(
 		new PullTask(master, tarCre, tarPos, nextStep,leaderStop);
 	}
 }
-export let pullGoSawmp: Boolean = false
+export let pullGoSwamp: Boolean = false
 export function setPullGoSwamp(b: Boolean) {
-	pullGoSawmp = b
+	pullGoSwamp = b
+}
+export let pullIgnoreSwamp: Boolean = false
+export function set_pullIgnoreSwamp(b: Boolean) {
+	pullIgnoreSwamp = b
 }
 /**
  * Task of pull ,the creep will pull a creep to a position
@@ -114,19 +118,23 @@ export class PullTask extends Task_Cre {
 		) {
 			SA(this.master, "this.moveTask1.complete");
 			this.moveTask1?.end()
-			let ptRtn = this.master.normalPull(this.tarCre,false);
+			let ptRtn = this.master.normalPull(this.tarCre,true);
 			if (ptRtn) {
 				//if is pulling
 				SA(this.master, "is pulling");
 				if (!this.moveTask2) {
 					if(this.leaderStop){
 						SA(this.master, "leaderStop");
-					}else if (pullGoSawmp === true) {
-						this.moveTask2 = new FindPathAndMoveTask(this.master, this.tarPos, 5, {
+					}else if (pullIgnoreSwamp === true) {
+						this.moveTask2 = new FindPathAndMoveTask(this.master, this.tarPos, 1, {
+							plainCost: 1, swampCost: 1
+						});
+					} else if (pullGoSwamp === true) {
+						this.moveTask2 = new FindPathAndMoveTask(this.master, this.tarPos, 1, {
 							plainCost: 5, swampCost: 0.1
 						});
 					} else {
-						this.moveTask2 = new FindPathAndMoveTask(this.master, this.tarPos);
+						this.moveTask2 = new FindPathAndMoveTask(this.master, this.tarPos,1);
 					}
 				} else if (this.moveTask2.complete) {
 					//master at pos

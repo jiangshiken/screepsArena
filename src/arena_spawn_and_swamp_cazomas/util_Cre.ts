@@ -2512,11 +2512,12 @@ export class Cre_pathFinder {
 	//move to ,use move() that use direction,not find path
 	moveTo_Basic_Direct(tar: Pos): void {
 		setMoveMapAndMatrixBlock(tar);
-		SA(this.master,"moveTo_Basic_Direct")
 		this.master.moveTargetNextPos = new Event_Pos(tar)
 		const dx = tar.x - this.master.x;
 		const dy = tar.y - this.master.y;
 		const direc = getDirection(dx, dy);
+		SA(this.master,"moveTo_Basic_Direct="+direc+"tar="+tar)
+		SA(this.master,"dx="+dx+"dy="+dy)
 		this.master.master.move(direc);
 	}
 

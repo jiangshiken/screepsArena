@@ -76,7 +76,7 @@ export function loop(): void {
 			useMod = snakeRushStrategy
 			// useMod = standardStrategy
 		} else if (gp === Dooms) {
-			let antiDoomsMode = 1
+			let antiDoomsMode = 2
 			// const antiDoomsMode=ran(3)
 			if (antiDoomsMode === 0) {
 				//use turtle
@@ -88,6 +88,8 @@ export function loop(): void {
 				// set_harvesterNotFleeAtStart(true)
 				set_snakePartsTotalNum(7)
 				useMod = snakeRushStrategy
+			} else if (antiDoomsMode === 2) {
+				useMod=tailStrategy
 			} else {
 				//use standard
 				useMod = standardStrategy
@@ -101,7 +103,7 @@ export function loop(): void {
 
 	//main strategy
 	const st = ct();
-	// useMod=testMod
+	useMod=armedBuilderStrategy
 	if (useMod == standardStrategy) {
 		useStandardStrategy();
 	} else if (useMod === testMod) {

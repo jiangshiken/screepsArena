@@ -1,7 +1,7 @@
 import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
 import { StructureExtension, StructureSpawn } from "game/prototypes";
 import { getTicks } from "game/utils";
-import { PullTarsTask } from "../pullTasks";
+import { PullTarsTask, set_pullIgnoreSwamp } from "../pullTasks";
 import { stdShoter } from "../roles/fighters_std";
 import { jamer } from "../roles/jamer";
 import { enemySpawn, spawn, spawnCleared, spawnCreep } from "../spawn";
@@ -24,6 +24,7 @@ class TailInfo{
     }
 }
 export function useTailStrategy(){
+    set_pullIgnoreSwamp(true)
     // set_moveCostForceRate(0.001)
     // setMoveMapSetRate(0.0004);
     if(getTicks()===50){
@@ -155,7 +156,7 @@ function tailMeleeJob(cre:Cre){
             if (getGuessPlayer() === Tigga) {
                 typeBonus = 10
             } else if (getGuessPlayer() === Dooms) {
-                typeBonus = 10
+                typeBonus = 1
             }  else {
                 typeBonus = 1
             }
@@ -250,17 +251,13 @@ function tailMeleeJob(cre:Cre){
                         }
                     }else if(closestThreatDis===3){
                         if(hasMeleeEnemy){
-                            if(ranBool(0.9)){
+                            if(ranBool(0.6)){
                                 fleeAction(cre,myGroup,head,tail,second)
                             }else{
                                 stopAction(cre,head,myGroup)
                             }
                         }else{
-                            if(ranBool(0.9)){
-                                pushAction(cre,target,myGroup,head,tail,second)
-                            }else{
-                                stopAction(cre,head,myGroup)
-                            }
+                            pushAction(cre,target,myGroup,head,tail,second)
                         }
                     }else if(closestThreatDis===4){
                         if(hasMeleeEnemy){
@@ -341,10 +338,16 @@ function fleeAction(cre:Cre,myGroup:Cre[],head:Cre,tail:Cre,second:Cre){
             fatigueHolder.stop()
             fatigueHolder.master.move(direct)
             // fatigueHolder.master.moveTo(fatigueHolderNext,{})
-            const followers2=myGroup.filter(i=>tailIndex(i)>tailIndex(fatigueHolder))
+            const followers2=myGroup.filter(i=>
+                i!==tail
+                && tailIndex(i)>tailIndex(fatigueHolder))
             const sortedFollowers2 = followers2.sort((a, b) => tailIndex(b) - tailIndex(a))
-            SA(tail,"Tail")
-            new PullTarsTask(tail,sortedFollowers2,spawn)
+            SA(tail,"Tail="+sortedFollowers2.length)
+            if(sortedFollowers2.length===0){
+                tail.MTJ(spawn)
+            }else{
+                new PullTarsTask(tail,sortedFollowers2,spawn)
+            }
         }else{
             new PullTarsTask(fatigueHolder,sortedFollowers,spawn)
         }
