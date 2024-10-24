@@ -1,19 +1,15 @@
-/**
- Module: util_export
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
+import { GameObject } from "game/prototypes";
 import { d2, invalid, valid } from "./util_JS";
-import { COO, validPos } from "./util_pos";
+import { COO, Pos_C } from "./util_pos";
 
 /** get print string not print attribute */
 export function toString0(o: any): string {
 	if (invalid(o))
 		return o;
 	else if (typeof o === "object") {
-		if (validPos(o)) {
+		if (o instanceof Pos_C
+			||o instanceof GameObject) {
 			return COO(o);
 		} else if (o.length) {
 			return "obj(len=" + o.length + ")";

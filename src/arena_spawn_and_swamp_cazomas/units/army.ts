@@ -1,10 +1,4 @@
-/**
- Module: army
- Author: 820491047
- CreateDate:   2022.5.27
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 
 import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
 import { getRange } from "game/utils";

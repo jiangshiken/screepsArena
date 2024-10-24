@@ -1,10 +1,4 @@
-/**
- Module: toughDefender
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { CostMatrix } from "game/path-finder";
 import { findClosestByRange } from "game/utils";
 

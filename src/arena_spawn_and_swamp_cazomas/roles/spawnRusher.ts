@@ -1,10 +1,4 @@
-/**
- Module: spawnRusher
- Author: 820491047
- CreateDate:   2023.1.14
- UpDateDate:   2023.1.14
- version 0.0.0
-*/
+
 import { findPath } from "game/utils";
 
 import { enemySpawn } from "../units/spawn";

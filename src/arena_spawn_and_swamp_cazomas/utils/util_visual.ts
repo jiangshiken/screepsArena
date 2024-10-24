@@ -1,10 +1,4 @@
-/**
- Module: util_visual
- Author: 820491047
- CreateDate:   2022.5.25
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { RoomPosition } from "game/prototypes";
 import { getTicks } from "game/utils";
 import { Visual } from "game/visual";

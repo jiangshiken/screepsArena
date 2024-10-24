@@ -1,10 +1,4 @@
-/**
- Module: spawnStealer
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { enemySpawn } from "../units/spawn";
 import { Cre, Role } from "../utils/util_Cre";
 import { SA } from "../utils/util_visual";

@@ -1,23 +1,5 @@
 
 import { ATTACK, BodyPartConstant, CARRY, HEAL, MOVE, RANGED_ATTACK, TOUGH, WORK } from "game/constants"
-/**
- Module: util_autoBodys
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
-// //success samples
-// const str = "4MA12T"
-// const str2 = "4MA012T"
-// //error samples
-// const str3 = "-4MA12T"
-// const str4 = "4MA12EFG"
-// console.log(TB(str))
-// console.log(TB(str2))
-// console.log(TB(str3))
-// console.log(TB(str4))
-
 /**transform bodyparts.
  * use string to get Bodys,like
  * "2AM"->[ATTACK,ATTACK,MOVE]

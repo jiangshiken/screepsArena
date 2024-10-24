@@ -1,10 +1,4 @@
-/**
- Module: builder
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { ATTACK, WORK } from "game/constants";
 import { ConstructionSite, StructureExtension, StructureRampart } from "game/prototypes";
 import { findClosestByRange } from "game/utils";

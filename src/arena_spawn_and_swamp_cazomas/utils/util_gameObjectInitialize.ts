@@ -1,10 +1,4 @@
-/**
- Module: util_gameObjectInitialize
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { ConstructionSite, Creep, GameObject, Resource, Structure, StructureContainer, StructureExtension, StructureRampart, StructureRoad, StructureSpawn, StructureTower, StructureWall } from "game/prototypes";
 import { getObjectsByPrototype } from "game/utils";
 

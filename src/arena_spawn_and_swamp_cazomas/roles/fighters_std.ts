@@ -15,13 +15,7 @@ import { COO, filterInRange, getDirectionByPos, getRangePoss, GR, Pos } from "..
 import { drawLineComplex, SA, SAN } from "../utils/util_visual";
 import { defender_RampartJob } from "./defender";
 import { harvesterJob } from "./harvester";
-/**
- Module: figher_std
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { ATTACK, RANGED_ATTACK } from "game/constants";
 import { StructureExtension } from "game/prototypes";
 import { findClosestByRange } from "game/utils";

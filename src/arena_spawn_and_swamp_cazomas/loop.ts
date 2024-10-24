@@ -24,13 +24,7 @@ import { GR } from "./utils/util_pos";
 import { append_largeSizeText, firstInit_visual, loopEnd_visual, loopStart_visual, SA, SAN } from "./utils/util_visual";
 import { showEnemies, visual } from "./utils/util_visual_Cre";
 
-/**
- Module: loop
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 export function loopEnd() {
 	const st0 = ct();
 	controlCreeps();

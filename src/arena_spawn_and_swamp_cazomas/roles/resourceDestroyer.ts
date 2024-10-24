@@ -1,10 +1,4 @@
-/**
- Module: resourceDestroyer
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { WORK } from "game/constants"
 import { Resource, StructureExtension } from "game/prototypes"
 import { findClosestByRange } from "game/utils"

@@ -1,10 +1,4 @@
-/**
- Module: pipe
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { Cre, Task_Role } from "../utils/util_Cre";
 import { Pos } from "../utils/util_pos";
 import { Task_C } from "../utils/util_task";

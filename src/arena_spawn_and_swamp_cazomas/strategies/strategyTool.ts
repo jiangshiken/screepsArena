@@ -1,10 +1,4 @@
-/**
- Module: strategyTool
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { CARRY, MOVE } from "game/constants";
 
 import { harvester } from "../roles/harvester";

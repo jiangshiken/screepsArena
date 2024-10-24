@@ -1,10 +1,4 @@
-/**
- Module: pullTasks
- Author: 820491047
- CreateDate:   2022.5.26
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 
 import { Cre, exist, FindPathAndMoveTask, moveToRandomEmptyAround, Task_Cre } from "../utils/util_Cre";
 import { arrayEqual, remove, valid } from "../utils/util_JS";

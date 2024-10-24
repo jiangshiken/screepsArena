@@ -1,10 +1,4 @@
-/**
- Module: util_overallMap
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { valid } from "./util_JS";
 import { MyMap } from "./util_MyMap";
 import { Pos } from "./util_pos";

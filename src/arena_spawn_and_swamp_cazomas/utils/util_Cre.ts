@@ -1,10 +1,4 @@
-/**
- Module: util_Cre
- Author: 820491047
- CreateDate:2022.5.26
- UpDateDate:2022.7.22
- version 0.0.2
-*/
+
 import { ATTACK, BodyPartConstant, CARRY, CreepActionReturnCode, ERR_NOT_IN_RANGE, HEAL, MOVE, OK, RANGED_ATTACK, RESOURCE_ENERGY, TERRAIN_SWAMP, TERRAIN_WALL, TOUGH, WORK } from "game/constants";
 import { FindPathOpts, FindPathResult, searchPath } from "game/path-finder";
 import { ConstructionSite, Creep, GameObject, Resource, Structure, StructureContainer, StructureExtension, StructureRampart, StructureRoad, StructureSpawn, StructureTower } from "game/prototypes";
@@ -15,8 +9,7 @@ import { sasVariables } from "../SASVariables";
 import { CS, getMaxWorthCSS, getMyCSs, progress } from "../units/constructionSite";
 import { getForceMapValue, isBlockGameObject, moveMatrix, setMoveMapAndMatrixBlock } from "../units/maps";
 import { ct, et, ptSum } from "./util_CPU";
-import { StNumber, divide0, divideReduce, divide_ab0, invalid, last, nst, pow2, ranGet, remove, removeIf, valid } from "./util_JS";
-import { Selecter, wc } from "./util_WT";
+import { divide0, divideReduce, invalid, last, pow2, ranGet, remove, removeIf, valid } from "./util_JS";
 import { Res, displayPos, getMyContainers, getRess, inRampart, isOppoContainer, spawnPos, validRes } from "./util_attackable";
 import { BodyCre } from "./util_bodyParts";
 import { Event, Event_C, Event_Number, Event_Pos, validEvent } from "./util_event";
@@ -25,9 +18,9 @@ import { tick } from "./util_game";
 import { Harvable, OwnedStructure, constructionSites, containers, creeps, isMyGO, isMyRampart, isMySpawn, isOppoRampart, isOppoSpawn, myStructures, oppoStructures, resources, spawns, structures, walls } from "./util_gameObjectInitialize";
 import { findGO, hasGO, overallMap } from "./util_overallMap";
 import { Kerob, getGuessPlayer } from "./util_player";
-import { Adj, COO, GR, Pos, Pos_C, X_axisDistance, atPos, getRangePoss, inRangeVector, invalidPos, midPoint, minusVector, multiplyVector, myGetRange, plusVector, pos00, roundVector, validPos } from "./util_pos";
+import { Adj, COO, GR, Pos, Pos_C, X_axisDistance, atPos, getRangePoss, midPoint, minusVector, multiplyVector, plusVector, pos00 } from "./util_pos";
 import { HasTasks, MultiTask, Task, Task_C, findTask, findTaskByFilter, useTasks } from "./util_task";
-import { P, SA, drawLineComplex, drawLineLight, drawPoly, drawPolyLight, getOpacity } from "./util_visual";
+import { P, SA, drawLineComplex, drawLineLight, drawPoly, drawPolyLight } from "./util_visual";
 
 export const defFindPathResult: FindPathResult = {
 	path: [], ops: 0, cost: 0, incomplete: true

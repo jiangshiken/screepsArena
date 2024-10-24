@@ -1,12 +1,4 @@
-/**
- Module: snakeRush
- Author: 820491047
- CreateDate:   2023.1.13
- UpDateDate:   2023.1.13
- version 0.0.0
- discription: use 7~8 mixed creeps mainly with melee bodyParts.Rush to the enemy
-	  Spawn by pulling all together like a snake.
-*/
+
 import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
 import { CostMatrix, searchPath } from "game/path-finder";
 import { findClosestByRange } from "game/utils";

@@ -1,10 +1,4 @@
-/**
- Module: healShoter
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { findFitOppoUnit } from "../units/army";
 import { Cre, enemies, getDecideSearchRtnNoArea, getRangePosArr, hasThreat, Role } from "../utils/util_Cre";
 import { tick } from "../utils/util_game";

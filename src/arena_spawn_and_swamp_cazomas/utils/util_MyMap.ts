@@ -1,13 +1,7 @@
-/**
- Module: util_MyMap
- Author: 820491047
- CreateDate:   2022.5.25
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
-import { P } from "./util_game";
+
 import { inRange_int } from "./util_JS";
 import { Pos, pos00 } from "./util_pos";
+import { P } from "./util_visual";
 
 /**
  * a map that represent the map tiles
@@ -37,10 +31,7 @@ export class MyMap<T> extends Array<Array<T>> {
 	 */
 	borderValue: T;
 	width_mini: number
-
 	height_mini: number
-
-
 	constructor(
 		width: number,
 		height: number,
@@ -147,8 +138,7 @@ export class MyMap<T> extends Array<Array<T>> {
 	 */
 	setByLambda(l: (pos: Pos) => T): void {
 		this.setByLambda_realIndex((x, y) => {
-			let realPos = this.miniToReal(x, y);
-			// let realPos = this.miniToReal(pos);
+			const realPos = this.miniToReal(x, y);
 			return l(realPos);
 		});
 	}
@@ -169,7 +159,7 @@ export class MyMap<T> extends Array<Array<T>> {
 	setByLambda_area(l: (pos: Pos) => T, pos1: Pos, pos2: Pos): void {
 		this.setByLambda_realIndex_area(
 			(x, y) => {
-				let realPos = this.miniToReal(x, y);
+				const realPos = this.miniToReal(x, y);
 				return l(realPos);
 			},
 			this.realToMini(pos1),
@@ -219,7 +209,7 @@ export class MyMap<T> extends Array<Array<T>> {
 	 * clone this one
 	 */
 	clone(): MyMap<T> {
-		let rtn = new MyMap<T>(
+		const rtn = new MyMap<T>(
 			this.width,
 			this.height,
 			this.defaultValue,

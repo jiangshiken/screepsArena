@@ -1,10 +1,4 @@
-/**
- Module: constructionSite
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { createConstructionSite } from "game";
 import { ConstructionSite, StructureRampart } from "game/prototypes";
 import { getTicks } from "game/utils";

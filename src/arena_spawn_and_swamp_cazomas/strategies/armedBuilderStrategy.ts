@@ -1,10 +1,4 @@
-/**
- Module: armedBuilderStrategy
- Author: 820491047
- CreateDate:   2023.1.13
- UpDateDate:   2023.1.13
- version 0.0.0
-*/
+
 import { CARRY } from "game/constants";
 import { StructureExtension } from "game/prototypes";
 

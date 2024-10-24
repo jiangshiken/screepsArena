@@ -6,13 +6,7 @@ import { containers, isOppoGO, resources } from "./util_gameObjectInitialize";
 import { valid } from "./util_JS";
 import { findGO, overallMap } from "./util_overallMap";
 import { atPos, GR, Pos } from "./util_pos";
-/**
- Module: util_attackable
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { GameObject, Resource, StructureContainer, StructureRampart, StructureSpawn } from "game/prototypes";
 import { getObjectsByPrototype, getRange } from "game/utils";
 

@@ -1,10 +1,4 @@
-/**
- Module: util_player
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { CARRY } from "game/constants";
 
 import { enemySpawn } from "../units/spawn";
@@ -13,14 +7,14 @@ import { TB } from "./util_autoBodys";
 import { enemies, getBodyArrayOfCreep, getEnergy } from "./util_Cre";
 import { tick } from "./util_game";
 import { creeps, isOppoGO } from "./util_gameObjectInitialize";
-import { arrayEquals } from "./util_JS";
+import { arrayEquals, best } from "./util_JS";
 import { GR } from "./util_pos";
 import { SA } from "./util_visual";
 
 //class
 export class Player {
-	name: String;
-	//   posibility: number = 0;
+	readonly name: String;
+	/** the support evidences that show its this player*/
 	supportList: {
 		[key: string]: {
 			worth: number;
@@ -33,8 +27,8 @@ export class Player {
 	}
 	getWorth(): number {
 		let rtn = 0
-		for (let key in this.supportList) {
-			let worth: number = this.supportList[key].worth
+		for (let evidenceIndex in this.supportList) {
+			const worth: number = this.supportList[evidenceIndex].worth
 			rtn += worth
 		}
 		return rtn
@@ -70,13 +64,13 @@ export function identifyOpponent() {
 	if (tick <= startWaitTick) {
 		const scanEn0 = creeps.find(i => isOppoGO(i) && arrayEquals(getBodyArrayOfCreep(i), TB("4M3R")))
 		if (scanEn0 !== undefined) {
-			SA(displayPos(), "Kerob triggered")
+			SA(displayPos(), "Kerob0 triggered")
 			addSupport(Kerob, "0", 1)
 		}
 		const scanEn1 = creeps.find(i => isOppoGO(i) && arrayEquals(getBodyArrayOfCreep(i), TB("2M3R2M")))
 		if (scanEn1 !== undefined) {
-			SA(displayPos(), "Kerob triggered")
-			addSupport(Kerob, "0", 1)
+			SA(displayPos(), "Kerob1 triggered")
+			addSupport(Kerob, "1", 1)
 		}
 	}
 	//identify dooms
@@ -90,21 +84,11 @@ export function identifyOpponent() {
 	//
 	SA(displayPos(), "guessPlayer=" + getGuessPlayer().name)
 }
-function addSupport(player: Player, name: string, worth: number) {
-	player.supportList[name] = { worth: worth }
+function addSupport(player: Player, evidenceIndex: string, worth: number) {
+	player.supportList[evidenceIndex] = { worth: worth }
 }
 export function getGuessPlayer(): Player {
-	const defaultPlayer = Other
-	const rtn = playerList.reduce((a, b) => a.getWorth() > b.getWorth() ? a : b, defaultPlayer)
+	const rtn=<Player>best(playerList,i=>i.getWorth());
 	currentGuessPlayer = rtn
 	return rtn
-	//   let rtn: Player = Tigga;
-	//   let maxP: number = -1;
-	//   for (let p of playerList) {
-	//     if (p.posibility > maxP) {
-	//       maxP = p.posibility;
-	//       rtn = p;
-	//     }
-	//   }
-	//   return rtn;
 }

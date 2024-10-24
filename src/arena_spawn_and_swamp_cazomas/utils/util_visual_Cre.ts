@@ -1,10 +1,4 @@
-/**
- Module: util_visual_Cre
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { Structure } from "game/prototypes";
 import { Visual } from "game/visual";
 

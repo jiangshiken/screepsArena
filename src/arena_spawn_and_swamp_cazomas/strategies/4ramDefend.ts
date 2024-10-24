@@ -6,13 +6,7 @@ import { TB } from "../utils/util_autoBodys";
 import { friends } from "../utils/util_Cre";
 import { SA } from "../utils/util_visual";
 import { spawnStartHarvester } from "./strategyTool";
-/**
- Module: 4ramDefend
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { StructureRampart } from "game/prototypes";
 import { displayPos } from "../utils/util_attackable";
 

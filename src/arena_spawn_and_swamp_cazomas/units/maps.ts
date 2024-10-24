@@ -13,13 +13,7 @@ import { getGuessPlayer, Kerob } from "../utils/util_player";
 import { getRangePoss, GR, Pos, pos00 } from "../utils/util_pos";
 import { P, SA } from "../utils/util_visual";
 import { getSpawns } from "./spawn";
-/**
- Module: maps
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { RANGED_ATTACK } from "game/constants";
 import { CostMatrix } from "game/path-finder";
 import { Structure, StructureContainer, StructureExtension, StructureRampart, StructureRoad } from "game/prototypes";

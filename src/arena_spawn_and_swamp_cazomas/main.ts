@@ -1,10 +1,4 @@
-/**
- Module: main(for SAS)
- Author: 820491047
- CreateDate:   2022.5.27
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 
 import { firstInit, loopEnd, loopStart } from "./loop";
 import { set_harvesterNotFleeAtStart } from "./roles/harvester";

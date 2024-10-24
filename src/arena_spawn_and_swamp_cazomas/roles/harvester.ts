@@ -1,10 +1,4 @@
-/**
- Module: harvester
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { StructureContainer } from "game/prototypes";
 
 import { sasVariables } from "../SASVariables";

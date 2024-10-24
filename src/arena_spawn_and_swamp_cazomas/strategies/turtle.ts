@@ -120,6 +120,16 @@ export function useStandardTurtling(st: number, strength: number = 0) {
 		}
 	}
 }
+export function supplyHarvester(st: number) {
+	//supply harvester
+	if (st >= 2 && st <= 300 && spawnCleared(spawn)) {
+		let carryNum = sum(friends.filter(i => i.role === harvester), i => i.getBodiesNum(CARRY))
+		if (carryNum < 2) {
+			spawnCreepInFront(bodyCM, harvester);
+		}
+	}
+}
+
 /**rebuild the base rampart
  * if not in my rampart ,create a `StructureRampart` at pos
 */

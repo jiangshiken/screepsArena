@@ -1,10 +1,4 @@
-/**
- Module: mover
- Author: 820491047
- CreateDate:   2023.1.10
- UpDateDate:   2023.1.10
- version 0.0.0
-*/
+
 import { MOVE, WORK } from "game/constants";
 import { getRange } from "game/utils";
 
