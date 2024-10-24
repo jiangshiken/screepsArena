@@ -9,15 +9,15 @@
 import { ConstructionSite } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
-import { cpuBreakJudge } from "../army";
-import { attackWeakRampart, defendTheRampart } from "../ramparts";
-import { spawn } from "../spawn";
-import { spawnPos } from "../util_attackable";
-import { Cre, enemies, getEnemyThreats, Role } from "../util_Cre";
-import { tick } from "../util_game";
-import { findGO } from "../util_overallMap";
-import { GR } from "../util_pos";
-import { P, SA } from "../util_visual";
+import { cpuBreakJudge } from "../units/army";
+import { attackWeakRampart, defendTheRampart } from "../units/ramparts";
+import { spawn } from "../units/spawn";
+import { spawnPos } from "../utils/util_attackable";
+import { Cre, enemies, getEnemyThreats, Role } from "../utils/util_Cre";
+import { tick } from "../utils/util_game";
+import { findGO } from "../utils/util_overallMap";
+import { GR } from "../utils/util_pos";
+import { P, SA } from "../utils/util_visual";
 
 //role
 /**the defender that hide in rampart*/

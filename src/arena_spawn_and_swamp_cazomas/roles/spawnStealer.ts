@@ -5,9 +5,9 @@
  UpDateDate:   2023.1.10
  version 0.0.0
 */
-import { enemySpawn } from "../spawn";
-import { Cre, Role } from "../util_Cre";
-import { SA } from "../util_visual";
+import { enemySpawn } from "../units/spawn";
+import { Cre, Role } from "../utils/util_Cre";
+import { SA } from "../utils/util_visual";
 
 /**tring to attack the enemy spawn when no one noticed*/
 export const spawnStealer: Role = new Role("spawnStealer", spawnStealerControl);

@@ -7,7 +7,7 @@
 */
 import { CARRY } from "game/constants";
 
-import { enemySpawn } from "./spawn";
+import { enemySpawn } from "../units/spawn";
 import { displayPos } from "./util_attackable";
 import { TB } from "./util_autoBodys";
 import { enemies, getBodyArrayOfCreep, getEnergy } from "./util_Cre";

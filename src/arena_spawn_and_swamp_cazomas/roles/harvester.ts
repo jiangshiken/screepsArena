@@ -8,14 +8,14 @@
 import { StructureContainer } from "game/prototypes";
 
 import { sasVariables } from "../SASVariables";
-import { inMyBaseRan, spawn } from "../spawn";
-import { Cont, getContWorth, getRess, getWildConts, setResourceDrop, validRes } from "../util_attackable";
-import { Cre, getEmptyCapacity, getEnergy, getFreeEnergy, HasStore, id, isMyTick, live, Producer, Role, Task_Cre } from "../util_Cre";
-import { S } from "../util_export";
-import { containers, Harvable } from "../util_gameObjectInitialize";
-import { COO, GR } from "../util_pos";
-import { findTask } from "../util_task";
-import { drawPoly, SA } from "../util_visual";
+import { inMyBaseRan, spawn } from "../units/spawn";
+import { Cont, getContWorth, getRess, getWildConts, setResourceDrop, validRes } from "../utils/util_attackable";
+import { Cre, getEmptyCapacity, getEnergy, getFreeEnergy, HasStore, id, isMyTick, live, Producer, Role, Task_Cre } from "../utils/util_Cre";
+import { S } from "../utils/util_export";
+import { containers, Harvable } from "../utils/util_gameObjectInitialize";
+import { COO, GR } from "../utils/util_pos";
+import { findTask } from "../utils/util_task";
+import { drawPoly, SA } from "../utils/util_visual";
 
 /**get the move time assume its capacity is full*/
 export function getTimeAfterFull(cre: Cre) {

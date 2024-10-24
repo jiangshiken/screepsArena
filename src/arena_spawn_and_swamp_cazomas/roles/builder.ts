@@ -9,21 +9,21 @@ import { ATTACK, WORK } from "game/constants";
 import { ConstructionSite, StructureExtension, StructureRampart } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
-import { cpuBreakJudge } from "../army";
-import { createCS, CS, getMaxWorthCSS, getMyCSs, getProgressRate, hasConstructionSite } from "../constructionSite";
-import { defendTheRampart, getMyHealthyRamparts, gotoTargetRampart, inMyHealthyRampart, inMyRampart, myRampartAt } from "../ramparts";
-import { enemySpawn, getSpawnAndBaseContainerEnergy, inMyBaseRan, resetStartGateAvoidFromEnemies, spawn } from "../spawn";
-import { getOutsideContainers } from "../util_attackable";
-import { blocked, calAroundEnergy, canBeBuildByCre, Cre, friends, getCapacity, getEnemyThreats, getEnergy, getFreeEnergy, getHarvables, getIsBuilding, getRoundEmptyPosLeave1Empty, getSpawnAroundFreeContainers, getSpawnAroundLiveContainers, hasEnemyArmyAround, hasEnemyThreatAround, HasStore, live, protectSelfExtraTaunt, Role, setIsBuilding, Task_Cre } from "../util_Cre";
-import { S } from "../util_export";
-import { tick } from "../util_game";
-import { myConstructionSites, myRamparts } from "../util_gameObjectInitialize";
-import { d2, getClassName, invalid } from "../util_JS";
-import { overallMap } from "../util_overallMap";
-import { atPos, COO, getRangePoss, GR, midPoint, myGetRange, Pos } from "../util_pos";
-import { findTask } from "../util_task";
-import { SA, SAN } from "../util_visual";
+import { cpuBreakJudge } from "../units/army";
+import { createCS, CS, getMaxWorthCSS, getMyCSs, getProgressRate, hasConstructionSite } from "../units/constructionSite";
+import { defendTheRampart, getMyHealthyRamparts, gotoTargetRampart, inMyHealthyRampart, inMyRampart, myRampartAt } from "../units/ramparts";
+import { enemySpawn, getSpawnAndBaseContainerEnergy, inMyBaseRan, resetStartGateAvoidFromEnemies, spawn } from "../units/spawn";
 import { wc } from "../util_WT";
+import { getOutsideContainers } from "../utils/util_attackable";
+import { blocked, calAroundEnergy, canBeBuildByCre, Cre, friends, getCapacity, getEnemyThreats, getEnergy, getFreeEnergy, getHarvables, getIsBuilding, getRoundEmptyPosLeave1Empty, getSpawnAroundFreeContainers, getSpawnAroundLiveContainers, hasEnemyArmyAround, hasEnemyThreatAround, HasStore, live, protectSelfExtraTaunt, Role, setIsBuilding, Task_Cre } from "../utils/util_Cre";
+import { S } from "../utils/util_export";
+import { tick } from "../utils/util_game";
+import { myConstructionSites, myRamparts } from "../utils/util_gameObjectInitialize";
+import { d2, getClassName, invalid } from "../utils/util_JS";
+import { overallMap } from "../utils/util_overallMap";
+import { atPos, COO, getRangePoss, GR, midPoint, myGetRange, Pos } from "../utils/util_pos";
+import { findTask } from "../utils/util_task";
+import { SA, SAN } from "../utils/util_visual";
 
 /**Builder that used in trutling,will not go to wild resource.
  * Only stay at ramparts.

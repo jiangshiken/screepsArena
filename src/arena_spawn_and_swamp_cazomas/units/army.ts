@@ -9,14 +9,14 @@
 import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
 import { getRange } from "game/utils";
 
+import { getCPUPercent, lowCPUMode } from "../utils/util_CPU";
+import { blocked, calculateForce, Cre, damaged, exist, friends, getDamagedRate, getEarning, getEnergy, getFriendArmies, getOtherFriends, getTaunt, hasEnemyThreatAround, is5MA, isMyTick, moveToRandomEmptyAround, oppoUnits, Unit } from "../utils/util_Cre";
+import { myRamparts, resources } from "../utils/util_gameObjectInitialize";
+import { divide0, divideReduce, goInRange, ranGet, sum } from "../utils/util_JS";
+import { currentGuessPlayer, Dooms } from "../utils/util_player";
+import { atPos, COO, getRangePoss, getRangePossByStep, GR, Pos } from "../utils/util_pos";
+import { drawLineComplex, SA, SAN } from "../utils/util_visual";
 import { getEnemyForceMapValue, getForceMapValue, getFriendForceMapValue } from "./maps";
-import { getCPUPercent, lowCPUMode } from "./util_CPU";
-import { blocked, calculateForce, Cre, damaged, exist, friends, getDamagedRate, getEarning, getEnergy, getFriendArmies, getOtherFriends, getTaunt, hasEnemyThreatAround, is5MA, isMyTick, moveToRandomEmptyAround, oppoUnits, Unit } from "./util_Cre";
-import { myRamparts, resources } from "./util_gameObjectInitialize";
-import { divide0, divideReduce, goInRange, ranGet, sum } from "./util_JS";
-import { currentGuessPlayer, Dooms } from "./util_player";
-import { atPos, COO, getRangePoss, getRangePossByStep, GR, Pos } from "./util_pos";
-import { drawLineComplex, SA, SAN } from "./util_visual";
 
 /**find the position that can get protect nearby*/
 export function findProtectPos(cre: Cre): { pos: Pos; rate: number } {

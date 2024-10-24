@@ -8,9 +8,9 @@
 import { CostMatrix } from "game/path-finder";
 import { findClosestByRange } from "game/utils";
 
-import { spawn } from "../spawn";
-import { Cre, enemies, Role } from "../util_Cre";
-import { absRange, getRangePoss, GR } from "../util_pos";
+import { spawn } from "../units/spawn";
+import { Cre, enemies, Role } from "../utils/util_Cre";
+import { absRange, getRangePoss, GR } from "../utils/util_pos";
 
 /**a defender with tough on the body part instead of building rampart around
  * the base

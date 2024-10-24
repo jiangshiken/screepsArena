@@ -10,18 +10,18 @@ import { CostMatrix } from "game/path-finder";
 import { StructureRampart } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
+import { spawnPos } from "../utils/util_attackable";
+import { rangeBonus } from "../utils/util_bonus";
+import { blocked, Cre, enemies, enRamAroundCost, friends, getDecideSearchRtnNoArea, getEnemyArmies, getOtherFriends, hasOppoUnitsAround, hits, my } from "../utils/util_Cre";
+import { Event_C } from "../utils/util_event";
+import { tick } from "../utils/util_game";
+import { myRamparts, oppoRamparts } from "../utils/util_gameObjectInitialize";
+import { last, relu, sum, valid } from "../utils/util_JS";
+import { findGO, overallMap } from "../utils/util_overallMap";
+import { atPos, COO, getRangePoss, GR, myGetRange, Pos } from "../utils/util_pos";
+import { dotted, drawLineComplex, drawPolyLight, SA } from "../utils/util_visual";
 import { moveMap } from "./maps";
 import { enemySpawn, spawn } from "./spawn";
-import { spawnPos } from "./util_attackable";
-import { rangeBonus } from "./util_bonus";
-import { blocked, Cre, enemies, enRamAroundCost, friends, getDecideSearchRtnNoArea, getEnemyArmies, getOtherFriends, hasOppoUnitsAround, hits, my } from "./util_Cre";
-import { Event_C } from "./util_event";
-import { tick } from "./util_game";
-import { myRamparts, oppoRamparts } from "./util_gameObjectInitialize";
-import { last, relu, sum, valid } from "./util_JS";
-import { findGO, overallMap } from "./util_overallMap";
-import { atPos, COO, getRangePoss, GR, myGetRange, Pos } from "./util_pos";
-import { dotted, drawLineComplex, drawPolyLight, SA } from "./util_visual";
 
 export function myRampartAt(pos: Pos): StructureRampart {
 	return <StructureRampart>findGO(pos, StructureRampart)

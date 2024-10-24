@@ -9,14 +9,14 @@ import { createConstructionSite } from "game";
 import { ConstructionSite, StructureRampart } from "game/prototypes";
 import { getTicks } from "game/utils";
 
-import { my } from "./util_Cre";
-import { Event, Event_C } from "./util_event";
-import { S } from "./util_export";
-import { myConstructionSites } from "./util_gameObjectInitialize";
-import { invalid } from "./util_JS";
-import { findGO } from "./util_overallMap";
-import { atPos, COO, Pos } from "./util_pos";
-import { drawLineComplex, SA } from "./util_visual";
+import { my } from "../utils/util_Cre";
+import { Event, Event_C } from "../utils/util_event";
+import { S } from "../utils/util_export";
+import { myConstructionSites } from "../utils/util_gameObjectInitialize";
+import { invalid } from "../utils/util_JS";
+import { findGO } from "../utils/util_overallMap";
+import { atPos, COO, Pos } from "../utils/util_pos";
+import { drawLineComplex, SA } from "../utils/util_visual";
 import { wc, WT, WT_C } from "./util_WT";
 
 // export let CSs: CS[] = []

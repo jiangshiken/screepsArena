@@ -9,20 +9,20 @@ import { TOUGH } from "game/constants";
 import { CostMatrix, searchPath } from "game/path-finder";
 import { StructureExtension } from "game/prototypes";
 
-import { createCS } from "./constructionSite";
-import { builder4Ram } from "./roles/builder";
-import { harvester } from "./roles/harvester";
-import { enemySpawn, spawn, spawnCreep } from "./spawn";
-import { TB } from "./util_autoBodys";
-import { ct, pt } from "./util_CPU";
-import { Cre, friends, id, Role } from "./util_Cre";
-import { validEvent } from "./util_event";
-import { S } from "./util_export";
-import { P, tick } from "./util_game";
-import { divideReduce } from "./util_JS";
-import { MyMap } from "./util_MyMap";
-import { atPos, GR, midPoint, plusVector } from "./util_pos";
-import { drawPolyLight, drawRangeComplex, fillCircle, SA } from "./util_visual";
+import { builder4Ram } from "../roles/builder";
+import { harvester } from "../roles/harvester";
+import { createCS } from "../units/constructionSite";
+import { enemySpawn, spawn, spawnCreep } from "../units/spawn";
+import { TB } from "../utils/util_autoBodys";
+import { ct, pt } from "../utils/util_CPU";
+import { Cre, friends, id, Role } from "../utils/util_Cre";
+import { validEvent } from "../utils/util_event";
+import { S } from "../utils/util_export";
+import { P, tick } from "../utils/util_game";
+import { divideReduce } from "../utils/util_JS";
+import { MyMap } from "../utils/util_MyMap";
+import { atPos, GR, midPoint, plusVector } from "../utils/util_pos";
+import { drawPolyLight, drawRangeComplex, fillCircle, SA } from "../utils/util_visual";
 
 //这个是测试脚本集合，将所有的测试保留在这里，以便版本变更时确认是否还有以下的特性
 //Role

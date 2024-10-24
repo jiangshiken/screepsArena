@@ -7,21 +7,21 @@
 */
 
 import { firstInit, loopEnd, loopStart } from "./loop";
-import { set_setMoveMapAvoidFarOn } from "./maps";
 import { set_harvesterNotFleeAtStart } from "./roles/harvester";
 import { useArmedBuilderStrategy } from "./strategies/armedBuilderStrategy";
 import { set_snakePartsTotalNum, useSnakeRushStrategy } from "./strategies/snakeRush";
 import { useStandardStrategy } from "./strategies/standard";
 import { spawnStartHarvester } from "./strategies/strategyTool";
 import { useTailStrategy } from "./strategies/tailStrategy";
+import { useTest } from "./strategies/testMode";
 import { useTurtleStrategy } from "./strategies/turtle";
-import { useTest } from "./testMode";
-import { ct, lowCPUMode, pt } from "./util_CPU";
-import { displayPos } from "./util_attackable";
-import { P, tick } from "./util_game";
-import { Dooms, Kerob, Tigga, getGuessPlayer, identifyOpponent, startWaitTick } from "./util_player";
-import { SA } from "./util_visual";
-import { showHealthBars } from "./util_visual_Cre";
+import { set_setMoveMapAvoidFarOn } from "./units/maps";
+import { ct, lowCPUMode, pt } from "./utils/util_CPU";
+import { displayPos } from "./utils/util_attackable";
+import { P, tick } from "./utils/util_game";
+import { Dooms, Kerob, Tigga, getGuessPlayer, identifyOpponent, startWaitTick } from "./utils/util_player";
+import { SA } from "./utils/util_visual";
+import { showHealthBars } from "./utils/util_visual_Cre";
 
 //overall variable
 let useMod: string;

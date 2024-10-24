@@ -3,26 +3,26 @@ import { CostMatrix, searchPath } from "game/path-finder";
 import { StructureSpawn } from "game/prototypes";
 import { findClosestByRange, getCpuTime, getHeapStatistics, getTicks } from "game/utils";
 
-import { CS, initCS } from "./constructionSite";
-import { firstInit_maps, loopStart_maps, setMoveMatrix } from "./maps";
-import { SDFP_control } from "./predictSys";
-import { setRamMoveMapValue } from "./ramparts";
+import { SDFP_control } from "./deprecated/predictSys";
 import { sum_stdAttacker0, sum_stdAttacker1, sum_stdHealer0 } from "./roles/fighters_std";
 import { sasVariables, SASVariables, setSasVariables } from "./SASVariables";
-import { checkSpawns, enemySpawn, initSpa, setEnemySpawn, setSpawn, Spa, spawn } from "./spawn";
 import { sum_snakePart0 } from "./strategies/snakeRush";
-import { Cont, displayPos, enemySpawnPos, setEnemySpawnPos, setSpawnPos, spawnPos } from "./util_attackable";
-import { getSuperior, getSuperiorRate } from "./util_bonus";
-import { ct, getCPUPercent, lowCPUMode, pt, ptSum, setLowCPUMode, switchCPUModeOn } from "./util_CPU";
-import { controlCreeps, cres, enemies, friends, getAllUnits, getDecideSearchRtn, getEnemyProducers, getEnergy, getGameObjects, getMyProducers, initialCresAtLoopStart } from "./util_Cre";
-import { Event_C, validEvent } from "./util_event";
-import { P, setTick, tick } from "./util_game";
-import { constructionSites, containers, getPrototype, initialGameObjectsAtLoopStart, spawns } from "./util_gameObjectInitialize";
-import { divideReduce } from "./util_JS";
-import { firstInit_overallMap, overallMapInit, setGameObjectsThisTick, setOverallMap } from "./util_overallMap";
-import { GR } from "./util_pos";
-import { append_largeSizeText, firstInit_visual, loopEnd_visual, loopStart_visual, SA, SAN } from "./util_visual";
-import { showEnemies, visual } from "./util_visual_Cre";
+import { CS, initCS } from "./units/constructionSite";
+import { firstInit_maps, loopStart_maps, setMoveMatrix } from "./units/maps";
+import { setRamMoveMapValue } from "./units/ramparts";
+import { checkSpawns, enemySpawn, initSpa, setEnemySpawn, setSpawn, Spa, spawn } from "./units/spawn";
+import { Cont, displayPos, enemySpawnPos, setEnemySpawnPos, setSpawnPos, spawnPos } from "./utils/util_attackable";
+import { getSuperior, getSuperiorRate } from "./utils/util_bonus";
+import { ct, getCPUPercent, lowCPUMode, pt, ptSum, setLowCPUMode, switchCPUModeOn } from "./utils/util_CPU";
+import { controlCreeps, cres, enemies, friends, getAllUnits, getDecideSearchRtn, getEnemyProducers, getEnergy, getGameObjects, getMyProducers, initialCresAtLoopStart } from "./utils/util_Cre";
+import { Event_C, validEvent } from "./utils/util_event";
+import { P, setTick, tick } from "./utils/util_game";
+import { constructionSites, containers, getPrototype, initialGameObjectsAtLoopStart, spawns } from "./utils/util_gameObjectInitialize";
+import { divideReduce } from "./utils/util_JS";
+import { firstInit_overallMap, overallMapInit, setGameObjectsThisTick, setOverallMap } from "./utils/util_overallMap";
+import { GR } from "./utils/util_pos";
+import { append_largeSizeText, firstInit_visual, loopEnd_visual, loopStart_visual, SA, SAN } from "./utils/util_visual";
+import { showEnemies, visual } from "./utils/util_visual_Cre";
 
 /**
  Module: loop

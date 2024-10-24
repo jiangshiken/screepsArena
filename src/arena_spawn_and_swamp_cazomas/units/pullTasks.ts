@@ -6,11 +6,11 @@
  version 0.0.0
 */
 
-import { Cre, exist, FindPathAndMoveTask, moveToRandomEmptyAround, Task_Cre } from "./util_Cre";
-import { arrayEqual, remove, valid } from "./util_JS";
-import { atPos, COO, myGetRange, Pos } from "./util_pos";
-import { findTask } from "./util_task";
-import { SA } from "./util_visual";
+import { Cre, exist, FindPathAndMoveTask, moveToRandomEmptyAround, Task_Cre } from "../utils/util_Cre";
+import { arrayEqual, remove, valid } from "../utils/util_JS";
+import { atPos, COO, myGetRange, Pos } from "../utils/util_pos";
+import { findTask } from "../utils/util_task";
+import { SA } from "../utils/util_visual";
 
 //functions
 /**

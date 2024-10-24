@@ -8,7 +8,6 @@
 import { CARRY } from "game/constants";
 import { StructureExtension } from "game/prototypes";
 
-import { createCS } from "../constructionSite";
 import { builderStandard } from "../roles/builder";
 import { defender_rampart } from "../roles/defender";
 import { harvester } from "../roles/harvester";
@@ -16,15 +15,16 @@ import { jamer } from "../roles/jamer";
 import { resourceDestroyer } from "../roles/resourceDestroyer";
 import { spawnRusher } from "../roles/spawnRusher";
 import { sasVariables } from "../SASVariables";
-import { EEB, resetStartGateAvoidFromEnemies, spawn, spawnAndExtensionsEnergy } from "../spawn";
-import { spawnBySpawnTypeList, SpawnType } from "../spawnTypeList";
-import { displayPos } from "../util_attackable";
-import { TB } from "../util_autoBodys";
-import { enemyArmyReduce, enemyBuilderBonus, ticksBonus, totalInferiorityBonus, totalSuperiorityRateReduce } from "../util_bonus";
-import { addStrategyTick, strategyTick, tick } from "../util_game";
-import { myConstructionSites, myExtensions } from "../util_gameObjectInitialize";
-import { GR, multiplyVector, plusVector } from "../util_pos";
-import { SA, SAN } from "../util_visual";
+import { createCS } from "../units/constructionSite";
+import { EEB, resetStartGateAvoidFromEnemies, spawn, spawnAndExtensionsEnergy } from "../units/spawn";
+import { spawnBySpawnTypeList, SpawnType } from "../units/spawnTypeList";
+import { displayPos } from "../utils/util_attackable";
+import { TB } from "../utils/util_autoBodys";
+import { enemyArmyReduce, enemyBuilderBonus, ticksBonus, totalInferiorityBonus, totalSuperiorityRateReduce } from "../utils/util_bonus";
+import { addStrategyTick, strategyTick, tick } from "../utils/util_game";
+import { myConstructionSites, myExtensions } from "../utils/util_gameObjectInitialize";
+import { GR, multiplyVector, plusVector } from "../utils/util_pos";
+import { SA, SAN } from "../utils/util_visual";
 import { useStandardTurtling } from "./turtle";
 
 /**use a bunch of builder with ATTACK part to confuse enemy and harve huge

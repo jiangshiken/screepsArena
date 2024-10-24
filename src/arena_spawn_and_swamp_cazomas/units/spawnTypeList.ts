@@ -7,11 +7,11 @@
 */
 import { BodyPartConstant } from "game/constants";
 
+import { Cre, friends, Role } from "../utils/util_Cre";
+import { S } from "../utils/util_export";
+import { d2, repeat } from "../utils/util_JS";
+import { P, SA } from "../utils/util_visual";
 import { enoughEnergy, spawn, spawnAndSpawnListEmpty, spawnCreep } from "./spawn";
-import { Cre, friends, Role } from "./util_Cre";
-import { S } from "./util_export";
-import { d2, repeat } from "./util_JS";
-import { P, SA } from "./util_visual";
 
 export function spawnBySpawnTypeList(spl: SpawnType[]) {
 	let maxNeedRate = 0;

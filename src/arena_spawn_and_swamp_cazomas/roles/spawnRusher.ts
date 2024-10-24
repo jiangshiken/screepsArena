@@ -7,11 +7,11 @@
 */
 import { findPath } from "game/utils";
 
-import { enemySpawn } from "../spawn";
-import { Cre, friends, Role } from "../util_Cre";
-import { Event_C, validEvent } from "../util_event";
-import { COO, GR } from "../util_pos";
-import { drawPolyLight, SA } from "../util_visual";
+import { enemySpawn } from "../units/spawn";
+import { Cre, friends, Role } from "../utils/util_Cre";
+import { Event_C, validEvent } from "../utils/util_event";
+import { COO, GR } from "../utils/util_pos";
+import { drawPolyLight, SA } from "../utils/util_visual";
 
 /**tring to attack the enemy spawn when no one noticed*/
 export const spawnRusher: Role = new Role("spawnRusher", spawnRusherControl);

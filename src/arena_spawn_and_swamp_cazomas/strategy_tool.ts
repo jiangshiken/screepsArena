@@ -1,8 +1,8 @@
 import { harvester } from "./roles/harvester";
-import { spawn, spawnCleared, spawnCreepInFront } from "./spawn";
-import { bodyCM } from "./util_bodyParts";
-import { friends } from "./util_Cre";
-import { sum } from "./util_JS";
+import { spawn, spawnCleared, spawnCreepInFront } from "./units/spawn";
+import { bodyCM } from "./utils/util_bodyParts";
+import { friends } from "./utils/util_Cre";
+import { sum } from "./utils/util_JS";
 /**
  Module: strategy_tool
  Author: 820491047

@@ -9,15 +9,15 @@ import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
 import { ConstructionSite } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
-import { cpuBreakJudge, fleeWeakComplex, givePositionToImpartantFriend } from "../army";
-import { getProgressRate } from "../constructionSite";
-import { inOppoRampart } from "../util_attackable";
-import { blocked, Cre, enemies, friends, hasEnemyAround_lamb, hasThreat, Role } from "../util_Cre";
-import { tick } from "../util_game";
-import { oppoConstructionSites } from "../util_gameObjectInitialize";
-import { divideReduce } from "../util_JS";
-import { Adj, atPos, COO, GR, InShotRan, midPoint } from "../util_pos";
-import { SA } from "../util_visual";
+import { cpuBreakJudge, fleeWeakComplex, givePositionToImpartantFriend } from "../units/army";
+import { getProgressRate } from "../units/constructionSite";
+import { inOppoRampart } from "../utils/util_attackable";
+import { blocked, Cre, enemies, friends, hasEnemyAround_lamb, hasThreat, Role } from "../utils/util_Cre";
+import { tick } from "../utils/util_game";
+import { oppoConstructionSites } from "../utils/util_gameObjectInitialize";
+import { divideReduce } from "../utils/util_JS";
+import { Adj, atPos, COO, GR, InShotRan, midPoint } from "../utils/util_pos";
+import { SA } from "../utils/util_visual";
 
 /**used to jam the opponent's construction site*/
 export const jamer: Role = new Role("jamer", jamerJob)

@@ -1,18 +1,18 @@
-import { sasVariables } from "./SASVariables";
+import { sasVariables } from "../SASVariables";
+import { displayPos, inRampart, spawnPos } from "../utils/util_attackable";
+import { rangeDecreaseBonus } from "../utils/util_bonus";
+import { ct, et, getCPUPercent, lowCPUMode, pt, ptSum } from "../utils/util_CPU";
+import { Attackable, blocked, calculateForce, Cre, cres, exist, getArmies, getEnemyArmies, GO, isTerrainSwamp, isTerrainWall, my, myGO, oppo, Unit } from "../utils/util_Cre";
+import { S } from "../utils/util_export";
+import { tick } from "../utils/util_game";
+import { isMyRampart, isMySpawn, isOppoRampart, isOppoSpawn, ramparts, spawns } from "../utils/util_gameObjectInitialize";
+import { divide0, goInRange, randomBool, relu } from "../utils/util_JS";
+import { MyMap } from "../utils/util_MyMap";
+import { overallMap } from "../utils/util_overallMap";
+import { getGuessPlayer, Kerob } from "../utils/util_player";
+import { getRangePoss, GR, Pos, pos00 } from "../utils/util_pos";
+import { P, SA } from "../utils/util_visual";
 import { getSpawns } from "./spawn";
-import { displayPos, inRampart, spawnPos } from "./util_attackable";
-import { rangeDecreaseBonus } from "./util_bonus";
-import { ct, et, getCPUPercent, lowCPUMode, pt, ptSum } from "./util_CPU";
-import { Attackable, blocked, calculateForce, Cre, cres, exist, getArmies, getEnemyArmies, GO, isTerrainSwamp, isTerrainWall, my, myGO, oppo, Unit } from "./util_Cre";
-import { S } from "./util_export";
-import { tick } from "./util_game";
-import { isMyRampart, isMySpawn, isOppoRampart, isOppoSpawn, ramparts, spawns } from "./util_gameObjectInitialize";
-import { divide0, goInRange, randomBool, relu } from "./util_JS";
-import { MyMap } from "./util_MyMap";
-import { overallMap } from "./util_overallMap";
-import { getGuessPlayer, Kerob } from "./util_player";
-import { getRangePoss, GR, Pos, pos00 } from "./util_pos";
-import { P, SA } from "./util_visual";
 /**
  Module: maps
  Author: 820491047

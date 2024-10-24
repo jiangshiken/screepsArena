@@ -1,11 +1,11 @@
-import { sasVariables } from "./SASVariables";
+import { sasVariables } from "../SASVariables";
+import { SA } from "../util_visual";
 import { Event, Event_Number, Event_Pos, filterEventList, validEvent } from "./util_event";
 import { tick } from "./util_game";
 import { containers, isOppoGO, resources } from "./util_gameObjectInitialize";
 import { valid } from "./util_JS";
 import { findGO, overallMap } from "./util_overallMap";
 import { atPos, GR, Pos } from "./util_pos";
-import { SA } from "./util_visual";
 /**
  Module: util_attackable
  Author: 820491047

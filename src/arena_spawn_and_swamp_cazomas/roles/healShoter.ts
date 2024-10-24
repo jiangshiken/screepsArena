@@ -5,11 +5,11 @@
  UpDateDate:   2023.1.10
  version 0.0.0
 */
-import { findFitOppoUnit } from "../army";
-import { Cre, enemies, getDecideSearchRtnNoArea, getRangePosArr, hasThreat, Role } from "../util_Cre";
-import { tick } from "../util_game";
-import { COO, myGetRange } from "../util_pos";
-import { SA } from "../util_visual";
+import { findFitOppoUnit } from "../units/army";
+import { Cre, enemies, getDecideSearchRtnNoArea, getRangePosArr, hasThreat, Role } from "../utils/util_Cre";
+import { tick } from "../utils/util_game";
+import { COO, myGetRange } from "../utils/util_pos";
+import { SA } from "../utils/util_visual";
 
 /**do heal and shot and the same time*/
 export const healShoter: Role = new Role("healShoter", healShoterControl);

@@ -8,7 +8,7 @@
 import { ATTACK, CARRY, HEAL, MOVE, RANGED_ATTACK, WORK } from "game/constants";
 import { getTicks } from "game/utils";
 
-import { spawn, spawnAndExtensionsEnergy, spawnNearBlockedAround } from "./spawn";
+import { spawn, spawnAndExtensionsEnergy, spawnNearBlockedAround } from "../units/spawn";
 import { displayPos } from "./util_attackable";
 import { calculateForce, enemies, enemyAttackNum, friends, getEnergy, getHarvables, hasThreat, is5MA, sumForceByArr } from "./util_Cre";
 import { divide0, divideReduce, relu, sum } from "./util_JS";

@@ -5,9 +5,9 @@
  UpDateDate:   2023.1.10
  version 0.0.0
 */
-import { inRange_int } from "./util_JS";
-import { invalidPos, Pos } from "./util_pos";
-import { drawLineComplex } from "./util_visual";
+import { inRange_int } from "./utils/util_JS";
+import { invalidPos, Pos } from "./utils/util_pos";
+import { drawLineComplex } from "./utils/util_visual";
 
 /** the variables of game mod Spawn and Swamp */
 export let sasVariables: SASVariables;
