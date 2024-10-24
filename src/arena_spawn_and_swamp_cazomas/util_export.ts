@@ -5,7 +5,7 @@
  UpDateDate:   2023.1.10
  version 0.0.0
 */
-import { DND2, invalid, valid } from "./util_JS";
+import { d2, invalid, valid } from "./util_JS";
 import { COO, validPos } from "./util_pos";
 
 /** get print string not print attribute */
@@ -23,7 +23,7 @@ export function toString0(o: any): string {
 			return "object";
 		}
 	} else if (typeof o === "number") {
-		return "" + DND2(o);
+		return "" + d2(o);
 	} else if (typeof o === "string") {
 		return o;
 	} else if (typeof o === "function") {

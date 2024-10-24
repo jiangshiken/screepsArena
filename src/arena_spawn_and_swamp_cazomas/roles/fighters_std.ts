@@ -9,8 +9,8 @@ import { blocked, calculateForce, Cre, exist, friends, getDamagedRate, getDecide
 import { Event_C, Event_Number, Event_Pos, validEvent } from "../util_event";
 import { tick } from "../util_game";
 import { myRamparts } from "../util_gameObjectInitialize";
-import { divide0, divideReduce, goInDoubleRange, randomBool, relu_oppo, sum } from "../util_JS";
-import { COO, getDirectionByPos, getRangePoss, inRange, MGR, Pos } from "../util_pos";
+import { divide0, divideReduce, goInRange, randomBool, relu_oppo, sum } from "../util_JS";
+import { COO, filterInRange, getDirectionByPos, getRangePoss, GR, Pos } from "../util_pos";
 import { drawLineComplex, SA, SAN } from "../util_visual";
 import { maxWorth_lamb } from "../util_WT";
 import { defender_RampartJob } from "./defender";
@@ -76,7 +76,7 @@ export function stdHealerJob(cre: Cre) {
 	} else {
 		SA(cre, "no friend");
 		const friendThreateds = getFriendsThreated();
-		const target = maxWorth_lamb(friendThreateds, i => calculateForce(i).value * rangeBonus(MGR(i, cre), 10)).target
+		const target = maxWorth_lamb(friendThreateds, i => calculateForce(i).value * rangeBonus(GR(i, cre), 10)).target
 		if (!cre.battle.flee(8, 16)) {
 			if (target) {
 				SA(cre, "target=" + id(target));
@@ -144,8 +144,8 @@ export function stdShoterJob(cre: Cre) {
 		const prePos: Pos = enemy;
 		const protectPos = findProtectPos(cre).pos;
 		const enemyRAs = getEnemyThreats().filter(i =>
-			i.getBodiesNum(RANGED_ATTACK) > 0 && MGR(i, cre) <= 10
-			&& i.getBodiesNum(ATTACK) > 0 && MGR(i, cre) <= 2);
+			i.getBodiesNum(RANGED_ATTACK) > 0 && GR(i, cre) <= 10
+			&& i.getBodiesNum(ATTACK) > 0 && GR(i, cre) <= 2);
 		const goFight: boolean = enemyRAs.length === 0;
 		if (goFight) {
 			SA(cre, "goFight")
@@ -157,9 +157,9 @@ export function stdShoterJob(cre: Cre) {
 			//TODO other same closest
 			if (closestEn) {
 				drawLineComplex(cre, closestEn, 0.4, "#00ee77")
-				const rangeClose = MGR(cre, closestEn);
+				const rangeClose = GR(cre, closestEn);
 				const ifCanMove = closestEn.canMove();
-				const surroundInEns = getEnemyThreats().filter(i => MGR(cre, i) <= 12
+				const surroundInEns = getEnemyThreats().filter(i => GR(cre, i) <= 12
 					&& i.getSpeed_general() > 0.3)
 				const surround: boolean = ifSurround(cre, surroundInEns)
 				const speedSuperior = closestEn.getSpeed_general() < cre.getSpeed_general()
@@ -225,20 +225,20 @@ export function shortDistanceFight(cre: Cre, isHealer: boolean = false) {
 	for (let pos of poss) {
 		//calculate worth of pos
 		if (!blocked(pos, true, false, true)) {
-			const cost = MGR(pos, cre);
-			const enemyAround = getEnemyArmies().filter((i) => MGR(i, pos) <= 1);
-			const enemyAround2 = getEnemyArmies().filter((i) => MGR(i, pos) <= 2);
+			const cost = GR(pos, cre);
+			const enemyAround = getEnemyArmies().filter((i) => GR(i, pos) <= 1);
+			const enemyAround2 = getEnemyArmies().filter((i) => GR(i, pos) <= 2);
 			const firendAround = friends.filter((i) =>
-				MGR(i, pos) <= 1
+				GR(i, pos) <= 1
 				|| (
-					MGR(i, pos) <= 2
+					GR(i, pos) <= 2
 					&& i.moveTarget
 					&& validEvent(i.moveTarget, 0)
-					&& MGR(i.moveTarget.pos, i) <= 1
+					&& GR(i.moveTarget.pos, i) <= 1
 				)
 			);
-			const defendSpawnExtra = MGR(spawn, pos) <= 1 ? 1 : 0
-			const invadeSpawnExtra = MGR(enemySpawn, pos) <= 1 ? 2 : 0
+			const defendSpawnExtra = GR(spawn, pos) <= 1 ? 1 : 0
+			const invadeSpawnExtra = GR(enemySpawn, pos) <= 1 ? 2 : 0
 			const hasMyHealthyEmptyRam = inMyHealthyRampart(pos) && !blocked(pos)
 			const ramDamageDecrease = hasMyHealthyEmptyRam ? 0.01 : 1
 			const otherFriendAround = firendAround.filter(i => i !== cre)
@@ -301,7 +301,7 @@ export let sum_stdAttacker1: Event_Number = new Event_Number(0)
 export function stdAttackerJob(cre: Cre) {
 	const st_stdAttacker0 = ct()
 	if (cre.fight()) {
-		const enAround = getEnemyThreats().filter(i => MGR(i, cre) <= 1)
+		const enAround = getEnemyThreats().filter(i => GR(i, cre) <= 1)
 		for (let en of enAround) {
 			en.addTauntBonus(1)
 		}
@@ -309,7 +309,7 @@ export function stdAttackerJob(cre: Cre) {
 	if (cpuBreakJudge(cre)) {
 		return;
 	}
-	const baseRams = myRamparts.filter(i => MGR(i, spawn) <= 3)
+	const baseRams = myRamparts.filter(i => GR(i, spawn) <= 3)
 	if (tick >= 600) {
 		const superior = getSuperior(false)
 		const superiorRate = getSuperiorRate()
@@ -321,8 +321,8 @@ export function stdAttackerJob(cre: Cre) {
 		}
 		//turtle mode active
 		if (superior < -90 && tick >= 1500
-			|| superior < 0 && tick >= 1900 && MGR(cre, spawn) <= 50) {
-			if (inRampart(cre) && MGR(cre, spawn) <= 3) {
+			|| superior < 0 && tick >= 1900 && GR(cre, spawn) <= 50) {
+			if (inRampart(cre) && GR(cre, spawn) <= 3) {
 				SA(cre, "defend base")
 				defender_RampartJob(cre)
 				// cre.stop()
@@ -334,7 +334,7 @@ export function stdAttackerJob(cre: Cre) {
 					return;
 				} else {
 					SA(cre, "defend base")
-					if (MGR(cre, spawn) >= 5) {
+					if (GR(cre, spawn) >= 5) {
 						cre.MTJ(spawn)
 					} else {
 						shortDistanceFight(cre)
@@ -370,7 +370,7 @@ export function stdAttackerJob(cre: Cre) {
 			getFriendForceMapValue(i),
 			getEnemyForceMapValue(i)
 		).value
-		const distanceReduce = goInDoubleRange(MGR(cre, i) / 40, 0, 1)
+		const distanceReduce = goInRange(GR(cre, i) / 40, 0, 1)
 		const earn_protect: number = getEarning(
 			getFriendForceMapValue(i) + distanceReduce * calculateForce(cre).value,
 			getEnemyForceMapValue(i)
@@ -387,7 +387,7 @@ export function stdAttackerJob(cre: Cre) {
 		fitRate = fitRtn.maxFitRate;
 	} else {
 		const closestEn = protectRtn.target ? findClosestByRange(protectRtn.target, getEnemyThreats()) : undefined
-		if (protectRtn.target && closestEn && MGR(closestEn, protectRtn.target) <= 3) {
+		if (protectRtn.target && closestEn && GR(closestEn, protectRtn.target) <= 3) {
 			fitTarget = closestEn
 		} else {
 			fitTarget = protectRtn.target
@@ -420,8 +420,8 @@ export function stdAttackerJob(cre: Cre) {
 			// const _myWorkerBonus = myWorkerBonus(1.1)
 			//
 			const moveScanRange = 10
-			const enemiesInRange = inRange(getEnemyArmies(), cre, moveScanRange)
-			const friendsInRange = inRange(getFriendArmies(), cre, moveScanRange)
+			const enemiesInRange = filterInRange(getEnemyArmies(), cre, moveScanRange)
+			const friendsInRange = filterInRange(getFriendArmies(), cre, moveScanRange)
 
 			const enemyForceSum = sumForceByArr(enemiesInRange).value
 			const friendForceSum = sumForceByArr(friendsInRange).value
@@ -447,24 +447,24 @@ export function stdAttackerJob(cre: Cre) {
 			const enemySpawnPathExtraComponent = 0.001 * enemySpawnCost
 			// * _myWorkerBonus
 			//extras
-			const startFightExtra = inRange(getFriendArmies(), cre, 4).find(i => hasEnemyThreatAround(i, 1)) !== undefined ? 2 : 0
+			const startFightExtra = filterInRange(getFriendArmies(), cre, 4).find(i => hasEnemyThreatAround(i, 1)) !== undefined ? 2 : 0
 			const superiorRateExtra = 0.25 * (Math.min(4, getSuperiorRate()) - 1)
 			const spawnPathExtra = 1.6 * (mySpawnPathExtraComponent + enemySpawnPathExtraComponent);
 			const tauntExtra = 0.1 * getTaunt(fitTarget).value;
 			const TNPRateExtra = 0.67 * getForceTarAndPosRate(cre, fitTarget)
-			const fitRateExtra = 0.12 * fitRate * rangeBonus(MGR(fitTarget, cre), 10, 3)
+			const fitRateExtra = 0.12 * fitRate * rangeBonus(GR(fitTarget, cre), 10, 3)
 			const fightNumExtra = 0.08 * fightNum
 			const avoidNumExtra = - 0.08 * avoidNum
 			const isFightingExtra = cre.upgrade.fight ? 0.1 : -0.1
 			//
-			const hasHealerNearby = friends.find(i => MGR(i, cre) <= 10 && isHealer(i)) !== undefined
+			const hasHealerNearby = friends.find(i => GR(i, cre) <= 10 && isHealer(i)) !== undefined
 			const damagedExtra = hasHealerNearby ? -0.4 * getDamagedRate(cre) : -0.1 * getDamagedRate(cre)
-			const isSpawnFortress = MGR(fitTarget, enemySpawn) <= 2
+			const isSpawnFortress = GR(fitTarget, enemySpawn) <= 2
 			const fortressAttack_biasPoint = isSpawnFortress ? 0.3 : 0.1
 			const fortressAttackRate = 2 *
 				(fortressAttack_biasPoint - getDamagedRate(cre))
 			const fortressAttackExtra = inOppoRampart(fitTarget) && friends.find(
-				i => MGR(i, cre) <= 5 && isHealer(i)
+				i => GR(i, cre) <= 5 && isHealer(i)
 			) ?
 				fortressAttackRate : relu_oppo(fortressAttackRate)
 			// const bias = -0.4

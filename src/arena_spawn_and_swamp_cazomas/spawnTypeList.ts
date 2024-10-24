@@ -10,8 +10,8 @@ import { BodyPartConstant } from "game/constants";
 import { enoughEnergy, spawn, spawnAndSpawnListEmpty, spawnCreep } from "./spawn";
 import { Cre, friends, Role } from "./util_Cre";
 import { S } from "./util_export";
-import { DND2, repeat } from "./util_JS";
-import { PS, SA } from "./util_visual";
+import { d2, repeat } from "./util_JS";
+import { P, SA } from "./util_visual";
 
 export function spawnBySpawnTypeList(spl: SpawnType[]) {
 	let maxNeedRate = 0;
@@ -35,7 +35,7 @@ export function spawnBySpawnTypeList(spl: SpawnType[]) {
 		const repeatNum = Math.min(Math.ceil(needRate * 3), 100);
 		const tableNum = 5 - Math.floor((s1.length + 1) / 8);
 		//print the need
-		PS(s1 + repeat("\t", tableNum) + DND2(needRate) + "\t " + repeat("#", repeatNum));
+		P(s1 + repeat("\t", tableNum) + d2(needRate) + "\t " + repeat("#", repeatNum));
 		//
 		if (needRate > maxNeedRate) {
 			maxNeedRate = needRate;

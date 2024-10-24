@@ -1,24 +1,5 @@
-/**
- Module: util_JS
- Author: 820491047
- CreateDate:   2022.5.25
- UpDateDate:   2023.1.10
- version 0.0.1
-*/
-// methods
-// export type STNumber = number
-export function nst(n: number): StNumber {
-	return new StNumber(n)
-}
 export function arrayEquals<E>(a: E[], b: E[]) {
 	return a.length === b.length && a.every((val, index) => val === b[index]);
-}
-/**a number thats value is almost from -1 to 1 ,less value may be out of this range*/
-export class StNumber {
-	value: number
-	constructor(n: number) {
-		this.value = n
-	}
 }
 export function pow2(a: number): number {
 	return a * a
@@ -27,7 +8,8 @@ export function sum<E>(arr: E[], sumLambda: (arr: E) => number): number {
 	return arr.map(i => sumLambda(i)).reduce((a, b) => a + b, 0)
 }
 export function exchange<E>(arr: E[], i0: number, i1: number) {
-	if (arr.length <= i0 || arr.length <= i1) return;
+	if (arr.length <= i0 || arr.length <= i1)
+		return;
 	else {
 		const temp: E = arr[i0];
 		arr[i0] = arr[i1];
@@ -48,12 +30,6 @@ export function repeat(s: string, n: number) {
 	return rtn;
 }
 /**
- * get a bonus that is E^x , -`rate` <= x <= `rate`
- */
-export function ranBonus(rate: number) {
-	return Math.pow(Math.E, ranNumber(-rate, rate));
-}
-/**
  * get a random number from `min` to `max`
  */
 export function ranNumber(min: number, max: number) {
@@ -63,14 +39,16 @@ export function ranNumber(min: number, max: number) {
  * return last element of an array
  */
 export function last<E>(arr: E[]): E | undefined {
-	if (!arr || arr.length == 0) {
+	if (arr.length === 0)
 		return undefined;
-	} else return arr[arr.length - 1];
+	else
+		return arr[arr.length - 1];
 }
 export function first<E>(arr: E[]): E | undefined {
-	if (!arr || arr.length == 0) {
+	if (arr.length === 0)
 		return undefined;
-	} else return arr[0];
+	else
+		return arr[0];
 }
 /**
  * remove all element that match the lambda function
@@ -103,19 +81,20 @@ export function ranBool(n:number):boolean{
  * return a random element from the array
  */
 export function ranGet<E>(arr: E[]): E | undefined {
-	if (arr && arr.length > 0) {
+	if (arr.length > 0) {
 		const i = ran(arr.length);
 		return arr[i];
-	}
-	return;
+	}else
+		return undefined;
 }
 /**
  * if two array the same of every element,will not judge the attribute of the element
  */
-export function equal1<E>(a1: E[], a2: E[]): boolean {
-	if (a1.length != a2.length) return false;
+export function arrayEqual<E>(a1: E[], a2: E[]): boolean {
+	if (a1.length !== a2.length)
+		return false;
 	for (const i in a1) {
-		if (a1[i] != a2[i]) {
+		if (a1[i] !== a2[i]) {
 			return false;
 		}
 	}
@@ -133,7 +112,7 @@ export function removeByInd(arr: any[], i: number) {
 export function remove<E>(arr: E[], tar: E) {
 	for (const i in arr) {
 		const e = arr[i];
-		if (e == tar) {
+		if (e === tar) {
 			arr.splice(<any>i, 1);
 			break;
 		}
@@ -144,8 +123,10 @@ export function remove<E>(arr: E[], tar: E) {
  */
 export function getClassName(c: any): string {
 	try {
-		if (valid(c)) return new c().constructor.name;
-		else return c;
+		if (valid(c))
+			return new c().constructor.name;
+		else
+			return c;
 	} catch (ex) {
 		return c;
 	}
@@ -153,52 +134,73 @@ export function getClassName(c: any): string {
 /**
  * 取2位小数 Take 2 decimal places
  */
-export function DND2(num: number): number {
-	return Math.floor(num * 100) / 100;
+export function d2(num: number): string {
+	return num.toFixed(2)
 }
 /**
  * give a simple express of the number
  */
 export function SNumber(n: number): string {
-	if (n >= 10000) return Math.floor(n / 1000) + "K";
-	else return "" + DND2(n);
+	if (n >= 10000)
+		return Math.floor(n / 1000) + "K";
+	else
+		return "" + d2(n);
 }
 /**
  * use the unit of kilo
  */
-export function KNumber(n: number) {
+export function KNumber(n: number):string {
 	return Math.ceil(n / 1000) + "K";
 }
-/**
- * go in range , `min` <= `i` <= `max`
- */
-export function goInDoubleRange(i: number, min: number, max: number) {
-	if (i < min)
-		i = min
-	else if (i > max)
-		i = max
-	return i
+/**get the comparer of max worth in comparers*/
+export type Weight<E>={ target: E, worth: number }
+export function maxWorth<E>(arr: Weight<E>[]): Weight<E>|undefined {
+	if(arr.length===0)
+		return undefined
+	else
+		return arr.reduce((a, b) => a.worth > b.worth ? a : b)
+}
+export function best<E>(arr: E[], lamb: (e: E) => number): E | undefined {
+	return maxWorth_lamb(arr, lamb)?.target
+}
+export function maxWorth_lamb<E>(arr: E[], lamb: (e: E) => number):Weight<E>|undefined {
+	const weightArr=arr.map(i=>{
+		return {target:i,worth:lamb(i)}
+	})
+	return maxWorth(weightArr)
 }
 /**
  * go in range , `min` <= `i` <= `max`
  */
-export function goInIntRange(i: number, min: number, max: number) {
+export function goInRange(i: number, min: number, max: number) {
 	if (i < min)
-		i = min
-	else if (i >= max)
-		i = max - 1
-	return i
+		return min
+	else if (i > max)
+		return max
+	else
+		return i
+}
+/**
+ * go in range , `min` <= `i` <= `max`
+ */
+export function goInRange_Int(i: number, min: number, max: number) {
+	if (i < min)
+		return min
+	else if (i > max - 1)
+		return max - 1
+	else
+		return i
 }
 /**
  * if a number in range , `min` <= `i` <= `max`
  */
-export function inDoubleRange(i: number, min: number, max: number) {
+export function inRange(i: number, min: number, max: number) {
 	return i >= min && i <= max;
 }
 /**
  * if a number in range , `min` <= `i` < `max`
  */
-export function inIntRange(i: number, min: number, max: number) {
+export function inRange_int(i: number, min: number, max: number) {
 	return i >= min && i < max;
 }
 /**
@@ -234,8 +236,10 @@ export function sigmoidUWH(n: number, width: number, height: number) {
  * change value less than 0 to 0
  */
 export function relu(d: number) {
-	if (d < 0) return 0;
-	else return d;
+	if (d < 0)
+		return 0;
+	else
+		return d;
 }
 export function relu_oppo(d: number) {
 	if (d > 0)
@@ -243,10 +247,7 @@ export function relu_oppo(d: number) {
 	else
 		return d;
 }
-export function divide0(a: number, b: number): number {
-	return divide_ab0(a, b, 0)
-}
-export function divide_ab0(a: number, b: number, def: number): number {
+export function divide0(a: number, b: number, def: number = 0): number {
 	if (a === 0 && b === 0) {
 		return def
 	} else {

@@ -18,9 +18,9 @@ import { blocked, calAroundEnergy, canBeBuildByCre, Cre, friends, getCapacity, g
 import { S } from "../util_export";
 import { tick } from "../util_game";
 import { myConstructionSites, myRamparts } from "../util_gameObjectInitialize";
-import { DND2, getClassName, invalid } from "../util_JS";
+import { d2, getClassName, invalid } from "../util_JS";
 import { overallMap } from "../util_overallMap";
-import { atPos, COO, getRangePoss, MGR, midPoint, myGetRange, Pos } from "../util_pos";
+import { atPos, COO, getRangePoss, GR, midPoint, myGetRange, Pos } from "../util_pos";
 import { findTask } from "../util_task";
 import { SA, SAN } from "../util_visual";
 import { wc } from "../util_WT";
@@ -42,10 +42,10 @@ export function isBuilderOutSide(role: Role | undefined): boolean {
 export function builder4RamJob(cre: Cre) {
 	SA(cre, "builder4RamJob")
 	const scanCSRange = 8;
-	if (getMyCSs().find(i => MGR(spawn, i) <= scanCSRange)) {
+	if (getMyCSs().find(i => GR(spawn, i) <= scanCSRange)) {
 		let css = <CS[]>(
 			getMyCSs().filter(
-				i => MGR(i, spawn) <= scanCSRange
+				i => GR(i, spawn) <= scanCSRange
 					&& canBeBuildByCre(i, cre)
 			)
 		);
@@ -89,7 +89,7 @@ export function builderTurtleControl(cre: Cre) {
 	const scanCSRange = 4;
 	const css = getMyCSs().filter(
 		i => canBeBuildByCre(i, cre)
-			&& MGR(i, spawn) <= scanCSRange
+			&& GR(i, spawn) <= scanCSRange
 	)
 	const canUseEnergy = getEnergy(cre) + getSpawnAndBaseContainerEnergy()
 	SAN(cre, "canUseEnergy", canUseEnergy);
@@ -135,7 +135,7 @@ export function builderTurtleControl(cre: Cre) {
 		} else if (tick <= 300) {//time for build ramparts
 			SA(cre, "collectResource");
 			let harvables = getHarvables()
-				.filter(i => MGR(i, spawn) <= 3)
+				.filter(i => GR(i, spawn) <= 3)
 				.concat(spawn);
 			let harvable = cre.findClosestByRange(harvables);
 			if (harvable) {
@@ -156,7 +156,7 @@ export function builderTurtleControl(cre: Cre) {
 				const con = findClosestByRange(cre, cons)
 				if (con) {
 					SA(cre, "has container")
-					if (MGR(con, cre) <= 1) {
+					if (GR(con, cre) <= 1) {
 						cre.macro.transferNormal(con)
 					} else {
 						gotoTargetRampart(cre, con)
@@ -164,7 +164,7 @@ export function builderTurtleControl(cre: Cre) {
 				}
 			} else {
 				SA(cre, "no en");
-				if (MGR(cre, spawn) <= 1) {
+				if (GR(cre, spawn) <= 1) {
 					cre.macro.withdrawNormal(spawn);
 				} else {
 					gotoTargetRampart(cre, spawn)
@@ -201,7 +201,7 @@ export function builderTurtleWithdrawNormal(cre: Cre) {
 	// 	SA(cre, "withdraw con");
 	// 	target = con
 	// }
-	if (MGR(cre, target) <= 1) {
+	if (GR(cre, target) <= 1) {
 		SA(cre, "withdraw it");
 		cre.macro.withdrawNormal(target);
 	} else {
@@ -316,7 +316,7 @@ export class BuilderStandardTask extends Task_Cre {
 			SA(cre, "builder flee")
 			protectSelfExtraTaunt(cre, 0.8);
 			cre.dropEnergy();
-			const ram = getMyHealthyRamparts().find(i => MGR(i, cre) <= 10 && !blocked(i))
+			const ram = getMyHealthyRamparts().find(i => GR(i, cre) <= 10 && !blocked(i))
 			const realFleeRange = this.fleeRange + workingExtra
 			if (ram) {
 				cre.MTJ_follow(ram)
@@ -405,7 +405,7 @@ export class BuilderStandardTask extends Task_Cre {
 		//if rampart is far from finished and enemy is still far away from here,
 		//give up the building and directly build extensions
 		if (cs &&
-			MGR(cre, closestEnemy) - fleeRange > (cs.progressTotal - cs.progress) / 5
+			GR(cre, closestEnemy) - fleeRange > (cs.progressTotal - cs.progress) / 5
 			&& getProgressRate(cs) < 0.8) {
 			this.step = build_extensions;
 			(<CS>cs).wt = wc(5)
@@ -431,13 +431,13 @@ export class BuilderStandardTask extends Task_Cre {
 	/**build extensions and fill it until all energy exhaust*/
 	buildExtensions(cs: ConstructionSite | undefined, closestEnemy: Cre, fleeRange: number) {
 		const cre = this.master
-		if (!inMyRampart(cre) && cs && MGR(cre, closestEnemy) - fleeRange <= (cs.progressTotal - cs.progress) / 5) {
+		if (!inMyRampart(cre) && cs && GR(cre, closestEnemy) - fleeRange <= (cs.progressTotal - cs.progress) / 5) {
 			this.step = build_rampart;
 			(<CS>cs).wt = wc(12)
 		}
 		let sumEn: number = calAroundEnergy(cre);
 		sumEn += getEnergy(cre);
-		SA(cre, "sumEn=" + DND2(sumEn));
+		SA(cre, "sumEn=" + d2(sumEn));
 		if (sumEn > 0) {
 			if (getEnergy(cre) > 0) {
 				let fb = cre.macro.fillExtension();

@@ -16,8 +16,8 @@ import { spawnPos } from "../util_attackable";
 import { Cre, enemies, getEnemyThreats, Role } from "../util_Cre";
 import { tick } from "../util_game";
 import { findGO } from "../util_overallMap";
-import { MGR } from "../util_pos";
-import { PS, SA } from "../util_visual";
+import { GR } from "../util_pos";
+import { P, SA } from "../util_visual";
 
 //role
 /**the defender that hide in rampart*/
@@ -32,9 +32,9 @@ export const defender_rampart: Role = new Role(
 */
 export function defender_RampartJob(cre: Cre) {
 	SA(cre, "defender_RampartJob")
-	PS("defender_RampartJob")
+	P("defender_RampartJob")
 	cre.fight();
-	const EnemyAroundSpawn = getEnemyThreats().filter(i => MGR(i, spawn) <= 1)
+	const EnemyAroundSpawn = getEnemyThreats().filter(i => GR(i, spawn) <= 1)
 	if (EnemyAroundSpawn.length > 0
 		&& (
 			tick > 1950 && !findGO(spawnPos, ConstructionSite)
@@ -43,7 +43,7 @@ export function defender_RampartJob(cre: Cre) {
 	) {
 		SA(cre, "final protect mode")
 		const tar = findClosestByRange(cre, EnemyAroundSpawn)
-		if (MGR(cre, tar) > 1) {
+		if (GR(cre, tar) > 1) {
 			SA(cre, "MTJ_follow")
 			cre.MTJ_follow(tar)
 		} else {
@@ -53,13 +53,13 @@ export function defender_RampartJob(cre: Cre) {
 	} else {
 		// cre.MTJ_follow({ x: spawn.x - 4, y: spawn.y + 4 })
 		// cre.MTJ_follow({ x: spawn.x - 4, y: spawn.y - 4 })
-		const hasEnemyAround = enemies.find(i => MGR(i, cre) <= 4) !== undefined
+		const hasEnemyAround = enemies.find(i => GR(i, cre) <= 4) !== undefined
 		if (!hasEnemyAround) {
 			if (cpuBreakJudge(cre)) {
 				return
 			}
 		}
-		let roundEn = enemies.filter(i => MGR(i, cre) <= 1);
+		let roundEn = enemies.filter(i => GR(i, cre) <= 1);
 		if (roundEn.length === 0) {
 			attackWeakRampart(cre);
 		}

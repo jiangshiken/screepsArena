@@ -21,8 +21,8 @@ import { S } from "./util_export";
 import { P, tick } from "./util_game";
 import { divideReduce } from "./util_JS";
 import { MyMap } from "./util_MyMap";
-import { atPos, MGR, midPoint, plusVector } from "./util_pos";
-import { drawPolyLight, drawRangeComplex, fillCircle, PS, SA } from "./util_visual";
+import { atPos, GR, midPoint, plusVector } from "./util_pos";
+import { drawPolyLight, drawRangeComplex, fillCircle, SA } from "./util_visual";
 
 //这个是测试脚本集合，将所有的测试保留在这里，以便版本变更时确认是否还有以下的特性
 //Role
@@ -210,9 +210,9 @@ export function useTest() {
 				for (let y = 0; y < 100; y++) {
 					const enPoint = { x: 40, y: 50 }
 					const point = { x: x, y: y }
-					const range = MGR(point, enPoint)
+					const range = GR(point, enPoint)
 					const value = 100 * divideReduce(range, 10)
-					if (MGR(point, midPoint) <= 10) {
+					if (GR(point, midPoint) <= 10) {
 						fillCircle(point, "#123123", value / 100, value / 100)
 					}
 					cm.set(x, y, value)
@@ -263,7 +263,7 @@ export function useTest() {
 			}
 		}
 		pt("[][]", st4)
-		PS("sum=" + sum)
+		P("sum=" + sum)
 	}
 	//TEST CODE
 }

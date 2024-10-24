@@ -1,5 +1,5 @@
 import { arenaInfo } from "game";
-import { searchPath } from "game/path-finder";
+import { CostMatrix, searchPath } from "game/path-finder";
 import { StructureSpawn } from "game/prototypes";
 import { findClosestByRange, getCpuTime, getHeapStatistics, getTicks } from "game/utils";
 
@@ -16,12 +16,12 @@ import { getSuperior, getSuperiorRate } from "./util_bonus";
 import { ct, getCPUPercent, lowCPUMode, pt, ptSum, setLowCPUMode, switchCPUModeOn } from "./util_CPU";
 import { controlCreeps, cres, enemies, friends, getAllUnits, getDecideSearchRtn, getEnemyProducers, getEnergy, getGameObjects, getMyProducers, initialCresAtLoopStart } from "./util_Cre";
 import { Event_C, validEvent } from "./util_event";
-import { getCostMatrixHalf, P, setTick, tick } from "./util_game";
+import { P, setTick, tick } from "./util_game";
 import { constructionSites, containers, getPrototype, initialGameObjectsAtLoopStart, spawns } from "./util_gameObjectInitialize";
 import { divideReduce } from "./util_JS";
 import { firstInit_overallMap, overallMapInit, setGameObjectsThisTick, setOverallMap } from "./util_overallMap";
-import { MGR } from "./util_pos";
-import { append_largeSizeText, firstInit_visual, loopEnd_visual, loopStart_visual, PS, SA, SAN } from "./util_visual";
+import { GR } from "./util_pos";
+import { append_largeSizeText, firstInit_visual, loopEnd_visual, loopStart_visual, SA, SAN } from "./util_visual";
 import { showEnemies, visual } from "./util_visual_Cre";
 
 /**
@@ -54,8 +54,8 @@ export function loopEnd() {
 }
 let initSpawnDistanceProgress = 0
 function doLongProgress() {
-	PS("do long progress")
-	PS("initSpawnDistanceProgress " + initSpawnDistanceProgress)
+	P("do long progress")
+	P("initSpawnDistanceProgress " + initSpawnDistanceProgress)
 	//init spawn distance map and enemySpawn distance map
 	for (let i = initSpawnDistanceProgress; i < 10000; i++) {
 		//do things
@@ -109,9 +109,9 @@ function switchLowCPUMode() {
 		SA(displayPos(), "lowCPUMode=" + lowCPUMode)
 		SAN(displayPos(), "switchExtra", switchExtra)
 		//
-		PS("getSuperiorRate=" + sr)
-		PS("lowCPUMode=" + lowCPUMode)
-		PS("switchExtra=" + switchExtra)
+		P("getSuperiorRate=" + sr)
+		P("lowCPUMode=" + lowCPUMode)
+		P("switchExtra=" + switchExtra)
 	}
 }
 export let useAvoidEnRam=false
@@ -119,7 +119,7 @@ export function set_useAvoidEnRam(b:boolean){
 	useAvoidEnRam=b
 }
 export function loopStart() {
-	PS("loopStart start");
+	P("loopStart start");
 	setTick(getTicks())
 	const st0 = ct();
 	overallMapInit();
@@ -168,11 +168,11 @@ export function loopStart() {
 	setWorthForContainers()
 	pt("setWorthForContainers", st5);
 	// P("setWorthForContainersb end");
-	PS("loopStart end");
+	P("loopStart end");
 }
 export function setWorthForContainers() {
 	const conts: Cont[] = <Cont[]>containers.filter(i => sasVariables.inResourceArea(i))
-	PS("setWorthForContainers:" + conts.length)
+	P("setWorthForContainers:" + conts.length)
 	for (let cont of conts) {
 		setWorthForContainer(cont)
 	}
@@ -183,14 +183,14 @@ export function setWorthForContainer(cont: Cont): void {
 		cont.inited = new Event_C()
 		const myProducers = getMyProducers()
 		const myProducer = findClosestByRange(cont, myProducers)
-		const myProducerCost = myProducer ? MGR(myProducer, cont) : 100
+		const myProducerCost = myProducer ? GR(myProducer, cont) : 100
 		// const myProducerCost = myProducer ? searchPath(cont, myProducer).cost : 500
 		// const myDisProducerExtra = divideReduce(myProducerCost, 50)
 		const myDisProducerExtra = divideReduce(myProducerCost, 10)
 		//
 		const enemyProducers = getEnemyProducers()
 		const enemyProducer = findClosestByRange(cont, enemyProducers)
-		const enemyProducerCost = enemyProducer ? MGR(enemyProducer, cont) : 100
+		const enemyProducerCost = enemyProducer ? GR(enemyProducer, cont) : 100
 		const enemyDisProducerExtra = -divideReduce(enemyProducerCost, 10)
 		//
 		const mySpCost = getDecideSearchRtn(cont, spawnPos).cost
@@ -227,7 +227,14 @@ export function firstInit() {
 	}
 }
 // function setTopAndBottomY(): void {
-
+function getCostMatrixHalf(up: boolean): CostMatrix {
+	let rtn = new CostMatrix()
+	const wallY = up ? 70 : 30
+	for (let i = 0; i < 100; i++) {
+		rtn.set(i, wallY, 255)
+	}
+	return rtn
+}
 // }
 /** set startGate by cost of the path*/
 function setStartGate(): void {
@@ -249,14 +256,14 @@ export function printCPU() {
 	const heap = getHeapStatistics();
 	const heapK = Math.floor(heap.total_heap_size / 1000);
 	const maxHeapK = Math.floor(heap.heap_size_limit / 1000);
-	PS(`HeapUsed\t ${heapK} K\t/ ${maxHeapK}K`);
+	P(`HeapUsed\t ${heapK} K\t/ ${maxHeapK}K`);
 	SA(displayPos(),`HeapUsed\t ${heapK} K\t/ ${maxHeapK}K`);
 	// P(`Used ${heap.total_heap_size} / ${heap.heap_size_limit}`);
 	const cpu = getCpuTime();
 	const maxCpu = arenaInfo.cpuTimeLimit;
 	const cpuK = Math.floor(cpu / 1000);
 	const maxCpuK = Math.floor(maxCpu / 1000);
-	PS("cpu=\t" + cpuK + "K\t/ " + maxCpuK + "K");
+	P("cpu=\t" + cpuK + "K\t/ " + maxCpuK + "K");
 	SA(displayPos(),"cpu=\t" + cpuK + "K\t/ " + maxCpuK + "K");
 }
 function displayRoleCPU() {

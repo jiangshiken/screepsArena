@@ -35,7 +35,7 @@ import { P, addStrategyTick, strategyTick, tick } from "../util_game";
 import { oppoRamparts } from "../util_gameObjectInitialize";
 import { findGO } from "../util_overallMap";
 import { Dooms, Kerob, Tigga, currentGuessPlayer, getGuessPlayer } from "../util_player";
-import { Adj, COO, InShotRan, MGR, Pos, X_axisDistance, Y_axisDistance, atPos, getRangePoss, multiplyVector, myGetRange, plusVector } from "../util_pos";
+import { Adj, COO, GR, InShotRan, Pos, X_axisDistance, Y_axisDistance, atPos, getRangePoss, multiplyVector, myGetRange, plusVector } from "../util_pos";
 import { findTask } from "../util_task";
 import { SA, SAN, drawLineComplex } from "../util_visual";
 import { useStandardTurtling } from "./turtle";
@@ -183,11 +183,11 @@ export function snakePartJob(cre: Cre) {
 		}
 		//control normal PSA
 		let split: boolean;
-		const roundEnemies = enemies.filter(i => MGR(i, cre) <= 1);
+		const roundEnemies = enemies.filter(i => GR(i, cre) <= 1);
 		const roundEnemyForce: number = sumForceByArr(roundEnemies).value;
 		//judge if split
 		const roundEnemyForceBias = 25;
-		SA(cre, 'MGR(leader,enemySpawn)=' + MGR(leader, enemySpawn));
+		SA(cre, 'MGR(leader,enemySpawn)=' + GR(leader, enemySpawn));
 		SA(
 			cre,
 			'verticalDistance(leader,enemySpawn)=' +
@@ -195,10 +195,10 @@ export function snakePartJob(cre: Cre) {
 		);
 		SA(cre, 'roundEnemyForce=' + roundEnemyForce);
 		const roundForce1 = sumForceByArr(
-			getEnemyArmies().filter(i => MGR(i, leader) <= 1)
+			getEnemyArmies().filter(i => GR(i, leader) <= 1)
 		).value;
 		const roundForce5 = sumForceByArr(
-			getEnemyArmies().filter((i) => MGR(i, leader) <= 5)
+			getEnemyArmies().filter((i) => GR(i, leader) <= 5)
 		).value;
 		const leaderDanger: number = roundForce1 + 0.4 * roundForce5;
 		SAN(leader, 'leaderDanger', leaderDanger);
@@ -210,8 +210,8 @@ export function snakePartJob(cre: Cre) {
 			}
 		} else if (
 			//judge if split by position
-			(MGR(leader, enemySpawn) <= (currentGuessPlayer === Dooms ? 4 : 4))
-			|| (MGR(leader, enemySpawn) <= 6 &&
+			(GR(leader, enemySpawn) <= (currentGuessPlayer === Dooms ? 4 : 4))
+			|| (GR(leader, enemySpawn) <= 6 &&
 				(leader.getMoveTime() > 1 || roundEnemyForce >= 25)) ||
 			(X_axisDistance(leader, enemySpawn) <= 20 &&
 				roundEnemyForce >= roundEnemyForceBias)
@@ -233,13 +233,13 @@ export function snakePartJob(cre: Cre) {
 			if (invalid(allInEvent)) {
 				allInEvent = new Event_C();
 			}
-			const closeEnNum = enemies.filter(i => MGR(i, enemySpawn) <= 2).length
+			const closeEnNum = enemies.filter(i => GR(i, enemySpawn) <= 2).length
 			const waitTime: number =
 				getGuessPlayer() === Tigga && closeEnNum <= 2
 					? 1 : 7;
 			if (validEvent(allInEvent, waitTime)) {
 				SA(cre, "wait")
-				if (MGR(cre, enemySpawn) >= 4) {
+				if (GR(cre, enemySpawn) >= 4) {
 					cre.MTJ(enemySpawn)
 				} else {
 					cre.stop()
@@ -254,9 +254,9 @@ export function snakePartJob(cre: Cre) {
 				} else if (currentGuessPlayer === Dooms) {
 					snakeAgainstDooms(cre)
 				} else {//guess player is not Tigga
-					const nearFriends = friends.filter(i => MGR(i, cre) <= 1 && i.role === snakePart)
-					const nearFriendNearSpawn = nearFriends.find(i => MGR(i, enemySpawn) === 1)
-					const tarRams = oppoRamparts.filter(i => MGR(i, enemySpawn) === 1)
+					const nearFriends = friends.filter(i => GR(i, cre) <= 1 && i.role === snakePart)
+					const nearFriendNearSpawn = nearFriends.find(i => GR(i, enemySpawn) === 1)
+					const tarRams = oppoRamparts.filter(i => GR(i, enemySpawn) === 1)
 					const tarRam = maxWorth_lamb(tarRams, i => {
 						const enemyInRam = <Cre | undefined>findGO(i, Cre)
 						if (enemyInRam) {
@@ -266,17 +266,17 @@ export function snakePartJob(cre: Cre) {
 						}
 					}).target
 					const needDestroyRams = oppoRamparts.filter(i =>
-						MGR(i, enemySpawn) <= 7
+						GR(i, enemySpawn) <= 7
 						&& !atPos(i, enemySpawn)
 						&& !(hasEnemyThreatAround(i, 0) && enemyRampartIsHealthy(i)))
 					const needDestroyRam = findClosestByRange(cre, needDestroyRams)
-					const avoidRams = oppoRamparts.filter(i => MGR(i, enemySpawn) <= 1 && hasEnemyThreatAround(i, 0))
+					const avoidRams = oppoRamparts.filter(i => GR(i, enemySpawn) <= 1 && hasEnemyThreatAround(i, 0))
 					SAN(cre, "tarRams.length", tarRams.length)
 					SA(cre, "tarRams=" + COO(tarRam))
 					if (tarRam) {
-						SAN(cre, "MGR(tarRam, cre)", MGR(tarRam, cre))
+						SAN(cre, "MGR(tarRam, cre)", GR(tarRam, cre))
 					}
-					if (MGR(cre, enemySpawn) === 2
+					if (GR(cre, enemySpawn) === 2
 						&& nearFriendNearSpawn
 						&& cre.getBodiesNum(ATTACK) > nearFriendNearSpawn.getBodiesNum(ATTACK)) {
 						SA(cre, "exchange Pos")
@@ -285,7 +285,7 @@ export function snakePartJob(cre: Cre) {
 						SA(cre, "stop at spawn")
 						cre.pureMeleeMode = true
 						cre.stop();
-					} else if (tarRams.length >= 2 && tarRam && MGR(tarRam, cre) <= 1) {
+					} else if (tarRams.length >= 2 && tarRam && GR(tarRam, cre) <= 1) {
 						SA(cre, "stop at ram")
 						cre.pureMeleeMode = true
 						cre.stop()
@@ -297,9 +297,9 @@ export function snakePartJob(cre: Cre) {
 						if (inEnBaseRan(cre)) {
 							let threatenEn = enemies.find(
 								i =>
-									MGR(i, cre) <= 4
+									GR(i, cre) <= 4
 									&& (currentGuessPlayer !== Dooms ? (i.getBodies(ATTACK).length > 0) : hasThreat(i))
-									&& MGR(i, enemySpawn) <= MGR(cre, enemySpawn) + 3
+									&& GR(i, enemySpawn) <= GR(cre, enemySpawn) + 3
 									&& !atPos(i, enemySpawn)
 									&& !inRampart(i)
 							);
@@ -315,7 +315,7 @@ export function snakePartJob(cre: Cre) {
 						}
 						SA(cre, "target=" + COO(target))
 						//avoid block by friend at small road
-						if (MGR(cre, enemySpawn) >= 4) {
+						if (GR(cre, enemySpawn) >= 4) {
 							SA(cre, 'move careful');
 							const tempCM = new CostMatrix();
 							const creeps = cres
@@ -334,7 +334,7 @@ export function snakePartJob(cre: Cre) {
 							const tarPos = sRtn.path[0];
 							const enRam = enemies.find(
 								i =>
-									MGR(tarPos, i) <= 1 &&
+									GR(tarPos, i) <= 1 &&
 									i.getBodiesNum(ATTACK) >= 3 &&
 									inRampart(i) &&
 									!atPos(i, enemySpawn)
@@ -371,7 +371,7 @@ function snakeAgainstDooms(cre: Cre) {
 	} else {
 		const tar = enemies.find(i =>
 			i.getBodiesNum(ATTACK) >= 1
-			&& MGR(i, enemySpawn) <= 2
+			&& GR(i, enemySpawn) <= 2
 		)
 		if (tar) {
 			SA(cre, "atar")
@@ -398,7 +398,7 @@ function snakeAgainstTigga(cre: Cre) {
 		} else {
 			const tar = enemies.find(i =>
 				i.getBodiesNum(ATTACK) >= 2
-				&& MGR(i, enemySpawn) <= 2
+				&& GR(i, enemySpawn) <= 2
 			)
 			const spawnRam = oppoRamparts.find(i =>
 				atPos(i, enemySpawn))
@@ -414,15 +414,15 @@ function snakeAgainstTigga(cre: Cre) {
 		}
 	} else if (directShotMode) {
 		SA(cre, 'directShotMode');
-		if (MGR(enemySpawn, cre) <= 2) {
+		if (GR(enemySpawn, cre) <= 2) {
 			const tars = enemies.filter(i => !inRampart(i))
-			const tar = best(tars, i => -MGR(cre, i))
+			const tar = best(tars, i => -GR(cre, i))
 			if (tar) {
 				cre.MTJ_stop(tar)
 			} else {
 				cre.MTJ_stop(enemySpawn)
 			}
-		} else if (MGR(enemySpawn, cre) >= 4) {
+		} else if (GR(enemySpawn, cre) >= 4) {
 			cre.MTJ_stop(enemySpawn)
 		} else {
 			//
@@ -432,7 +432,7 @@ function snakeAgainstTigga(cre: Cre) {
 		}
 	} else {
 		SA(cre, "AGAINST TIGGA")
-		const range = MGR(cre, enemySpawn)
+		const range = GR(cre, enemySpawn)
 		const XRange = X_axisDistance(cre, enemySpawn)
 		const outsideone = snakeParts.find(i =>
 			range >= 3)
@@ -450,13 +450,13 @@ function snakeAgainstTigga(cre: Cre) {
 }
 function snakeAgainstTigga_old(cre: Cre) {
 	let st_0 = ct()
-	if (!enemies.find(i => MGR(enemySpawn, i) <= 1 && inRampart(i))) {
+	if (!enemies.find(i => GR(enemySpawn, i) <= 1 && inRampart(i))) {
 		cre.MTJ_stop(enemySpawn)
 	} else {
 		if (isHealer(cre)) {
-			if (MGR(cre, enemySpawn) <= 2) {
+			if (GR(cre, enemySpawn) <= 2) {
 				SA(cre, "run away")
-				const fleePoss = getRangePoss(enemySpawn, 3).filter(i => MGR(enemySpawn, i) === 3 && !blocked(i))
+				const fleePoss = getRangePoss(enemySpawn, 3).filter(i => GR(enemySpawn, i) === 3 && !blocked(i))
 				const fleePos = findClosestByRange(cre, fleePoss)
 				if (fleePos) {
 					cre.MTJ_follow(fleePos)
@@ -465,7 +465,7 @@ function snakeAgainstTigga_old(cre: Cre) {
 				}
 			} else {
 				SA(cre, "heal")
-				const tars = friends.filter(i => MGR(i, cre) <= 10 && damaged(i))
+				const tars = friends.filter(i => GR(i, cre) <= 10 && damaged(i))
 				const tar = maxWorth_lamb(tars, i => getDamagedRate(i)).target
 				if (tar) {
 					cre.MTJ(tar)
@@ -475,7 +475,7 @@ function snakeAgainstTigga_old(cre: Cre) {
 			SA(cre, "antiRamMode")
 			const attackRate = (0.2 - getDamagedRate(cre))
 			const hasHealer = friends.find(i => isHealer(i))
-			const hasOutSideEnemy = getEnemyArmies().filter(i => MGR(i, enemySpawn) > 1).length !== 0
+			const hasOutSideEnemy = getEnemyArmies().filter(i => GR(i, enemySpawn) > 1).length !== 0
 			if (hasOutSideEnemy) {
 				SA(cre, "hasOutSideEnemy")
 				const tars = getEnemyArmies().filter(i => !inRampart(i))
@@ -488,7 +488,7 @@ function snakeAgainstTigga_old(cre: Cre) {
 			} else if (hasHealer) {
 				if (attackRate > 0) {
 					SA(cre, "ATT")
-					if (MGR(cre, enemySpawn) <= 3) {
+					if (GR(cre, enemySpawn) <= 3) {
 						SA(cre, "SDF")
 						shortDistanceFight(cre)
 					} else {
@@ -496,9 +496,9 @@ function snakeAgainstTigga_old(cre: Cre) {
 						cre.MTJ(enemySpawn)
 					}
 				} else {
-					if (MGR(cre, enemySpawn) <= 3) {
+					if (GR(cre, enemySpawn) <= 3) {
 						SA(cre, "run away")
-						const fleePoss = getRangePoss(enemySpawn, 3).filter(i => MGR(enemySpawn, i) === 3 && !blocked(i))
+						const fleePoss = getRangePoss(enemySpawn, 3).filter(i => GR(enemySpawn, i) === 3 && !blocked(i))
 						const fleePos = findClosestByRange(cre, fleePoss)
 						if (fleePos) {
 							cre.MTJ_follow(fleePos)
@@ -797,11 +797,11 @@ function command() {
 					} else {
 						if (i.getBodiesNum(WORK) > 0) {
 							typeBonus = 1
-						}else if(MGR(i,enemySpawn)<=7 && i.getBodiesNum(ATTACK)>=2){
+						}else if(GR(i,enemySpawn)<=7 && i.getBodiesNum(ATTACK)>=2){
 							typeBonus= 0.3
 						} else if (i.getBodiesNum(ATTACK) + i.getBodiesNum(RANGED_ATTACK) <= 1) {
 							typeBonus = 0.01
-						} else if (Adj(i, enemySpawn) && MGR(i, spawn) >= 90) {
+						} else if (Adj(i, enemySpawn) && GR(i, spawn) >= 90) {
 							typeBonus = 0.001
 						} else {
 							typeBonus = 3
@@ -828,7 +828,7 @@ function command() {
 				}
 				const X_axisDistanceBonus=1+0.05*X_axisDistance(i,enemySpawn)
 				const damageRate=getDamagedRate(head)
-				const disBonus = 1 / (1 + (0.1+4*damageRate) * MGR(i, head))
+				const disBonus = 1 / (1 + (0.1+4*damageRate) * GR(i, head))
 				const sameBonus = head.upgrade.currentTarget === i ? 2 : 1
 				const tauntBonus = 1 + 0.1*getTaunt(i).value
 				const final = disBonus * sameBonus * typeBonus * tauntBonus*X_axisDistanceBonus
@@ -846,8 +846,8 @@ function command() {
 			// const ifRetreat=!ranBool(1/(1+0.125*relu(potentialThreat-4)))
 			// SA(head,"potThreat="+potentialThreat+" ifRetreat="+ifRetreat)
 			const ifRetreat=false
-			const tarDistance = target ? MGR(head, target) : 1
-			const hasMelee = enemies.find(i => i.getBodiesNum(ATTACK) >= 3 && MGR(i, head) <= 5) != undefined
+			const tarDistance = target ? GR(head, target) : 1
+			const hasMelee = enemies.find(i => i.getBodiesNum(ATTACK) >= 3 && GR(i, head) <= 5) != undefined
 			const pureRangedBias = getGuessPlayer() === Tigga ? 500 : (
 				head.upgrade.isPush === true ? 600 : 0)
 			const damaged = sum(snakeParts, sp => sp.hitsMax - sp.hits) >= 36 * (tarDistance + 2)
@@ -962,7 +962,7 @@ function supplyToughDefender(defenderNum:number=2) {
 		SA(displayPos(), "spawn defender")
 		const spEns = getEnemyThreats().filter(i => inMyBaseRan(i));
 		const spEn = findClosestByRange(spawn, spEns)
-		const range = MGR(spEn, spawn)
+		const range = GR(spEn, spawn)
 		const aRate = enemyAWeight();
 		if (spEn) {
 			const myEnergy = spawnAndExtensionsEnergy(spawn)

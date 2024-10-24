@@ -14,7 +14,7 @@ import { enemies, getBodyArrayOfCreep, getEnergy } from "./util_Cre";
 import { tick } from "./util_game";
 import { creeps, isOppoGO } from "./util_gameObjectInitialize";
 import { arrayEquals } from "./util_JS";
-import { MGR } from "./util_pos";
+import { GR } from "./util_pos";
 import { SA } from "./util_visual";
 
 //class
@@ -53,7 +53,7 @@ export let currentGuessPlayer = Other;
 export function identifyOpponent() {
 	//identify tigga
 	if (tick === startWaitTick - 1) {
-		const ens = enemies.filter(i => MGR(i, enemySpawn) <= 1 && i.getBodiesNum(CARRY) > 0 && getEnergy(i) > 0)
+		const ens = enemies.filter(i => GR(i, enemySpawn) <= 1 && i.getBodiesNum(CARRY) > 0 && getEnergy(i) > 0)
 		if (ens.length >= 2) {
 			SA(displayPos(), "tigga1 triggered")
 			addSupport(Tigga, "1", 0.5)

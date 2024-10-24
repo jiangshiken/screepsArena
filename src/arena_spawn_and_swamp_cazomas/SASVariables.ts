@@ -5,7 +5,7 @@
  UpDateDate:   2023.1.10
  version 0.0.0
 */
-import { inIntRange } from "./util_JS";
+import { inRange_int } from "./util_JS";
 import { invalidPos, Pos } from "./util_pos";
 import { drawLineComplex } from "./util_visual";
 
@@ -47,7 +47,7 @@ export class SASVariables {
 		if (invalidPos(pos))
 			return false;
 		else
-			return inIntRange(pos.x, 13, 87) && inIntRange(pos.y, 2, 98);
+			return inRange_int(pos.x, 13, 87) && inRange_int(pos.y, 2, 98);
 	}
 	/** is outside */
 	isOutside(o: Pos): boolean {

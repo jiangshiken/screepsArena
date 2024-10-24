@@ -20,7 +20,7 @@ import { containers, isMyGO, myConstructionSites } from "../util_gameObjectIniti
 import { divide0, relu } from "../util_JS"
 import { findGO, overallMap } from "../util_overallMap"
 import { currentGuessPlayer, Dooms } from "../util_player"
-import { absRange, atPos, COO, getRangePoss, MGR, plusVector, Pos, X_axisDistance, Y_axisDistance } from "../util_pos"
+import { absRange, atPos, COO, getRangePoss, GR, plusVector, Pos, X_axisDistance, Y_axisDistance } from "../util_pos"
 import { SA, SAN } from "../util_visual"
 import { spawnStartHarvester } from "./strategyTool"
 
@@ -313,7 +313,7 @@ function supplyExtraRamparts() {
 /**supply the ramparts around the base*/
 function supplyRamparts() {
 	const cssAtSpawn = myConstructionSites.filter(i => atPos(i, spawn))
-	const hasEnemyArmyAround = getEnemyArmies().find(i => MGR(i, spawn) <= 4) !== undefined
+	const hasEnemyArmyAround = getEnemyArmies().find(i => GR(i, spawn) <= 4) !== undefined
 	const baseRamNum = currentGuessPlayer === Dooms ? 2 : 3
 	if (hasEnemyArmyAround) {
 		createCS_wait(spawn, StructureRampart, 15)
@@ -342,7 +342,7 @@ export function supplyRoads(simpleRoad:boolean=false) {
 
 	}else{
 		const rectPos = getRangePoss(spawn, 2).filter(i =>
-			MGR(spawn, i) === 2
+			GR(spawn, i) === 2
 			&& X_axisDistance(spawn, i) === 2
 			&& Y_axisDistance(spawn, i) <= 1)
 		// const crossPos = getRangePoss(spawn, 2).filter(i => MGR(spawn, i) === 2 && absRange(spawn, i) === 2)
@@ -359,7 +359,7 @@ export function supplyRoads(simpleRoad:boolean=false) {
 }
 /**supply base container*/
 function supplyContainer() {
-	const aroundCon = containers.find(i => MGR(i, spawn) <= 1
+	const aroundCon = containers.find(i => GR(i, spawn) <= 1
 		&& getFreeEnergy(i) > 0)
 	SA(displayPos(), "supplyContainer aroundCon=" + COO(aroundCon))
 	if (!aroundCon) {

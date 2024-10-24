@@ -25,9 +25,9 @@ import { tick } from "./util_game";
 import { Harvable, OwnedStructure, constructionSites, containers, creeps, isMyGO, isMyRampart, isMySpawn, isOppoRampart, isOppoSpawn, myStructures, oppoStructures, resources, spawns, structures, walls } from "./util_gameObjectInitialize";
 import { findGO, hasGO, overallMap } from "./util_overallMap";
 import { Kerob, getGuessPlayer } from "./util_player";
-import { Adj, COO, MGR, Pos, Pos_C, X_axisDistance, atPos, getRangePoss, inRangeVector, invalidPos, midPoint, minusVector, multiplyVector, myGetRange, plusVector, pos00, roundVector, validPos } from "./util_pos";
+import { Adj, COO, GR, Pos, Pos_C, X_axisDistance, atPos, getRangePoss, inRangeVector, invalidPos, midPoint, minusVector, multiplyVector, myGetRange, plusVector, pos00, roundVector, validPos } from "./util_pos";
 import { HasTasks, MultiTask, Task, Task_C, findTask, findTaskByFilter, useTasks } from "./util_task";
-import { PS, SA, drawLineComplex, drawLineLight, drawPoly, drawPolyLight, getOpacity } from "./util_visual";
+import { P, SA, drawLineComplex, drawLineLight, drawPoly, drawPolyLight, getOpacity } from "./util_visual";
 
 export const defFindPathResult: FindPathResult = {
 	path: [], ops: 0, cost: 0, incomplete: true
@@ -108,7 +108,7 @@ export function initCre(ca: Creep_advance, role?: Role, spawnInfo?: SpawnInfo, w
 	return newCre
 }
 export function initialCresAtLoopStart() {
-	PS("initialCresAtLoopStart")
+	P("initialCresAtLoopStart")
 	SA(midPoint, "initialCresAtLoopStart")
 	//remove dead Cre
 	cres = cres.filter(i => exist(i.master))
@@ -125,7 +125,7 @@ export function initialCresAtLoopStart() {
 			(exp2
 			)
 		) {
-			PS("ca=" + S(ca))
+			P("ca=" + S(ca))
 			initCre(ca)
 		}
 	}
@@ -374,7 +374,7 @@ export class Cre implements HasTasks {
 	}
 	moveTo_follow(tar: Pos) {
 		SA(this.master, "moveTo_follow" + COO(tar))
-		if (MGR(tar, this) <= 1) {
+		if (GR(tar, this) <= 1) {
 			this.stop();
 			this.crePathFinder?.moveTo_Basic(tar);
 		} else {
@@ -479,7 +479,7 @@ export class Cre implements HasTasks {
 		op?: FindPathOpts,
 		step: number = getMoveStepDef(this)
 	): void {
-		if (MGR(this, tar) <= 1) {
+		if (GR(this, tar) <= 1) {
 			this.stop();
 		} else {
 			this.MTJ(tar, op, step);
@@ -490,7 +490,7 @@ export class Cre implements HasTasks {
 		op?: FindPathOpts,
 		step: number = getMoveStepDef(this)
 	): void {
-		if (MGR(this, tar) <= 1) {
+		if (GR(this, tar) <= 1) {
 			this.moveTo_follow(tar)
 		} else {
 			this.MTJ(tar, op, step);
@@ -503,7 +503,7 @@ export class Cre implements HasTasks {
 	): void {
 		if (atPos(this, tar)) {
 			this.stop()
-		} else if (MGR(this, tar) <= 1) {
+		} else if (GR(this, tar) <= 1) {
 			this.moveTo_follow(tar)
 		} else {
 			this.MTJ(tar, op, step);
@@ -615,7 +615,7 @@ export class Cre implements HasTasks {
 			const rtn = { moveNum: moveNum, bodyNum: bodyNum, fatigueNum: fatigueNum };
 			return rtn;
 		} catch (ex) {
-			PS(ex);
+			P(ex);
 			throw new ReferenceError();
 		}
 	}
@@ -778,7 +778,7 @@ export function getMoveStepDef(cre: Cre): number {
 	return 10 * cre.getMoveTime();
 }
 export function defendInArea(cre: Cre, pos: Pos, range: number): boolean {
-	const enInArea = enemies.filter((i) => MGR(pos, i) <= range);
+	const enInArea = enemies.filter((i) => GR(pos, i) <= range);
 	if (enInArea.length > 0) {
 		const en = <Cre>cre.findClosestByRange(enInArea);
 		cre.MTJ(en);
@@ -973,10 +973,10 @@ export function getTauntShot(cre: Cre, tar: Attackable): StNumber {
 }
 export function getTauntMass(cre: Cre): StNumber {
 	const RANum = cre.getHealthyBodies(RANGED_ATTACK).length;
-	const oppos = oppoUnits.filter(i => MGR(i, cre) <= 3);
+	const oppos = oppoUnits.filter(i => GR(i, cre) <= 3);
 	let rtn: number = 0;
 	for (let oppo of oppos) {
-		const range = MGR(oppo, cre);
+		const range = GR(oppo, cre);
 		let dmg: number;
 		if (range === 1) {
 			dmg = 10;
@@ -1073,7 +1073,7 @@ export function hasOppoUnitsAround(pos: Pos, range: number = 1) {
 export function exchangePos(cre0: Cre, cre1: Cre) {
 	SA(cre0, "exchangePos" + COO(cre0) + " " + COO(cre1))
 	SA(cre1, "exchangePos" + COO(cre0) + " " + COO(cre1))
-	if (MGR(cre0, cre1) <= 1) {
+	if (GR(cre0, cre1) <= 1) {
 		cre0.moveToNormal(cre1);
 		cre1.moveToNormal(cre0);
 	}
@@ -1149,7 +1149,7 @@ export function getTaunt(cre: Unit, valueMode: boolean = false): StNumber {
 	}
 	//calculate the enemy approach my Spawn
 	if (oppo(cre)) {
-		const r = MGR(cre, spawnPos);
+		const r = GR(cre, spawnPos);
 		const vr = X_axisDistance(cre, spawnPos)
 		const spawnScanRange = 7
 		const spawnVertiScanRange = 10
@@ -1212,13 +1212,13 @@ function calExtraTaunt(cre: Unit, taunt: number): number {
 }
 export function getSpawnAroundFreeContainers() {
 	return containers.filter(i =>
-		MGR(i, spawnPos) <= 1
+		GR(i, spawnPos) <= 1
 		&& getFreeEnergy(i) > 0
 	)
 }
 export function getSpawnAroundLiveContainers() {
 	return containers.filter(i =>
-		MGR(i, spawnPos) <= 1
+		GR(i, spawnPos) <= 1
 		&& getEnergy(i) > 0
 	)
 }
@@ -1234,7 +1234,7 @@ export function getOtherFriends(cre: Cre): Cre[] {
 }
 /** called every tick to control all friend Creeps */
 export function controlCreeps() {
-	PS("control creeps start")
+	P("control creeps start")
 	const listNeedUseTask = [...friends]
 	listNeedUseTask.sort((a, b) => b.taskPriority - a.taskPriority)
 	for (let cre of listNeedUseTask) {
@@ -1245,7 +1245,7 @@ export function controlCreeps() {
 		try {
 			useTasks(cre)
 		} catch (ex) {
-			PS(ex);
+			P(ex);
 		}
 		const dt = et(st);
 		if (cre.role)
@@ -1258,7 +1258,7 @@ export function controlCreeps() {
 			ptSum(r.roleName, r.cpuTime.num);
 		}
 	}
-	PS("control creeps end")
+	P("control creeps end")
 }
 
 /**
@@ -1485,7 +1485,7 @@ export function getHarvables(): Harvable[] {
 			&& getEnergy(i) > 0
 			&& !isOppoContainer(i)
 			&& !(
-				MGR(i, spawnPos) <= 1
+				GR(i, spawnPos) <= 1
 				&& (
 					getFreeEnergy(spawnPos) === 0
 					|| isTurtleContainer
@@ -1650,9 +1650,9 @@ export class Battle {
 		SA(cre, "try flee_weak")
 		const meleeScanRange = range
 		const shotScanRange = range + 2
-		const roundEnemyAttackers = enemies.filter(i => MGR(i, cre) <= meleeScanRange
+		const roundEnemyAttackers = enemies.filter(i => GR(i, cre) <= meleeScanRange
 			&& i.getBodiesNum(ATTACK) > 0)
-		const roundEnemyShoters = enemies.filter(i => MGR(i, cre) <= shotScanRange
+		const roundEnemyShoters = enemies.filter(i => GR(i, cre) <= shotScanRange
 			&& i.getBodiesNum(RANGED_ATTACK) > 0)
 		if (roundEnemyAttackers.length + roundEnemyShoters.length > 0) {
 			const scanTars = roundEnemyAttackers.concat(roundEnemyShoters)
@@ -1676,8 +1676,8 @@ export class Battle {
 	flee(range: number = 4, FleeRange: number = 7): boolean {
 		SA(this.master, "try flee")
 		const cre = this.master
-		let ensArmyAround = getEnemyArmies().filter(i => MGR(i, this.master) <= range);
-		let ensThreatAround = getEnemyThreats().filter(i => MGR(i, this.master) <= range);
+		let ensArmyAround = getEnemyArmies().filter(i => GR(i, this.master) <= range);
+		let ensThreatAround = getEnemyThreats().filter(i => GR(i, this.master) <= range);
 		let ensAround;
 		if (ensThreatAround.length === 0) {
 			ensAround = ensThreatAround
@@ -1759,6 +1759,21 @@ export class Battle {
 		// 	return this.master;
 		// }
 	}
+	inRangeVector(vec: Pos, maxRange: number): Pos {
+		const x = vec.x;
+		const y = vec.y;
+		const ax = Math.abs(x)
+		const ay = Math.abs(y)
+		if (ax <= maxRange && ay <= maxRange) {
+			return { x: x, y: y }
+		} else if (ax > ay) {
+			const rate = divide0(maxRange, ax)
+			return multiplyVector(vec, rate)
+		} else {
+			const rate = divide0(maxRange, ay)
+			return multiplyVector(vec, rate)
+		}
+	}
 	// /** find the predict position of `tar` */
 	// findPredictPosByCre(tar: Cre): Pos {
 	// 	let r = exist(tar) ? myGetRange(this.master, tar) : 1;
@@ -1833,7 +1848,7 @@ export class Battle {
 			|| getGuessPlayer() === Kerob && walls.find(i => Adj(i, this.master)) !== undefined) {
 			//if can attack
 			if (this.master.getHealthyBodies(ATTACK).length > 0) {
-				let tars1 = oppoUnits.filter(i => MGR(this.master, i) <= 1);
+				let tars1 = oppoUnits.filter(i => GR(this.master, i) <= 1);
 				let ANum = this.master.getHealthyBodies(ATTACK).length;
 				//find max taunt
 				let tauntA = 30 * ANum * findMaxTaunt(tars1).taunt;
@@ -1869,12 +1884,12 @@ export class Battle {
 	/**attack wall*/
 	attackWall() {
 		if (this.master.getHealthyBodies(ATTACK).length > 0) {
-			const w = walls.find(i => MGR(i, this.master) <= 1);
+			const w = walls.find(i => GR(i, this.master) <= 1);
 			if (w)
 				this.attackNormal(w);
 		}
 		if (this.master.getHealthyBodies(RANGED_ATTACK).length > 0) {
-			const w = walls.find(i => MGR(i, this.master) <= 3);
+			const w = walls.find(i => GR(i, this.master) <= 3);
 			if (w)
 				this.shotTarget(w);
 		}
@@ -1951,7 +1966,7 @@ export class Macro {
 		const css = getMyCSs().filter(i => canBeBuildByCre(i, this.master));
 		const cs = getMaxWorthCSS(css);
 		this.buildStatic();
-		if (cs && MGR(cs, this.master) > 3) {
+		if (cs && GR(cs, this.master) > 3) {
 			this.master.MTJ(cs);
 		} else {
 			this.master.stop();
@@ -1960,7 +1975,7 @@ export class Macro {
 	/** build static*/
 	buildStatic(): CS | undefined {
 		const css = getMyCSs().filter(
-			i => MGR(i, this.master) <= 3 && canBeBuildByCre(i, this.master)
+			i => GR(i, this.master) <= 3 && canBeBuildByCre(i, this.master)
 		);
 		const cs = getMaxWorthCSS(css);
 		if (cs)
@@ -1992,7 +2007,7 @@ export class Macro {
 	/**transfer energy to target*/
 	transferTarget(tar: HasStore): boolean {
 		SA(this.master, "transferTarget " + S(tar))
-		if (MGR(this.master, tar) <= 1) {
+		if (GR(this.master, tar) <= 1) {
 			return this.transferNormal(tar)
 		} else {
 			return false;
@@ -2018,7 +2033,7 @@ export class Macro {
 			} else if (producer instanceof StructureSpawn) {
 				typeRate = 1
 			} else if (producer instanceof StructureExtension) {
-				if (MGR(producer, spawnPos) <= 7) {
+				if (GR(producer, spawnPos) <= 7) {
 					typeRate = 0.75
 				} else {
 					typeRate = 0.5
@@ -2055,7 +2070,7 @@ export class Macro {
 	transToTargetProducer(tar: Producer): boolean {
 		SA(this.master, "transToTargetProducer " + S(tar))
 		drawLineComplex(this.master, tar, 0.25, "#22ee22");
-		if (MGR(this.master, tar) <= 1) {
+		if (GR(this.master, tar) <= 1) {
 			//if producer is full,drop at producer
 			if (getFreeEnergy(tar) === 0) {
 				if (tick <= notDropLimitTick) {
@@ -2133,7 +2148,7 @@ export class Macro {
 		} else {//is Resource
 			td = getEnergy(harvable)
 		}
-		return td > MGR(this.master, harvable)
+		return td > GR(this.master, harvable)
 	}
 	/**find a fit harvable*/
 	findFitHarvable(): Harvable | undefined {
@@ -2145,7 +2160,7 @@ export class Macro {
 			harvable: Harvable | undefined;
 			worth: number;
 		}[] = needTransHarvable.map(harvable => {
-			let range = MGR(this.master, harvable)
+			let range = GR(this.master, harvable)
 			let baseRangeBonus = 1 + 3 * divideReduce(X_axisDistance(harvable, spawnPos), 10)
 			let volumn = getCapacity(this.master)
 			let energy = Math.min(getEnergy(harvable), volumn)
@@ -2198,7 +2213,7 @@ export class Macro {
 	}
 	/** withdraw static*/
 	withDrawStatic(): boolean {
-		let har = getHarvables().find(i => MGR(i, this.master) <= 1);
+		let har = getHarvables().find(i => GR(i, this.master) <= 1);
 		if (har) {
 			return this.withdrawNormal(har);
 		} else
@@ -2208,7 +2223,7 @@ export class Macro {
 	directWithdraw(con: HasEnergy): boolean {
 		//TODO back to base
 		drawLineLight(this.master, con);
-		if (MGR(con, this.master) > 1) {
+		if (GR(con, this.master) > 1) {
 			this.master.MTJ(con);
 		} else {
 			this.master.stop();
@@ -2227,7 +2242,7 @@ export class Macro {
 	}
 	/**withdraw target*/
 	withDrawTarget(tar: HasEnergy): boolean {
-		if (MGR(this.master, tar) <= 1) {
+		if (GR(this.master, tar) <= 1) {
 			return this.withdrawNormal(tar);
 		} else
 			return false;

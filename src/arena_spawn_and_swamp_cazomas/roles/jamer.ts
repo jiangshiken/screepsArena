@@ -16,7 +16,7 @@ import { blocked, Cre, enemies, friends, hasEnemyAround_lamb, hasThreat, Role } 
 import { tick } from "../util_game";
 import { oppoConstructionSites } from "../util_gameObjectInitialize";
 import { divideReduce } from "../util_JS";
-import { Adj, atPos, COO, InShotRan, MGR, midPoint } from "../util_pos";
+import { Adj, atPos, COO, GR, InShotRan, midPoint } from "../util_pos";
 import { SA } from "../util_visual";
 
 /**used to jam the opponent's construction site*/
@@ -66,7 +66,7 @@ export function jamerOldJob(cre: Cre) {
 			)
 			const enemyCSComparers: { target: ConstructionSite | undefined, worth: number }[] = enemyCSsHasEnemyBuilderAround.map(cs => {
 				const progressRate = getProgressRate(cs)
-				const range = MGR(cre, cs)
+				const range = GR(cre, cs)
 				const worth = progressRate * divideReduce(range, 10)
 				return { target: cs, worth: worth }
 			})

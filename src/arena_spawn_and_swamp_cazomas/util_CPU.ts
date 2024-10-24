@@ -3,7 +3,7 @@ import { getCpuTime } from "game/utils";
 import { Event_C, Event_Number } from "./util_event";
 import { tick } from "./util_game";
 import { KNumber } from "./util_JS";
-import { PS } from "./util_visual";
+import { P } from "./util_visual";
 
 export let cpuRateHistory = 0
 export function recordEmergencyHistory(cpuUsed: number) {
@@ -49,13 +49,13 @@ export function et(t: number) {
  */
 export function pt(s: string, t: number) {
 	let tt = et(t);
-	PS(s + " " + KNumber(tt) + " cpu");
+	P(s + " " + KNumber(tt) + " cpu");
 }
 /**
  * used to print the CPU time
  */
 export function ptSum(s: string, t: number) {
-	PS(s + " " + KNumber(t) + " cpu");
+	P(s + " " + KNumber(t) + " cpu");
 }
 /**
  * used to calculate the CPU time

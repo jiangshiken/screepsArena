@@ -7,12 +7,12 @@ import { Attackable, blocked, calculateForce, Cre, cres, exist, getArmies, getEn
 import { S } from "./util_export";
 import { tick } from "./util_game";
 import { isMyRampart, isMySpawn, isOppoRampart, isOppoSpawn, ramparts, spawns } from "./util_gameObjectInitialize";
-import { divide0, goInDoubleRange, randomBool, relu } from "./util_JS";
+import { divide0, goInRange, randomBool, relu } from "./util_JS";
 import { MyMap } from "./util_MyMap";
 import { overallMap } from "./util_overallMap";
 import { getGuessPlayer, Kerob } from "./util_player";
-import { getRangePoss, MGR, Pos, pos00, setMatrixByLambda } from "./util_pos";
-import { drawMyMap, PS, SA } from "./util_visual";
+import { getRangePoss, GR, Pos, pos00 } from "./util_pos";
+import { P, SA } from "./util_visual";
 /**
  Module: maps
  Author: 820491047
@@ -83,7 +83,7 @@ export function loopStart_maps() {
 	}
 	pt("setForceMap", st7);
 	if (getCPUPercent() > mapCPULimit) {
-		PS("CPU BREAK");
+		P("CPU BREAK");
 		return;
 	}
 	let st8 = ct();
@@ -94,7 +94,7 @@ export function loopStart_maps() {
 	}
 	pt("setMiniForceMap", st8);
 	if (getCPUPercent() > mapCPULimit) {
-		PS("CPU BREAK");
+		P("CPU BREAK");
 		return;
 	}
 	let st9 = ct();
@@ -193,12 +193,12 @@ export function setMoveMap() {
 		const units = (<Unit[]>cres).concat(spawns)
 		for (let u of units) {
 			if (setMoveMapAvoidFarOn) {
-				if (MGR(spawnPos, u) >= avoidFarRange) {
+				if (GR(spawnPos, u) >= avoidFarRange) {
 					continue;
 				}
 			}
 			if (getCPUPercent() > mapCPULimit) {
-				PS("CPU BREAK " + S(u));
+				P("CPU BREAK " + S(u));
 				return;
 			}
 			const range = 3;
@@ -217,13 +217,13 @@ export function setMoveMap() {
 	for (let i = 0; i < 100; i++) {
 		// CPU break
 		if (getCPUPercent() > mapCPULimit) {
-			PS("CPU BREAK " + i);
+			P("CPU BREAK " + i);
 			return;
 		}
 		for (let j = 0; j < 100; j++) {
 			let pos = { x: i, y: j };
 			if (setMoveMapAvoidFarOn) {
-				if (MGR(spawnPos, pos) >= avoidFarRange) {
+				if (GR(spawnPos, pos) >= avoidFarRange) {
 					continue;
 				}
 			}
@@ -267,7 +267,7 @@ export function setMoveMap() {
 					1 : (1 + relu(moveCostForceRate * (forceMapExtraCost + 1)));
 				cost += moveMapSetRate * swampRate * forceRate;
 				//set
-				const realCost = Math.ceil(goInDoubleRange(cost, 0, 255))
+				const realCost = Math.ceil(goInRange(cost, 0, 255))
 				moveMap.set(pos, realCost);
 				sum_finalSet += et(st_finalSet);
 			}
@@ -275,7 +275,7 @@ export function setMoveMap() {
 		}
 		// P("calCount=" + calCount);
 	}
-	PS("	calCount=" + calCount)
+	P("	calCount=" + calCount)
 	pt("	setMoveMapMainFunc", setMoveMapMainFunc);
 	ptSum("		sum_getRefreshValue", sum_getRefreshValue);
 	ptSum("		sum_setTerrainWall", sum_setTerrainWall);
@@ -302,6 +302,23 @@ export function setMoveMatrix() {
 	pt("draw matrix", st4);
 }
 /**
+ * set a `CostMatrix` by lambda Function
+ */
+export function setMatrixByLambda(
+	matrix: CostMatrix,
+	l: (x: number, y: number) => number
+) {
+	for (let i = 0; i < 100; i++) {
+		for (let j = 0; j < 100; j++) {
+			let d = l(i, j);
+			// if (d != 0) {
+			//if 0 that dont set ,cause it's default value
+			matrix.set(i, j, d);
+			// }
+		}
+	}//艹，好了，没好
+}
+/**
  * set force map
  */
 export function setForceMap() {
@@ -313,7 +330,7 @@ export function setForceMap() {
 		.concat(getSpawns());
 	for (let unit of scanUnits) {
 		if (getCPUPercent() > mapCPULimit) {
-			PS("CPU BREAK setForceMap");
+			P("CPU BREAK setForceMap");
 			break;
 		}
 		//get force of unit
@@ -329,7 +346,7 @@ export function setForceMap() {
 		const RPs = getRangePoss(unit, scanSize);
 		for (let pos of RPs) {
 			//every range pos
-			const range = MGR(unit, pos);
+			const range = GR(unit, pos);
 			//delta force
 			let df = 0;
 			const finalRate = 0.25;
@@ -384,7 +401,7 @@ export function getEnemyForceMapValue(pos: Pos): number {
 }
 function miniSetLambda(army: Cre, pos: Pos, scanSize: number, force: number, force_noRam: number): number {
 	//get range from unit to range pos
-	const range = MGR(army, pos);
+	const range = GR(army, pos);
 	//if is friend
 	// const friendRate = my(army) ? -1 : 1;
 	const finalRate = 0.2//0.75;
@@ -411,7 +428,7 @@ export function setMiniForceMap() {
 	pt("init miniForceMap", st1);
 	//set armies
 	const scanArmies = getArmies();
-	PS("scanUnits.length=" + scanArmies.length);
+	P("scanUnits.length=" + scanArmies.length);
 	let sum1: number = 0;
 	for (let army of scanArmies) {
 		//every unit
@@ -419,7 +436,7 @@ export function setMiniForceMap() {
 		const force = calculateForce(army).value;
 		const force_noRam = calculateForce(army, false).value;
 		if (getCPUPercent() > mapCPULimit) {
-			PS("CPU BREAK setMiniForceMap");
+			P("CPU BREAK setMiniForceMap");
 			break;
 		}
 		//set scanSize

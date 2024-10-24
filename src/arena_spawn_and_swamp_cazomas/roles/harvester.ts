@@ -13,7 +13,7 @@ import { Cont, getContWorth, getRess, getWildConts, setResourceDrop, validRes } 
 import { Cre, getEmptyCapacity, getEnergy, getFreeEnergy, HasStore, id, isMyTick, live, Producer, Role, Task_Cre } from "../util_Cre";
 import { S } from "../util_export";
 import { containers, Harvable } from "../util_gameObjectInitialize";
-import { COO, MGR } from "../util_pos";
+import { COO, GR } from "../util_pos";
 import { findTask } from "../util_task";
 import { drawPoly, SA } from "../util_visual";
 
@@ -96,7 +96,7 @@ export class HarvestTask extends Task_Cre {
 			// if (frtn) {
 			// 	SA(cre, "coo " + COO((<ResourceDropEvent>frtn).pos))
 			// }
-			const targetResources = getRess().find((i) => MGR(i, cre) <= 1 && !validRes(i));
+			const targetResources = getRess().find((i) => GR(i, cre) <= 1 && !validRes(i));
 			if (targetResources) {
 				SA(cre, "with draw dropped resource")
 				cre.macro.withDrawTarget(targetResources);
@@ -111,7 +111,7 @@ export class HarvestTask extends Task_Cre {
 			if (this.targetProducer === spawn
 				&& getFreeEnergy(spawn) === 0) {
 				const spawnAroundFreeContainer = containers.find(i =>
-					MGR(i, spawn) <= 1
+					GR(i, spawn) <= 1
 					&& getFreeEnergy(i) > 0
 				)
 				if (spawnAroundFreeContainer) {
@@ -164,7 +164,7 @@ export function harvesterJob(cre: Cre) {
 		SA(cre, "harve");
 		const contDropScanRange = 20
 		const targetCont = getWildConts().find(i =>
-			MGR(i, cre) <= contDropScanRange
+			GR(i, cre) <= contDropScanRange
 			&& getContWorth(i) > 0
 			&& getEnergy(i) > 0
 			&& cre.macro.reachableHarvable(i)
@@ -188,7 +188,7 @@ export function harvesterJob(cre: Cre) {
 /**drop the wild container */
 function dropCont(cre: Cre, cont: Cont) {
 	SA(cre, "dropCont")
-	if (MGR(cre, cont) <= 1) {
+	if (GR(cre, cont) <= 1) {
 		cre.stop()
 		if (getEnergy(cre) > 0) {
 			cre.dropEnergy()

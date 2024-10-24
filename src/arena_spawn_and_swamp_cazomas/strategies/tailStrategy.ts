@@ -8,9 +8,9 @@ import { enemySpawn, spawn, spawnCleared, spawnCreep } from "../spawn";
 import { displayPos, inRampart } from "../util_attackable";
 import { TB } from "../util_autoBodys";
 import { Cre, enemies, friends, getDamagedRate, getTaunt, hasThreat, MoveTask, oppoUnits, Role, Unit } from "../util_Cre";
-import { DND2, first, goInDoubleRange, ranBool, sum } from "../util_JS";
+import { d2, first, goInRange, ranBool, sum } from "../util_JS";
 import { Dooms, getGuessPlayer, Tigga } from "../util_player";
-import { Adj, atPos, getDirectionByPos, MGR, Pos, X_axisDistance, Y_axisDistance } from "../util_pos";
+import { Adj, atPos, getDirectionByPos, GR, Pos, X_axisDistance, Y_axisDistance } from "../util_pos";
 import { drawLineComplex, SA } from "../util_visual";
 import { best } from "../util_WT";
 const group1:Cre[]=[]
@@ -134,7 +134,7 @@ function tailMeleeJob(cre:Cre){
         if (tar instanceof Cre) {
             if (tar.getBodiesNum(WORK) > 0) {
                 typeBonus = 0.2
-            }else if(MGR(tar,enemySpawn)<=7 && tar.getBodiesNum(ATTACK)>=2){
+            }else if(GR(tar,enemySpawn)<=7 && tar.getBodiesNum(ATTACK)>=2){
                 typeBonus= 0.5
             } else if (tar.getBodiesNum(ATTACK) + tar.getBodiesNum(RANGED_ATTACK) <= 1) {
                 typeBonus = 1.5
@@ -163,16 +163,16 @@ function tailMeleeJob(cre:Cre){
             // typeExtra = getTicks() <= 630 ? 100 : 0.5
         }
 
-        const enSpawnBonus=1+0.5*goInDoubleRange(10+ESDCompare(tar,cre),0,10)
+        const enSpawnBonus=1+0.5*goInRange(10+ESDCompare(tar,cre),0,10)
         const damageRate=getDamagedRate(cre)
-        const disBonus = 1 / (1 + (0.4+4*damageRate) * MGR(tar, cre))
+        const disBonus = 1 / (1 + (0.4+4*damageRate) * GR(tar, cre))
         const sameBonus = cre.upgrade.currentTarget === tar ? 2 : 1
         const otherLeaders=friends.filter(i=>i.role===tailMelee && i!==cre)
         const linkBonus=1+3*otherLeaders.filter(i=>i.upgrade.currentTarget === tar).length
         const tauntBonus = 1 + 0.02*getTaunt(tar).value
         const final = disBonus * sameBonus*linkBonus * typeBonus * tauntBonus*enSpawnBonus
-        SA(tar, 'T=' +DND2(final)+ " lkb="+DND2(linkBonus)+" tyb="+DND2(typeBonus)
-            +" disb="+DND2(disBonus) +" ttb="+DND2(tauntBonus)+' xb='+DND2(enSpawnBonus))
+        SA(tar, 'T=' +d2(final)+ " lkb="+d2(linkBonus)+" tyb="+d2(typeBonus)
+            +" disb="+d2(disBonus) +" ttb="+d2(tauntBonus)+' xb='+d2(enSpawnBonus))
         return {unit:tar,num:final}
     })
     const target = best(targetAndWorth, tar => tar.num)?.unit
@@ -186,10 +186,10 @@ function tailMeleeJob(cre:Cre){
         const tail = best(myGroup, i => tailIndex(i))
         const second= myGroup.find(i=>tailIndex(i)===1)
         const head = best(myGroup, i => -tailIndex(i))
-        const enemyThreats=enemies.filter(i=>hasThreat(cre)&& MGR(cre,i)<=25)
+        const enemyThreats=enemies.filter(i=>hasThreat(cre)&& GR(cre,i)<=25)
         const enemyMelees=enemyThreats.filter(i=>i.getBodiesNum(ATTACK)>=2)
-        const closestThreat=best(enemyThreats,i=>-MGR(i,cre))
-        const closestThreatDis=closestThreat?MGR(closestThreat,cre):50
+        const closestThreat=best(enemyThreats,i=>-GR(i,cre))
+        const closestThreatDis=closestThreat?GR(closestThreat,cre):50
         if(tail && head && second){
             //clear pull tars task
             myGroup.filter(i=>i.role===tailPart).forEach(tp=>
@@ -198,13 +198,13 @@ function tailMeleeJob(cre:Cre){
             second.tasks.find(i => i instanceof PullTarsTask)?.end()
             head.tasks.find(i => i instanceof PullTarsTask)?.end()
             //
-            const tarDistance = target ? MGR(head, target) : 1
-			const hasMelee = enemies.find(i => i.getBodiesNum(ATTACK) >= 3 && MGR(i, head) <= 5) !== undefined
+            const tarDistance = target ? GR(head, target) : 1
+			const hasMelee = enemies.find(i => i.getBodiesNum(ATTACK) >= 3 && GR(i, head) <= 5) !== undefined
 			const pureRangedBias = getGuessPlayer() === Tigga ? 500 : (
 				head.upgrade.isPush === true ? 600 : 0)
 			const damaged = sum([head,second], i => i.hitsMax - i.hits) >= 36 * (tarDistance + 2)
 				+ (hasMelee ? 0 : pureRangedBias)
-            const tailHasThreat = enemyThreats.find(i => MGR(i, tail)<myGroup.length-3)!==undefined
+            const tailHasThreat = enemyThreats.find(i => GR(i, tail)<myGroup.length-3)!==undefined
             SA(cre,"tailHasThreat="+tailHasThreat)
             const frontHasThreat=enemyMelees.find(i=>Adj(i,head))!==undefined
             ||enemyMelees.find(i=>Adj(i,second))!==undefined
@@ -239,7 +239,7 @@ function tailMeleeJob(cre:Cre){
                 if(Adj(head,target) && !ifChase){
                     stopAction(cre,head,myGroup)
                 }else if(head.getBodiesNum(RANGED_ATTACK)>=3){
-                    const hasMeleeEnemy=enemies.find(i=>MGR(i,cre)<=4
+                    const hasMeleeEnemy=enemies.find(i=>GR(i,cre)<=4
                         && i.getBodiesNum(ATTACK)>=2)!==undefined
                     SA(cre,'hasMelee='+hasMeleeEnemy)
                     SA(cre,'closestThreatDis='+closestThreatDis)
@@ -366,10 +366,10 @@ function tailShoterJob(cre:Cre){
         || i instanceof StructureSpawn
     )
     const target=best(targets,i=>{
-        return -MGR(i,cre)
+        return -GR(i,cre)
     })
     if(target){
-        const dis=MGR(target,cre)
+        const dis=GR(target,cre)
         if(dis<=2){
             SA(cre,'FLEE')
         }else if(dis===3){

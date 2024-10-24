@@ -6,7 +6,7 @@
  version 0.0.0
 */
 import { P } from "./util_game";
-import { inIntRange } from "./util_JS";
+import { inRange_int } from "./util_JS";
 import { Pos, pos00 } from "./util_pos";
 
 /**
@@ -122,8 +122,8 @@ export class MyMap<T> extends Array<Array<T>> {
 	 */
 	get_realIndex(x: number, y: number): T {
 		if (
-			inIntRange(x, 0, this.width_mini) &&
-			inIntRange(y, 0, this.height_mini)
+			inRange_int(x, 0, this.width_mini) &&
+			inRange_int(y, 0, this.height_mini)
 		) {
 			return this[x][y];
 		} else {
@@ -136,8 +136,8 @@ export class MyMap<T> extends Array<Array<T>> {
 	set_realIndex(x: number, y: number, value: T): void {
 		// set_realIndex(pos: Pos, value: T): void {
 		if (
-			inIntRange(x, 0, this.width_mini) &&
-			inIntRange(y, 0, this.height_mini)
+			inRange_int(x, 0, this.width_mini) &&
+			inRange_int(y, 0, this.height_mini)
 		) {
 			this[x][y] = value;
 		}

@@ -5,16 +5,16 @@
  UpDateDate:   2023.1.10
  version 0.0.0
 */
-import { ATTACK, BodyPartConstant, BODYPART_COST, CARRY, HEAL, MOVE, RANGED_ATTACK, TOUGH, WORK } from "game/constants";
+import { ATTACK, BODYPART_COST, BodyPartConstant, CARRY, HEAL, MOVE, RANGED_ATTACK, TOUGH, WORK } from "game/constants";
 import { StructureSpawn } from "game/prototypes";
 
 import { sasVariables } from "./SASVariables";
 import { blocked, Cre, Creep_advance, enemies, friends, getEnergy, hasThreat, initCre, Role, SpawnInfo } from "./util_Cre";
 import { S } from "./util_export";
 import { containers, extensions, gameObjects, myExtensions, mySpawns, oppoExtensions, spawns, structures } from "./util_gameObjectInitialize";
-import { equal1 } from "./util_JS";
-import { getRangePoss, MGR, plusVector, Pos, X_axisDistance } from "./util_pos";
-import { PS, SA, SAN } from "./util_visual";
+import { arrayEqual } from "./util_JS";
+import { getRangePoss, GR, plusVector, Pos, X_axisDistance } from "./util_pos";
+import { P, SA, SAN } from "./util_visual";
 
 /** your first StructureSpawn*/
 export let spawn: Spa;
@@ -32,7 +32,7 @@ export function setEnemySpawn(s: Spa) {
 
 export function spawnListContain(body: BodyPartConstant[], role: Role) {
 	for (let info of spawnList) {
-		if (equal1(info.bodies, body) && info.role === role) {
+		if (arrayEqual(info.bodies, body) && info.role === role) {
 			return true;
 		}
 	}
@@ -71,7 +71,7 @@ export function getSpawnCost(bodies: BodyPartConstant[]): number {
 		else if (body === ATTACK) rtn += BODYPART_COST.attack;
 		else if (body === RANGED_ATTACK) rtn += BODYPART_COST.ranged_attack;
 		else if (body === HEAL) rtn += BODYPART_COST.heal;
-		else PS("ERR getSpawnCost " + body);
+		else P("ERR getSpawnCost " + body);
 	}
 	return rtn;
 }
@@ -95,11 +95,11 @@ export function initSpa(spa: Spa) {
 export function getExistListAndSpawningFriendsNum(lamb: (i: Cre) => boolean
 	, lambSpawnInfo: (i: SpawnInfo) => boolean): number {
 	let existFri = friends.filter(lamb).length;
-	PS("existFri=" + existFri)
+	P("existFri=" + existFri)
 	let isSpawningNum = spawn.isSpawning ? (lamb(spawn.isSpawning) ? 1 : 0) : 0
-	PS("isSpawningNum=" + isSpawningNum)
+	P("isSpawningNum=" + isSpawningNum)
 	let inListHarvesterNum = spawnList.filter(i => lambSpawnInfo(i)).length;
-	PS("inListHarvesterNum=" + inListHarvesterNum)
+	P("inListHarvesterNum=" + inListHarvesterNum)
 	return existFri + isSpawningNum + inListHarvesterNum
 }
 /** try spawn a creep of the first of spawnList*/
@@ -130,7 +130,7 @@ export function spawnIt(theSpawn: Spa) {
 	}
 }
 export function getSpawnAndBaseContainerEnergy(): number {
-	const baseCon = containers.find(i => MGR(i, spawn) <= 1)
+	const baseCon = containers.find(i => GR(i, spawn) <= 1)
 	return getEnergy(spawn) + (baseCon ? getEnergy(baseCon) : 0)
 }
 /** check if can spawn */
@@ -155,7 +155,7 @@ export function checkSpawn(theSpawn: Spa) {
 			}
 		}
 	} catch (ex) {
-		PS(ex);
+		P(ex);
 	}
 }
 /**
@@ -268,5 +268,5 @@ export function resetStartGateAvoidFromEnemies(avoid: boolean = true): void {
 	const upNum = upEnemies.length;
 	const downNum = downEnemies.length;
 	sasVariables.startGateUp = avoid ? upNum < downNum : upNum > downNum;
-	PS("startGateUp=" + sasVariables.startGateUp);
+	P("startGateUp=" + sasVariables.startGateUp);
 }

@@ -23,7 +23,7 @@ import { TB } from "../util_autoBodys";
 import { enemyArmyReduce, enemyBuilderBonus, ticksBonus, totalInferiorityBonus, totalSuperiorityRateReduce } from "../util_bonus";
 import { addStrategyTick, strategyTick, tick } from "../util_game";
 import { myConstructionSites, myExtensions } from "../util_gameObjectInitialize";
-import { MGR, multiplyVector, plusVector } from "../util_pos";
+import { GR, multiplyVector, plusVector } from "../util_pos";
 import { SA, SAN } from "../util_visual";
 import { useStandardTurtling } from "./turtle";
 
@@ -42,8 +42,8 @@ export function useArmedBuilderStrategy() {
 	const TG800_3 = tick >= 800 ? 3 : 1//tick greater than 1000
 	const TG1500_3 = tick >= 1500 ? 3 : 1
 	const extraExtBonus = tick <= 400
-		&& (myExtensions.find(i => MGR(i, spawn) <= 7) !== undefined
-			|| myConstructionSites.find(i => MGR(i, spawn) <= 7 && i.structure instanceof StructureExtension) !== undefined)
+		&& (myExtensions.find(i => GR(i, spawn) <= 7) !== undefined
+			|| myConstructionSites.find(i => GR(i, spawn) <= 7 && i.structure instanceof StructureExtension) !== undefined)
 		? 2.5 : 1
 	const TG300_1p5 = tick >= 300 ? 1.5 : 1
 	const TIB = totalInferiorityBonus();

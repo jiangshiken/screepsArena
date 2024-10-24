@@ -10,7 +10,7 @@ import { findPath } from "game/utils";
 import { enemySpawn } from "../spawn";
 import { Cre, friends, Role } from "../util_Cre";
 import { Event_C, validEvent } from "../util_event";
-import { COO, MGR } from "../util_pos";
+import { COO, GR } from "../util_pos";
 import { drawPolyLight, SA } from "../util_visual";
 
 /**tring to attack the enemy spawn when no one noticed*/
@@ -40,7 +40,7 @@ export function spawnRusher_swamp_Control(cre: Cre) {
 	if (validEvent(cre.upgrade.inited, 60)) {
 		return
 	}
-	if (MGR(cre, enemySpawn) >= 7) {
+	if (GR(cre, enemySpawn) >= 7) {
 
 		const p = findPath(cre, enemySpawn, { plainCost: 5, swampCost: 1 })
 		// cre.moveToNormal

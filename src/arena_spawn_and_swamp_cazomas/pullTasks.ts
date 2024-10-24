@@ -7,7 +7,7 @@
 */
 
 import { Cre, exist, FindPathAndMoveTask, moveToRandomEmptyAround, Task_Cre } from "./util_Cre";
-import { equal1, remove, valid } from "./util_JS";
+import { arrayEqual, remove, valid } from "./util_JS";
 import { atPos, COO, myGetRange, Pos } from "./util_pos";
 import { findTask } from "./util_task";
 import { SA } from "./util_visual";
@@ -25,7 +25,7 @@ export function newPullTarsTask(
 	let oldT = <PullTarsTask>findTask(master, PullTarsTask);
 	let newTask: boolean;
 	if (valid(oldT)) {
-		if (equal1(oldT.tarCres, tarCres) && oldT.tarPos == tarPos) {
+		if (arrayEqual(oldT.tarCres, tarCres) && oldT.tarPos == tarPos) {
 			SA(master, "samePullTask");
 			newTask = false;
 		} else {

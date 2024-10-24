@@ -4,7 +4,7 @@ import { tick } from "./util_game";
 import { containers, isOppoGO, resources } from "./util_gameObjectInitialize";
 import { valid } from "./util_JS";
 import { findGO, overallMap } from "./util_overallMap";
-import { atPos, MGR, Pos } from "./util_pos";
+import { atPos, GR, Pos } from "./util_pos";
 import { SA } from "./util_visual";
 /**
  Module: util_attackable
@@ -106,10 +106,10 @@ export function isOutsideContainer(con: GameObject) {
 	return getRange(con, spawnPos) > 7 && getRange(con, enemySpawnPos) > 7;
 }
 export function isMyContainer(con: GameObject) {
-	return con instanceof StructureContainer && MGR(con, spawnPos) <= 7;
+	return con instanceof StructureContainer && GR(con, spawnPos) <= 7;
 }
 export function isOppoContainer(con: GameObject) {
-	return con instanceof StructureContainer && MGR(con, enemySpawnPos) <= 7;
+	return con instanceof StructureContainer && GR(con, enemySpawnPos) <= 7;
 }
 export function getTowerDamage(range: number) {
 	if (range <= 5) {

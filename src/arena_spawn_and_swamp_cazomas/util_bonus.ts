@@ -12,7 +12,7 @@ import { spawn, spawnAndExtensionsEnergy, spawnNearBlockedAround } from "./spawn
 import { displayPos } from "./util_attackable";
 import { calculateForce, enemies, enemyAttackNum, friends, getEnergy, getHarvables, hasThreat, is5MA, sumForceByArr } from "./util_Cre";
 import { divide0, divideReduce, relu, sum } from "./util_JS";
-import { MGR, myGetRange, Pos, X_axisDistance } from "./util_pos";
+import { GR, myGetRange, Pos, X_axisDistance } from "./util_pos";
 import { SA } from "./util_visual";
 
 export function rangeBonus(
@@ -28,7 +28,7 @@ export function rangeReduce(
 	tar: Pos,
 	bias: number = 10,
 ): number {
-	return divideReduce(MGR(cre, tar), bias)
+	return divideReduce(GR(cre, tar), bias)
 }
 export function rangeDecreaseBonus(
 	range: number,
@@ -150,7 +150,7 @@ export function spawnEnergyBonus() {
 	return 1 + spawnAndExtensionsEnergy(spawn) / 1000;
 }
 export function spawnEnergyAroundBonus() {
-	const harvables = getHarvables().filter((i) => MGR(i, spawn) <= 6);
+	const harvables = getHarvables().filter((i) => GR(i, spawn) <= 6);
 	const totalEnergy = harvables.length === 0 ? 0 : harvables.map((i) => getEnergy(i)).reduce((a, b) => a + b);
 	return 1 + (spawnAndExtensionsEnergy(spawn) + totalEnergy) / 1000;
 }

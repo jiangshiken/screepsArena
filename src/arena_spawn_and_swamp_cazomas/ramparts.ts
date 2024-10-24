@@ -20,7 +20,7 @@ import { tick } from "./util_game";
 import { myRamparts, oppoRamparts } from "./util_gameObjectInitialize";
 import { last, relu, sum, valid } from "./util_JS";
 import { findGO, overallMap } from "./util_overallMap";
-import { atPos, COO, getRangePoss, MGR, myGetRange, Pos } from "./util_pos";
+import { atPos, COO, getRangePoss, GR, myGetRange, Pos } from "./util_pos";
 import { dotted, drawLineComplex, drawPolyLight, SA } from "./util_visual";
 
 export function myRampartAt(pos: Pos): StructureRampart {
@@ -63,8 +63,8 @@ export function setRamMoveMapValue() {
 export function rampartIsHealthy(ram: StructureRampart, isMy: boolean = true, useExtra: boolean = true, print: boolean = false) {
 	if (hasOppoUnitsAround(ram, 3)) {
 		//has enemy around
-		let around1Enemies = isMy ? enemies.filter(i => MGR(i, ram) <= 1) : friends.filter(i => MGR(i, ram) <= 1)
-		let around3Enemies = isMy ? enemies.filter(i => MGR(i, ram) <= 3) : friends.filter(i => MGR(i, ram) <= 3)
+		let around1Enemies = isMy ? enemies.filter(i => GR(i, ram) <= 1) : friends.filter(i => GR(i, ram) <= 1)
+		let around3Enemies = isMy ? enemies.filter(i => GR(i, ram) <= 3) : friends.filter(i => GR(i, ram) <= 3)
 		const RANum = sum(around3Enemies, i => i.getHealthyBodiesNum(RANGED_ATTACK))
 		const ANum = sum(around1Enemies, i => i.getHealthyBodiesNum(ATTACK))
 		const extraBias = 37 * ANum + 13 * RANum;
@@ -119,19 +119,19 @@ export let ramSaveCostMatrix_Event: Event_C = new Event_C();
 export let ramSaveCostMatrix: CostMatrix | undefined;
 export function defendTheRampart(cre: Cre) {
 	const scanRange = 20;
-	const enemyArmys = getEnemyArmies().filter((i) => MGR(i, cre) <= scanRange);
+	const enemyArmys = getEnemyArmies().filter((i) => GR(i, cre) <= scanRange);
 	let maxWorth: number = -Infinity;
 	let tarEnemy: Cre | undefined;
 	for (let en of enemyArmys) {
-		const aroundRam = myRamparts.find(i => MGR(i, en) <= 1);
-		const aroundRam2 = myRamparts.find(i => MGR(i, en) <= 2);
-		const aroundRam3 = myRamparts.find(i => MGR(i, en) <= 3);
+		const aroundRam = myRamparts.find(i => GR(i, en) <= 1);
+		const aroundRam2 = myRamparts.find(i => GR(i, en) <= 2);
+		const aroundRam3 = myRamparts.find(i => GR(i, en) <= 3);
 		const aroundBonus = aroundRam ? 4 : (aroundRam2 ? 2.4 : (aroundRam3 ? 1.6 : 1))
 		const RANum = en.getHealthyBodiesNum(RANGED_ATTACK)
-		const inBaseRange3 = MGR(en, spawn) <= 3;
+		const inBaseRange3 = GR(en, spawn) <= 3;
 		const shotBaseBonus = inBaseRange3 ? 1 + 0.5 * RANum : 1;
-		const baseRangeBonus = rangeBonus(MGR(en, spawnPos), 2, 1.5)
-		const w = shotBaseBonus * aroundBonus * baseRangeBonus * rangeBonus(MGR(en, cre), 2, 4);
+		const baseRangeBonus = rangeBonus(GR(en, spawnPos), 2, 1.5)
+		const w = shotBaseBonus * aroundBonus * baseRangeBonus * rangeBonus(GR(en, cre), 2, 4);
 		if (w > maxWorth) {
 			maxWorth = w;
 			tarEnemy = en;
@@ -181,7 +181,7 @@ export function moveToRampart(cre: Cre, enemy: Pos | undefined) {
 			SA(cre, "targetRampart=" + COO(targetRampart))
 			drawLineComplex(cre, targetRampart, 0.8, "#123456");
 			//if already in it
-			if (inMyHealthyRampart(cre) && MGR(targetRampart, enemy) >= MGR(cre, enemy)) {
+			if (inMyHealthyRampart(cre) && GR(targetRampart, enemy) >= GR(cre, enemy)) {
 				SA(cre, "already in it")
 				cre.stop();
 			} else {
@@ -219,7 +219,7 @@ export function gotoTargetRampart(cre: Cre, targetRampart: Pos) {
 			if (!inMyHealthyRampart(firstPos) || cost > 50) {
 				SA(cre, "path out of ram");
 				const tarFriends = getOtherFriends(cre).filter(i =>
-					MGR(i, cre) <= 1
+					GR(i, cre) <= 1
 					&& inMyHealthyRampart(i)
 					&& !(
 						cre.getBodiesNum(WORK) > 0
@@ -261,7 +261,7 @@ export function getMyHealthyRamparts(): StructureRampart[] {
 	return myRamparts.filter((i) => rampartIsHealthy(i));
 }
 export function getAroundMyHealthyRams(cre: Pos): StructureRampart[] {
-	let aroundRams = getMyHealthyRamparts().filter((i) => MGR(i, cre) <= 1);
+	let aroundRams = getMyHealthyRamparts().filter((i) => GR(i, cre) <= 1);
 	return aroundRams;
 }
 export function goinRampartAssign(cre: Cre, calBlocked: Pos[]) {
@@ -315,7 +315,7 @@ export function goinRampartAssign(cre: Cre, calBlocked: Pos[]) {
 }
 export function attackWeakRampart(cre: Cre) {
 	SA(cre, "try attackWeakRampart");
-	let myRamAround = myRamparts.filter(i => MGR(i, cre) <= 1);
+	let myRamAround = myRamparts.filter(i => GR(i, cre) <= 1);
 	let weakMyRamAround = myRamAround.find(i => !rampartIsHealthy(i, true, false) && !atPos(i, spawnPos));
 	if (weakMyRamAround) {
 		SA(cre, "attacking WeakRampart");

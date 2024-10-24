@@ -13,9 +13,9 @@ import { getEnemyForceMapValue, getForceMapValue, getFriendForceMapValue } from 
 import { getCPUPercent, lowCPUMode } from "./util_CPU";
 import { blocked, calculateForce, Cre, damaged, exist, friends, getDamagedRate, getEarning, getEnergy, getFriendArmies, getOtherFriends, getTaunt, hasEnemyThreatAround, is5MA, isMyTick, moveToRandomEmptyAround, oppoUnits, Unit } from "./util_Cre";
 import { myRamparts, resources } from "./util_gameObjectInitialize";
-import { divide0, divideReduce, goInDoubleRange, ranGet, sum } from "./util_JS";
+import { divide0, divideReduce, goInRange, ranGet, sum } from "./util_JS";
 import { currentGuessPlayer, Dooms } from "./util_player";
-import { atPos, COO, getRangePoss, getRangePossByStep, MGR, Pos } from "./util_pos";
+import { atPos, COO, getRangePoss, getRangePossByStep, GR, Pos } from "./util_pos";
 import { drawLineComplex, SA, SAN } from "./util_visual";
 
 /**find the position that can get protect nearby*/
@@ -30,7 +30,7 @@ export function findProtectPos(cre: Cre): { pos: Pos; rate: number } {
 	let bestPos: Pos = cre;
 	for (let pos of ranPoss) {
 		const force = getForceMapValue(pos);
-		const cost = MGR(cre, pos);
+		const cost = GR(cre, pos);
 		const thisWorth = 0.5 * force * divideReduce(cost, 15)
 		if (thisWorth > bestWorth) {
 			bestWorth = thisWorth;
@@ -41,18 +41,18 @@ export function findProtectPos(cre: Cre): { pos: Pos; rate: number } {
 	return { pos: bestPos, rate: bestWorth };
 }
 export function getRoundFightAndAvoidNum(cre: Cre, scanFilter: (cre: Cre) => boolean, scanRange: number = 8) {
-	const roundOtherAttackers = getOtherFriends(cre).filter((i) => MGR(cre, i) <= scanRange && scanFilter(cre));
+	const roundOtherAttackers = getOtherFriends(cre).filter((i) => GR(cre, i) <= scanRange && scanFilter(cre));
 	const fightNum = sum(roundOtherAttackers, i =>
 		i.upgrade.fight === true ?
 			(0.5 + i.getSpeed_general())
-			* divideReduce(MGR(i, cre), scanRange / 2)
+			* divideReduce(GR(i, cre), scanRange / 2)
 			* calculateForce(i).value
 			: 0
 	)
 	const avoidNum = sum(roundOtherAttackers, i =>
 		i.upgrade.fight === false ?
 			(0.5 + i.getSpeed_general())
-			* divideReduce(MGR(i, cre), scanRange / 2)
+			* divideReduce(GR(i, cre), scanRange / 2)
 			* calculateForce(i).value
 			: 0
 	)
@@ -69,7 +69,7 @@ export function getForceTarAndPosRate(cre: Cre, target: Pos) {
 	//if force is too high that this number is high too
 	// const forceRateAtPos = forceAtPos / forceCre; //20,5 = 1;
 	// const forceRateAtTarget = forceAtTarget / forceCre; //20,5 = 1;
-	const range = MGR(cre, target);
+	const range = GR(cre, target);
 	const targetRate = 2 * divideReduce(range, 10)
 	const posRate = 1
 	const totalRate = posRate + targetRate
@@ -129,7 +129,7 @@ export function givePositionToImpartantFriend(cre: Cre): boolean {
 	SA(cre, "givePositionToImpartantFriend")
 	const myForce = calculateForce(cre)
 	const importantFriend = friends.find(i =>
-		MGR(i, cre) <= 1
+		GR(i, cre) <= 1
 		&& i.canMove()
 		&& calculateForce(i) > myForce)
 	if (importantFriend) {
@@ -180,18 +180,18 @@ export function findFitOppoUnit(
 	range: number = 100,
 	extraBonus?: (tar: Unit) => number
 ): { maxFitEn: Unit; maxFitRate: number } {
-	const tars = oppoUnits.filter(i => MGR(i, cre) <= range);
+	const tars = oppoUnits.filter(i => GR(i, cre) <= range);
 	return findFitUnits(cre, tars, false, delay, extraBonus);
 }
 /**get the fit rate of a target*/
 export function getFitRate(cre: Cre, unit: Unit, isHealer: boolean, extraBonus?: (tar: Unit) => number): number {
-	const range = MGR(unit, cre);
+	const range = GR(unit, cre);
 	//calculate taunt
 	const scanValueRange = 35
 	let taunt: number
 	if (range >= scanValueRange) {
 		taunt = getTaunt(unit, true).value;
-	} else if (friends.filter(i => MGR(i, cre) <= scanValueRange && hasEnemyThreatAround(i, 8)).length === 0) {
+	} else if (friends.filter(i => GR(i, cre) <= scanValueRange && hasEnemyThreatAround(i, 8)).length === 0) {
 		taunt = getTaunt(unit, true).value;
 	} else {
 		taunt = getTaunt(unit).value;
@@ -283,7 +283,7 @@ export function findFitUnits(
 		let maxFitEn: Unit = units[0];
 		for (let u of units) {
 			const fitRate = getFitRate(cre, u, isHealer, extraBonus);
-			const op = goInDoubleRange(0.2 * fitRate, 0, 1)
+			const op = goInRange(0.2 * fitRate, 0, 1)
 			drawLineComplex(cre, u, op, "#ee8800")
 			//record max fit rate
 			if (fitRate > maxFitRate) {
