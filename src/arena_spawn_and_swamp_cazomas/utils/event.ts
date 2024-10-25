@@ -1,7 +1,7 @@
 
 import { getTicks } from "game/utils";
 
-import { Pos, Pos_C } from "./pos";
+import { Pos, PosToPos_C } from "./pos";
 
 //interfaces
 /**
@@ -92,7 +92,7 @@ export class Event_Pos extends Event_C {
 	pos: Pos;
 	constructor(pos: Pos) {
 		super();
-		this.pos = new Pos_C(pos);
+		this.pos = PosToPos_C(pos);
 	}
 	get x() {
 		if (this.pos)

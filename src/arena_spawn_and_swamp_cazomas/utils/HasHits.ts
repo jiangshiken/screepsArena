@@ -1,6 +1,6 @@
 
 import { Event, Event_Number, Event_Pos, filterEventList, validEvent } from "./event";
-import { tick } from "./game";
+import { inResourceArea, leftRate, tick } from "./game";
 import { containers, isOppoGO, resources } from "./gameObjectInitialize";
 import { valid } from "./JS";
 import { findGO, overallMap } from "./overallMap";
@@ -8,6 +8,7 @@ import { atPos, GR, Pos } from "./pos";
 
 import { GameObject, Resource, StructureContainer, StructureRampart, StructureSpawn } from "game/prototypes";
 import { getObjectsByPrototype, getRange } from "game/utils";
+import { SA } from "./visual";
 
 interface HasHits{
 	hits():number
@@ -17,7 +18,7 @@ export function getConts(): Cont[] {
 	return <Cont[]>containers
 }
 export function getWildConts(): Cont[] {
-	return getConts().filter(i => sasVariables.inResourceArea(i))
+	return getConts().filter(i => inResourceArea(i))
 }
 export class Cont extends StructureContainer {
 	worth: number | undefined
@@ -64,7 +65,7 @@ export function displayPos(): Pos {
 	}
 	displayAccumulate.increase(1)
 	const acc = displayAccumulate.num
-	const xBias = Math.floor((spawnPos.x - sasVariables.leftRate() * 12) / 5) * 5
+	const xBias = Math.floor((spawnPos.x - leftRate() * 12) / 5) * 5
 	const yBias = spawnPos.y
 	return { x: xBias + acc % 5, y: yBias + Math.floor(acc / 5) }
 }

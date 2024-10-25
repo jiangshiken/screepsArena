@@ -2,7 +2,6 @@ import { cpuBreakJudge, findFitDamagedFriend, findFitOppoUnit, findProtectPos, g
 import { getEnemyForceMapValue, getForceMapValue, getForceMapValueRate, getFriendForceMapValue } from "../units/maps";
 import { inMyHealthyRampart } from "../units/ramparts";
 import { enemySpawn, spawn } from "../units/spawn";
-import { maxWorth_lamb } from "../util_WT";
 import { getSuperior, getSuperiorRate, rangeBonus, rangeReduce } from "../utils/bonus";
 import { calSumCPU, ct } from "../utils/CPU";
 import { blocked, calculateForce, Cre, exist, friends, getDamagedRate, getDecideSearchRtn, getDps, getEarning, getEnemyArmies, getEnemyThreats, getFriendArmies, getFriendsThreated, getOtherFriends, getTaunt, hasEnemyArmyAround, hasEnemyHealerAround, hasEnemyThreatAround, hasOtherFriendAround, id, isHealer, isHealer_restrict, isSlowShoter, isWorker, myGO, protectSelfExtraTaunt, Role, sumForceByArr, Unit } from "../utils/Cre";
@@ -10,7 +9,7 @@ import { Event_C, Event_Number, Event_Pos, validEvent } from "../utils/event";
 import { tick } from "../utils/game";
 import { myRamparts } from "../utils/gameObjectInitialize";
 import { inOppoRampart, inRampart } from "../utils/HasHits";
-import { divide0, divideReduce, goInRange, randomBool, relu_oppo, sum } from "../utils/JS";
+import { divide0, divideReduce, goInRange, maxWorth_lamb, randomBool, relu_oppo, sum } from "../utils/JS";
 import { COO, filterInRange, getDirectionByPos, getRangePoss, GR, Pos } from "../utils/pos";
 import { drawLineComplex, SA, SAN } from "../utils/visual";
 import { defender_RampartJob } from "./defender";
@@ -70,7 +69,7 @@ export function stdHealerJob(cre: Cre) {
 	} else {
 		SA(cre, "no friend");
 		const friendThreateds = getFriendsThreated();
-		const target = maxWorth_lamb(friendThreateds, i => calculateForce(i).value * rangeBonus(GR(i, cre), 10)).target
+		const target = maxWorth_lamb(friendThreateds, i => calculateForce(i) * rangeBonus(GR(i, cre), 10))?.target
 		if (!cre.battle.flee(8, 16)) {
 			if (target) {
 				SA(cre, "target=" + id(target));
@@ -236,16 +235,17 @@ export function shortDistanceFight(cre: Cre, isHealer: boolean = false) {
 			const hasMyHealthyEmptyRam = inMyHealthyRampart(pos) && !blocked(pos)
 			const ramDamageDecrease = hasMyHealthyEmptyRam ? 0.01 : 1
 			const otherFriendAround = firendAround.filter(i => i !== cre)
-			const enemyMaxTaunt: number = maxWorth_lamb(enemyAround, e => getTaunt(e).value).worth
-			// const enemyMaxTaunt: number = enemyAround.length >= 1 ? getTaunt(enemyAround.reduce((a, b) => (getTaunt(a) > getTaunt(b) ? a : b))).value : 0;
+			const enemyMaxTaunt_un: number|undefined = maxWorth_lamb(enemyAround, e => getTaunt(e))?.worth
+			const enemyMaxTaunt: number = enemyMaxTaunt_un?enemyMaxTaunt_un:0
+			// const enemyMaxTaunt: number = enemyAround.length >= 1 ? getTaunt(enemyAround.reduce((a, b) => (getTaunt(a) > getTaunt(b) ? a : b))) : 0;
 			const friendMaxTaunt_healer: number = otherFriendAround.map(i =>
-				(0.1 + getDamagedRate(i)) * getTaunt(i).value).reduce((a, b) => a > b ? a : b, 0)
+				(0.1 + getDamagedRate(i)) * getTaunt(i)).reduce((a, b) => a > b ? a : b, 0)
 			const enemyDpsTotal: number = enemyAround2.length >= 1 ?
-				sum(enemyAround, i => 0.8 * getDps(i).value)
-				+ sum(enemyAround2, i => 0.2 * getDps(i).value)
+				sum(enemyAround, i => 0.8 * getDps(i))
+				+ sum(enemyAround2, i => 0.2 * getDps(i))
 				: 0;
-			const thisTaunt = getTaunt(cre).value;
-			const myDps: number = getDps(cre).value;
+			const thisTaunt = getTaunt(cre);
+			const myDps: number = getDps(cre);
 			let invade: number
 			if (isHealer) {
 				invade = 0.25 * friendMaxTaunt_healer * myDps;
@@ -363,159 +363,164 @@ export function stdAttackerJob(cre: Cre) {
 		const earn_current: number = getEarning(
 			getFriendForceMapValue(i),
 			getEnemyForceMapValue(i)
-		).value
+		)
 		const distanceReduce = goInRange(GR(cre, i) / 40, 0, 1)
 		const earn_protect: number = getEarning(
-			getFriendForceMapValue(i) + distanceReduce * calculateForce(cre).value,
+			getFriendForceMapValue(i) + distanceReduce * calculateForce(cre),
 			getEnemyForceMapValue(i)
-		).value
+		)
 		const earnExtra: number = earn_protect - earn_current
 		// SAN(cre, "EE" + COO(i) + ":", earnExtra)
 		return 0.2 * myRangeReduce * earnExtra
 	});
 	let fitTarget: Unit | undefined
 	let fitRate: number
-	const chooseInvade = fitRtn.maxFitRate > protectRtn.worth
-	if (chooseInvade) {
-		fitTarget = fitRtn.maxFitEn;
-		fitRate = fitRtn.maxFitRate;
-	} else {
-		const closestEn = protectRtn.target ? findClosestByRange(protectRtn.target, getEnemyThreats()) : undefined
-		if (protectRtn.target && closestEn && GR(closestEn, protectRtn.target) <= 3) {
-			fitTarget = closestEn
-		} else {
-			fitTarget = protectRtn.target
-		}
-		fitRate = protectRtn.worth
-	}
-	SAN(cre, "fitRtn.maxFitRate", fitRtn.maxFitRate);
-	SAN(cre, "protectRtn.worth", protectRtn.worth);
-	//go to attack it
-	if (fitTarget) {
-		if (myGO(fitTarget)) {
-			cre.moveTo_follow(fitTarget)
-		} else {
-			if (chooseInvade)
-				drawLineComplex(cre, fitTarget, 0.75, "#ff0000"); //red
-			else
-				drawLineComplex(cre, fitTarget, 0.75, "#0044bb"); //blue
-			const prePos: Pos = fitTarget
-			// const prePos: Pos = fitTarget instanceof Cre ? cre.battle.findPredictPosByCre(fitTarget) : fitTarget;
-			const protectRtn = findProtectPos(cre);
-			const protectPos = protectRtn.pos;
-			const protectRate = protectRtn.rate;
-			const fightAvoidRtn = getRoundFightAndAvoidNum(cre, i => i.role === stdAttacker, 10)
-			const fightNum = fightAvoidRtn.fightNum
-			const avoidNum = fightAvoidRtn.avoidNum
-			//spawn extra
-			const mySpawnCost = getDecideSearchRtn(cre, spawn).cost
-			const enemySpawnCost = getDecideSearchRtn(cre, enemySpawn).cost
-			// const _enemyWorkerBonus = enemyWorkerBonus(1.1)
-			// const _myWorkerBonus = myWorkerBonus(1.1)
-			//
-			const moveScanRange = 10
-			const enemiesInRange = filterInRange(getEnemyArmies(), cre, moveScanRange)
-			const friendsInRange = filterInRange(getFriendArmies(), cre, moveScanRange)
+	if(protectRtn){
 
-			const enemyForceSum = sumForceByArr(enemiesInRange).value
-			const friendForceSum = sumForceByArr(friendsInRange).value
-			const enemySpeedNum = sum(enemiesInRange, i => i.getSpeed() * calculateForce(i).value)
-			const friendSpeedNum = sum(friendsInRange, i => i.getSpeed() * calculateForce(i).value)
-			const enemySpeedAve = divide0(enemySpeedNum, enemyForceSum)
-			const friendSpeedAve = divide0(friendSpeedNum, friendForceSum)
-			const ifWin = friendForceSum > enemyForceSum
-			const speedDelta = friendSpeedAve - enemySpeedAve
-			let moveLackExtra
-			if (ifWin) {//we will win
-				moveLackExtra = 0.4 * speedDelta
-			} else {//we will lose
-				if (speedDelta > 0) {//we are quicker
-					moveLackExtra = - 0.3 * speedDelta
-				} else {//we are slower
-					moveLackExtra = - 0.6 * speedDelta
-				}
-			}
-			//
-			const mySpawnPathExtraComponent = -0.001 * mySpawnCost
-			// * _enemyWorkerBonus
-			const enemySpawnPathExtraComponent = 0.001 * enemySpawnCost
-			// * _myWorkerBonus
-			//extras
-			const startFightExtra = filterInRange(getFriendArmies(), cre, 4).find(i => hasEnemyThreatAround(i, 1)) !== undefined ? 2 : 0
-			const superiorRateExtra = 0.25 * (Math.min(4, getSuperiorRate()) - 1)
-			const spawnPathExtra = 1.6 * (mySpawnPathExtraComponent + enemySpawnPathExtraComponent);
-			const tauntExtra = 0.1 * getTaunt(fitTarget).value;
-			const TNPRateExtra = 0.67 * getForceTarAndPosRate(cre, fitTarget)
-			const fitRateExtra = 0.12 * fitRate * rangeBonus(GR(fitTarget, cre), 10, 3)
-			const fightNumExtra = 0.08 * fightNum
-			const avoidNumExtra = - 0.08 * avoidNum
-			const isFightingExtra = cre.upgrade.fight ? 0.1 : -0.1
-			//
-			const hasHealerNearby = friends.find(i => GR(i, cre) <= 10 && isHealer(i)) !== undefined
-			const damagedExtra = hasHealerNearby ? -0.4 * getDamagedRate(cre) : -0.1 * getDamagedRate(cre)
-			const isSpawnFortress = GR(fitTarget, enemySpawn) <= 2
-			const fortressAttack_biasPoint = isSpawnFortress ? 0.3 : 0.1
-			const fortressAttackRate = 2 *
-				(fortressAttack_biasPoint - getDamagedRate(cre))
-			const fortressAttackExtra = inOppoRampart(fitTarget) && friends.find(
-				i => GR(i, cre) <= 5 && isHealer(i)
-			) ?
-				fortressAttackRate : relu_oppo(fortressAttackRate)
-			// const bias = -0.4
-			const bias = 1
-			SAN(cre, "startFightExtra", startFightExtra);
-			SAN(cre, "superiorRateExtra", superiorRateExtra);
-			SAN(cre, "moveLackExtra", moveLackExtra);
-			SAN(cre, "spawnPathExtra", spawnPathExtra);
-			SAN(cre, "TNPRateExtra", TNPRateExtra);
-			SAN(cre, "fitRateExtra", fitRateExtra)
-			SAN(cre, "fightNumExtra", fightNumExtra);
-			SAN(cre, "avoidNumExtra", avoidNumExtra);
-			SAN(cre, "tauntExtra", tauntExtra)
-			SAN(cre, "isFightingExtra", isFightingExtra)
-			SAN(cre, "damagedExtra", damagedExtra)
-			SAN(cre, "fortressAttackExtra", fortressAttackExtra)
-			SAN(cre, "bias", bias)
-			const fightRate = startFightExtra + superiorRateExtra + moveLackExtra + spawnPathExtra + TNPRateExtra + fitRateExtra + fightNumExtra + avoidNumExtra + tauntExtra + isFightingExtra + damagedExtra + fortressAttackExtra + bias
-			SAN(cre, "FIGHT RATE", fightRate);
-			const goFight: boolean = fightRate > 0
-			if (goFight) {
-				cre.upgrade.fight = true;
-				if (fitTarget instanceof Cre) {
-					(<Cre>fitTarget).addTauntBonus(0.08);
-				}
-				const shortDistance = hasEnemyThreatAround(cre, 4);
-				const vr = getForceMapValueRate(cre)
-				if (shortDistance && vr < 2) {
-					const st_stdAttacker1 = ct()
-					shortDistanceFight(cre);
-					calSumCPU(sum_stdAttacker1, st_stdAttacker1)
-				} else {
-					SA(cre, "in relax mode");
-					drawLineComplex(cre, prePos, 0.25, "#00ff00"); //green
-					cre.moveTo_follow(prePos);
-				}
+		const chooseInvade = fitRtn.maxFitRate > protectRtn.worth
+		if (chooseInvade) {
+			fitTarget = fitRtn.maxFitEn;
+			fitRate = fitRtn.maxFitRate;
+		} else {
+			const closestEn = protectRtn.target ? findClosestByRange(protectRtn.target, getEnemyThreats()) : undefined
+			if (protectRtn.target && closestEn && GR(closestEn, protectRtn.target) <= 3) {
+				fitTarget = closestEn
 			} else {
-				// cre.battle.isFighting = true
-				cre.upgrade.fight = false;
-				protectSelfExtraTaunt(cre);
-				if (protectRate > 0) {
-					SA(cre, "go protect " + COO(protectPos));
-					drawLineComplex(cre, protectPos, 0.25, "#0000ff"); //blue
-					cre.moveTo_follow(protectPos);
-				} else if (stdAttackerFlee(cre)) {
-					SA(cre, "flee");
+				fitTarget = protectRtn.target
+			}
+			fitRate = protectRtn.worth
+		}
+		SAN(cre, "fitRtn.maxFitRate", fitRtn.maxFitRate);
+		SAN(cre, "protectRtn.worth", protectRtn.worth);
+
+
+		//go to attack it
+		if (fitTarget) {
+			if (myGO(fitTarget)) {
+				cre.moveTo_follow(fitTarget)
+			} else {
+				if (chooseInvade)
+					drawLineComplex(cre, fitTarget, 0.75, "#ff0000"); //red
+				else
+					drawLineComplex(cre, fitTarget, 0.75, "#0044bb"); //blue
+				const prePos: Pos = fitTarget
+				// const prePos: Pos = fitTarget instanceof Cre ? cre.battle.findPredictPosByCre(fitTarget) : fitTarget;
+				const protectRtn = findProtectPos(cre);
+				const protectPos = protectRtn.pos;
+				const protectRate = protectRtn.rate;
+				const fightAvoidRtn = getRoundFightAndAvoidNum(cre, i => i.role === stdAttacker, 10)
+				const fightNum = fightAvoidRtn.fightNum
+				const avoidNum = fightAvoidRtn.avoidNum
+				//spawn extra
+				const mySpawnCost = getDecideSearchRtn(cre, spawn).cost
+				const enemySpawnCost = getDecideSearchRtn(cre, enemySpawn).cost
+				// const _enemyWorkerBonus = enemyWorkerBonus(1.1)
+				// const _myWorkerBonus = myWorkerBonus(1.1)
+				//
+				const moveScanRange = 10
+				const enemiesInRange = filterInRange(getEnemyArmies(), cre, moveScanRange)
+				const friendsInRange = filterInRange(getFriendArmies(), cre, moveScanRange)
+
+				const enemyForceSum = sumForceByArr(enemiesInRange)
+				const friendForceSum = sumForceByArr(friendsInRange)
+				const enemySpeedNum = sum(enemiesInRange, i => i.getSpeed() * calculateForce(i))
+				const friendSpeedNum = sum(friendsInRange, i => i.getSpeed() * calculateForce(i))
+				const enemySpeedAve = divide0(enemySpeedNum, enemyForceSum)
+				const friendSpeedAve = divide0(friendSpeedNum, friendForceSum)
+				const ifWin = friendForceSum > enemyForceSum
+				const speedDelta = friendSpeedAve - enemySpeedAve
+				let moveLackExtra
+				if (ifWin) {//we will win
+					moveLackExtra = 0.4 * speedDelta
+				} else {//we will lose
+					if (speedDelta > 0) {//we are quicker
+						moveLackExtra = - 0.3 * speedDelta
+					} else {//we are slower
+						moveLackExtra = - 0.6 * speedDelta
+					}
+				}
+				//
+				const mySpawnPathExtraComponent = -0.001 * mySpawnCost
+				// * _enemyWorkerBonus
+				const enemySpawnPathExtraComponent = 0.001 * enemySpawnCost
+				// * _myWorkerBonus
+				//extras
+				const startFightExtra = filterInRange(getFriendArmies(), cre, 4).find(i => hasEnemyThreatAround(i, 1)) !== undefined ? 2 : 0
+				const superiorRateExtra = 0.25 * (Math.min(4, getSuperiorRate()) - 1)
+				const spawnPathExtra = 1.6 * (mySpawnPathExtraComponent + enemySpawnPathExtraComponent);
+				const tauntExtra = 0.1 * getTaunt(fitTarget);
+				const TNPRateExtra = 0.67 * getForceTarAndPosRate(cre, fitTarget)
+				const fitRateExtra = 0.12 * fitRate * rangeBonus(GR(fitTarget, cre), 10, 3)
+				const fightNumExtra = 0.08 * fightNum
+				const avoidNumExtra = - 0.08 * avoidNum
+				const isFightingExtra = cre.upgrade.fight ? 0.1 : -0.1
+				//
+				const hasHealerNearby = friends.find(i => GR(i, cre) <= 10 && isHealer(i)) !== undefined
+				const damagedExtra = hasHealerNearby ? -0.4 * getDamagedRate(cre) : -0.1 * getDamagedRate(cre)
+				const isSpawnFortress = GR(fitTarget, enemySpawn) <= 2
+				const fortressAttack_biasPoint = isSpawnFortress ? 0.3 : 0.1
+				const fortressAttackRate = 2 *
+					(fortressAttack_biasPoint - getDamagedRate(cre))
+				const fortressAttackExtra = inOppoRampart(fitTarget) && friends.find(
+					i => GR(i, cre) <= 5 && isHealer(i)
+				) ?
+					fortressAttackRate : relu_oppo(fortressAttackRate)
+				// const bias = -0.4
+				const bias = 1
+				SAN(cre, "startFightExtra", startFightExtra);
+				SAN(cre, "superiorRateExtra", superiorRateExtra);
+				SAN(cre, "moveLackExtra", moveLackExtra);
+				SAN(cre, "spawnPathExtra", spawnPathExtra);
+				SAN(cre, "TNPRateExtra", TNPRateExtra);
+				SAN(cre, "fitRateExtra", fitRateExtra)
+				SAN(cre, "fightNumExtra", fightNumExtra);
+				SAN(cre, "avoidNumExtra", avoidNumExtra);
+				SAN(cre, "tauntExtra", tauntExtra)
+				SAN(cre, "isFightingExtra", isFightingExtra)
+				SAN(cre, "damagedExtra", damagedExtra)
+				SAN(cre, "fortressAttackExtra", fortressAttackExtra)
+				SAN(cre, "bias", bias)
+				const fightRate = startFightExtra + superiorRateExtra + moveLackExtra + spawnPathExtra + TNPRateExtra + fitRateExtra + fightNumExtra + avoidNumExtra + tauntExtra + isFightingExtra + damagedExtra + fortressAttackExtra + bias
+				SAN(cre, "FIGHT RATE", fightRate);
+				const goFight: boolean = fightRate > 0
+				if (goFight) {
+					cre.upgrade.fight = true;
+					if (fitTarget instanceof Cre) {
+						(<Cre>fitTarget).addTauntBonus(0.08);
+					}
+					const shortDistance = hasEnemyThreatAround(cre, 4);
+					const vr = getForceMapValueRate(cre)
+					if (shortDistance && vr < 2) {
+						const st_stdAttacker1 = ct()
+						shortDistanceFight(cre);
+						calSumCPU(sum_stdAttacker1, st_stdAttacker1)
+					} else {
+						SA(cre, "in relax mode");
+						drawLineComplex(cre, prePos, 0.25, "#00ff00"); //green
+						cre.moveTo_follow(prePos);
+					}
 				} else {
-					SA(cre, "go protect after flee " + COO(protectPos));
-					drawLineComplex(cre, protectPos, 0.25, "#0000ff"); //blue
-					cre.moveTo_follow(protectPos);
+					// cre.battle.isFighting = true
+					cre.upgrade.fight = false;
+					protectSelfExtraTaunt(cre);
+					if (protectRate > 0) {
+						SA(cre, "go protect " + COO(protectPos));
+						drawLineComplex(cre, protectPos, 0.25, "#0000ff"); //blue
+						cre.moveTo_follow(protectPos);
+					} else if (stdAttackerFlee(cre)) {
+						SA(cre, "flee");
+					} else {
+						SA(cre, "go protect after flee " + COO(protectPos));
+						drawLineComplex(cre, protectPos, 0.25, "#0000ff"); //blue
+						cre.moveTo_follow(protectPos);
+					}
 				}
 			}
+		} else {
+			SA(cre, "no enemy");
+			cre.MTJ(enemySpawn);
 		}
-	} else {
-		SA(cre, "no enemy");
-		cre.MTJ(enemySpawn);
+		calSumCPU(sum_stdAttacker0, st_stdAttacker0)
 	}
-	calSumCPU(sum_stdAttacker0, st_stdAttacker0)
 }
 

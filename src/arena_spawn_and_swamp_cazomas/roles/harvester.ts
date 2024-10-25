@@ -1,10 +1,10 @@
 
 import { StructureContainer } from "game/prototypes";
 
-import { sasVariables } from "../SASVariables";
 import { inMyBaseRan, spawn } from "../units/spawn";
 import { Cre, getEmptyCapacity, getEnergy, getFreeEnergy, HasStore, id, isMyTick, live, Producer, Role, Task_Cre } from "../utils/Cre";
 import { S } from "../utils/export";
+import { inResourceArea } from "../utils/game";
 import { containers, Harvable } from "../utils/gameObjectInitialize";
 import { Cont, getContWorth, getRess, getWildConts, setResourceDrop, validRes } from "../utils/HasHits";
 import { COO, GR } from "../utils/pos";
@@ -164,7 +164,7 @@ export function harvesterJob(cre: Cre) {
 			&& cre.macro.reachableHarvable(i)
 		)
 		SA(cre, "targetCont=" + COO(targetCont))
-		if (sasVariables.inResourceArea(cre) && targetCont) {
+		if (inResourceArea(cre) && targetCont) {
 			dropCont(cre, targetCont)
 			findTask(cre, HarvestTask)?.end()
 		} else if (!findTask(cre, HarvestTask) || isMyTick(cre, 20)) {

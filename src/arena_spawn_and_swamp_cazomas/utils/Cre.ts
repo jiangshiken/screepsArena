@@ -5,20 +5,20 @@ import { ConstructionSite, Creep, GameObject, Resource, Structure, StructureCont
 import { findClosestByPath, findClosestByRange, findPath, getDirection, getRange, getTerrainAt, getTicks } from "game/utils";
 
 // import { CS, getMaxWorthCSS, getMyCSs, progress } from "../utils_pincer";
-import { sasVariables } from "../SASVariables";
+
 import { CS, getMaxWorthCSS, getMyCSs, progress } from "../units/constructionSite";
 import { getForceMapValue, isBlockGameObject, moveMatrix, setMoveMapAndMatrixBlock } from "../units/maps";
 import { BodyCre } from "./bodyParts";
 import { ct, et, ptSum } from "./CPU";
 import { Event, Event_C, Event_Number, Event_Pos, validEvent } from "./event";
 import { S, SOA } from "./export";
-import { tick } from "./game";
+import { StNumber, getNewTarByArea, tick } from "./game";
 import { Harvable, OwnedStructure, constructionSites, containers, creeps, isMyGO, isMyRampart, isMySpawn, isOppoRampart, isOppoSpawn, myStructures, oppoStructures, resources, spawns, structures, walls } from "./gameObjectInitialize";
 import { Res, displayPos, getMyContainers, getRess, inRampart, isOppoContainer, spawnPos, validRes } from "./HasHits";
 import { divide0, divideReduce, invalid, last, pow2, ranGet, remove, removeIf, valid } from "./JS";
 import { findGO, hasGO, overallMap } from "./overallMap";
 import { Kerob, getGuessPlayer } from "./player";
-import { Adj, COO, GR, Pos, Pos_C, X_axisDistance, atPos, getRangePoss, midPoint, minusVector, multiplyVector, plusVector, pos00 } from "./pos";
+import { Adj, COO, GR, Pos, X_axisDistance, atPos, getRangePoss, minusVector, multiplyVector, plusVector, pos00 } from "./pos";
 import { HasTasks, MultiTask, Task, Task_C, findTask, findTaskByFilter, useTasks } from "./task";
 import { P, SA, drawLineComplex, drawLineLight, drawPoly, drawPolyLight } from "./visual";
 
@@ -102,7 +102,6 @@ export function initCre(ca: Creep_advance, role?: Role, spawnInfo?: SpawnInfo, w
 }
 export function initialCresAtLoopStart() {
 	P("initialCresAtLoopStart")
-	SA(midPoint, "initialCresAtLoopStart")
 	//remove dead Cre
 	cres = cres.filter(i => exist(i.master))
 	//add new Cre
@@ -199,7 +198,7 @@ export class Cre implements HasTasks {
 	targetAttackable: Attackable | undefined = undefined;
 	/** used to predict the movement of the creep ,can only predict a little distance */
 	deltaPredictPos: Pos;
-	moveSelecter: Selecter<Pos>;
+	// moveSelecter: Selecter<Pos>;
 	/**extra infomation*/
 	upgrade: any = {};
 	taskPriority: number = 10
@@ -217,7 +216,7 @@ export class Cre implements HasTasks {
 		this.tasks = [];
 		this.tryPullFatigueFriend = [];
 		this.deltaPredictPos = pos00;
-		this.moveSelecter = this.getInitMoveSelector();
+		// this.moveSelecter = this.getInitMoveSelector();
 		this.upgrade = {};
 		this.battle = new Battle(this)
 		this.macro = new Macro(this)
@@ -304,9 +303,9 @@ export class Cre implements HasTasks {
 	addTauntBonus(taunt: number, name: string = "no name", from?: Unit): void {
 		this.battle?.tauntBonus.push(new ExtraTauntEvent(taunt, name, from));
 	}
-	getInitMoveSelector(): Selecter<Pos> {
-		return new Selecter<Pos>(new Pos_C(this), wc(1));
-	}
+	// getInitMoveSelector(): Selecter<Pos> {
+	// 	return new Selecter<Pos>(new Pos_C(this), wc(1));
+	// }
 	//member function
 	canMove(): boolean {
 		return this.master.fatigue === 0;
@@ -333,7 +332,7 @@ export class Cre implements HasTasks {
 		const tl = tar.getPullingTargetList();
 		SA(tar, "getIsPullingTargetList=" + SOA(tl));
 		let lastOne = last(tl);
-		if (lastOne === undefined || invalidPos(lastOne)) {
+		if (lastOne === undefined) {
 			return false;
 		}
 		if (lastOne === this) {
@@ -351,7 +350,7 @@ export class Cre implements HasTasks {
 			// if not being pulled
 			if (invalid(lastOne)) {
 				return false;
-			} else if (myGetRange(this, lastOne) > 1) {
+			} else if (GR(this, lastOne) > 1) {
 				// SA(this,"MTJ="+COO(lastOne));
 				this.MTJ(lastOne);
 				return false;
@@ -403,7 +402,7 @@ export class Cre implements HasTasks {
 	}
 	/** pull  */
 	normalPull(tar: Cre, direct: boolean = false): boolean {
-		if (myGetRange(this, tar) <= 1) {
+		if (GR(this, tar) <= 1) {
 			//draw green line
 			drawLineComplex(this, tar, 0.5, "#00ff00");
 			//pull
@@ -625,7 +624,7 @@ export class Cre implements HasTasks {
 		if (isRoad) fatigueMax = bodyNum;
 		else if (isSwamp) fatigueMax = bodyNum * 10;
 		else fatigueMax = bodyNum * 2;
-		const time = Math.max(1, Math.ceil(divide_ab0(fatigueMax, 2 * moveNum, Infinity)));
+		const time = Math.max(1, Math.ceil(divide0(fatigueMax, 2 * moveNum, Infinity)));
 		return time;
 	}
 	getMoveTime(extraEnergy: number = 0): number {
@@ -796,21 +795,13 @@ export function protectSelfExtraTaunt(cre: Cre, rate: number = 0.1) {
 	closestEnemyArmy.addTauntBonus(rate, "protectSelf", cre);
 }
 export function hasEnemyArmyAtPos(pos: Pos) {
-	if (validPos(pos)) {
-		const fRtn = findGO(pos, Cre)
-		return fRtn && (<Cre>fRtn).isEnemyArmy()
-	} else {
-		return false;
-	}
+	const fRtn = findGO(pos, Cre)
+	return fRtn && (<Cre>fRtn).isEnemyArmy()
 }
 export function hasCreepAtPos(pos: Pos) {
-	if (validPos(pos)) {
-		const list = overallMap.get(pos);
-		const cc = list.find(i => i instanceof Cre);
-		return valid(cc);
-	} else {
-		return false;
-	}
+	const list = overallMap.get(pos);
+	const cc = list.find(i => i instanceof Cre);
+	return valid(cc);
 }
 export function getEnemyArmies(): Cre[] {
 	return enemies.filter(i => i.isEnemyArmy());
@@ -819,38 +810,38 @@ export function getEnemyThreats(): Cre[] {
 	return enemies.filter(i => isEnemyThreat(i));
 }
 export function hasEnemyAround(pos: Pos, n: number) {
-	const enA = enemies.find(i => myGetRange(pos, i) <= n);
+	const enA = enemies.find(i => GR(pos, i) <= n);
 	return valid(enA);
 }
 export function hasEnemyAround_lamb(lamb: (cre: Cre) => boolean, pos: Pos, n: number) {
-	const enA = enemies.find(i => myGetRange(pos, i) <= n && lamb(i));
+	const enA = enemies.find(i => GR(pos, i) <= n && lamb(i));
 	return valid(enA);
 }
 export function hasFriendAround(pos: Pos, n: number) {
-	const enA = friends.find(i => myGetRange(pos, i) <= n);
+	const enA = friends.find(i => GR(pos, i) <= n);
 	return valid(enA);
 }
 export function hasOtherFriendAround(cre: Cre, pos: Pos, n: number) {
-	const enA = getOtherFriends(cre).find(i => myGetRange(pos, i) <= n);
+	const enA = getOtherFriends(cre).find(i => GR(pos, i) <= n);
 	return valid(enA);
 }
 export function hasOppoUnitAround(pos: Pos, n: number) {
-	const enA = oppoUnits.find(i => myGetRange(pos, i) <= n);
+	const enA = oppoUnits.find(i => GR(pos, i) <= n);
 	return valid(enA);
 }
 export function isEnemyThreat(cre: Cre) {
 	return hasThreat(cre) && oppo(cre);
 }
 export function hasEnemyThreatAround(pos: Pos, n: number) {
-	const enA = enemies.find(i => isEnemyThreat(i) && myGetRange(pos, i) <= n);
+	const enA = enemies.find(i => isEnemyThreat(i) && GR(pos, i) <= n);
 	return valid(enA);
 }
 export function hasEnemyArmyAround(pos: Pos, n: number) {
-	const enA = enemies.find(i => i.isEnemyArmy() && myGetRange(pos, i) <= n);
+	const enA = enemies.find(i => i.isEnemyArmy() && GR(pos, i) <= n);
 	return valid(enA);
 }
 export function hasEnemyHealerAround(pos: Pos, n: number) {
-	const enA = enemies.find(i => isHealer(i) && myGetRange(pos, i) <= n);
+	const enA = enemies.find(i => isHealer(i) && GR(pos, i) <= n);
 	return valid(enA);
 }
 export function getRoundEmptyPosLeave1Empty(cre: Pos, containerBlock: boolean = false): Pos | undefined {
@@ -922,10 +913,10 @@ export function findMaxTaunt<T extends Unit>(
 	let maxTaunt: number = 0;
 	let rtn: T | undefined;
 	for (let u of units) {
-		let ut = getTaunt(u).value;
+		let ut = getTaunt(u);
 		if (ifHeal) {
 			if (ori) {
-				if (myGetRange(u, ori) <= 1) {
+				if (GR(u, ori) <= 1) {
 					ut *= getDamagedRate(u);
 				} else {
 					ut *= 0.33 * getDamagedRate(u);
@@ -944,9 +935,9 @@ export function findMaxTaunt<T extends Unit>(
 export function sumForceByArr(arr: Unit[], includeRam: boolean = true): StNumber {
 	let sum = 0;
 	for (let cre of arr) {
-		sum += calculateForce(cre, includeRam).value;
+		sum += calculateForce(cre, includeRam);
 	}
-	return nst(sum);
+	return sum;
 }
 export function isUnit(a: Attackable): boolean {
 	return a instanceof Cre
@@ -957,13 +948,13 @@ export function isUnit(a: Attackable): boolean {
 }
 export function getTauntShot(cre: Cre, tar: Attackable): StNumber {
 	const RANum = cre.getHealthyBodies(RANGED_ATTACK).length;
-	const taunt = isUnit(tar) ? getTaunt(<Unit>tar).value : 0
+	const taunt = isUnit(tar) ? getTaunt(<Unit>tar) : 0
 	const oppoTaunt =
 		(tar instanceof Cre ||
 			tar instanceof Structure)
 			? taunt : 0.2;
 	const dmg = 10 * RANum;
-	return nst(0.1 * dmg * oppoTaunt);
+	return 0.1 * dmg * oppoTaunt;
 }
 export function getTauntMass(cre: Cre): StNumber {
 	const RANum = cre.getHealthyBodies(RANGED_ATTACK).length;
@@ -979,10 +970,10 @@ export function getTauntMass(cre: Cre): StNumber {
 		} else {
 			dmg = 1;
 		}
-		const oppoTaunt = getTaunt(oppo).value;
+		const oppoTaunt = getTaunt(oppo);
 		rtn += 0.1 * RANum * dmg * oppoTaunt;
 	}
-	return nst(rtn);
+	return rtn;
 }
 
 export function getForce_tradition(cre: Cre) {
@@ -1015,7 +1006,7 @@ export function getHP(cre: Unit, includeRam: boolean = true): StNumber {
 			HP += ramHP;
 		}
 	}
-	return nst(0.001 * HP);
+	return 0.001 * HP;
 }
 /**
  * calculate force of a cre,the higher hp and dps the cre has
@@ -1026,12 +1017,12 @@ export function calculateForce(cre: Unit, includeRam: boolean = true): StNumber 
 	if (cre instanceof Cre) {
 		const tarCal = includeRam ? cre.cal_force_includeRam : cre.cal_force_not_includeRam
 		if (tarCal && tarCal.validEvent()) {
-			return nst(tarCal.num)
+			return tarCal.num
 		}
 		//
 		const forceTradition = 0.1 * getForce_tradition(<Cre>cre);
-		const HP: number = getHP(cre, includeRam).value
-		const dps = getDps(cre, false, true).value;
+		const HP: number = getHP(cre, includeRam)
+		const dps = getDps(cre, false, true);
 		//if is 10M6A HP=1600 dps=180
 		//tradition=2.5+18=20.5
 		//new=0.05*sqrt(1600*180)=0.05*40*13.5=0.05*540=27
@@ -1054,10 +1045,10 @@ export function calculateForce(cre: Unit, includeRam: boolean = true): StNumber 
 		} else
 			rtn = 0;
 	}
-	return nst(rtn)
+	return rtn
 }
 export function hasOppoUnitsAround(pos: Pos, range: number = 1) {
-	const en = oppoUnits.find(i => myGetRange(i, pos) <= range);
+	const en = oppoUnits.find(i => GR(i, pos) <= range);
 	if (en) {
 		return true;
 	} else {
@@ -1122,24 +1113,24 @@ export function getTaunt(cre: Unit, valueMode: boolean = false): StNumber {
 	if (cre instanceof Cre) {
 		const tarCal = valueMode ? cre.cal_taunt_value : cre.cal_taunt_fight
 		if (tarCal && tarCal.validEvent()) {
-			return nst(calExtraTaunt(cre, tarCal.num))
+			return calExtraTaunt(cre, tarCal.num)
 		}
 	}
-	let HP = getHP(cre).value;
+	let HP = getHP(cre);
 	//
-	const dps = getDps(cre, valueMode).value;
+	const dps = getDps(cre, valueMode);
 	// SA(cre, "dps=" + dps);
 	// SA(cre, "HP=" + HP);
 	let rtn = 0;
 	if (HP > 0) {
-		let bias = 0.1 * calculateForce(cre).value;
+		let bias = 0.1 * calculateForce(cre);
 		if (valueMode && cre instanceof Cre) {
 			HP *= 1 + cre.getSpeed_general()
 		}
 		rtn = 0.1 * dps / (HP + bias);
 	} else {
 		rtn = 0;
-		return nst(rtn);
+		return rtn;
 	}
 	//calculate the enemy approach my Spawn
 	if (oppo(cre)) {
@@ -1180,7 +1171,7 @@ export function getTaunt(cre: Unit, valueMode: boolean = false): StNumber {
 		else
 			cre.cal_taunt_fight = new Event_Number(rtn)
 	}
-	return nst(rtn);
+	return rtn;
 }
 function calExtraTaunt(cre: Unit, taunt: number): number {
 	if (cre instanceof Cre) {
@@ -1286,7 +1277,7 @@ export function getEarning(myForce: number, enemyForce: number): StNumber {
 	const winOneExtra = myForce > enemyForce ?
 		-(myForce - winOneRemain) :
 		(enemyForce - winOneRemain)
-	return nst(0.5 * (loseOneExtra + winOneExtra))
+	return 0.5 * (loseOneExtra + winOneExtra)
 }
 export function getEarning_value(myForce: number, myValue: number, enemyForce: number, enemyValue: number): StNumber {
 	const winOneForce = myForce > enemyForce ? myForce : enemyForce
@@ -1296,7 +1287,7 @@ export function getEarning_value(myForce: number, myValue: number, enemyForce: n
 	const winOneExtra = myForce > enemyForce ?
 		-myValue * (1 - winOneRemainRate) :
 		enemyValue * (1 - winOneRemainRate)
-	return nst(0.5 * (loseOneExtra + winOneExtra))
+	return 0.5 * (loseOneExtra + winOneExtra)
 }
 /**
  * get DPS of a Creep ,DPS of Structure represent the threat of it
@@ -1358,9 +1349,9 @@ export function getDps(cre: Unit, valueMode: boolean = false, byCalculateForce: 
 		} else if (cre instanceof StructureSpawn) {
 			let totalForce;
 			if (my(cre)) {
-				totalForce = sumForceByArr(getFriendArmies()).value;
+				totalForce = sumForceByArr(getFriendArmies());
 			} else {
-				totalForce = sumForceByArr(getEnemyArmies()).value;
+				totalForce = sumForceByArr(getEnemyArmies());
 			}
 			rtn = spawnDps * (1 + 0.5 * totalForce)
 		} else if (cre instanceof StructureExtension) {
@@ -1371,7 +1362,7 @@ export function getDps(cre: Unit, valueMode: boolean = false, byCalculateForce: 
 		}
 	} else
 		rtn = 0;
-	return nst(0.03 * rtn)
+	return 0.03 * rtn
 }
 export function getArmies() {
 	return cres.filter(i => i.isArmy());
@@ -1492,7 +1483,7 @@ export function getHarvables(): Harvable[] {
  * calculate energy around
  */
 export function calAroundEnergy(pos: Pos) {
-	let sources = getHarvables().filter(i => myGetRange(pos, i) <= 1);
+	let sources = getHarvables().filter(i => GR(pos, i) <= 1);
 	let sum: number = 0;
 	for (let sou of sources) {
 		sum += getEnergy(sou);
@@ -1585,15 +1576,15 @@ export class Battle {
 	/** try shot or rangedHeal */
 	shotAndRestore(): boolean {
 		// SA(this.master, "shotAndRestore");
-		let tars = oppoUnits.filter(i => myGetRange(this.master, i) <= 3);
-		let tarFriends = friends.filter(i => myGetRange(this.master, i) <= 3);
+		let tars = oppoUnits.filter(i => GR(this.master, i) <= 3);
+		let tarFriends = friends.filter(i => GR(this.master, i) <= 3);
 		let UTShot = findMaxTaunt(tars);
 		let UTHeal = findMaxTaunt(tarFriends, true, this.master);
 		let RANum = this.master.getHealthyBodies(RANGED_ATTACK).length;
 		let HNum = this.master.getHealthyBodies(HEAL).length;
 		let tarShot = UTShot.unit;
 		let tarHeal = UTHeal.unit;
-		if (tarHeal && tarShot && myGetRange(this.master, tarHeal) >= 2) {
+		if (tarHeal && tarShot && GR(this.master, tarHeal) >= 2) {
 			//will conflict
 			let useShot: boolean =
 				10 * RANum * UTShot.taunt > 12 * HNum * UTHeal.taunt;
@@ -1629,7 +1620,7 @@ export class Battle {
 	/** ranged attack static, will find fit enemy  */
 	shot(): boolean {
 		if (this.master.getBodies(RANGED_ATTACK).length > 0) {
-			let tars = oppoUnits.filter(i => myGetRange(this.master, i) <= 3);
+			let tars = oppoUnits.filter(i => GR(this.master, i) <= 3);
 			let tar = findMaxTaunt(tars).unit;
 			if (tar != undefined && exist(tar)) {
 				this.shotTargetJudgeIfMass(tar);
@@ -1681,8 +1672,8 @@ export class Battle {
 		if (ensAround.length > 0) {
 			const mapForce = getForceMapValue(cre)
 			const mapForceExtra = - mapForce
-			const enFSum = sumForceByArr(ensAround).value;
-			const myForce = calculateForce(this.master).value
+			const enFSum = sumForceByArr(ensAround)
+			const myForce = calculateForce(this.master)
 			const oldExtra = enFSum - myForce
 			const fleeRate = oldExtra + mapForceExtra
 			const ifSelfNotThreated = !hasThreat(cre)
@@ -1717,7 +1708,7 @@ export class Battle {
 	/** heal static */
 	restore() {
 		if (this.master.getBodies(HEAL).length > 0) {
-			let tars = friends.filter(i => myGetRange(this.master, i) <= 3);
+			let tars = friends.filter(i => GR(this.master, i) <= 3);
 			let tar = findMaxTaunt(tars, true, this.master).unit;
 			if (tar != undefined && exist(tar)) {
 				this.healTar(tar);
@@ -1728,7 +1719,7 @@ export class Battle {
 	healTar(tar: Cre): boolean {
 		SA(this.master, "healTar");
 		if (exist(tar)) {
-			let range = myGetRange(this.master, tar);
+			let range = GR(this.master, tar);
 			if (range > 1 && range <= 3) {
 				//if range 2 or 3,
 				this.master.master.rangedHeal(tar.master);
@@ -1741,18 +1732,18 @@ export class Battle {
 		}
 		return false;
 	}
-	/** find the predict pos of the specific rate*/
-	findPredictPos(rate: number, maxRange: number = 3): Pos {
-		const deltaPredictPos = this.master.deltaPredictPos;
-		// if (deltaPredictPos) {
-		const ratedDeltaPredictPos = multiplyVector(deltaPredictPos, rate);
-		const roundedRatedDeltaPredictPos = roundVector(ratedDeltaPredictPos)
-		const inRangedPredictPos = inRangeVector(roundedRatedDeltaPredictPos, maxRange)
-		return plusVector(this.master, inRangedPredictPos);
-		// } else {
-		// 	return this.master;
-		// }
-	}
+	// /** find the predict pos of the specific rate*/
+	// findPredictPos(rate: number, maxRange: number = 3): Pos {
+	// 	const deltaPredictPos = this.master.deltaPredictPos;
+	// 	// if (deltaPredictPos) {
+	// 	const ratedDeltaPredictPos = multiplyVector(deltaPredictPos, rate);
+	// 	const roundedRatedDeltaPredictPos = roundVector(ratedDeltaPredictPos)
+	// 	const inRangedPredictPos = inRangeVector(roundedRatedDeltaPredictPos, maxRange)
+	// 	return plusVector(this.master, inRangedPredictPos);
+	// 	// } else {
+	// 	// 	return this.master;
+	// 	// }
+	// }
 	inRangeVector(vec: Pos, maxRange: number): Pos {
 		const x = vec.x;
 		const y = vec.y;
@@ -1770,7 +1761,7 @@ export class Battle {
 	}
 	// /** find the predict position of `tar` */
 	// findPredictPosByCre(tar: Cre): Pos {
-	// 	let r = exist(tar) ? myGetRange(this.master, tar) : 1;
+	// 	let r = exist(tar) ? GR(this.master, tar) : 1;
 	// 	let rate = sigmoidUWH(r, 18, 20); //rate=0-10,r=0-9
 	// 	SA(tar, "predict Rate=" + DND2(rate));
 	// 	return tar.battle ? tar.battle.findPredictPos(rate) : tar;
@@ -1816,7 +1807,7 @@ export class Battle {
 		// SA(this,"melee 1")
 		if (this.master.getBodies(ATTACK).length > 0) {
 			// SA(this,"melee 2")
-			let tars = oppoUnits.filter(i => myGetRange(this.master, i) <= 1);
+			let tars = oppoUnits.filter(i => GR(this.master, i) <= 1);
 
 			let tar = findMaxTaunt(tars).unit;
 			if (tar != undefined && exist(tar)) {
@@ -1847,12 +1838,12 @@ export class Battle {
 				//find max taunt
 				let tauntA = 30 * ANum * findMaxTaunt(tars1).taunt;
 				//targets in range 3
-				// let tars3 = oppoUnits.filter(i => myGetRange(this.master, i) <= 3);
+				// let tars3 = oppoUnits.filter(i => GR(this.master, i) <= 3);
 				// let RANum = this.master.getHealthyBodies(RANGED_ATTACK).length;
 				// //taunt of rangedAttack
 				// let tauntR = 10 * RANum * findMaxTaunt(tars3).taunt;
 				//
-				let tarFriends = friends.filter(i => myGetRange(this.master, i) <= 3);
+				let tarFriends = friends.filter(i => GR(this.master, i) <= 3);
 				let HNum = this.master.getHealthyBodies(HEAL).length;
 				//taunt of heal
 				let tauntH = 12 * HNum * findMaxTaunt(tarFriends, true, this.master).taunt;
@@ -1890,7 +1881,7 @@ export class Battle {
 	}
 	/**attack normal*/
 	attackNormal(tar: Attackable): boolean {
-		if (myGetRange(this.master, tar) <= 1) {
+		if (GR(this.master, tar) <= 1) {
 			this.master.master.attack(tar instanceof Cre ? tar.master : tar);
 			return true
 		} else
@@ -1899,16 +1890,16 @@ export class Battle {
 	/**ranged attack normal*/
 	shotTarget(tar: Attackable): void {
 		SA(this.master, "shotTarget " + COO(tar));
-		if (myGetRange(this.master, tar) <= 3) {
+		if (GR(this.master, tar) <= 3) {
 			this.master.master.rangedAttack(tar instanceof Cre ? tar.master : tar);
 		}
 	}
 	/** shot round ,if range is 1 , mass attack */
 	shotTargetJudgeIfMass(tar: Attackable) {
 		SA(this.master, "shotTargetJudgeIfMass");
-		let tauntMass: number = getTauntMass(this.master).value;
-		let tauntShot: number = getTauntShot(this.master, tar).value;
-		if (myGetRange(this.master, tar) <= 1 || tauntMass > tauntShot) {
+		let tauntMass: number = getTauntMass(this.master);
+		let tauntShot: number = getTauntShot(this.master, tar);
+		if (GR(this.master, tar) <= 1 || tauntMass > tauntShot) {
 			this.master.master.rangedMassAttack();
 		} else {
 			this.shotTarget(tar);
@@ -1945,7 +1936,7 @@ export class Macro {
 			myStructures.find(
 				i =>
 					i instanceof StructureExtension &&
-					myGetRange(i, this.master) <= 1 &&
+					GR(i, this.master) <= 1 &&
 					getFreeEnergy(i) > 0
 			)
 		);
@@ -2127,7 +2118,7 @@ export class Macro {
 	/** move and transfer*/
 	directTransfer(tar: HasStore): boolean {
 		SA(this.master, "directTransfer" + COO(tar));
-		if (myGetRange(this.master, tar) <= 1) {
+		if (GR(this.master, tar) <= 1) {
 			return this.transferNormal(tar);
 		} else {
 			this.master.MTJ(tar);
@@ -2159,7 +2150,7 @@ export class Macro {
 			let volumn = getCapacity(this.master)
 			let energy = Math.min(getEnergy(harvable), volumn)
 			let worth = baseRangeBonus * energy / (range + 4)
-			drawLineComplex(this.master, harvable, getOpacity(0.1 * worth), "#22bb22")
+			drawLineComplex(this.master, harvable, 0.1 * worth, "#22bb22")
 			return { harvable: harvable, worth: worth }
 		})
 		let rtn: Harvable | undefined = harvableWorths.reduce((a, b) => a.worth > b.worth ? a : b, { harvable: undefined, worth: 0 }).harvable;
@@ -2175,7 +2166,7 @@ export class Macro {
 	}
 	/**move and drop energy*/
 	directDrop(tar: Pos): boolean {
-		if (myGetRange(this.master, tar) <= 1) {
+		if (GR(this.master, tar) <= 1) {
 			SA(this.master, "dropEnergy");
 			this.dropEnergy();
 			return true;
@@ -2403,7 +2394,7 @@ export function blocked(
 	if (isTerrainWall(pos)) {
 		// SA(pos,"block isTerrainWall");
 		return true;
-	} else if (validPos(pos)) {
+	} else {
 		let posList = overallMap[pos.x][pos.y];
 		if (avoidFriendBlock) {
 			useMoveMatrix = false;
@@ -2433,8 +2424,6 @@ export function blocked(
 			}
 		}
 		return false;
-	} else {
-		return true;
 	}
 }
 /**
@@ -2467,7 +2456,7 @@ export class MoveTask extends Task_Cre {
 			this.master.crePathFinder?.moveTo_Basic(tempTar);
 			this.master.wantMove = new Event_C();
 			//
-			if (myGetRange(this.master, tempTar) <= 1) {
+			if (GR(this.master, tempTar) <= 1) {
 				this.path.shift();
 			}
 		} else {
@@ -2674,14 +2663,13 @@ export class FindPathAndMoveTask extends MoveTask {
 	loop_task(): void {
 		let st = ct();
 		// SA(this.master, "findPath loop")
-		if (invalidPos(this.tar)) {
+		if (!this.tar) {
 			this.end();
 		}
 		if (
 			isMyTick(this.master, this.findPathStep) ||
-			invalidPos(this.tempTar) ||
-			myGetRange(this.tempTar, this.master) <= 1 ||
-			myGetRange(this.tar, this.master) <= 1 ||
+			GR(this.tempTar, this.master) <= 1 ||
+			GR(this.tar, this.master) <= 1 ||
 			(this.path.length > 0 && blocked(this.path[0]))
 		) {
 			this.path = this.findPath_task(this.master, this.tar);
@@ -2746,12 +2734,12 @@ export function getDecideSearchRtn(
 	op?: FindPathOpts | undefined
 ): FindPathResult {
 	let newTar: Pos;
-	newTar = sasVariables.getNewTarByArea(ori, tar);
+	newTar = getNewTarByArea(ori, tar);
 	let SR1 = getDecideSearchRtnNoArea(ori, newTar, op);
 	let SR2: FindPathResult | undefined;
 	let SR3: FindPathResult | undefined;
 	if (!atPos(newTar, tar)) {
-		let newTar2 = sasVariables.getNewTarByArea(newTar, tar);
+		let newTar2 = getNewTarByArea(newTar, tar);
 		SR2 = getDecideSearchRtnNoArea(newTar, newTar2, op);
 		if (!atPos(newTar2, tar)) {
 			SR3 = getDecideSearchRtnNoArea(newTar2, tar, op);
@@ -2802,18 +2790,18 @@ export function getDecideSearchRtnNoArea<T extends Pos>(
 	if (Array.isArray(tarOOA)) {
 		for (let t of tarOOA) {
 			if ("range" in t) {
-				if (invalidPos(t.pos)) {
+				if (t.pos) {
 					return errReturn;
 				}
-			} else if (invalidPos(t)) {
+			} else if (t) {
 				return errReturn;
 			}
 		}
 	} else if (valid(tarOOA) && "range" in tarOOA) {
-		if (invalidPos(tarOOA.pos)) {
+		if (tarOOA.pos) {
 			return errReturn;
 		}
-	} else if (invalidPos(<Pos>tarOOA)) {
+	} else if (<Pos>tarOOA) {
 		return errReturn;
 	}
 	let newOp: FindPathOpts | undefined;

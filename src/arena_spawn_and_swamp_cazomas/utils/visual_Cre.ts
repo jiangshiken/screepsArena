@@ -3,11 +3,10 @@ import { Structure } from "game/prototypes";
 import { Visual } from "game/visual";
 
 import { calculateForce, Cre, cres, damaged, enemies, friends, hits, hitsMax, Unit } from "./Cre";
-import { P } from "./game";
+
 import { myStructures } from "./gameObjectInitialize";
 import { valid } from "./JS";
-import { validPos } from "./pos";
-import { drawRangeComplex } from "./visual";
+import { drawRangeComplex, P } from "./visual";
 
 const VISUAL_LAYER = 6
 /**
@@ -42,7 +41,7 @@ export function visual() {
  * @version 1.0
  */
 export function showHealthBar(obj: Cre | Structure) {
-	if (valid(obj) && validPos(obj) && valid(obj.hits)) {
+	if (valid(obj) && valid(obj.hits)) {
 		const visbase = new Visual(VISUAL_LAYER, false);
 		// 打底色
 		visbase.line(
@@ -86,12 +85,12 @@ export function showHealthBars() {
  */
 export function showEnemies() {
 	for (let en of enemies) {
-		const f = calculateForce(en).value;
+		const f = calculateForce(en);
 		const rad = 0.75 * Math.sqrt(f);
 		drawRangeComplex(en, rad, 0.75, "#ff0000");
 	}
 	for (let fr of friends) {
-		const f = calculateForce(fr).value;
+		const f = calculateForce(fr);
 		const rad = 0.75 * Math.sqrt(f);
 		drawRangeComplex(fr, rad, 0.75, "#00ff55");
 	}

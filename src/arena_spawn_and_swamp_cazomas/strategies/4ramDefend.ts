@@ -1,5 +1,4 @@
 import { builder4Ram } from "../roles/builder";
-import { sasVariables } from "../SASVariables";
 import { supplyCS } from "../units/constructionSite";
 import { spawn, spawnCleared, spawnCreep } from "../units/spawn";
 import { TB } from "../utils/autoBodys";
@@ -8,6 +7,7 @@ import { SA } from "../utils/visual";
 import { spawnStartHarvester } from "./strategyTool";
 
 import { StructureRampart } from "game/prototypes";
+import { leftRate } from "../utils/game";
 import { displayPos } from "../utils/HasHits";
 
 /**use 4 ramparts to defend the base*/
@@ -24,7 +24,7 @@ export function use4RamDefend(st: number, exposeSpawnSimple: boolean = false) {
 	supplyCS(spawn, StructureRampart, 10);
 	supplyCS({ x: spawn.x, y: spawn.y + 1 }, StructureRampart, 10);
 	supplyCS({ x: spawn.x, y: spawn.y - 1 }, StructureRampart, 10);
-	supplyCS({ x: spawn.x - sasVariables.leftRate(), y: spawn.y }, StructureRampart, 10);
+	supplyCS({ x: spawn.x - leftRate(), y: spawn.y }, StructureRampart, 10);
 	// }
 	supplyBuilder()
 	spawnStartHarvester(1, true)

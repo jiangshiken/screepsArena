@@ -12,7 +12,7 @@ import { myRamparts, oppoRamparts } from "../utils/gameObjectInitialize";
 import { spawnPos } from "../utils/HasHits";
 import { last, relu, sum, valid } from "../utils/JS";
 import { findGO, overallMap } from "../utils/overallMap";
-import { atPos, COO, getRangePoss, GR, myGetRange, Pos } from "../utils/pos";
+import { atPos, COO, getRangePoss, GR, Pos } from "../utils/pos";
 import { dotted, drawLineComplex, drawPolyLight, SA } from "../utils/visual";
 import { moveMap } from "./maps";
 import { enemySpawn, spawn } from "./spawn";
@@ -22,7 +22,7 @@ export function myRampartAt(pos: Pos): StructureRampart {
 }
 export function myRoundRamparts(cre: Pos, range: number): StructureRampart[] {
 	let rp = myRamparts
-	let inR = rp.filter(i => myGetRange(i, cre) <= range);
+	let inR = rp.filter(i => GR(i, cre) <= range);
 	return inR;
 }
 // export const rampartHealthBias0: number = 750;

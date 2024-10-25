@@ -1,7 +1,6 @@
 
 import { inRange_int } from "./JS";
 import { Pos, pos00 } from "./pos";
-import { P } from "./visual";
 
 /**
  * a map that represent the map tiles
@@ -178,7 +177,6 @@ export class MyMap<T> extends Array<Array<T>> {
 				this.set_realIndex(i, j, d);
 			}
 		}
-		P("count=" + count)
 	}
 	/**
 	 * iter the lambda function and the real index

@@ -2,7 +2,7 @@
 
 import { Cre, exist, FindPathAndMoveTask, moveToRandomEmptyAround, Task_Cre } from "../utils/Cre";
 import { arrayEqual, remove, valid } from "../utils/JS";
-import { atPos, COO, myGetRange, Pos } from "../utils/pos";
+import { atPos, COO, GR, Pos } from "../utils/pos";
 import { findTask } from "../utils/task";
 import { SA } from "../utils/visual";
 
@@ -108,7 +108,7 @@ export class PullTask extends Task_Cre {
 		SA(this.master, "do PullTask");
 		if (
 			(this.moveTask1 && this.moveTask1.complete) ||
-			myGetRange(this.master, this.tarCre) <= 1
+			GR(this.master, this.tarCre) <= 1
 		) {
 			SA(this.master, "this.moveTask1.complete");
 			this.moveTask1?.end()

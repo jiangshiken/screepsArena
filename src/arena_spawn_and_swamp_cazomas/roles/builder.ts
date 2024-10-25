@@ -7,7 +7,6 @@ import { cpuBreakJudge } from "../units/army";
 import { createCS, CS, getMaxWorthCSS, getMyCSs, getProgressRate, hasConstructionSite } from "../units/constructionSite";
 import { defendTheRampart, getMyHealthyRamparts, gotoTargetRampart, inMyHealthyRampart, inMyRampart, myRampartAt } from "../units/ramparts";
 import { enemySpawn, getSpawnAndBaseContainerEnergy, inMyBaseRan, resetStartGateAvoidFromEnemies, spawn } from "../units/spawn";
-import { wc } from "../util_WT";
 import { blocked, calAroundEnergy, canBeBuildByCre, Cre, friends, getCapacity, getEnemyThreats, getEnergy, getFreeEnergy, getHarvables, getIsBuilding, getRoundEmptyPosLeave1Empty, getSpawnAroundFreeContainers, getSpawnAroundLiveContainers, hasEnemyArmyAround, hasEnemyThreatAround, HasStore, live, protectSelfExtraTaunt, Role, setIsBuilding, Task_Cre } from "../utils/Cre";
 import { S } from "../utils/export";
 import { tick } from "../utils/game";
@@ -15,7 +14,7 @@ import { myConstructionSites, myRamparts } from "../utils/gameObjectInitialize";
 import { getOutsideContainers } from "../utils/HasHits";
 import { d2, getClassName, invalid } from "../utils/JS";
 import { overallMap } from "../utils/overallMap";
-import { atPos, COO, getRangePoss, GR, midPoint, myGetRange, Pos } from "../utils/pos";
+import { atPos, COO, getRangePoss, GR, midPoint, Pos } from "../utils/pos";
 import { findTask } from "../utils/task";
 import { SA, SAN } from "../utils/visual";
 
@@ -222,7 +221,7 @@ export function buildStructureByWorth(
 }
 /**has builderStandard around the pos*/
 export function hasBuilderStandardAround(pos: Pos) {
-	const bss = friends.filter((i) => isBuilderOutSide(i.role) && myGetRange(i, pos) <= 1);
+	const bss = friends.filter((i) => isBuilderOutSide(i.role) && GR(i, pos) <= 1);
 	return bss.length > 0;
 }
 /**the job of builderNormal*/
@@ -363,8 +362,8 @@ export class BuilderStandardTask extends Task_Cre {
 		} else {
 			let harvestables = getHarvables().filter(i => {
 				let j0 = getEnergy(i) > 500;
-				let j1 = myGetRange(i, spawn) >= 5;
-				let j2 = !(hasBuilderStandardAround(i) && !(myGetRange(cre, i) <= 1));
+				let j1 = GR(i, spawn) >= 5;
+				let j2 = !(hasBuilderStandardAround(i) && !(GR(cre, i) <= 1));
 				let j3 = cre.macro.reachableHarvable(i)
 				return j0 && j1 && j2 && j3;
 			});
@@ -372,7 +371,7 @@ export class BuilderStandardTask extends Task_Cre {
 			if (har) {
 				cre.MTJ(har);
 				cre.dropEnergy();
-				if (myGetRange(cre, har) <= 1) {
+				if (GR(cre, har) <= 1) {
 					cre.stop();
 					this.step = drop_on_the_ground
 				}
@@ -385,7 +384,7 @@ export class BuilderStandardTask extends Task_Cre {
 	dropOntheGround() {
 		//drop con
 		const cre = this.master
-		let ccs = getOutsideContainers().filter((i) => getEnergy(i) > 0 && myGetRange(i, cre) <= 1);
+		let ccs = getOutsideContainers().filter((i) => getEnergy(i) > 0 && GR(i, cre) <= 1);
 		let cc = cre.findClosestByRange(ccs);
 		if (cc) {
 			cre.macro.directWithdrawAndDrop(cc);
@@ -402,7 +401,7 @@ export class BuilderStandardTask extends Task_Cre {
 			GR(cre, closestEnemy) - fleeRange > (cs.progressTotal - cs.progress) / 5
 			&& getProgressRate(cs) < 0.8) {
 			this.step = build_extensions;
-			(<CS>cs).wt = wc(5)
+			(<CS>cs).wt = 5
 		}
 		//build ram
 		let sumEn = calAroundEnergy(cre);
@@ -427,7 +426,7 @@ export class BuilderStandardTask extends Task_Cre {
 		const cre = this.master
 		if (!inMyRampart(cre) && cs && GR(cre, closestEnemy) - fleeRange <= (cs.progressTotal - cs.progress) / 5) {
 			this.step = build_rampart;
-			(<CS>cs).wt = wc(12)
+			(<CS>cs).wt = 12
 		}
 		let sumEn: number = calAroundEnergy(cre);
 		sumEn += getEnergy(cre);
@@ -439,7 +438,7 @@ export class BuilderStandardTask extends Task_Cre {
 					SA(cre, "fillExtension=" + fb);
 					if (sumEn > 0) {
 						let css = getMyCSs().find((i) => {
-							let j0 = myGetRange(i, cre) <= 3;
+							let j0 = GR(i, cre) <= 3;
 							let j1 = i.structure instanceof StructureExtension;
 							let j2 = !blocked(i);
 							// SA(i,"j0="+j0)

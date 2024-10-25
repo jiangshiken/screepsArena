@@ -2,9 +2,9 @@
 import { ATTACK, BODYPART_COST, BodyPartConstant, CARRY, HEAL, MOVE, RANGED_ATTACK, TOUGH, WORK } from "game/constants";
 import { StructureSpawn } from "game/prototypes";
 
-import { sasVariables } from "../SASVariables";
 import { blocked, Cre, Creep_advance, enemies, friends, getEnergy, hasThreat, initCre, Role, SpawnInfo } from "../utils/Cre";
 import { S } from "../utils/export";
+import { set_startGateUp, startGateUp } from "../utils/game";
 import { containers, extensions, gameObjects, myExtensions, mySpawns, oppoExtensions, spawns, structures } from "../utils/gameObjectInitialize";
 import { arrayEqual } from "../utils/JS";
 import { getRangePoss, GR, plusVector, Pos, X_axisDistance } from "../utils/pos";
@@ -261,6 +261,6 @@ export function resetStartGateAvoidFromEnemies(avoid: boolean = true): void {
 	const downEnemies = enemies.filter(i => i.y > spawnY && hasThreat(i));
 	const upNum = upEnemies.length;
 	const downNum = downEnemies.length;
-	sasVariables.startGateUp = avoid ? upNum < downNum : upNum > downNum;
-	P("startGateUp=" + sasVariables.startGateUp);
+	set_startGateUp ( avoid ? upNum < downNum : upNum > downNum)
+	P("startGateUp=" +startGateUp);
 }

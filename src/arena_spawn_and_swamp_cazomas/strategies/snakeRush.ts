@@ -4,7 +4,7 @@ import { CostMatrix, searchPath } from "game/path-finder";
 import { findClosestByRange } from "game/utils";
 
 import { StructureExtension, StructureRampart, StructureSpawn } from "game/prototypes";
-import { sasVariables } from "../SASVariables";
+
 import { builderTurtle } from "../roles/builder";
 import { shortDistanceFight } from "../roles/fighters_std";
 import { jamer } from "../roles/jamer";
@@ -14,22 +14,22 @@ import { setMoveMapSetRate, set_moveCostForceRate, set_swampFirst } from "../uni
 import { PullTarsTask, setPullGoSwamp } from "../units/pullTasks";
 import { enemyRampartIsHealthy } from "../units/ramparts";
 import { enemySpawn, getBodiesCost, inEnBaseRan, inMyBaseRan, resetStartGateAvoidFromEnemies, spawn, spawnAndExtensionsEnergy, spawnCleared, spawnCreep, spawnCreep_ifHasEnergy } from "../units/spawn";
-import { best, maxWorth_lamb } from "../util_WT";
+
 import { ct, et } from "../utils/CPU";
 import { Cre, Role, blocked, calculateForce, cres, damaged, defendInArea, enemies, enemyAWeight, exchangePos, exist, friends, getDamagedRate, getEnemyArmies, getEnemyThreats, getTaunt, hasEnemyThreatAround, hasThreat, isHealer, myUnits, oppo, oppoUnits, setEnRamAroundCost, sumForceByArr } from "../utils/Cre";
 import { displayPos, inRampart } from "../utils/HasHits";
-import { invalid, sum } from "../utils/JS";
+import { best, invalid, maxWorth_lamb, sum } from "../utils/JS";
 import { TB } from "../utils/autoBodys";
 import { GTB } from "../utils/bodyParts";
 import { Event, Event_C, validEvent } from "../utils/event";
 import { SOA } from "../utils/export";
-import { P, addStrategyTick, strategyTick, tick } from "../utils/game";
+import { addStrategyTick, leftVector, strategyTick, tick } from "../utils/game";
 import { oppoRamparts } from "../utils/gameObjectInitialize";
 import { findGO } from "../utils/overallMap";
 import { Dooms, Kerob, Tigga, currentGuessPlayer, getGuessPlayer } from "../utils/player";
-import { Adj, COO, GR, InShotRan, Pos, X_axisDistance, Y_axisDistance, atPos, getRangePoss, multiplyVector, myGetRange, plusVector } from "../utils/pos";
+import { Adj, COO, GR, InShotRan, Pos, X_axisDistance, Y_axisDistance, atPos, getRangePoss, multiplyVector, plusVector } from "../utils/pos";
 import { findTask } from "../utils/task";
-import { SA, SAN, drawLineComplex } from "../utils/visual";
+import { P, SA, SAN, drawLineComplex } from "../utils/visual";
 import { useStandardTurtling } from "./turtle";
 
 /**the part of the snake*/
@@ -59,7 +59,7 @@ export function set_HealerMode(b: boolean) {
  * be easy to pull together*/
 function assemblePoint(cre: Cre): Pos {
 	const ind: number = cre.upgrade.spIndex;
-	const leftOrRight = multiplyVector(sasVariables.leftVector(), -3);
+	const leftOrRight = multiplyVector(leftVector(), -3);
 	let vecCre: Pos;
 	if (ind == 0) vecCre = { x: - 1, y: 0 };
 	else if (ind == 1) vecCre = { x: 0, y: 0 };
@@ -120,7 +120,7 @@ export function snakePartJob(cre: Cre) {
 			if (isHealer(cre)) {
 				const scanRange = 10;
 				const tars = myUnits.filter(
-					i => myGetRange(cre, i) <= scanRange && damaged(i)
+					i => GR(cre, i) <= scanRange && damaged(i)
 				);
 				if (tars.length > 0) {
 					const tar = cre.findClosestByRange(tars);
@@ -176,7 +176,7 @@ export function snakePartJob(cre: Cre) {
 		//control normal PSA
 		let split: boolean;
 		const roundEnemies = enemies.filter(i => GR(i, cre) <= 1);
-		const roundEnemyForce: number = sumForceByArr(roundEnemies).value;
+		const roundEnemyForce: number = sumForceByArr(roundEnemies);
 		//judge if split
 		const roundEnemyForceBias = 25;
 		SA(cre, 'MGR(leader,enemySpawn)=' + GR(leader, enemySpawn));
@@ -188,10 +188,10 @@ export function snakePartJob(cre: Cre) {
 		SA(cre, 'roundEnemyForce=' + roundEnemyForce);
 		const roundForce1 = sumForceByArr(
 			getEnemyArmies().filter(i => GR(i, leader) <= 1)
-		).value;
+		);
 		const roundForce5 = sumForceByArr(
 			getEnemyArmies().filter((i) => GR(i, leader) <= 5)
-		).value;
+		);
 		const leaderDanger: number = roundForce1 + 0.4 * roundForce5;
 		SAN(leader, 'leaderDanger', leaderDanger);
 		if (allIn) {
@@ -252,11 +252,11 @@ export function snakePartJob(cre: Cre) {
 					const tarRam = maxWorth_lamb(tarRams, i => {
 						const enemyInRam = <Cre | undefined>findGO(i, Cre)
 						if (enemyInRam) {
-							return -calculateForce(enemyInRam).value
+							return -calculateForce(enemyInRam)
 						} else {
 							return 0
 						}
-					}).target
+					})?.target
 					const needDestroyRams = oppoRamparts.filter(i =>
 						GR(i, enemySpawn) <= 7
 						&& !atPos(i, enemySpawn)
@@ -273,7 +273,7 @@ export function snakePartJob(cre: Cre) {
 						&& cre.getBodiesNum(ATTACK) > nearFriendNearSpawn.getBodiesNum(ATTACK)) {
 						SA(cre, "exchange Pos")
 						exchangePos(cre, nearFriendNearSpawn)
-					} else if (myGetRange(cre, enemySpawn) <= 1 && currentGuessPlayer !== Dooms) {
+					} else if (GR(cre, enemySpawn) <= 1 && currentGuessPlayer !== Dooms) {
 						SA(cre, "stop at spawn")
 						cre.pureMeleeMode = true
 						cre.stop();
@@ -458,7 +458,7 @@ function snakeAgainstTigga_old(cre: Cre) {
 			} else {
 				SA(cre, "heal")
 				const tars = friends.filter(i => GR(i, cre) <= 10 && damaged(i))
-				const tar = maxWorth_lamb(tars, i => getDamagedRate(i)).target
+				const tar = maxWorth_lamb(tars, i => getDamagedRate(i))?.target
 				if (tar) {
 					cre.MTJ(tar)
 				}
@@ -822,7 +822,7 @@ function command() {
 				const damageRate=getDamagedRate(head)
 				const disBonus = 1 / (1 + (0.1+4*damageRate) * GR(i, head))
 				const sameBonus = head.upgrade.currentTarget === i ? 2 : 1
-				const tauntBonus = 1 + 0.1*getTaunt(i).value
+				const tauntBonus = 1 + 0.1*getTaunt(i)
 				const final = disBonus * sameBonus * typeBonus * tauntBonus*X_axisDistanceBonus
 				SA(i, 'T=' +final+ " tyb="+typeBonus+" disb="+disBonus+" ttb="+tauntBonus+' xb='+X_axisDistanceBonus)
 				return final

@@ -3,9 +3,8 @@ import { CostMatrix, searchPath } from "game/path-finder";
 import { StructureSpawn } from "game/prototypes";
 import { findClosestByRange, getCpuTime, getHeapStatistics, getTicks } from "game/utils";
 
-import { SDFP_control } from "./deprecated/predictSys";
 import { sum_stdAttacker0, sum_stdAttacker1, sum_stdHealer0 } from "./roles/fighters_std";
-import { sasVariables, SASVariables, setSasVariables } from "./SASVariables";
+
 import { sum_snakePart0 } from "./strategies/snakeRush";
 import { CS, initCS } from "./units/constructionSite";
 import { firstInit_maps, loopStart_maps, setMoveMatrix } from "./units/maps";
@@ -15,13 +14,13 @@ import { getSuperior, getSuperiorRate } from "./utils/bonus";
 import { ct, getCPUPercent, lowCPUMode, pt, ptSum, setLowCPUMode, switchCPUModeOn } from "./utils/CPU";
 import { controlCreeps, cres, enemies, friends, getAllUnits, getDecideSearchRtn, getEnemyProducers, getEnergy, getGameObjects, getMyProducers, initialCresAtLoopStart } from "./utils/Cre";
 import { Event_C, validEvent } from "./utils/event";
-import { P, setTick, tick } from "./utils/game";
+import { inResourceArea, PL, set_left, set_startGateUp, setTick, tick } from "./utils/game";
 import { constructionSites, containers, getPrototype, initialGameObjectsAtLoopStart, spawns } from "./utils/gameObjectInitialize";
 import { Cont, displayPos, enemySpawnPos, setEnemySpawnPos, setSpawnPos, spawnPos } from "./utils/HasHits";
 import { divideReduce } from "./utils/JS";
 import { firstInit_overallMap, overallMapInit, setGameObjectsThisTick, setOverallMap } from "./utils/overallMap";
 import { GR } from "./utils/pos";
-import { append_largeSizeText, firstInit_visual, loopEnd_visual, loopStart_visual, SA, SAN } from "./utils/visual";
+import { append_largeSizeText, firstInit_visual, loopEnd_visual, loopStart_visual, P, SA, SAN } from "./utils/visual";
 import { showEnemies, visual } from "./utils/visual_Cre";
 
 
@@ -33,7 +32,6 @@ export function loopEnd() {
 	if (getCPUPercent() > 0.8 && switchCPUModeOn) {
 		setLowCPUMode(true)
 	}
-	SDFP_control();
 	const st1 = ct();
 	if (!lowCPUMode) {
 		setHisPoss(); //history pos
@@ -113,11 +111,9 @@ export function set_useAvoidEnRam(b:boolean){
 	useAvoidEnRam=b
 }
 export function loopStart() {
-	P("loopStart start");
+	PL("loopStart start");
 	setTick(getTicks())
-	const st0 = ct();
 	overallMapInit();
-	pt("overallMap init", st0);
 	const st1 = ct();
 	loopStart_visual();
 	pt("loopStart_visual", st1);
@@ -165,7 +161,7 @@ export function loopStart() {
 	P("loopStart end");
 }
 export function setWorthForContainers() {
-	const conts: Cont[] = <Cont[]>containers.filter(i => sasVariables.inResourceArea(i))
+	const conts: Cont[] = <Cont[]>containers.filter(i => inResourceArea(i))
 	P("setWorthForContainers:" + conts.length)
 	for (let cont of conts) {
 		setWorthForContainer(cont)
@@ -208,14 +204,14 @@ export function setWorthForContainer(cont: Cont): void {
  */
 export function firstInit() {
 	if (getTicks() === 1) {
-		P("startGame");
+		PL("startGame");
 		firstInit_overallMap();
 		firstInit_visual();
 		setSpawn(<Spa>(<StructureSpawn[]>getPrototype(StructureSpawn)).find(i => i.my))
 		setEnemySpawn(<Spa>(<StructureSpawn[]>getPrototype(StructureSpawn)).find(i => !i.my))
 		setSpawnPos(spawn)
 		setEnemySpawnPos(enemySpawn)
-		setSasVariables(new SASVariables(spawn.x < 50));
+		set_left(spawn.x < 50);
 		setStartGate();
 		firstInit_maps();
 	}
@@ -236,9 +232,7 @@ function setStartGate(): void {
 	let costUp = sRtnUp.cost;
 	let sRtnBo = searchPath(spawn, enemySpawn, { costMatrix: getCostMatrixHalf(false) });
 	let costBo = sRtnBo.cost;
-	SAN(spawn, "costUp", costUp)
-	SAN(spawn, "costBo", costBo)
-	sasVariables.startGateUp = costUp < costBo;
+	set_startGateUp (costUp < costBo);
 	// set top and bottom Y
 	// let top
 }

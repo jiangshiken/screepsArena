@@ -1,9 +1,8 @@
-import { sasVariables } from "../SASVariables";
 import { rangeDecreaseBonus } from "../utils/bonus";
 import { ct, et, getCPUPercent, lowCPUMode, pt, ptSum } from "../utils/CPU";
-import { Attackable, blocked, calculateForce, Cre, cres, exist, getArmies, getEnemyArmies, GO, isTerrainSwamp, isTerrainWall, my, myGO, oppo, Unit } from "../utils/Cre";
+import { Attackable, blocked, calculateForce, Cre, cres, exist, getArmies, GO, isTerrainSwamp, isTerrainWall, my, myGO, oppo, Unit } from "../utils/Cre";
 import { S } from "../utils/export";
-import { tick } from "../utils/game";
+import { inResourceArea, tick } from "../utils/game";
 import { isMyRampart, isMySpawn, isOppoRampart, isOppoSpawn, ramparts, spawns } from "../utils/gameObjectInitialize";
 import { displayPos, inRampart, spawnPos } from "../utils/HasHits";
 import { divide0, goInRange, randomBool, relu } from "../utils/JS";
@@ -52,7 +51,6 @@ export function firstInit_maps() {
 	miniForceMap_fri = new MyMap(100, 100, 0, 0, pos00, 3);
 	miniForceMap_ene = new MyMap(100, 100, 0, 0, pos00, 3);
 	moveMapRefreshActiveMap = new MyMap(100, 100, 0, 0, pos00, 1);
-
 	moveMatrix = new CostMatrix();
 }
 export let setMoveMapOn: boolean = true
@@ -124,7 +122,7 @@ export function isBlockGameObject(go: GO, containerBlock: boolean = false, my?: 
 export function getBlockRate(att: Attackable): number {
 	if (att instanceof Cre) {
 		if (oppo(att)) {
-			return 10 + 5 * moveMapSetRate * calculateForce(att).value
+			return 10 + 5 * moveMapSetRate * calculateForce(att)
 		} else {
 			return 255
 		}
@@ -284,15 +282,6 @@ export function setMoveMatrix() {
 	pt("set move matrix", st3);
 	let st4 = ct();
 	//draw matrix
-	let enA = getEnemyArmies();
-	for (let en of enA) {
-		drawMyMap(
-			moveMap,
-			{ x: en.x - 1, y: en.y - 1 },
-			{ x: en.x - 1, y: en.y - 1 }
-		);
-		// drawMyMap(moveMap,en.x-1,en.y-1,en.x+2,en.y+2,pos=>!atPos(pos,en));
-	}
 	pt("draw matrix", st4);
 }
 /**
@@ -328,7 +317,7 @@ export function setForceMap() {
 			break;
 		}
 		//get force of unit
-		const forceInfluence = calculateForce(unit).value;
+		const forceInfluence = calculateForce(unit);
 		//set scanSize
 		let scanSize;
 		if (unit instanceof StructureRampart) {
@@ -427,8 +416,8 @@ export function setMiniForceMap() {
 	for (let army of scanArmies) {
 		//every unit
 		//get force of unit
-		const force = calculateForce(army).value;
-		const force_noRam = calculateForce(army, false).value;
+		const force = calculateForce(army);
+		const force_noRam = calculateForce(army, false);
 		if (getCPUPercent() > mapCPULimit) {
 			P("CPU BREAK setMiniForceMap");
 			break;
@@ -441,7 +430,7 @@ export function setMiniForceMap() {
 		const rangeScanExtra = army.getBodiesNum(RANGED_ATTACK) > 0 ? 3 : 0
 		let scanSize = 8 + rangeScanExtra + Math.floor(influentRangePlus);
 		// SAN(army, "scanSize", scanSize)
-		if (!sasVariables.inResourceArea(army)) {
+		if (!inResourceArea(army)) {
 			SA(army, "not in resource area")
 			scanSize = Math.min(scanSize, 12)
 		}

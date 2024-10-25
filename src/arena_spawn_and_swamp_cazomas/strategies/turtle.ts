@@ -1,23 +1,24 @@
 import { ConstructionSite, StructureContainer, StructureRampart, StructureRoad, StructureWall } from "game/prototypes"
 import { getTicks } from "game/utils"
 
+import { CARRY } from "game/constants"
 import { builderTurtle } from "../roles/builder"
 import { defender_rampart } from "../roles/defender"
+import { harvester } from "../roles/harvester"
 import { jamer } from "../roles/jamer"
-import { sasVariables } from "../SASVariables"
-import { supplyHarvester } from "../strategy_tool"
 import { createCS, createCS_wait, supplyCS } from "../units/constructionSite"
 import { set_setMiniForceMapOn } from "../units/maps"
 import { baseLoseRampart } from "../units/ramparts"
 import { getSpawnAndBaseContainerEnergy, resetStartGateAvoidFromEnemies, spawn, spawnCleared, spawnCreep, spawnCreepInFront } from "../units/spawn"
 import { SpawnType } from "../units/spawnTypeList"
 import { TB } from "../utils/autoBodys"
+import { bodyCM } from "../utils/bodyParts"
 import { set_switchCPUModeOn } from "../utils/CPU"
 import { friends, getEnemyArmies, getFreeEnergy, setIsTurtleContainer } from "../utils/Cre"
-import { tick } from "../utils/game"
+import { leftRate, leftVector, tick } from "../utils/game"
 import { containers, isMyGO, myConstructionSites } from "../utils/gameObjectInitialize"
 import { displayPos } from "../utils/HasHits"
-import { divide0, relu } from "../utils/JS"
+import { divide0, relu, sum } from "../utils/JS"
 import { findGO, overallMap } from "../utils/overallMap"
 import { currentGuessPlayer, Dooms } from "../utils/player"
 import { absRange, atPos, COO, getRangePoss, GR, plusVector, Pos, X_axisDistance, Y_axisDistance } from "../utils/pos"
@@ -55,9 +56,9 @@ export function useStandardTurtling(st: number, strength: number = 0) {
 	supplyCS({ x: spawn.x, y: spawn.y + 1 }, StructureRampart, 10);
 	supplyCS({ x: spawn.x, y: spawn.y - 1 }, StructureRampart, 10);
 	if (strength > 0) {
-		supplyCS({ x: spawn.x + sasVariables.leftRate(), y: spawn.y }, StructureRampart, 10);
+		supplyCS({ x: spawn.x + leftRate(), y: spawn.y }, StructureRampart, 10);
 	}
-	supplyCS({ x: spawn.x - sasVariables.leftRate(), y: spawn.y }, StructureRampart, 10);
+	supplyCS({ x: spawn.x - leftRate(), y: spawn.y }, StructureRampart, 10);
 	// supply
 	supplyHarvester(st);
 	// supplyHarvester
@@ -300,23 +301,23 @@ function supplyExtraRamparts() {
 		// 	supplyCS({ x: spawn.x, y: spawn.y - 2 }, StructureRampart, ramWorth)
 		// } else
 		if (buildExtraRamRate > startBias + 5 * increaseBias) {
-			supplyCS({ x: spawn.x - 2 * sasVariables.leftRate(), y: spawn.y + 1 }, StructureRampart, ramWorth, false, false, true)
+			supplyCS({ x: spawn.x - 2 * leftRate(), y: spawn.y + 1 }, StructureRampart, ramWorth, false, false, true)
 		}
 		if (buildExtraRamRate > startBias + 4 * increaseBias) {
-			supplyCS({ x: spawn.x - 2 * sasVariables.leftRate(), y: spawn.y - 1 }, StructureRampart, ramWorth,
+			supplyCS({ x: spawn.x - 2 * leftRate(), y: spawn.y - 1 }, StructureRampart, ramWorth,
 				false, false, true)
 		}
 		if (buildExtraRamRate > startBias + 3 * increaseBias) {
-			supplyCS({ x: spawn.x - 2 * sasVariables.leftRate(), y: spawn.y }, StructureRampart, ramWorth)
+			supplyCS({ x: spawn.x - 2 * leftRate(), y: spawn.y }, StructureRampart, ramWorth)
 		}
 		if (buildExtraRamRate > startBias + 2 * increaseBias) {
-			supplyCS({ x: spawn.x + 2 * sasVariables.leftRate(), y: spawn.y + 1 }, StructureRampart, ramWorth)
+			supplyCS({ x: spawn.x + 2 * leftRate(), y: spawn.y + 1 }, StructureRampart, ramWorth)
 		}
 		if (buildExtraRamRate > startBias + 1 * increaseBias) {
-			supplyCS({ x: spawn.x + 2 * sasVariables.leftRate(), y: spawn.y - 1 }, StructureRampart, ramWorth)
+			supplyCS({ x: spawn.x + 2 * leftRate(), y: spawn.y - 1 }, StructureRampart, ramWorth)
 		}
 		if (buildExtraRamRate > startBias) {
-			supplyCS({ x: spawn.x + 2 * sasVariables.leftRate(), y: spawn.y }, StructureRampart, ramWorth)
+			supplyCS({ x: spawn.x + 2 * leftRate(), y: spawn.y }, StructureRampart, ramWorth)
 		}
 	}
 }
@@ -373,7 +374,7 @@ function supplyContainer() {
 		&& getFreeEnergy(i) > 0)
 	SA(displayPos(), "supplyContainer aroundCon=" + COO(aroundCon))
 	if (!aroundCon) {
-		const pos = plusVector(spawn, sasVariables.leftVector())
+		const pos = plusVector(spawn, leftVector())
 		SA(displayPos(), "pos=" + COO(pos))
 		createCS_wait(pos, StructureContainer, 13)
 	}

@@ -11,7 +11,6 @@ import { invalid } from "../utils/JS";
 import { findGO } from "../utils/overallMap";
 import { atPos, COO, Pos } from "../utils/pos";
 import { drawLineComplex, SA } from "../utils/visual";
-import { wc, WT, WT_C } from "./util_WT";
 
 // export let CSs: CS[] = []
 /** extend of ConstructionSite */
@@ -19,12 +18,12 @@ export class CS extends ConstructionSite {
 	inited: boolean | undefined
 	decayEvent: Event | undefined;
 	useDecay: boolean | undefined;
-	wt: WT_C | undefined
+	wt: number| undefined
 }
 /**initiate all constructionSites to CS*/
 export function initCS(cs: CS) {
 	if (!cs.inited) {
-		cs.wt = wc(0)
+		cs.wt = 0
 		cs.useDecay = true
 		cs.inited = true
 	}
@@ -50,8 +49,8 @@ export function hasConstructionSite(pos: Pos): boolean {
 	return getMyCSs().find(i => atPos(i, pos)) !== undefined;
 }
 /**get the worth of CS*/
-export function getCSWT(cs: CS): WT {
-	return cs.wt ? cs.wt : wc(0)
+export function getCSWT(cs: CS): number {
+	return cs.wt ? cs.wt : 0
 }
 /**init an action Sequence*/
 export function initActionSequence(...actions: (() => void)[]): {
@@ -160,7 +159,7 @@ export function createCS(
 				if (invalid(myCS))
 					csw = 0;
 				else
-					csw = getCSWT(myCS).w
+					csw = getCSWT(myCS)
 				//progressRate bonus
 				const pr = getProgressRate(myCS); //0~1
 				const prBonus = 1 + 2 * pr;
@@ -189,7 +188,7 @@ export function createCS(
 		if (rtn && rtnObj) {
 			rtnObj.decayEvent = new Event_C();
 			rtnObj.useDecay = useDecay;
-			rtnObj.wt = wc(worth);
+			rtnObj.wt = worth;
 			rtnObj.inited = true
 			return true;
 		}
@@ -227,7 +226,7 @@ export function getMaxWorthCSS(css: CS[]): CS | undefined {
 	let maxWorth: number = -Infinity;
 	let rtn;
 	for (let cs of css) {
-		let w = getCSWT(cs).w
+		let w = getCSWT(cs)
 		if (w === undefined) w = 0;
 		if (w > maxWorth) {
 			maxWorth = w;

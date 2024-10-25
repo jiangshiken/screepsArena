@@ -1,37 +1,44 @@
+import { inRange_int } from "./JS";
+import { Pos } from "./pos";
+import { drawLineComplex } from "./visual";
+export type StNumber=number
 /** the startGate top or bottom ,true is top,will decide the area search*/
-let startGateUp: boolean = false;
-/** you are at the left or the right of the game map*/
-let left: boolean;
-const topY: number = 10;
-const bottomY: number = 89;
-const leftBorder1 = 13;
-const rightBorder1 = 85;
-const leftBorder2 = 14;
-const rightBorder2 = 86;
-const midBorder = 50;
-function leftRate(): number {
-	return this.left ? -1 : 1;
+export let startGateUp: boolean = false;
+export function set_startGateUp(b:boolean){
+	startGateUp=b
 }
-function leftVector(): Pos {
-	if (this.left) {
+/** you are at the left or the right of the game map*/
+export let left: boolean;
+export function set_left(b:boolean){
+	left=b
+}
+export const topY: number = 10;
+export const bottomY: number = 89;
+export const leftBorder1 = 13;
+export const rightBorder1 = 85;
+export const leftBorder2 = 14;
+export const rightBorder2 = 86;
+export const midBorder = 50;
+export function leftRate(): number {
+	return left ? -1 : 1;
+}
+export function leftVector(): Pos {
+	if (left) {
 		return { x: -1, y: 0 };
 	} else {
 		return { x: 1, y: 0 };
 	}
 }
 /** you are at the area that will gene container*/
-function inResourceArea(pos: Pos): boolean {
-	if (invalidPos(pos))
-		return false;
-	else
-		return inRange_int(pos.x, 13, 87) && inRange_int(pos.y, 2, 98);
+export function inResourceArea(pos: Pos): boolean {
+	return inRange_int(pos.x, 13, 87) && inRange_int(pos.y, 2, 98);
 }
 /** is outside */
-function isOutside(o: Pos): boolean {
+export function isOutside(o: Pos): boolean {
 	return o.x >= 15 && o.x <= 85;
 }
 /** get the area by pos and other parameter*/
-function getArea(
+export function getArea(
 	pos: Pos,
 	leftBorder: number,
 	rightBorder: number,
@@ -47,41 +54,37 @@ function getArea(
  * that it will search path to the first gate ,then the next gate ,and then search to
  * the enemy spawn
  */
-function getNewTarByArea(cre: Pos, tar: Pos) {
+export function getNewTarByArea(cre: Pos, tar: Pos) {
 	let newTar = tar;
-
-	if (invalidPos(cre) || invalidPos(tar)) {
-		return tar;
-	}
-	let creArea = this.getArea(cre, this.leftBorder1, this.rightBorder2, this.midBorder);
-	let tarArea = this.getArea(tar, this.leftBorder1, this.rightBorder2, this.midBorder);
+	let creArea = getArea(cre, leftBorder1, rightBorder2, midBorder);
+	let tarArea = getArea(tar, leftBorder1, rightBorder2, midBorder);
 	//
-	let top = this.topY;
-	let bottom = this.bottomY;
+	let top = topY;
+	let bottom = bottomY;
 	if (creArea === "left" && tarArea === "right") {
 		//go left top
-		if (this.startGateUp) newTar = { x: this.leftBorder2, y: top };
-		else newTar = { x: this.leftBorder2, y: bottom };
+		if (startGateUp) newTar = { x: leftBorder2, y: top };
+		else newTar = { x: leftBorder2, y: bottom };
 	} else if (creArea === "right" && tarArea === "left") {
 		//go right bottom
-		if (this.startGateUp) newTar = { x: this.rightBorder1, y: top };
-		else newTar = { x: this.rightBorder1, y: bottom };
+		if (startGateUp) newTar = { x: rightBorder1, y: top };
+		else newTar = { x: rightBorder1, y: bottom };
 	} else if (creArea === "left" && tarArea === "top")
-		newTar = { x: this.leftBorder2, y: top };
+		newTar = { x: leftBorder2, y: top };
 	else if (creArea === "top" && tarArea === "left")
-		newTar = { x: this.leftBorder1, y: top };
+		newTar = { x: leftBorder1, y: top };
 	else if (creArea === "left" && tarArea === "bottom")
-		newTar = { x: this.leftBorder2, y: bottom };
+		newTar = { x: leftBorder2, y: bottom };
 	else if (creArea === "bottom" && tarArea === "left")
-		newTar = { x: this.leftBorder1, y: bottom };
+		newTar = { x: leftBorder1, y: bottom };
 	else if (creArea === "right" && tarArea === "bottom")
-		newTar = { x: this.rightBorder1, y: bottom };
+		newTar = { x: rightBorder1, y: bottom };
 	else if (creArea === "bottom" && tarArea === "right")
-		newTar = { x: this.rightBorder2, y: bottom };
+		newTar = { x: rightBorder2, y: bottom };
 	else if (creArea === "right" && tarArea === "top")
-		newTar = { x: this.rightBorder1, y: top };
+		newTar = { x: rightBorder1, y: top };
 	else if (creArea === "top" && tarArea === "right")
-		newTar = { x: this.rightBorder2, y: top };
+		newTar = { x: rightBorder2, y: top };
 	drawLineComplex(cre, newTar, 0.25, "#222222");
 	return newTar;
 }

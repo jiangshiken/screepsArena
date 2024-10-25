@@ -6,7 +6,6 @@ import { defender_rampart } from "../roles/defender";
 import { stdAttacker, stdHealer, stdShoter } from "../roles/fighters_std";
 import { harvester } from "../roles/harvester";
 import { jamer } from "../roles/jamer";
-import { resourceDestroyer } from "../roles/resourceDestroyer";
 import { toughDefender } from "../roles/toughDefender";
 import { getEnemyForceMapValue, getForceMapValue, getFriendForceMapValue, miniForceMap_fri } from "../units/maps";
 import { EEB, spawn, spawnAndExtensionsEnergy } from "../units/spawn";
@@ -18,7 +17,7 @@ import { calculateForce, Cre, cres, enemies, friends, getAllUnits, getTaunt, set
 import { addStrategyTick, strategyTick, tick } from "../utils/game";
 import { displayPos } from "../utils/HasHits";
 import { getRangePossByStep, midPoint } from "../utils/pos";
-import { dotted, drawLineComplex, SA, SAN } from "../utils/visual";
+import { SA, SAN } from "../utils/visual";
 import { spawnStartHarvester } from "./strategyTool";
 
 /**if expose the spawn (bait)*/
@@ -37,18 +36,16 @@ export function useStandardStrategy() {
 	// }
 	for (let cre of enemies) {
 		SAN(cre, "speed_general", cre.getSpeed_general())
-		const predictPos = cre.battle.findPredictPos(3, 3)
-		drawLineComplex(cre, predictPos, 0.7, "#22ff66", dotted)
 	}
 	for (let cre of cres) {
-		SAN(cre, "force", calculateForce(cre).value)
+		SAN(cre, "force", calculateForce(cre))
 	}
 	// if (tick === 1) {
 	// 	init_predictTickList();
 	// }
 	for (let unit of getAllUnits()) {
-		SAN(unit, "taunt_V", getTaunt(unit, true).value);
-		SAN(unit, "taunt", getTaunt(unit).value);
+		SAN(unit, "taunt_V", getTaunt(unit, true));
+		SAN(unit, "taunt", getTaunt(unit));
 	}
 	//draw force map
 	const drawPoss = getRangePossByStep(midPoint, 50, miniForceMap_fri.scale)
@@ -85,7 +82,7 @@ function getMainArmyNum(fri: Cre[]): number {
 	// const numOver6A = fri.filter(i => i.getBodiesNum(ATTACK) >= 7).length
 	// const supplyAParts = fri.filter(i => inDoubleRange(i.getBodiesNum(ATTACK), 1, 5)).map(i => i.getBodiesNum(ATTACK)).reduce((a, b) => a + b, 0)
 	// const rtn = num6A + 1.2 * numOver6A + 0.1 * supplyAParts
-	const rtn: number = 0.5 * sumForceByArr(fri.filter(i => i.getBodiesNum(ATTACK) > 0)).value
+	const rtn: number = 0.5 * sumForceByArr(fri.filter(i => i.getBodiesNum(ATTACK) > 0))
 	// PS("mainArmyNum=" + rtn)
 	return rtn
 }
@@ -148,9 +145,6 @@ export function getSpawnTypeList_st(): SpawnType[] {
 		//50
 		new SpawnType(jamer, 6 * EBB1p7 * TSRR * TKB6_3 * EEB(50, 1.2), TB("M"),
 			fri => fri.filter(i => i.role === jamer).length),
-		//100
-		new SpawnType(resourceDestroyer, 4 * EBB1p7 * TSRR * TKB6_3 * EEB(100, 1.2), TB("CM"),
-			fri => fri.filter(i => i.role === resourceDestroyer).length),
 		//1340
 		new SpawnType(stdAttacker, TKB4_6 * supplyBonus * EEB(1340, 9), TB("14M8A"),
 			fri => getMainArmyNum(fri), true),

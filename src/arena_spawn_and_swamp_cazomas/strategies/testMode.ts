@@ -18,11 +18,11 @@ import { ct, pt } from "../utils/CPU";
 import { Cre, friends, id, Role } from "../utils/Cre";
 import { validEvent } from "../utils/event";
 import { S } from "../utils/export";
-import { P, tick } from "../utils/game";
+import { tick } from "../utils/game";
 import { divideReduce } from "../utils/JS";
 import { MyMap } from "../utils/MyMap";
 import { atPos, GR, midPoint, plusVector } from "../utils/pos";
-import { drawPolyLight, drawRangeComplex, fillCircle, SA } from "../utils/visual";
+import { drawPolyLight, drawRangeComplex, fillCircle, P, SA } from "../utils/visual";
 
 //这个是测试脚本集合，将所有的测试保留在这里，以便版本变更时确认是否还有以下的特性
 //Role

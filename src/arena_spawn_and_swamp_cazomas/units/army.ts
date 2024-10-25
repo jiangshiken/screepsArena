@@ -40,14 +40,14 @@ export function getRoundFightAndAvoidNum(cre: Cre, scanFilter: (cre: Cre) => boo
 		i.upgrade.fight === true ?
 			(0.5 + i.getSpeed_general())
 			* divideReduce(GR(i, cre), scanRange / 2)
-			* calculateForce(i).value
+			* calculateForce(i)
 			: 0
 	)
 	const avoidNum = sum(roundOtherAttackers, i =>
 		i.upgrade.fight === false ?
 			(0.5 + i.getSpeed_general())
 			* divideReduce(GR(i, cre), scanRange / 2)
-			* calculateForce(i).value
+			* calculateForce(i)
 			: 0
 	)
 	return { fightNum: fightNum, avoidNum: avoidNum }
@@ -184,11 +184,11 @@ export function getFitRate(cre: Cre, unit: Unit, isHealer: boolean, extraBonus?:
 	const scanValueRange = 35
 	let taunt: number
 	if (range >= scanValueRange) {
-		taunt = getTaunt(unit, true).value;
+		taunt = getTaunt(unit, true);
 	} else if (friends.filter(i => GR(i, cre) <= scanValueRange && hasEnemyThreatAround(i, 8)).length === 0) {
-		taunt = getTaunt(unit, true).value;
+		taunt = getTaunt(unit, true);
 	} else {
-		taunt = getTaunt(unit).value;
+		taunt = getTaunt(unit);
 	}
 	//dooms high taunt
 	if (currentGuessPlayer === Dooms && unit instanceof Cre && unit.getBodiesNum(WORK) >= 2) {
@@ -208,7 +208,7 @@ export function getFitRate(cre: Cre, unit: Unit, isHealer: boolean, extraBonus?:
 	//calculate earn
 	const friendForce = getFriendForceMapValue(cre) + getFriendForceMapValue(unit)
 	const enemyForce = getEnemyForceMapValue(cre) + getEnemyForceMapValue(unit)
-	const earn = isHealer ? 0 : getEarning(friendForce, enemyForce).value
+	const earn = isHealer ? 0 : getEarning(friendForce, enemyForce)
 	//calculate cost
 	let cost;
 	if (range > 20) {
@@ -234,7 +234,7 @@ export function getFitRate(cre: Cre, unit: Unit, isHealer: boolean, extraBonus?:
 	const tauntExtra = 0.4 * taunt
 	const earnExtra = 0.4 * earn
 	const basicFit = tauntExtra + earnExtra + friendForceExtra
-	// const fitRate = extraBonusRate * healerBonus * taunt.value * divideReduce(cost, costConst)
+	// const fitRate = extraBonusRate * healerBonus * taunt * divideReduce(cost, costConst)
 	const fitRate = quickRangerBonus * speedEnoughBonus * extraBonusRate * healerBonus * basicFit
 		* divideReduce(cost, costConst)
 	//print

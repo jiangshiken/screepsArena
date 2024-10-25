@@ -6,15 +6,13 @@ import { builderStandard } from "../roles/builder";
 import { defender_rampart } from "../roles/defender";
 import { harvester } from "../roles/harvester";
 import { jamer } from "../roles/jamer";
-import { resourceDestroyer } from "../roles/resourceDestroyer";
 import { spawnRusher } from "../roles/spawnRusher";
-import { sasVariables } from "../SASVariables";
 import { createCS } from "../units/constructionSite";
 import { EEB, resetStartGateAvoidFromEnemies, spawn, spawnAndExtensionsEnergy } from "../units/spawn";
 import { spawnBySpawnTypeList, SpawnType } from "../units/spawnTypeList";
 import { TB } from "../utils/autoBodys";
 import { enemyArmyReduce, enemyBuilderBonus, ticksBonus, totalInferiorityBonus, totalSuperiorityRateReduce } from "../utils/bonus";
-import { addStrategyTick, strategyTick, tick } from "../utils/game";
+import { addStrategyTick, leftRate, strategyTick, tick } from "../utils/game";
 import { myConstructionSites, myExtensions } from "../utils/gameObjectInitialize";
 import { displayPos } from "../utils/HasHits";
 import { GR, multiplyVector, plusVector } from "../utils/pos";
@@ -42,7 +40,7 @@ export function useArmedBuilderStrategy() {
 	const TG300_1p5 = tick >= 300 ? 1.5 : 1
 	const TIB = totalInferiorityBonus();
 	if (tick === 1) {
-		createCS(plusVector(multiplyVector({ x: 4, y: 2 }, sasVariables.leftRate()), spawn), StructureExtension, 11)
+		createCS(plusVector(multiplyVector({ x: 4, y: 2 }, leftRate()), spawn), StructureExtension, 11)
 	}
 	SAN(displayPos(), "extraExtBonus", extraExtBonus)
 	SA(displayPos(), "spawnAndExtensionsEnergy(spawn)=" + spawnAndExtensionsEnergy(spawn))
@@ -71,8 +69,6 @@ export function useArmedBuilderStrategy() {
 		new SpawnType(jamer, 0.8 * TKB2_4 * TKB4_4 * EBB1p7 * TSRR * EEB(50, 1.2), TB("M"),
 			fri => fri.filter(i => i.role === jamer).length),
 		//100
-		new SpawnType(resourceDestroyer, 0.4 * TKB2_2 * TKB4_2 * EBB1p7 * TSRR * EEB(100, 1.2), TB("CM"),
-			fri => fri.filter(i => i.role === resourceDestroyer).length),
 		// //500
 		// new SpawnType(stdHealer, 0.15 * EEB(500, 1.4), TB("5MH"),
 		// 	fri => fri.filter(i => i.role === stdHealer).length),

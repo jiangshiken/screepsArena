@@ -6,7 +6,7 @@ import { spawn, spawnAndExtensionsEnergy, spawnNearBlockedAround } from "../unit
 import { calculateForce, enemies, enemyAttackNum, friends, getEnergy, getHarvables, hasThreat, is5MA, sumForceByArr } from "./Cre";
 import { displayPos } from "./HasHits";
 import { divide0, divideReduce, relu, sum } from "./JS";
-import { GR, myGetRange, Pos, X_axisDistance } from "./pos";
+import { GR, Pos, X_axisDistance } from "./pos";
 import { SA } from "./visual";
 
 export function rangeBonus(
@@ -55,15 +55,15 @@ export function getFriendEnemyForceSum(includeRam: boolean = false) {
 }
 export function getSuperiorRate(includeRam: boolean = false) {
 	const feRtn = getFriendEnemyForceSum(includeRam)
-	let ff = feRtn.friendForceSum.value
-	let ef = feRtn.enemyForceSum.value
+	let ff = feRtn.friendForceSum
+	let ef = feRtn.enemyForceSum
 	return divide0(ff, ef + 1)
 }
 /** my force -enemy force*/
 export function getSuperior(includeRam: boolean = false, detail: boolean = false) {
 	const feRtn = getFriendEnemyForceSum(includeRam)
-	let ff = feRtn.friendForceSum.value
-	let ef = feRtn.enemyForceSum.value
+	let ff = feRtn.friendForceSum
+	let ef = feRtn.enemyForceSum
 	let rtn = 10 * (ff - ef);
 	if (detail) {
 		SA(displayPos(), "friendForceSum=" + ff);
@@ -123,12 +123,12 @@ export function enemyMoveSpeedReduce(rate: number) {
 	return 1 / enemyMoveSpeedBonus(rate)
 }
 export function enemyMoveSpeedBonus(rate: number) {
-	// const moveSum = sum(enemies, i => i.getSpeed_general() * calculateForce(i).value)
-	const moveSum = sum(enemies, i => i.getSpeed_general() * calculateForce(i).value)
+	// const moveSum = sum(enemies, i => i.getSpeed_general() * calculateForce(i))
+	const moveSum = sum(enemies, i => i.getSpeed_general() * calculateForce(i))
 	return 1 + relu(rate - 1) * 0.25 * moveSum;
 }
 export function enemy5MABonus(rate: number) {
-	// const moveSum = sum(enemies, i => i.getSpeed_general() * calculateForce(i).value)
+	// const moveSum = sum(enemies, i => i.getSpeed_general() * calculateForce(i))
 	const sum = enemies.filter(i => is5MA(i)).length
 	return 1 + relu(rate - 1) * 1 * sum;
 }
@@ -163,10 +163,10 @@ export function enemyArmyReduce(rate: number): number {
 export function enemyArmyBonus(rate: number): number {
 	let enemiesThreated = enemies.filter((i) => hasThreat(i));
 	let sumForce = sumForceByArr(enemiesThreated);
-	return 1 + relu(rate - 1) * 0.5 * sumForce.value;
+	return 1 + relu(rate - 1) * 0.5 * sumForce;
 }
 export function getBaseRangeBonus(pos: Pos) {
-	return 1 + 25 / myGetRange(pos, spawn);
+	return 1 + 25 / GR(pos, spawn);
 }
 // export function getForceBonus(pos: Pos) {
 //     let f = -getForceMapValue(pos);
@@ -185,7 +185,7 @@ export function ticksReduce(n: number, strength: number = 2) {
 
 export function spawnDangerousBonus(rate: number) {
 	let ets = enemies.filter((i) => hasThreat(i) && X_axisDistance(i, spawn) <= 10);
-	let ef = sumForceByArr(ets).value;
+	let ef = sumForceByArr(ets);
 	return 1 + relu(rate - 1) * 3 * ef;
 }
 

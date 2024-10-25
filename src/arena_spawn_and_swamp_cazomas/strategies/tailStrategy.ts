@@ -5,11 +5,11 @@ import { stdShoter } from "../roles/fighters_std";
 import { jamer } from "../roles/jamer";
 import { PullTarsTask, set_pullIgnoreSwamp } from "../units/pullTasks";
 import { enemySpawn, spawn, spawnCleared, spawnCreep } from "../units/spawn";
-import { best } from "../util_WT";
+
 import { TB } from "../utils/autoBodys";
 import { Cre, enemies, friends, getDamagedRate, getTaunt, hasThreat, MoveTask, oppoUnits, Role, Unit } from "../utils/Cre";
 import { displayPos, inRampart } from "../utils/HasHits";
-import { d2, first, goInRange, ranBool, sum } from "../utils/JS";
+import { best, d2, first, goInRange, ranBool, sum } from "../utils/JS";
 import { Dooms, getGuessPlayer, Tigga } from "../utils/player";
 import { Adj, atPos, getDirectionByPos, GR, Pos, X_axisDistance, Y_axisDistance } from "../utils/pos";
 import { drawLineComplex, SA } from "../utils/visual";
@@ -169,7 +169,7 @@ function tailMeleeJob(cre:Cre){
         const sameBonus = cre.upgrade.currentTarget === tar ? 2 : 1
         const otherLeaders=friends.filter(i=>i.role===tailMelee && i!==cre)
         const linkBonus=1+3*otherLeaders.filter(i=>i.upgrade.currentTarget === tar).length
-        const tauntBonus = 1 + 0.02*getTaunt(tar).value
+        const tauntBonus = 1 + 0.02*getTaunt(tar)
         const final = disBonus * sameBonus*linkBonus * typeBonus * tauntBonus*enSpawnBonus
         SA(tar, 'T=' +d2(final)+ " lkb="+d2(linkBonus)+" tyb="+d2(typeBonus)
             +" disb="+d2(disBonus) +" ttb="+d2(tauntBonus)+' xb='+d2(enSpawnBonus))

@@ -2,7 +2,7 @@
 import { findFitOppoUnit } from "../units/army";
 import { Cre, enemies, getDecideSearchRtnNoArea, getRangePosArr, hasThreat, Role } from "../utils/Cre";
 import { tick } from "../utils/game";
-import { COO, myGetRange } from "../utils/pos";
+import { COO, GR } from "../utils/pos";
 import { SA } from "../utils/visual";
 
 /**do heal and shot and the same time*/
@@ -14,8 +14,8 @@ export function healShoterControl(cre: Cre) {
 		return;
 	}
 	let enemiesThreat = enemies.filter((i) => hasThreat(i));
-	let enemiesRanged = enemiesThreat.filter((i) => myGetRange(i, cre) <= 2);
-	let enemiesRanged3 = enemiesThreat.filter((i) => myGetRange(i, cre) == 3);
+	let enemiesRanged = enemiesThreat.filter((i) => GR(i, cre) <= 2);
+	let enemiesRanged3 = enemiesThreat.filter((i) => GR(i, cre) == 3);
 	if (enemiesRanged.length > 0) {
 		SA(cre, "enemiesRanged.length=" + enemiesRanged.length);
 		let tarOOA = getRangePosArr(enemiesRanged, 11);
