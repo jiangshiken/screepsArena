@@ -3,11 +3,11 @@ import { ATTACK, CARRY, HEAL, MOVE, RANGED_ATTACK, WORK } from "game/constants";
 import { getTicks } from "game/utils";
 
 import { spawn, spawnAndExtensionsEnergy, spawnNearBlockedAround } from "../units/spawn";
-import { displayPos } from "./util_attackable";
-import { calculateForce, enemies, enemyAttackNum, friends, getEnergy, getHarvables, hasThreat, is5MA, sumForceByArr } from "./util_Cre";
-import { divide0, divideReduce, relu, sum } from "./util_JS";
-import { GR, myGetRange, Pos, X_axisDistance } from "./util_pos";
-import { SA } from "./util_visual";
+import { calculateForce, enemies, enemyAttackNum, friends, getEnergy, getHarvables, hasThreat, is5MA, sumForceByArr } from "./Cre";
+import { displayPos } from "./HasHits";
+import { divide0, divideReduce, relu, sum } from "./JS";
+import { GR, myGetRange, Pos, X_axisDistance } from "./pos";
+import { SA } from "./visual";
 
 export function rangeBonus(
 	range: number,

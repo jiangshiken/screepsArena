@@ -1,7 +1,7 @@
 
 import { GameObject } from "game/prototypes";
-import { d2, invalid, valid } from "./util_JS";
-import { COO, Pos_C } from "./util_pos";
+import { d2, invalid, valid } from "./JS";
+import { COO, Pos_C } from "./pos";
 
 /** get print string not print attribute */
 export function toString0(o: any): string {

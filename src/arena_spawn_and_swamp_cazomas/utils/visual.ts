@@ -3,11 +3,11 @@ import { RoomPosition } from "game/prototypes";
 import { getTicks } from "game/utils";
 import { Visual } from "game/visual";
 
-import { Event } from "./util_event";
-import { PL } from "./util_game";
-import { d2 } from "./util_JS";
-import { overallMap } from "./util_overallMap";
-import { Pos, pos00, Pos_C } from "./util_pos";
+import { Event } from "./event";
+import { PL } from "./game";
+import { d2 } from "./JS";
+import { overallMap } from "./overallMap";
+import { Pos, pos00, Pos_C } from "./pos";
 
 /**
  * the list of SAVis

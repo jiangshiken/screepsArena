@@ -2,13 +2,13 @@ import { builder4Ram } from "../roles/builder";
 import { sasVariables } from "../SASVariables";
 import { supplyCS } from "../units/constructionSite";
 import { spawn, spawnCleared, spawnCreep } from "../units/spawn";
-import { TB } from "../utils/util_autoBodys";
-import { friends } from "../utils/util_Cre";
-import { SA } from "../utils/util_visual";
+import { TB } from "../utils/autoBodys";
+import { friends } from "../utils/Cre";
+import { SA } from "../utils/visual";
 import { spawnStartHarvester } from "./strategyTool";
 
 import { StructureRampart } from "game/prototypes";
-import { displayPos } from "../utils/util_attackable";
+import { displayPos } from "../utils/HasHits";
 
 /**use 4 ramparts to defend the base*/
 export function use4RamDefend(st: number, exposeSpawnSimple: boolean = false) {

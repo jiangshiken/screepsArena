@@ -1,7 +1,7 @@
 
-import { valid } from "./util_JS";
-import { MyMap } from "./util_MyMap";
-import { Pos } from "./util_pos";
+import { valid } from "./JS";
+import { MyMap } from "./MyMap";
+import { Pos } from "./pos";
 
 /**
  * a map store all things has pos in the game

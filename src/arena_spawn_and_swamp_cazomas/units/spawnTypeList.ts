@@ -1,10 +1,10 @@
 
 import { BodyPartConstant } from "game/constants";
 
-import { Cre, friends, Role } from "../utils/util_Cre";
-import { S } from "../utils/util_export";
-import { d2, repeat } from "../utils/util_JS";
-import { P, SA } from "../utils/util_visual";
+import { Cre, friends, Role } from "../utils/Cre";
+import { S } from "../utils/export";
+import { d2, repeat } from "../utils/JS";
+import { P, SA } from "../utils/visual";
 import { enoughEnergy, spawn, spawnAndSpawnListEmpty, spawnCreep } from "./spawn";
 
 export function spawnBySpawnTypeList(spl: SpawnType[]) {

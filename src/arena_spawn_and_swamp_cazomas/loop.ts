@@ -11,18 +11,18 @@ import { CS, initCS } from "./units/constructionSite";
 import { firstInit_maps, loopStart_maps, setMoveMatrix } from "./units/maps";
 import { setRamMoveMapValue } from "./units/ramparts";
 import { checkSpawns, enemySpawn, initSpa, setEnemySpawn, setSpawn, Spa, spawn } from "./units/spawn";
-import { Cont, displayPos, enemySpawnPos, setEnemySpawnPos, setSpawnPos, spawnPos } from "./utils/util_attackable";
-import { getSuperior, getSuperiorRate } from "./utils/util_bonus";
-import { ct, getCPUPercent, lowCPUMode, pt, ptSum, setLowCPUMode, switchCPUModeOn } from "./utils/util_CPU";
-import { controlCreeps, cres, enemies, friends, getAllUnits, getDecideSearchRtn, getEnemyProducers, getEnergy, getGameObjects, getMyProducers, initialCresAtLoopStart } from "./utils/util_Cre";
-import { Event_C, validEvent } from "./utils/util_event";
-import { P, setTick, tick } from "./utils/util_game";
-import { constructionSites, containers, getPrototype, initialGameObjectsAtLoopStart, spawns } from "./utils/util_gameObjectInitialize";
-import { divideReduce } from "./utils/util_JS";
-import { firstInit_overallMap, overallMapInit, setGameObjectsThisTick, setOverallMap } from "./utils/util_overallMap";
-import { GR } from "./utils/util_pos";
-import { append_largeSizeText, firstInit_visual, loopEnd_visual, loopStart_visual, SA, SAN } from "./utils/util_visual";
-import { showEnemies, visual } from "./utils/util_visual_Cre";
+import { getSuperior, getSuperiorRate } from "./utils/bonus";
+import { ct, getCPUPercent, lowCPUMode, pt, ptSum, setLowCPUMode, switchCPUModeOn } from "./utils/CPU";
+import { controlCreeps, cres, enemies, friends, getAllUnits, getDecideSearchRtn, getEnemyProducers, getEnergy, getGameObjects, getMyProducers, initialCresAtLoopStart } from "./utils/Cre";
+import { Event_C, validEvent } from "./utils/event";
+import { P, setTick, tick } from "./utils/game";
+import { constructionSites, containers, getPrototype, initialGameObjectsAtLoopStart, spawns } from "./utils/gameObjectInitialize";
+import { Cont, displayPos, enemySpawnPos, setEnemySpawnPos, setSpawnPos, spawnPos } from "./utils/HasHits";
+import { divideReduce } from "./utils/JS";
+import { firstInit_overallMap, overallMapInit, setGameObjectsThisTick, setOverallMap } from "./utils/overallMap";
+import { GR } from "./utils/pos";
+import { append_largeSizeText, firstInit_visual, loopEnd_visual, loopStart_visual, SA, SAN } from "./utils/visual";
+import { showEnemies, visual } from "./utils/visual_Cre";
 
 
 export function loopEnd() {

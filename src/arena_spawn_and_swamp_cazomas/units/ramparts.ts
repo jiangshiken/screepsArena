@@ -4,16 +4,16 @@ import { CostMatrix } from "game/path-finder";
 import { StructureRampart } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
-import { spawnPos } from "../utils/util_attackable";
-import { rangeBonus } from "../utils/util_bonus";
-import { blocked, Cre, enemies, enRamAroundCost, friends, getDecideSearchRtnNoArea, getEnemyArmies, getOtherFriends, hasOppoUnitsAround, hits, my } from "../utils/util_Cre";
-import { Event_C } from "../utils/util_event";
-import { tick } from "../utils/util_game";
-import { myRamparts, oppoRamparts } from "../utils/util_gameObjectInitialize";
-import { last, relu, sum, valid } from "../utils/util_JS";
-import { findGO, overallMap } from "../utils/util_overallMap";
-import { atPos, COO, getRangePoss, GR, myGetRange, Pos } from "../utils/util_pos";
-import { dotted, drawLineComplex, drawPolyLight, SA } from "../utils/util_visual";
+import { rangeBonus } from "../utils/bonus";
+import { blocked, Cre, enemies, enRamAroundCost, friends, getDecideSearchRtnNoArea, getEnemyArmies, getOtherFriends, hasOppoUnitsAround, hits, my } from "../utils/Cre";
+import { Event_C } from "../utils/event";
+import { tick } from "../utils/game";
+import { myRamparts, oppoRamparts } from "../utils/gameObjectInitialize";
+import { spawnPos } from "../utils/HasHits";
+import { last, relu, sum, valid } from "../utils/JS";
+import { findGO, overallMap } from "../utils/overallMap";
+import { atPos, COO, getRangePoss, GR, myGetRange, Pos } from "../utils/pos";
+import { dotted, drawLineComplex, drawPolyLight, SA } from "../utils/visual";
 import { moveMap } from "./maps";
 import { enemySpawn, spawn } from "./spawn";
 

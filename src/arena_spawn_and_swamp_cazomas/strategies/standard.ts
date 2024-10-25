@@ -11,14 +11,14 @@ import { toughDefender } from "../roles/toughDefender";
 import { getEnemyForceMapValue, getForceMapValue, getFriendForceMapValue, miniForceMap_fri } from "../units/maps";
 import { EEB, spawn, spawnAndExtensionsEnergy } from "../units/spawn";
 import { spawnBySpawnTypeList, SpawnType } from "../units/spawnTypeList";
-import { displayPos } from "../utils/util_attackable";
-import { TB } from "../utils/util_autoBodys";
-import { enemy5MABonus, enemyArmyBonus, enemyAttackBonus, enemyAttackReduce, enemyBuilderBonus, enemyHealBonus, enemyHealReduction, enemyMoveSpeedBonus, enemyMoveSpeedReduce, enemyQuickAttackReduce, enemyRABonus, enemyRAReduce, enemyRASlowBonus, enemySlowShoterBonus, enemyWorkerBonus, getSuperior, getSuperiorRate, spawnBlockBonus, spawnDangerousBonus, spawnEnergyAroundBonus, spawnEnergyBonus, ticksBonus, ticksReduce, totalInferiorityBonus, totalSuperiorityBonus, totalSuperiorityRateBonus, totalSuperiorityRateReduce } from "../utils/util_bonus";
-import { getCPUPercent, setLowCPUMode, switchCPUModeOn } from "../utils/util_CPU";
-import { calculateForce, Cre, cres, enemies, friends, getAllUnits, getTaunt, set_spawnDps, set_spawnExtraTaunt, sumForceByArr } from "../utils/util_Cre";
-import { addStrategyTick, strategyTick, tick } from "../utils/util_game";
-import { getRangePossByStep, midPoint } from "../utils/util_pos";
-import { dotted, drawLineComplex, SA, SAN } from "../utils/util_visual";
+import { TB } from "../utils/autoBodys";
+import { enemy5MABonus, enemyArmyBonus, enemyAttackBonus, enemyAttackReduce, enemyBuilderBonus, enemyHealBonus, enemyHealReduction, enemyMoveSpeedBonus, enemyMoveSpeedReduce, enemyQuickAttackReduce, enemyRABonus, enemyRAReduce, enemyRASlowBonus, enemySlowShoterBonus, enemyWorkerBonus, getSuperior, getSuperiorRate, spawnBlockBonus, spawnDangerousBonus, spawnEnergyAroundBonus, spawnEnergyBonus, ticksBonus, ticksReduce, totalInferiorityBonus, totalSuperiorityBonus, totalSuperiorityRateBonus, totalSuperiorityRateReduce } from "../utils/bonus";
+import { getCPUPercent, setLowCPUMode, switchCPUModeOn } from "../utils/CPU";
+import { calculateForce, Cre, cres, enemies, friends, getAllUnits, getTaunt, set_spawnDps, set_spawnExtraTaunt, sumForceByArr } from "../utils/Cre";
+import { addStrategyTick, strategyTick, tick } from "../utils/game";
+import { displayPos } from "../utils/HasHits";
+import { getRangePossByStep, midPoint } from "../utils/pos";
+import { dotted, drawLineComplex, SA, SAN } from "../utils/visual";
 import { spawnStartHarvester } from "./strategyTool";
 
 /**if expose the spawn (bait)*/

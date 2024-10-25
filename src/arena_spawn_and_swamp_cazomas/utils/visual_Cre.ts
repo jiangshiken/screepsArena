@@ -2,12 +2,12 @@
 import { Structure } from "game/prototypes";
 import { Visual } from "game/visual";
 
-import { calculateForce, Cre, cres, damaged, enemies, friends, hits, hitsMax, Unit } from "./util_Cre";
-import { P } from "./util_game";
-import { myStructures } from "./util_gameObjectInitialize";
-import { valid } from "./util_JS";
-import { validPos } from "./util_pos";
-import { drawRangeComplex } from "./util_visual";
+import { calculateForce, Cre, cres, damaged, enemies, friends, hits, hitsMax, Unit } from "./Cre";
+import { P } from "./game";
+import { myStructures } from "./gameObjectInitialize";
+import { valid } from "./JS";
+import { validPos } from "./pos";
+import { drawRangeComplex } from "./visual";
 
 const VISUAL_LAYER = 6
 /**

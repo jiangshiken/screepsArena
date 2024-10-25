@@ -1,9 +1,9 @@
 import { arenaInfo } from "game";
 import { getCpuTime } from "game/utils";
-import { Event_C, Event_Number } from "./util_event";
-import { tick } from "./util_game";
-import { KNumber } from "./util_JS";
-import { P } from "./util_visual";
+import { Event_C, Event_Number } from "./event";
+import { tick } from "./game";
+import { KNumber } from "./JS";
+import { P } from "./visual";
 
 export let cpuRateHistory = 0
 export function recordEmergencyHistory(cpuUsed: number) {

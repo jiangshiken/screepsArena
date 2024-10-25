@@ -5,12 +5,12 @@ import { findClosestByRange } from "game/utils";
 import { cpuBreakJudge } from "../units/army";
 import { attackWeakRampart, defendTheRampart } from "../units/ramparts";
 import { spawn } from "../units/spawn";
-import { spawnPos } from "../utils/util_attackable";
-import { Cre, enemies, getEnemyThreats, Role } from "../utils/util_Cre";
-import { tick } from "../utils/util_game";
-import { findGO } from "../utils/util_overallMap";
-import { GR } from "../utils/util_pos";
-import { P, SA } from "../utils/util_visual";
+import { Cre, enemies, getEnemyThreats, Role } from "../utils/Cre";
+import { tick } from "../utils/game";
+import { spawnPos } from "../utils/HasHits";
+import { findGO } from "../utils/overallMap";
+import { GR } from "../utils/pos";
+import { P, SA } from "../utils/visual";
 
 //role
 /**the defender that hide in rampart*/

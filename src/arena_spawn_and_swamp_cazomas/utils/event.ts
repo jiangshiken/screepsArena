@@ -1,7 +1,7 @@
 
 import { getTicks } from "game/utils";
 
-import { Pos, Pos_C } from "./util_pos";
+import { Pos, Pos_C } from "./pos";
 
 //interfaces
 /**

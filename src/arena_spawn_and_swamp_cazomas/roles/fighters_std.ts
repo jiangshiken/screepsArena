@@ -3,16 +3,16 @@ import { getEnemyForceMapValue, getForceMapValue, getForceMapValueRate, getFrien
 import { inMyHealthyRampart } from "../units/ramparts";
 import { enemySpawn, spawn } from "../units/spawn";
 import { maxWorth_lamb } from "../util_WT";
-import { inOppoRampart, inRampart } from "../utils/util_attackable";
-import { getSuperior, getSuperiorRate, rangeBonus, rangeReduce } from "../utils/util_bonus";
-import { calSumCPU, ct } from "../utils/util_CPU";
-import { blocked, calculateForce, Cre, exist, friends, getDamagedRate, getDecideSearchRtn, getDps, getEarning, getEnemyArmies, getEnemyThreats, getFriendArmies, getFriendsThreated, getOtherFriends, getTaunt, hasEnemyArmyAround, hasEnemyHealerAround, hasEnemyThreatAround, hasOtherFriendAround, id, isHealer, isHealer_restrict, isSlowShoter, isWorker, myGO, protectSelfExtraTaunt, Role, sumForceByArr, Unit } from "../utils/util_Cre";
-import { Event_C, Event_Number, Event_Pos, validEvent } from "../utils/util_event";
-import { tick } from "../utils/util_game";
-import { myRamparts } from "../utils/util_gameObjectInitialize";
-import { divide0, divideReduce, goInRange, randomBool, relu_oppo, sum } from "../utils/util_JS";
-import { COO, filterInRange, getDirectionByPos, getRangePoss, GR, Pos } from "../utils/util_pos";
-import { drawLineComplex, SA, SAN } from "../utils/util_visual";
+import { getSuperior, getSuperiorRate, rangeBonus, rangeReduce } from "../utils/bonus";
+import { calSumCPU, ct } from "../utils/CPU";
+import { blocked, calculateForce, Cre, exist, friends, getDamagedRate, getDecideSearchRtn, getDps, getEarning, getEnemyArmies, getEnemyThreats, getFriendArmies, getFriendsThreated, getOtherFriends, getTaunt, hasEnemyArmyAround, hasEnemyHealerAround, hasEnemyThreatAround, hasOtherFriendAround, id, isHealer, isHealer_restrict, isSlowShoter, isWorker, myGO, protectSelfExtraTaunt, Role, sumForceByArr, Unit } from "../utils/Cre";
+import { Event_C, Event_Number, Event_Pos, validEvent } from "../utils/event";
+import { tick } from "../utils/game";
+import { myRamparts } from "../utils/gameObjectInitialize";
+import { inOppoRampart, inRampart } from "../utils/HasHits";
+import { divide0, divideReduce, goInRange, randomBool, relu_oppo, sum } from "../utils/JS";
+import { COO, filterInRange, getDirectionByPos, getRangePoss, GR, Pos } from "../utils/pos";
+import { drawLineComplex, SA, SAN } from "../utils/visual";
 import { defender_RampartJob } from "./defender";
 import { harvesterJob } from "./harvester";
 

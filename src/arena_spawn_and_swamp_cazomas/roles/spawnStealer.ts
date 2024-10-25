@@ -1,7 +1,7 @@
 
 import { enemySpawn } from "../units/spawn";
-import { Cre, Role } from "../utils/util_Cre";
-import { SA } from "../utils/util_visual";
+import { Cre, Role } from "../utils/Cre";
+import { SA } from "../utils/visual";
 
 /**tring to attack the enemy spawn when no one noticed*/
 export const spawnStealer: Role = new Role("spawnStealer", spawnStealerControl);

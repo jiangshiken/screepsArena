@@ -3,12 +3,12 @@ import { ATTACK, BODYPART_COST, BodyPartConstant, CARRY, HEAL, MOVE, RANGED_ATTA
 import { StructureSpawn } from "game/prototypes";
 
 import { sasVariables } from "../SASVariables";
-import { blocked, Cre, Creep_advance, enemies, friends, getEnergy, hasThreat, initCre, Role, SpawnInfo } from "../utils/util_Cre";
-import { S } from "../utils/util_export";
-import { containers, extensions, gameObjects, myExtensions, mySpawns, oppoExtensions, spawns, structures } from "../utils/util_gameObjectInitialize";
-import { arrayEqual } from "../utils/util_JS";
-import { getRangePoss, GR, plusVector, Pos, X_axisDistance } from "../utils/util_pos";
-import { P, SA, SAN } from "../utils/util_visual";
+import { blocked, Cre, Creep_advance, enemies, friends, getEnergy, hasThreat, initCre, Role, SpawnInfo } from "../utils/Cre";
+import { S } from "../utils/export";
+import { containers, extensions, gameObjects, myExtensions, mySpawns, oppoExtensions, spawns, structures } from "../utils/gameObjectInitialize";
+import { arrayEqual } from "../utils/JS";
+import { getRangePoss, GR, plusVector, Pos, X_axisDistance } from "../utils/pos";
+import { P, SA, SAN } from "../utils/visual";
 
 /** your first StructureSpawn*/
 export let spawn: Spa;

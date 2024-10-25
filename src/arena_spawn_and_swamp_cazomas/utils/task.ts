@@ -1,8 +1,8 @@
 
 import { getTicks } from "game/utils";
 
-import { Event, Event_C, validEvent } from "./util_event";
-import { invalid, remove, valid } from "./util_JS";
+import { Event, Event_C, validEvent } from "./event";
+import { invalid, remove, valid } from "./JS";
 
 export function findTask<E extends Task>(
 	ht: HasTasks,

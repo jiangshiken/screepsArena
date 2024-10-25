@@ -10,12 +10,12 @@ import { useTailStrategy } from "./strategies/tailStrategy";
 import { useTest } from "./strategies/testMode";
 import { useTurtleStrategy } from "./strategies/turtle";
 import { set_setMoveMapAvoidFarOn } from "./units/maps";
-import { ct, lowCPUMode, pt } from "./utils/util_CPU";
-import { displayPos } from "./utils/util_attackable";
-import { P, tick } from "./utils/util_game";
-import { Dooms, Kerob, Tigga, getGuessPlayer, identifyOpponent, startWaitTick } from "./utils/util_player";
-import { SA } from "./utils/util_visual";
-import { showHealthBars } from "./utils/util_visual_Cre";
+import { ct, lowCPUMode, pt } from "./utils/CPU";
+import { P, tick } from "./utils/game";
+import { displayPos } from "./utils/HasHits";
+import { Dooms, Kerob, Tigga, getGuessPlayer, identifyOpponent, startWaitTick } from "./utils/player";
+import { SA } from "./utils/visual";
+import { showHealthBars } from "./utils/visual_Cre";
 
 //overall variable
 let useMod: string;

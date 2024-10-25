@@ -1,9 +1,9 @@
 
 import { findFitOppoUnit } from "../units/army";
-import { Cre, enemies, getDecideSearchRtnNoArea, getRangePosArr, hasThreat, Role } from "../utils/util_Cre";
-import { tick } from "../utils/util_game";
-import { COO, myGetRange } from "../utils/util_pos";
-import { SA } from "../utils/util_visual";
+import { Cre, enemies, getDecideSearchRtnNoArea, getRangePosArr, hasThreat, Role } from "../utils/Cre";
+import { tick } from "../utils/game";
+import { COO, myGetRange } from "../utils/pos";
+import { SA } from "../utils/visual";
 
 /**do heal and shot and the same time*/
 export const healShoter: Role = new Role("healShoter", healShoterControl);

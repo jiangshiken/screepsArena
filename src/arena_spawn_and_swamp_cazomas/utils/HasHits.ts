@@ -1,15 +1,18 @@
-import { sasVariables } from "../SASVariables";
-import { SA } from "../util_visual";
-import { Event, Event_Number, Event_Pos, filterEventList, validEvent } from "./util_event";
-import { tick } from "./util_game";
-import { containers, isOppoGO, resources } from "./util_gameObjectInitialize";
-import { valid } from "./util_JS";
-import { findGO, overallMap } from "./util_overallMap";
-import { atPos, GR, Pos } from "./util_pos";
+
+import { Event, Event_Number, Event_Pos, filterEventList, validEvent } from "./event";
+import { tick } from "./game";
+import { containers, isOppoGO, resources } from "./gameObjectInitialize";
+import { valid } from "./JS";
+import { findGO, overallMap } from "./overallMap";
+import { atPos, GR, Pos } from "./pos";
 
 import { GameObject, Resource, StructureContainer, StructureRampart, StructureSpawn } from "game/prototypes";
 import { getObjectsByPrototype, getRange } from "game/utils";
 
+interface HasHits{
+	hits():number
+	maxHits():number
+}
 export function getConts(): Cont[] {
 	return <Cont[]>containers
 }

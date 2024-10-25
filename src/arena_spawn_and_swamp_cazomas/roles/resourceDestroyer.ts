@@ -5,14 +5,14 @@ import { findClosestByRange } from "game/utils"
 
 import { cpuBreakJudge, fleeWeakComplex, givePositionToImpartantFriend } from "../units/army"
 import { maxWorth } from "../util_WT"
-import { hasResourceOnGround, inOppoRampart } from "../utils/util_attackable"
-import { Cre, enemies, getEnergy, getExist, hasEnemyAround_lamb, isMyTick, Role } from "../utils/util_Cre"
-import { S } from "../utils/util_export"
-import { tick } from "../utils/util_game"
-import { oppoExtensions, resources } from "../utils/util_gameObjectInitialize"
-import { divideReduce } from "../utils/util_JS"
-import { COO, getRangePoss, GR, midPoint } from "../utils/util_pos"
-import { SA } from "../utils/util_visual"
+import { Cre, enemies, getEnergy, getExist, hasEnemyAround_lamb, isMyTick, Role } from "../utils/Cre"
+import { S } from "../utils/export"
+import { tick } from "../utils/game"
+import { oppoExtensions, resources } from "../utils/gameObjectInitialize"
+import { hasResourceOnGround, inOppoRampart } from "../utils/HasHits"
+import { divideReduce } from "../utils/JS"
+import { COO, getRangePoss, GR, midPoint } from "../utils/pos"
+import { SA } from "../utils/visual"
 
 /**Used to drop and decay the energy that enemy builder has.
  * Withdraw the energy from the enemy extensions

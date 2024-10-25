@@ -3,8 +3,8 @@ import { BOTTOM, BOTTOM_LEFT, BOTTOM_RIGHT, DirectionConstant, LEFT, RIGHT, TOP,
 import { GameObject, RoomPosition } from "game/prototypes";
 import { getDirection, getRange } from "game/utils";
 
-import { printError } from "./util_game";
-import { inRange_int, valid } from "./util_JS";
+import { printError } from "./game";
+import { inRange_int, valid } from "./JS";
 
 /**
  * represent a position type

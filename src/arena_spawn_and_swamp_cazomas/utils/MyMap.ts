@@ -1,7 +1,7 @@
 
-import { inRange_int } from "./util_JS";
-import { Pos, pos00 } from "./util_pos";
-import { P } from "./util_visual";
+import { inRange_int } from "./JS";
+import { Pos, pos00 } from "./pos";
+import { P } from "./visual";
 
 /**
  * a map that represent the map tiles

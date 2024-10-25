@@ -2,14 +2,14 @@
 import { MOVE, WORK } from "game/constants";
 import { getRange } from "game/utils";
 
-import { drawLineLight, SA } from "arena_spawn_and_swamp_cazomas/utils/util_visual";
+import { drawLineLight, SA } from "arena_spawn_and_swamp_cazomas/utils/visual";
 
-import { Cre, exist, friends, getFriendArmies, hasMovePart, Role, Task_Cre } from "../utils/util_Cre";
-import { validEvent } from "../utils/util_event";
-import { S } from "../utils/util_export";
-import { remove } from "../utils/util_JS";
-import { COO, Pos } from "../utils/util_pos";
-import { findTaskByFilter, Task } from "../utils/util_task";
+import { Cre, exist, friends, getFriendArmies, hasMovePart, Role, Task_Cre } from "../utils/Cre";
+import { validEvent } from "../utils/event";
+import { S } from "../utils/export";
+import { remove } from "../utils/JS";
+import { COO, Pos } from "../utils/pos";
+import { findTaskByFilter, Task } from "../utils/task";
 
 /** will go to pull the fatigue friend ,
  * until it can move by full speed by itself

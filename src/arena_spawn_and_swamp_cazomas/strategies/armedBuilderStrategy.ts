@@ -12,13 +12,13 @@ import { sasVariables } from "../SASVariables";
 import { createCS } from "../units/constructionSite";
 import { EEB, resetStartGateAvoidFromEnemies, spawn, spawnAndExtensionsEnergy } from "../units/spawn";
 import { spawnBySpawnTypeList, SpawnType } from "../units/spawnTypeList";
-import { displayPos } from "../utils/util_attackable";
-import { TB } from "../utils/util_autoBodys";
-import { enemyArmyReduce, enemyBuilderBonus, ticksBonus, totalInferiorityBonus, totalSuperiorityRateReduce } from "../utils/util_bonus";
-import { addStrategyTick, strategyTick, tick } from "../utils/util_game";
-import { myConstructionSites, myExtensions } from "../utils/util_gameObjectInitialize";
-import { GR, multiplyVector, plusVector } from "../utils/util_pos";
-import { SA, SAN } from "../utils/util_visual";
+import { TB } from "../utils/autoBodys";
+import { enemyArmyReduce, enemyBuilderBonus, ticksBonus, totalInferiorityBonus, totalSuperiorityRateReduce } from "../utils/bonus";
+import { addStrategyTick, strategyTick, tick } from "../utils/game";
+import { myConstructionSites, myExtensions } from "../utils/gameObjectInitialize";
+import { displayPos } from "../utils/HasHits";
+import { GR, multiplyVector, plusVector } from "../utils/pos";
+import { SA, SAN } from "../utils/visual";
 import { useStandardTurtling } from "./turtle";
 
 /**use a bunch of builder with ATTACK part to confuse enemy and harve huge

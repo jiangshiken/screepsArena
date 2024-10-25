@@ -2,7 +2,7 @@
 import { ConstructionSite, Creep, GameObject, Resource, Structure, StructureContainer, StructureExtension, StructureRampart, StructureRoad, StructureSpawn, StructureTower, StructureWall } from "game/prototypes";
 import { getObjectsByPrototype } from "game/utils";
 
-import { invalid, valid } from "./util_JS";
+import { invalid, valid } from "./JS";
 
 /** can be attack,has hits*/
 export type Attackable_origin = Creep | Structure;

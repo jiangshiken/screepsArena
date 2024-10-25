@@ -1,7 +1,7 @@
 
-import { Cre, Task_Role } from "../utils/util_Cre";
-import { Pos } from "../utils/util_pos";
-import { Task_C } from "../utils/util_task";
+import { Cre, Task_Role } from "../utils/Cre";
+import { Pos } from "../utils/pos";
+import { Task_C } from "../utils/task";
 
 /**can not move.Used to transport energy like a pipe*/
 export class PipeTask extends Task_Role {
