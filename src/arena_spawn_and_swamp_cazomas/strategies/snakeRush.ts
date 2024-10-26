@@ -5,18 +5,17 @@ import { findClosestByRange } from "game/utils";
 
 import { StructureExtension, StructureRampart, StructureSpawn } from "game/prototypes";
 
-import { builderTurtle } from "../roles/builder";
 import { shortDistanceFight } from "../roles/fighters_std";
 import { jamer } from "../roles/jamer";
 import { toughDefender } from "../roles/toughDefender";
-import { createCS } from "../units/constructionSite";
 import { setMoveMapSetRate, set_moveCostForceRate, set_swampFirst } from "../units/maps";
 import { PullTarsTask, setPullGoSwamp } from "../units/pullTasks";
 import { enemyRampartIsHealthy } from "../units/ramparts";
 import { enemySpawn, getBodiesCost, inEnBaseRan, inMyBaseRan, resetStartGateAvoidFromEnemies, spawn, spawnAndExtensionsEnergy, spawnCleared, spawnCreep, spawnCreep_ifHasEnergy } from "../units/spawn";
 
+import { supplyCS } from "../units/constructionSite";
 import { ct, et } from "../utils/CPU";
-import { Cre, Role, blocked, calculateForce, cres, damaged, defendInArea, enemies, enemyAWeight, exchangePos, exist, friends, getDamagedRate, getEnemyArmies, getEnemyThreats, getTaunt, hasEnemyThreatAround, hasThreat, isHealer, myUnits, oppo, oppoUnits, setEnRamAroundCost, sumForceByArr } from "../utils/Cre";
+import { Cre, Role, blocked, calculateForce, cres, damaged, defendInArea, enemies, enemyAWeight, exchangePos, exist, friends, getDamagedRate, getEnemyArmies, getEnemyThreats, getEnergy, getTaunt, hasEnemyThreatAround, hasThreat, isHealer, myUnits, oppo, oppoUnits, setEnRamAroundCost, sumForceByArr } from "../utils/Cre";
 import { displayPos, inRampart } from "../utils/HasHits";
 import { best, invalid, maxWorth_lamb, sum } from "../utils/JS";
 import { TB } from "../utils/autoBodys";
@@ -24,7 +23,7 @@ import { GTB } from "../utils/bodyParts";
 import { Event, Event_C, validEvent } from "../utils/event";
 import { SOA } from "../utils/export";
 import { addStrategyTick, leftVector, strategyTick, tick } from "../utils/game";
-import { oppoRamparts } from "../utils/gameObjectInitialize";
+import { constructionSites, oppoRamparts } from "../utils/gameObjectInitialize";
 import { findGO } from "../utils/overallMap";
 import { Dooms, Kerob, Tigga, currentGuessPlayer, getGuessPlayer } from "../utils/player";
 import { Adj, COO, GR, InShotRan, Pos, X_axisDistance, Y_axisDistance, atPos, getRangePoss, multiplyVector, plusVector } from "../utils/pos";
@@ -102,9 +101,31 @@ export let sum_snakePart0: number = 0
  */
 export function snakePartJob(cre: Cre) {
 	SA(cre, "i'm snakePart")
+	if(cre.getBodiesNum(WORK)>0){
+		if(Adj(cre,spawn)){
+			SA(cre, "ad")
+			if(getEnergy(cre)===0){
+				SA(cre, "w")
+				cre.macro.withdrawNormal(spawn)
+			}else{
+				SA(cre, "2")
+				const cs=constructionSites.find(i=>atPos(i,spawn))
+				if(cs){
+					SA(cre, "cs")
+					cre.master.build(cs)
+					cre.stop()
+					return
+				}
+			}
+		}
+	}
 	const index = cre.upgrade.spIndex
 	SA(cre, 'index=' + index);
-	cre.fight()
+	if(cre.getBodiesNum(WORK)>0){
+
+	}else{
+		cre.fight()
+	}
 	const leader = snakeLeader
 	//snake wait to rush
 	if (!snakeGo) {
@@ -532,8 +553,12 @@ export function decideSpawnPart(ind: number) {
 			(getGuessPlayer() === Dooms?"M11AM":"MR9AM")
 		// const tigga0 = "M11AM"
 		//300+640+50=990
-		const tigga1 = getGuessPlayer() === Tigga ? "6M8AM": "5M3H"
-		const tiggaType="9M"
+		//50+50+100+80+150+250+50
+		//300+200+200+240+50
+		//200+150+50+50+200+320
+		const tiggaHeadType="4M3CMC2W4A"
+		const tigga1 = getGuessPlayer() === Tigga ? tiggaHeadType: "5M3H"
+		const tiggaType="7M"
 		// const tigga1 = "5M3H"
 		//900
 		const tigga2 = getGuessPlayer() === Tigga ? tiggaType : "14M"
@@ -690,8 +715,9 @@ export function useSnakeRushStrategy() {
 	SA(displayPos(), "enemyAWeight()=" + enemyAWeight());
 	//defend spawn
 	if(getGuessPlayer() === Tigga){
+		supplyCS(spawn,StructureRampart)
 		if (snakeGo) {
-			supplyToughDefender(2)
+			supplyToughDefender(4)
 		}
 	}else if(getGuessPlayer() === Dooms){
 		if (snakeGo) {
@@ -715,8 +741,8 @@ export function useSnakeRushStrategy() {
 			// spawnCreep(TB("10M2R"), stdShoter)
 			// // }
 			// spawnCreep(TB("10M2H"), stdHealer)
-			spawnCreep(TB("MACW"), builderTurtle)
-			createCS({ x: spawn.x, y: spawn.y }, StructureRampart)
+			// spawnCreep(TB("MACW"), builderTurtle)
+			// createCS({ x: spawn.x, y: spawn.y }, StructureRampart)
 			// createCS({ x: spawn.x, y: spawn.y + 2 }, StructureExtension)
 			// createCS({ x: spawn.x - 1, y: spawn.y + 2 }, StructureExtension)
 			// createCS({ x: spawn.x + 1, y: spawn.y + 2 }, StructureExtension)
@@ -724,14 +750,16 @@ export function useSnakeRushStrategy() {
 		}
 	}
 	if (st >= 12 && tick < 600) {
-		if (trySpawnPart(6)) {
-		} else if (trySpawnPart(3)) {
-		} else if (trySpawnPart(4)) {
-		} else if (trySpawnPart(5)) {
-		} else if (trySpawnPart(2)) {
-		} else if (trySpawnPart(0)) {
-		} else if (trySpawnPart(1)) {
-		} else if (trySpawnPart(7)) {
+		if(!snakeGo){
+			if (trySpawnPart(6)) {
+			} else if (trySpawnPart(3)) {
+			} else if (trySpawnPart(4)) {
+			} else if (trySpawnPart(5)) {
+			} else if (trySpawnPart(2)) {
+			} else if (trySpawnPart(0)) {
+			} else if (trySpawnPart(1)) {
+			} else if (trySpawnPart(7)) {
+			}
 		}
 	}
 
@@ -761,11 +789,15 @@ export function useSnakeRushStrategy() {
 function command() {
 	if (snakeGo) {
 		set_swampFirst(true)
-		const head = snakeParts.find(i => snakeIndex(i)===0)//i.getBodiesNum(ATTACK) >= 1)
+		const head = best(snakeParts, i => -snakeIndex(i))//snakeParts.find(i => snakeIndex(i)===0)//i.getBodiesNum(ATTACK) >= 1)
 		const second = snakeParts.find(i =>snakeIndex(i)===1)// i.getBodiesNum(HEAL) >= 3||
 		const tail = best(snakeParts, i => snakeIndex(i))
 		if (head && tail && second) {
-			setPullGoSwamp(true)
+			if(getGuessPlayer()===Tigga){
+				// setPullGoSwamp(true)
+			}else{
+				setPullGoSwamp(true)
+			}
 			SA(head, "HEAD")
 			SA(tail, "TAIL")
 			const targets = oppoUnits.filter(i =>
@@ -846,6 +878,27 @@ function command() {
 				+ (hasMelee ? 0 : pureRangedBias)
 			if (getGuessPlayer() === Tigga) {
 				if (Adj(second, enemySpawn)) {
+					supplyCS(second,StructureRampart)
+					// if(getEnergy(second)<10){
+					// 	SA(second,"withdraw")
+					// 	const a=second.master.withdraw(enemySpawn, RESOURCE_ENERGY)
+					// 	SA(second,'a='+a)
+					// }else{
+					if(getEnergy(second)>0){
+						SA(second,"0")
+						const ram=constructionSites.find(i=>i.my && Adj(i,second))
+						if(ram){
+							second.master.build(ram)
+							SA(second,"1")
+						}else{
+							SA(second,"2")
+						}
+					}else{
+						SA(second,"3")
+						second.fight()
+					}
+					// builderStandardJob(second)
+					// }
 					// const followers = snakeParts.filter(i => snakeIndex(i)>0 && snakeIndex(i)<=2);
 					// const sortedFollowers = followers.sort((a, b) => spInd(a) - spInd(b))
 					// const rest = snakeParts.filter(i => snakeIndex(i)>=3);
@@ -856,26 +909,26 @@ function command() {
 						// // head.tasks.find(i => i instanceof PullTarsTask)?.end()
 						// const pos1
 						// new PullTarsTask(head, sortedFollowers, enemySpawn, undefined, false);
-					const rest = snakeParts.filter(i => snakeIndex(i)!==1);
-					let exc=false
-					for (let fol of rest) {
-						const threatEn=enemies.find(i=>Adj(i,second) && hasThreat(i))
-						if(threatEn){
-							SA(second,'THREAT')
-							if(Adj(fol,second)&& !Adj(fol,threatEn)){
-								SA(fol,'EXC')
-								fol.exchangePos_setAppointment(second)
-								exc=true
-							}else{
-								fol.MTJ_stop(enemySpawn)
-							}
-						}else{
-							fol.MTJ_stop(enemySpawn)
-						}
-					}
-					if(!exc){
-						second.stop()
-					}
+					// const rest = snakeParts.filter(i => snakeIndex(i)!==1);
+					// let exc=false
+					// for (let fol of rest) {
+					// 	const threatEn=enemies.find(i=>Adj(i,second) && hasThreat(i))
+					// 	if(threatEn){
+					// 		SA(second,'THREAT')
+					// 		if(Adj(fol,second)&& !Adj(fol,threatEn)){
+					// 			SA(fol,'EXC')
+					// 			fol.exchangePos_setAppointment(second)
+					// 			exc=true
+					// 		}else{
+					// 			fol.MTJ_stop(enemySpawn)
+					// 		}
+					// 	}else{
+					// 		fol.MTJ_stop(enemySpawn)
+					// 	}
+					// }
+					// if(!exc){
+					// 	second.stop()
+					// }
 					head.tasks.find(i => i instanceof PullTarsTask)?.end()
 					tail.tasks.find(i => i instanceof PullTarsTask)?.end()
 					SA(second, "ATT")

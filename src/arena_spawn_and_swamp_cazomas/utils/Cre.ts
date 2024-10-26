@@ -20,7 +20,7 @@ import { findGO, hasGO, overallMap } from "./overallMap";
 import { Kerob, getGuessPlayer } from "./player";
 import { Adj, COO, GR, Pos, X_axisDistance, atPos, getRangePoss, minusVector, multiplyVector, plusVector, pos00 } from "./pos";
 import { HasTasks, MultiTask, Task, Task_C, findTask, findTaskByFilter, useTasks } from "./task";
-import { P, SA, drawLineComplex, drawLineLight, drawPoly, drawPolyLight } from "./visual";
+import { P, SA, drawLineComplex, drawLineLight, drawPolyLight } from "./visual";
 
 export const defFindPathResult: FindPathResult = {
 	path: [], ops: 0, cost: 0, incomplete: true
@@ -2609,9 +2609,9 @@ export class Cre_pathFinder {
 			}
 		}
 		const rtn: FindPathResult = getDecideSearchRtn(this.master, tar, ops);
-		if (isWorker(this.master)) {
-			drawPoly(rtn.path, 0.75, "#aa22bb");
-		}
+		// if (this.master) {
+		// 	drawPoly(rtn.path, 1, "#aa22bb");
+		// }
 		return rtn
 	}
 }
@@ -2659,6 +2659,8 @@ export class FindPathAndMoveTask extends MoveTask {
 		} else this.tempTar = tar;
 		//
 		this.findPathStep = step;
+		// SA(master,"pathLen="+this.path.length)
+		// drawPoly(this.path,1,"#aaffaa")
 	}
 	loop_task(): void {
 		let st = ct();
@@ -2738,10 +2740,13 @@ export function getDecideSearchRtn(
 	let SR1 = getDecideSearchRtnNoArea(ori, newTar, op);
 	let SR2: FindPathResult | undefined;
 	let SR3: FindPathResult | undefined;
+	// SA(ori,"area0")
 	if (!atPos(newTar, tar)) {
+		// SA(ori,"area1")
 		let newTar2 = getNewTarByArea(newTar, tar);
 		SR2 = getDecideSearchRtnNoArea(newTar, newTar2, op);
 		if (!atPos(newTar2, tar)) {
+			// SA(ori,"area2")
 			SR3 = getDecideSearchRtnNoArea(newTar2, tar, op);
 		}
 	}
@@ -2781,6 +2786,7 @@ export function getDecideSearchRtnNoArea<T extends Pos>(
 	tarOOA: searchPathTarOOA<T>,
 	op?: FindPathOpts | undefined
 ): FindPathResult {
+	// SA(ori,"GDSRN")
 	let errReturn: FindPathResult = {
 		path: [],
 		cost: Infinity,
@@ -2801,8 +2807,6 @@ export function getDecideSearchRtnNoArea<T extends Pos>(
 		if (tarOOA.pos) {
 			return errReturn;
 		}
-	} else if (<Pos>tarOOA) {
-		return errReturn;
 	}
 	let newOp: FindPathOpts | undefined;
 	if (op) newOp = op;
@@ -2815,8 +2819,6 @@ export function getDecideSearchRtnNoArea<T extends Pos>(
 	if (!newOp.heuristicWeight) newOp.heuristicWeight = so.heuristicWeight;
 	if (!newOp.flee) newOp.flee = false;
 	let rtn = searchPath(ori, tarOOA, newOp);
-	// SA(ori,"getDecideSearch")
-	// if(
 	drawPolyLight(rtn.path);
 	return rtn;
 }

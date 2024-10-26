@@ -21,11 +21,11 @@ import { SA, SAN } from "../utils/visual";
 /**Builder that used in trutling,will not go to wild resource.
  * Only stay at ramparts.
 */
-export const builderTurtle: Role = new Role("builderTurtle", builderTurtleControl);
+export const builderTurtle: Role = new Role("builderTurtle", builderTurtleJob);
 /**Builder that will only harvest wild resources,if you give it an ATTACK part
  * it will rush enemySpawn when game near end
 */
-export const builderStandard: Role = new Role("builderStandard", builderStandardControl)
+export const builderStandard: Role = new Role("builderStandard", builderStandardJob)
 /**this type of builder will harvest outside after base building tasks finished*/
 export const builder4Ram: Role = new Role("builder4Ram", builder4RamJob);
 export function isBuilderOutSide(role: Role | undefined): boolean {
@@ -56,7 +56,7 @@ export function builder4RamJob(cre: Cre) {
 		// builderControl(cre);
 	} else {
 		SA(cre, "builderStandardControl")
-		builderStandardControl(cre);
+		builderStandardJob(cre);
 	}
 }
 /**get the energy of spawn and builderTurtles*/
@@ -72,7 +72,7 @@ export function spawnAndBuilderEnergy() {
 /**builder that build base structures and assign base containers.
  * Can be used as defender
 */
-export function builderTurtleControl(cre: Cre) {
+export function builderTurtleJob(cre: Cre) {
 	SA(cre, "builderTurtleControl")
 	cre.fight();
 	cre.taskPriority = 9
@@ -241,7 +241,7 @@ export function builderNormalControl(cre: Cre, tar: CS): boolean {
 	}
 }
 /**the job of builderStandard*/
-export function builderStandardControl(cre: Cre) {
+export function builderStandardJob(cre: Cre) {
 	SA(cre, "melee");
 	cre.fight()
 	//
