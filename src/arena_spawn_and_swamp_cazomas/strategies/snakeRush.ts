@@ -554,9 +554,10 @@ export function decideSpawnPart(ind: number) {
 		// const tigga0 = "M11AM"
 		//300+640+50=990
 		//50+50+100+80+150+250+50
-		//300+200+200+240+50
+		//300+150+50+50+200+240
+		const tiggaHeadType="6M3CMC2W3A"
 		//200+150+50+50+200+320
-		const tiggaHeadType="4M3CMC2W4A"
+		// const tiggaHeadType="4M3CMC2W4A"
 		const tigga1 = getGuessPlayer() === Tigga ? tiggaHeadType: "5M3H"
 		const tiggaType="7M"
 		// const tigga1 = "5M3H"
@@ -729,7 +730,7 @@ export function useSnakeRushStrategy() {
 	//spawn jamer
 	if (spawnJamer) {
 		if (st === 1) {
-			for (let i = 0; i < 6; i++) {
+			for (let i = 0; i < 3; i++) {
 				spawnCreep(TB("M"), jamer)
 			}
 		}
