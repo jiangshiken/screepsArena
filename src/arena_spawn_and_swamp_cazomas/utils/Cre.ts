@@ -18,7 +18,7 @@ import { Res, displayPos, getMyContainers, getRess, inRampart, isOppoContainer, 
 import { divide0, divideReduce, invalid, last, pow2, ranGet, remove, removeIf, valid } from "./JS";
 import { findGO, hasGO, overallMap } from "./overallMap";
 import { Kerob, getGuessPlayer } from "./player";
-import { Adj, COO, GR, Pos, X_axisDistance, atPos, getRangePoss, minusVector, multiplyVector, plusVector, pos00 } from "./pos";
+import { Adj, COO, GR, Pos, X_axisDistance, atPos, deltaPosToVec, getRangePoss, pos00, posPlusVec } from "./pos";
 import { HasTasks, MultiTask, Task, Task_C, findTask, findTaskByFilter, useTasks } from "./task";
 import { P, SA, drawLineComplex, drawLineLight, drawPolyLight } from "./visual";
 
@@ -862,10 +862,10 @@ export function getRoundEmptyPos(cre: Pos): Pos | undefined {
 /**
  * move by vector
  */
-export function moveByVector(cre: Cre, vec: Pos) {
-	const tarPos = plusVector(cre, vec);
-	cre.MTJ(tarPos);
-}
+// export function moveByVector(cre: Cre, vec: Vec) {
+// 	const tarPos = VecplusVec(cre, vec);
+// 	cre.MTJ(tarPos);
+// }
 export function getFriendArmies() {
 	return friends.filter(i => i.isArmy());
 }
@@ -1565,14 +1565,14 @@ export class Battle {
 		this.velocity = new Event_Pos(pos00)
 		this.tauntBonus = [];
 	}
-	/**predict the position of this Cre*/
-	predictOppo() {
-		const nowPos = this.master;
-		const hisPos: Pos = this.hisPos.pos;
-		const deltaPos = minusVector(nowPos, hisPos);
-		const step = 3;
-		this.increaseVelocity(deltaPos, 1 - 1 / step);
-	}
+	// /**predict the position of this Cre*/
+	// predictOppo() {
+	// 	const nowPos = this.master;
+	// 	const hisPos: Pos = this.hisPos.pos;
+	// 	const deltaPos = minusVector(nowPos, hisPos);
+	// 	const step = 3;
+	// 	this.increaseVelocity(deltaPos, 1 - 1 / step);
+	// }
 	/** try shot or rangedHeal */
 	shotAndRestore(): boolean {
 		// SA(this.master, "shotAndRestore");
@@ -1744,21 +1744,21 @@ export class Battle {
 	// 	// 	return this.master;
 	// 	// }
 	// }
-	inRangeVector(vec: Pos, maxRange: number): Pos {
-		const x = vec.x;
-		const y = vec.y;
-		const ax = Math.abs(x)
-		const ay = Math.abs(y)
-		if (ax <= maxRange && ay <= maxRange) {
-			return { x: x, y: y }
-		} else if (ax > ay) {
-			const rate = divide0(maxRange, ax)
-			return multiplyVector(vec, rate)
-		} else {
-			const rate = divide0(maxRange, ay)
-			return multiplyVector(vec, rate)
-		}
-	}
+	// inRangeVector(vec: Pos, maxRange: number): Pos {
+	// 	const x = vec.x;
+	// 	const y = vec.y;
+	// 	const ax = Math.abs(x)
+	// 	const ay = Math.abs(y)
+	// 	if (ax <= maxRange && ay <= maxRange) {
+	// 		return { x: x, y: y }
+	// 	} else if (ax > ay) {
+	// 		const rate = divide0(maxRange, ax)
+	// 		return VecMultiplyConst(vec, rate)
+	// 	} else {
+	// 		const rate = divide0(maxRange, ay)
+	// 		return VecMultiplyConst(vec, rate)
+	// 	}
+	// }
 	// /** find the predict position of `tar` */
 	// findPredictPosByCre(tar: Cre): Pos {
 	// 	let r = exist(tar) ? GR(this.master, tar) : 1;
@@ -1767,16 +1767,16 @@ export class Battle {
 	// 	return tar.battle ? tar.battle.findPredictPos(rate) : tar;
 	// }
 	/** calculate velocity */
-	increaseVelocity(deltaPos: Pos, decayRate: number) {
-		const veloAfterPlus = plusVector(this.velocity.pos, deltaPos);
-		this.velocity = new Event_Pos(multiplyVector(veloAfterPlus, decayRate));
-	}
+	// increaseVelocity(deltaPos: Pos, decayRate: number) {
+	// 	const veloAfterPlus = VecplusVec(this.velocity.pos, deltaPos);
+	// 	this.velocity = new Event_Pos(VecMultiplyConst(veloAfterPlus, decayRate));
+	// }
 	/** get the predict pos */
 	getPrePosInRange1() {
 		const hisPos = this.hisPos.pos;
 		const nowPos = this.master;
-		const nmh = minusVector(nowPos, hisPos);
-		const rtn = plusVector(nowPos, nmh);
+		const nmh = deltaPosToVec(nowPos, hisPos);
+		const rtn = posPlusVec(nowPos, nmh);
 		drawLineComplex(this.master, rtn, 0.25, "#00ff66");
 		return rtn;
 	}

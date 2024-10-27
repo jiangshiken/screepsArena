@@ -21,7 +21,7 @@ import { displayPos } from "../utils/HasHits"
 import { divide0, relu, sum } from "../utils/JS"
 import { findGO, overallMap } from "../utils/overallMap"
 import { currentGuessPlayer, Dooms } from "../utils/player"
-import { absRange, atPos, COO, getRangePoss, GR, plusVector, Pos, X_axisDistance, Y_axisDistance } from "../utils/pos"
+import { absRange, atPos, COO, getRangePoss, GR, Pos, posPlusVec, X_axisDistance, Y_axisDistance } from "../utils/pos"
 import { SA, SAN } from "../utils/visual"
 import { spawnStartHarvester } from "./strategyTool"
 
@@ -374,7 +374,7 @@ function supplyContainer() {
 		&& getFreeEnergy(i) > 0)
 	SA(displayPos(), "supplyContainer aroundCon=" + COO(aroundCon))
 	if (!aroundCon) {
-		const pos = plusVector(spawn, leftVector())
+		const pos = posPlusVec(spawn, leftVector())
 		SA(displayPos(), "pos=" + COO(pos))
 		createCS_wait(pos, StructureContainer, 13)
 	}

@@ -21,7 +21,7 @@ import { S } from "../utils/export";
 import { tick } from "../utils/game";
 import { divideReduce } from "../utils/JS";
 import { MyMap } from "../utils/MyMap";
-import { atPos, GR, midPoint, plusVector } from "../utils/pos";
+import { atPos, GR, midPoint, posPlusVec } from "../utils/pos";
 import { drawPolyLight, drawRangeComplex, fillCircle, P, SA } from "../utils/visual";
 
 //这个是测试脚本集合，将所有的测试保留在这里，以便版本变更时确认是否还有以下的特性
@@ -62,10 +62,10 @@ export function tester_PFC2_Job(cre: Cre) {
 }
 export function tester_PFC_Job(cre: Cre) {
 	SA(cre, "i'm tester_PFC")
-	const pos1 = plusVector(spawn, { x: 1, y: -1 })
-	const pos2 = plusVector(spawn, { x: 1, y: 0 })
-	const pos3 = plusVector(spawn, { x: 2, y: 0 })
-	const pos4 = plusVector(spawn, { x: 1, y: 1 })
+	const pos1 = posPlusVec(spawn, { vec_x: 1, vec_y: -1 })
+	const pos2 = posPlusVec(spawn, { vec_x: 1, vec_y: 0 })
+	const pos3 = posPlusVec(spawn, { vec_x: 2, vec_y: 0 })
+	const pos4 = posPlusVec(spawn, { vec_x: 1, vec_y: 1 })
 	const testTick = 50
 	if (tick <= testTick) {
 		if (cre.getBodiesNum(TOUGH) > 0) {
@@ -91,9 +91,9 @@ export function tester_PFC_Job(cre: Cre) {
 }
 export function tester_MSS_Job(cre: Cre) {
 	SA(cre, "i'm tester_MSS")
-	const pos1 = plusVector(spawn, { x: 1, y: -1 })
-	const pos2 = plusVector(spawn, { x: 1, y: 1 })
-	const pos3 = plusVector(spawn, { x: 2, y: 0 })
+	const pos1 = posPlusVec(spawn, { vec_x: 1, vec_y: -1 })
+	const pos2 = posPlusVec(spawn, { vec_x: 1, vec_y: 1 })
+	const pos3 = posPlusVec(spawn, { vec_x: 2, vec_y: 0 })
 	if (tick <= 20) {
 		if (id(cre) % 2 === 0) {
 			cre.master.moveTo(pos1)
@@ -108,14 +108,14 @@ export function tester_MSS_Job(cre: Cre) {
 export function tester_MCB_Job(cre: Cre) {
 	SA(cre, "i'm tester_MCB")
 	if (tick >= 34) {
-		const csPos = plusVector(spawn, { x: 2, y: -1 })
+		const csPos = posPlusVec(spawn, { vec_x: 2, vec_y: -1 })
 		cre.master.moveTo(csPos)
 	}
 }
 export function tester_DCB_Job(cre: Cre) {
 	SA(cre, "i'm tester_DCB")
-	const pos1 = plusVector(spawn, { x: 1, y: -1 })
-	const pos2 = plusVector(spawn, { x: 1, y: 0 })
+	const pos1 = posPlusVec(spawn, { vec_x: 1, vec_y: -1 })
+	const pos2 = posPlusVec(spawn, { vec_x: 1, vec_y: 0 })
 	if (id(cre) % 2 === 0) {
 		if (tick <= 20) {
 			cre.master.moveTo(pos1)
@@ -176,7 +176,7 @@ export function useTest() {
 	} else if (mode === "MCB") {
 		if (tick === 1) {
 			spawnCreep(TB("CM"), harvester)
-			const csPos = plusVector(spawn, { x: 2, y: -1 })
+			const csPos = posPlusVec(spawn, { vec_x: 2, vec_y: -1 })
 			createCS(csPos, StructureExtension)
 			spawnCreep(TB("WCM"), builder4Ram)
 			spawnCreep(TB("M"), tester_MCB)

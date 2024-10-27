@@ -25,11 +25,11 @@ export class Pos_C implements RoomPosition {
  * represent a position of the map
  */
 export class Vec {
-	readonly x: number;
-	readonly y: number;
+	readonly vec_x: number;
+	readonly vec_y: number;
 	constructor(x:number,y:number) {
-		this.x = validNum(x)?x:printError(0);
-		this.y = validNum(y)?y:printError(0);
+		this.vec_x = validNum(x)?x:printError(0);
+		this.vec_y = validNum(y)?y:printError(0);
 	}
 }
 export function validNum(x:number):boolean{
@@ -51,7 +51,7 @@ export function filterInRange<E extends Pos>(poss: E[], ori: Pos, range: number)
  * return -`vec`
  */
 export function oppoVector(vec: Vec): Vec {
-	return new Vec(-vec.x,-vec.y)
+	return new Vec(-vec.vec_x,-vec.vec_y)
 }
 export function getDirectionByPos(posFrom: Pos, posTo: Pos): DirectionConstant {
 	return getDirection(posTo.x - posFrom.x, posTo.y - posFrom.y)
@@ -96,23 +96,23 @@ export function possFromTo(ori: Pos, tar: Pos): Pos[] {
  * return (`w1`*`v1`+`w2`*`v2`)/(`w1`+`w2`)
  */
 export function plusVectorByWeight(
-	v1: Pos,
+	v1: Vec,
 	w1: number,
-	v2: Pos,
+	v2: Vec,
 	w2: number
-): Pos {
+): Vec {
 	const wv1 = w1 / (w1 + w2);
 	const wv2 = w2 / (w1 + w2);
-	const vt1 = multiplyVector(v1, wv1);
-	const vt2 = multiplyVector(v2, wv2);
-	return plusVector(vt1, vt2);
+	const vt1 = VecMultiplyConst(v1, wv1);
+	const vt2 = VecMultiplyConst(v2, wv2);
+	return vecPlusVec(vt1, vt2);
 }
 
 /**
  * return `n`*`vec`
  */
-export function multiplyVector(vec: Vec, n: number): Vec {
-	return new Vec (vec.x * n, vec.y * n)
+export function VecMultiplyConst(vec: Vec, n: number): Vec {
+	return new Vec (vec.vec_x * n, vec.vec_y * n)
 }
 /**
  * return |`ori.x`-`tar.x`|
@@ -153,27 +153,33 @@ export function getRangePossByStep(
 	}
 	return rtn;
 }
+export function posPlusVec(pos:Pos,vec:Vec):Pos{
+	return new Pos_C(pos.x+vec.vec_x,pos.y+vec.vec_y)
+}
+export function deltaPosToVec(pos1:Pos,pos2:Pos):Vec{
+	return new Vec(pos2.x-pos1.x,pos2.y-pos1.y)
+}
 /**
  * return `v1`+`v2`
  */
-export function plusVector(v1: Vec, v2: Vec): Pos {
- 	return new Vec(v1.x + v2.x, v1.y + v2.y);
+export function vecPlusVec(v1: Vec, v2: Vec): Vec {
+ 	return new Vec(v1.vec_x + v2.vec_x, v1.vec_y + v2.vec_y);
 }
 /** CounterClockWise
  */
-export function leftRotate(vec: Vec): Pos {
-	return new Vec(vec.y, -vec.x);
+export function leftRotate(vec: Vec): Vec {
+	return new Vec(vec.vec_y, -vec.vec_x);
 }
 /**ClockWise
  */
-export function rightRotate(vec: Vec): Pos {
-	return new Vec(-vec.y,vec.x);
+export function rightRotate(vec: Vec): Vec {
+	return new Vec(-vec.vec_y,vec.vec_x);
 }
 /**
  * return `v1`-`v2`
  */
-export function minusVector(v1: Vec, v2: Vec): Pos {
-	return new Vec( v1.x - v2.x, v1.y - v2.y);
+export function minusVector(v1: Vec, v2: Vec): Vec {
+	return new Vec( v1.vec_x - v2.vec_x, v1.vec_y - v2.vec_y);
 }
 /**
  * the same as {@link myGetRange}

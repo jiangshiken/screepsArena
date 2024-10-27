@@ -15,7 +15,7 @@ import { enemyArmyReduce, enemyBuilderBonus, ticksBonus, totalInferiorityBonus, 
 import { addStrategyTick, leftRate, strategyTick, tick } from "../utils/game";
 import { myConstructionSites, myExtensions } from "../utils/gameObjectInitialize";
 import { displayPos } from "../utils/HasHits";
-import { GR, multiplyVector, plusVector } from "../utils/pos";
+import { GR, posPlusVec, Vec, VecMultiplyConst } from "../utils/pos";
 import { SA, SAN } from "../utils/visual";
 import { useStandardTurtling } from "./turtle";
 
@@ -40,7 +40,7 @@ export function useArmedBuilderStrategy() {
 	const TG300_1p5 = tick >= 300 ? 1.5 : 1
 	const TIB = totalInferiorityBonus();
 	if (tick === 1) {
-		createCS(plusVector(multiplyVector({ x: 4, y: 2 }, leftRate()), spawn), StructureExtension, 11)
+		createCS(posPlusVec( spawn,VecMultiplyConst(new Vec( 4,  2), leftRate())), StructureExtension, 11)
 	}
 	SAN(displayPos(), "extraExtBonus", extraExtBonus)
 	SA(displayPos(), "spawnAndExtensionsEnergy(spawn)=" + spawnAndExtensionsEnergy(spawn))

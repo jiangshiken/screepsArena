@@ -6,7 +6,7 @@ import { spawn } from "../units/spawn";
 import { Cre, enemies, friends, Role } from "../utils/Cre";
 import { leftVector } from "../utils/game";
 import { getGuessPlayer, Tigga } from "../utils/player";
-import { absRange, getRangePoss, GR, multiplyVector, plusVector, Vec } from "../utils/pos";
+import { absRange, getRangePoss, GR, posPlusVec, Vec, VecMultiplyConst, vecPlusVec } from "../utils/pos";
 import { SA } from "../utils/visual";
 
 /**a defender with tough on the body part instead of building rampart around
@@ -17,6 +17,7 @@ export function toughDefenderJob(cre: Cre) {
 	cre.fight();
 	const cm = new CostMatrix();
 	if(getGuessPlayer()===Tigga){
+		SA(cre,"TIGGA")
 		if(cre.upgrade.index===undefined){
 			cre.upgrade.index=friends.filter(i=>i.role===toughDefender).length
 		}
@@ -25,13 +26,23 @@ export function toughDefenderJob(cre: Cre) {
 		const ind=cre.upgrade.index
 		const upVec=new Vec(0,1)
 		if(ind===1){
-			cre.MTJ_stop(plusVector(plusVector(spawn,leftVec),upVec))
+			SA(cre,"1")
+			const stop_pos=posPlusVec(spawn,vecPlusVec(leftVec,upVec))
+			cre.moveToNormal(stop_pos)
 		}else if(ind===2){
-			cre.MTJ_stop(plusVector(plusVector(spawn,multiplyVector(leftVec,2)),upVec))
+			SA(cre,"2")
+			const stop_pos=posPlusVec(spawn,vecPlusVec(upVec,VecMultiplyConst(leftVec,2)))
+			cre.moveToNormal(stop_pos)
 		}else if(ind===3){
-			cre.MTJ_stop(plusVector(spawn,leftVec))
+			SA(cre,"3")
+			const stop_pos=posPlusVec(spawn,leftVec)
+			cre.moveToNormal(stop_pos)
 		}else if(ind===4){
-			cre.MTJ_stop(plusVector(spawn,multiplyVector(leftVec,2)))
+			SA(cre,"4")
+			const stop_pos=posPlusVec(spawn,VecMultiplyConst(leftVec,2))
+			cre.moveToNormal(stop_pos)
+		}else{
+			SA(cre,"XX")
 		}
 	}else{
 		const rps = getRangePoss(spawn, 2);

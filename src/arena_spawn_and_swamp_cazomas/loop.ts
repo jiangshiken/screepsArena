@@ -12,26 +12,28 @@ import { setRamMoveMapValue } from "./units/ramparts";
 import { checkSpawns, enemySpawn, initSpa, setEnemySpawn, setSpawn, Spa, spawn } from "./units/spawn";
 import { getSuperior, getSuperiorRate } from "./utils/bonus";
 import { ct, getCPUPercent, lowCPUMode, pt, ptSum, setLowCPUMode, switchCPUModeOn } from "./utils/CPU";
-import { controlCreeps, cres, enemies, friends, getAllUnits, getDecideSearchRtn, getEnemyProducers, getEnergy, getGameObjects, getMyProducers, initialCresAtLoopStart } from "./utils/Cre";
+import { controlCreeps, cres, friends, getAllUnits, getDecideSearchRtn, getEnemyProducers, getEnergy, getGameObjects, getMyProducers, initialCresAtLoopStart } from "./utils/Cre";
 import { Event_C, validEvent } from "./utils/event";
 import { inResourceArea, PL, set_left, set_startGateUp, setTick, tick } from "./utils/game";
 import { constructionSites, containers, getPrototype, initialGameObjectsAtLoopStart, spawns } from "./utils/gameObjectInitialize";
 import { Cont, displayPos, enemySpawnPos, setEnemySpawnPos, setSpawnPos, spawnPos } from "./utils/HasHits";
 import { divideReduce } from "./utils/JS";
 import { firstInit_overallMap, overallMapInit, setGameObjectsThisTick, setOverallMap } from "./utils/overallMap";
-import { GR } from "./utils/pos";
-import { append_largeSizeText, firstInit_visual, loopEnd_visual, loopStart_visual, P, SA, SAN } from "./utils/visual";
+import { GR, Pos_C } from "./utils/pos";
+import { append_largeSizeText, drawText, firstInit_visual, loopEnd_visual, loopStart_visual, P, SA, SAN } from "./utils/visual";
 import { showEnemies, visual } from "./utils/visual_Cre";
 
 
 export function loopEnd() {
 	const st0 = ct();
+	drawText(new Pos_C(50,56),"F")
 	controlCreeps();
 	displayRoleCPU()
 	pt("controlCreeps", st0);
 	if (getCPUPercent() > 0.8 && switchCPUModeOn) {
 		setLowCPUMode(true)
 	}
+	drawText(new Pos_C(50,57),"G")
 	const st1 = ct();
 	if (!lowCPUMode) {
 		setHisPoss(); //history pos
@@ -39,9 +41,11 @@ export function loopEnd() {
 		showEnemies();
 	}
 	doLongProgress()
+	drawText(new Pos_C(50,58),"H")
 	printCPU();
 	append_largeSizeText("LEN")
 	loopEnd_visual();
+	drawText(new Pos_C(50,59),"I")
 	pt("loop end other", st1);
 }
 let initSpawnDistanceProgress = 0
@@ -57,11 +61,11 @@ function doLongProgress() {
 		}
 	}
 }
-function predictOppos() {
-	for (let en of enemies) {
-		en.battle.predictOppo()
-	}
-}
+// function predictOppos() {
+// 	for (let en of enemies) {
+// 		en.battle.predictOppo()
+// 	}
+// }
 /**
  * set all the hisPos of Creeps
  */
@@ -147,8 +151,8 @@ export function loopStart() {
 	// }
 	const st_predictOppos = ct();
 	// useTasks(predictTasks);
-	if (!lowCPUMode)
-		predictOppos()
+	// if (!lowCPUMode)
+	// 	predictOppos()
 	pt("predictOppos and setRamMoveMapValue", st_predictOppos);
 	const st_checkSpawns = ct();
 	checkSpawns();

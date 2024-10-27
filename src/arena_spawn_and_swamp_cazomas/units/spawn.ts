@@ -7,7 +7,7 @@ import { S } from "../utils/export";
 import { set_startGateUp, startGateUp } from "../utils/game";
 import { containers, extensions, gameObjects, myExtensions, mySpawns, oppoExtensions, spawns, structures } from "../utils/gameObjectInitialize";
 import { arrayEqual } from "../utils/JS";
-import { getRangePoss, GR, plusVector, Pos, X_axisDistance } from "../utils/pos";
+import { getRangePoss, GR, Pos, posPlusVec, X_axisDistance } from "../utils/pos";
 import { P, SA, SAN } from "../utils/visual";
 
 /** your first StructureSpawn*/
@@ -70,7 +70,7 @@ export function getSpawnCost(bodies: BodyPartConstant[]): number {
 	return rtn;
 }
 export function fromSpawnPos(x: number, y: number) {
-	return plusVector(spawn, { x: x, y: y })
+	return posPlusVec(spawn, { vec_x: x, vec_y: y })
 }
 /** extend of Spawn */
 export class Spa extends StructureSpawn {

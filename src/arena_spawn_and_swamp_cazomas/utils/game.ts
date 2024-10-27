@@ -1,5 +1,6 @@
+import { findClosestByRange } from "game/utils";
 import { inRange_int } from "./JS";
-import { Pos } from "./pos";
+import { Pos, Vec } from "./pos";
 import { drawLineComplex } from "./visual";
 export type StNumber=number
 /** the startGate top or bottom ,true is top,will decide the area search*/
@@ -22,11 +23,11 @@ export const midBorder = 50;
 export function leftRate(): number {
 	return left ? -1 : 1;
 }
-export function leftVector(): Pos {
+export function leftVector(): Vec {
 	if (left) {
-		return { x: -1, y: 0 };
+		return new Vec(-1,0)
 	} else {
-		return { x: 1, y: 0 };
+		return new Vec(1,0)
 	}
 }
 /** you are at the area that will gene container*/
@@ -88,8 +89,15 @@ export function getNewTarByArea(cre: Pos, tar: Pos) {
 	drawLineComplex(cre, newTar, 0.25, "#222222");
 	return newTar;
 }
+export function closest(pos:Pos,arr:Pos[]):Pos|undefined{
+	if(arr.length===0){
+		return undefined
+	}else{
+		return findClosestByRange(pos,arr)
+	}
+}
 export function printError<E>(o:E):E{
-	PL(new Error().stack)
+	// PL(new Error().stack)
 	return o
 }
 /**tick inside strategy to make sure every strategy worked even if time out */

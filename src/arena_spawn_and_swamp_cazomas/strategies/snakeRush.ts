@@ -1,5 +1,5 @@
 
-import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
+import { ATTACK, HEAL, RANGED_ATTACK, WORK } from "game/constants";
 import { CostMatrix, searchPath } from "game/path-finder";
 import { findClosestByRange } from "game/utils";
 
@@ -22,13 +22,13 @@ import { TB } from "../utils/autoBodys";
 import { GTB } from "../utils/bodyParts";
 import { Event, Event_C, validEvent } from "../utils/event";
 import { SOA } from "../utils/export";
-import { addStrategyTick, leftVector, strategyTick, tick } from "../utils/game";
+import { addStrategyTick, closest, leftVector, strategyTick, tick } from "../utils/game";
 import { constructionSites, oppoRamparts } from "../utils/gameObjectInitialize";
 import { findGO } from "../utils/overallMap";
 import { Dooms, Kerob, Tigga, currentGuessPlayer, getGuessPlayer } from "../utils/player";
-import { Adj, COO, GR, InShotRan, Pos, X_axisDistance, Y_axisDistance, atPos, getRangePoss, multiplyVector, plusVector } from "../utils/pos";
+import { Adj, COO, GR, InShotRan, Pos, Pos_C, Vec, VecMultiplyConst, X_axisDistance, Y_axisDistance, atPos, getRangePoss, posPlusVec, vecPlusVec } from "../utils/pos";
 import { findTask } from "../utils/task";
-import { P, SA, SAN, drawLineComplex } from "../utils/visual";
+import { P, SA, SAN, drawLineComplex, drawText } from "../utils/visual";
 import { useStandardTurtling } from "./turtle";
 
 /**the part of the snake*/
@@ -58,17 +58,17 @@ export function set_HealerMode(b: boolean) {
  * be easy to pull together*/
 function assemblePoint(cre: Cre): Pos {
 	const ind: number = cre.upgrade.spIndex;
-	const leftOrRight = multiplyVector(leftVector(), -3);
-	let vecCre: Pos;
-	if (ind == 0) vecCre = { x: - 1, y: 0 };
-	else if (ind == 1) vecCre = { x: 0, y: 0 };
-	else if (ind == 2) vecCre = { x: - 1, y: 1 };
-	else if (ind == 3) vecCre = { x: 1, y: 1 };
-	else if (ind == 4) vecCre = { x: 0, y: 1 };
-	else if (ind == 5) vecCre = { x: 1, y: 0 };
-	else if (ind == 6) vecCre = { x: 0, y: - 1 };
-	else vecCre = { x: 0, y: 0 - 2 };
-	return plusVector(spawn, plusVector(vecCre, leftOrRight));
+	const leftOrRight = VecMultiplyConst(leftVector(), -3);
+	let vecCre: Vec;
+	if (ind == 0) vecCre =new Vec( - 1, 0 );
+	else if (ind == 1) vecCre = new Vec( 0,  0 );
+	else if (ind == 2) vecCre = new Vec( - 1,  1 );
+	else if (ind == 3) vecCre = new Vec( 1,  1 );
+	else if (ind == 4) vecCre = new Vec( 0,  1 );
+	else if (ind == 5) vecCre = new Vec(1, 0 );
+	else if (ind == 6) vecCre = new Vec( 0, - 1 );
+	else vecCre =new Vec( 0,  - 2 );
+	return posPlusVec(spawn, vecPlusVec(vecCre, leftOrRight));
 }
 const assembleTick = 380
 function goLimitTick() {
@@ -82,6 +82,7 @@ const restartGateTickLimit = 385
 const defenderTickLimit = 380
 /**if ready in rush mode(after spawned at base and ready to rush)*/
 function ifGo(): boolean {
+	drawText(new Pos_C(50,52),"C")
 	const finalSnakePart = findSnakePart(snakePartsTotalNum === 8 ? 7 : 1)
 	return tick >= goLimitTick()
 		|| (
@@ -101,6 +102,7 @@ export let sum_snakePart0: number = 0
  */
 export function snakePartJob(cre: Cre) {
 	SA(cre, "i'm snakePart")
+	drawText(new Pos_C(50,55),"E")
 	if(cre.getBodiesNum(WORK)>0){
 		if(Adj(cre,spawn)){
 			SA(cre, "ad")
@@ -566,7 +568,7 @@ export function decideSpawnPart(ind: number) {
 		const tigga3 = getGuessPlayer() === Tigga ? tiggaType : "14M"
 		const tigga4 = getGuessPlayer() === Tigga ? tiggaType : "14M"
 		const tigga5 = getGuessPlayer() === Tigga ? tiggaType  :"14MH"
-		const tigga6 = getGuessPlayer() === Tigga ? tiggaType : "14M"
+		const tigga6 = getGuessPlayer() === Tigga ? "14M" : "14M"
 		const tigga7 = ""
 		//TIGGA
 		//M=3+6+17*5=94
@@ -689,6 +691,7 @@ export function set_spawnJamer(b: boolean) {
 }
 export let suppliedBuilder = false
 export function useSnakeRushStrategy() {
+	drawText(new Pos_C(50,53),"D")
 	if (getGuessPlayer() === Dooms) {
 		set_moveCostForceRate(0.1)
 		setMoveMapSetRate(0.04);
@@ -777,9 +780,13 @@ export function useSnakeRushStrategy() {
 	//after fight
 	if (st >= 300 && snakeGo && spawnCleared(spawn)) {
 		//250+160
-		SA(displayPos(), "supply stdShoter")
-		// spawnCreep(TB("5MR"), stdShoter);
-		spawnCreep(TB("M"), jamer)
+		if(getGuessPlayer()===Tigga){
+
+		}else{
+			SA(displayPos(), "supply stdShoter")
+			// spawnCreep(TB("5MR"), stdShoter);
+			spawnCreep(TB("M"), jamer)
+		}
 	}
 	//
 	command()
@@ -789,7 +796,7 @@ export function useSnakeRushStrategy() {
 }
 function command() {
 	if (snakeGo) {
-		set_swampFirst(true)
+		drawText(new Pos_C(50,50),"A")
 		const head = best(snakeParts, i => -snakeIndex(i))//snakeParts.find(i => snakeIndex(i)===0)//i.getBodiesNum(ATTACK) >= 1)
 		const second = snakeParts.find(i =>snakeIndex(i)===1)// i.getBodiesNum(HEAL) >= 3||
 		const tail = best(snakeParts, i => snakeIndex(i))
@@ -797,6 +804,7 @@ function command() {
 			if(getGuessPlayer()===Tigga){
 				// setPullGoSwamp(true)
 			}else{
+				set_swampFirst(true)
 				setPullGoSwamp(true)
 			}
 			SA(head, "HEAD")
@@ -814,7 +822,7 @@ function command() {
 					return i.getBodiesNum(ATTACK) > 0
 				}
 			})
-			const target = best(targets, i => {
+			const target = getGuessPlayer()===Tigga?enemySpawn:best(targets, i => {
 				let typeBonus: number = 0
 				if (i instanceof Cre) {
 					if (getGuessPlayer() === Tigga) {
@@ -858,6 +866,7 @@ function command() {
 				const tauntBonus = 1 + 0.1*getTaunt(i)
 				const final = disBonus * sameBonus * typeBonus * tauntBonus*X_axisDistanceBonus
 				SA(i, 'T=' +final+ " tyb="+typeBonus+" disb="+disBonus+" ttb="+tauntBonus+' xb='+X_axisDistanceBonus)
+
 				return final
 			})
 			if(target)
@@ -878,6 +887,7 @@ function command() {
 			const damaged = sum(snakeParts, sp => sp.hitsMax - sp.hits) >= 36 * (tarDistance + 2)
 				+ (hasMelee ? 0 : pureRangedBias)
 			if (getGuessPlayer() === Tigga) {
+				drawText(new Pos_C(50,51),"B")
 				if (Adj(second, enemySpawn)) {
 					supplyCS(second,StructureRampart)
 					// if(getEnergy(second)<10){
@@ -896,7 +906,13 @@ function command() {
 						}
 					}else{
 						SA(second,"3")
-						second.fight()
+						const enemyHealer=enemies.filter(i=>i.getBodiesNum(HEAL)>0 && GR(i,second)<=7)
+						const healNum=sum(enemyHealer,i=>i.getBodiesNum(HEAL))
+						if(healNum>=5 && Adj(second,enemySpawn)){
+							second.master.attack(enemySpawn)
+						}else{
+							second.fight()
+						}
 					}
 					// builderStandardJob(second)
 					// }
@@ -1007,10 +1023,10 @@ function supplyToughDefender(defenderNum:number=2) {
 	if (spawnCleared(spawn) && friends.filter(i => i.role === toughDefender).length < defenderNum) {
 		SA(displayPos(), "spawn defender")
 		const spEns = getEnemyThreats().filter(i => inMyBaseRan(i));
-		const spEn = findClosestByRange(spawn, spEns)
-		const range = GR(spEn, spawn)
+		const spEn = closest(spawn, spEns)
 		const aRate = enemyAWeight();
 		if (spEn) {
+			const range = GR(spEn, spawn)
 			const myEnergy = spawnAndExtensionsEnergy(spawn)
 			let restPart
 			if (getGuessPlayer() === Tigga) {

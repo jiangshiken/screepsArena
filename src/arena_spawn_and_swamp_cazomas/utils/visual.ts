@@ -145,7 +145,7 @@ export function SAE(pos: Pos, ex: Error): void {
 export function drawText(
 	pos: Pos,
 	s: string,
-	size: number,
+	size: number=0.5,
 	color:string="#ffffff"
 ): Visual | undefined {
 	return visual_layer10.text(s, pos, {
