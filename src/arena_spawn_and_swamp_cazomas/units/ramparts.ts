@@ -7,9 +7,7 @@ import { moveMap } from "../deprecated/maps";
 import { rangeBonus } from "../utils/bonus";
 import { Event_C } from "../utils/Event";
 import { closest, tick } from "../utils/game";
-import { myRamparts, oppoRamparts } from "../utils/gameObjectInitialize";
 import { last, relu, sum, valid } from "../utils/JS";
-import { findGO, overallMap } from "../utils/overallMap";
 import { atPos, COO, getRangePoss, GR, Pos } from "../utils/Pos";
 import { dotted, drawLineComplex, drawPolyLight, SA } from "../utils/visual";
 import {
@@ -25,7 +23,9 @@ import {
   hits,
   my,
 } from "./Cre";
+import { myRamparts, oppoRamparts } from "./gameObjectInitialize";
 import { spawnPos } from "./HasHits";
+import { findGO, overallMap } from "./overallMap";
 import { enemySpawn, spawn } from "./spawn";
 
 export function myRampartAt(pos: Pos): StructureRampart {

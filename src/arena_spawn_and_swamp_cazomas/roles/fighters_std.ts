@@ -43,6 +43,7 @@ import {
   sumForceByArr,
   Unit,
 } from "../units/Cre";
+import { myRamparts } from "../units/gameObjectInitialize";
 import { inOppoRampart, inRampart } from "../units/HasHits";
 import { inMyHealthyRampart } from "../units/ramparts";
 import { enemySpawn, spawn } from "../units/spawn";
@@ -55,7 +56,6 @@ import {
 import { calSumCPU, ct } from "../utils/CPU";
 import { Event_C, Event_Number, Event_Pos, validEvent } from "../utils/Event";
 import { tick } from "../utils/game";
-import { myRamparts } from "../utils/gameObjectInitialize";
 import {
   divide0,
   divideReduce,

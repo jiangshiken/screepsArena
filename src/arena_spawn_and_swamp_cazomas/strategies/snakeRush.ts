@@ -62,6 +62,8 @@ import {
 } from "../units/Cre";
 import { displayPos, inRampart } from "../units/HasHits";
 import { supplyCS } from "../units/constructionSite";
+import { constructionSites, oppoRamparts } from "../units/gameObjectInitialize";
+import { findGO } from "../units/overallMap";
 import { ct, et } from "../utils/CPU";
 import { Event, Event_C, validEvent } from "../utils/Event";
 import { best, invalid, maxWorth_lamb, sum } from "../utils/JS";
@@ -91,8 +93,6 @@ import {
   strategyTick,
   tick,
 } from "../utils/game";
-import { constructionSites, oppoRamparts } from "../utils/gameObjectInitialize";
-import { findGO } from "../utils/overallMap";
 import {
   Dooms,
   Kerob,

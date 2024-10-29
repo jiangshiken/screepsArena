@@ -1,6 +1,6 @@
 import { getTicks } from "game/utils";
 
-import { Pos, Pos_C, PosToPos_C } from "./Pos";
+import { HasPos, Pos } from "./Pos";
 
 //classes
 /**
@@ -34,10 +34,12 @@ export class Event_Number extends Event {
 /**
  *  have a `pos` member attribute
  */
-export class Event_Pos extends Event {
-  readonly pos: Pos_C;
+export class Event_Pos extends Event implements HasPos {
+  readonly x: number;
+  readonly y: number;
   constructor(pos: Pos) {
     super();
-    this.pos = PosToPos_C(pos);
+    this.x = pos.x;
+    this.y = pos.y;
   }
 }

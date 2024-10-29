@@ -37,7 +37,7 @@ export function ct() {
   return getCpuTime();
 }
 export function calSumCPU(e: Event_Number, st: number) {
-  e.increase(et(st));
+  e.num += et(st);
 }
 export function getCPUK(): number {
   const cpu = getCpuTime();

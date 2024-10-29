@@ -1,11 +1,11 @@
 import { CARRY } from "game/constants";
 
 import { enemies, getBodyArrayOfCreep, getEnergy } from "../units/Cre";
+import { creeps, isOppoGO } from "../units/gameObjectInitialize";
 import { displayPos } from "../units/HasHits";
 import { enemySpawn } from "../units/spawn";
 import { TB } from "./autoBodys";
 import { tick } from "./game";
-import { creeps, isOppoGO } from "./gameObjectInitialize";
 import { arrayEquals, best } from "./JS";
 import { GR } from "./Pos";
 import { SA } from "./visual";

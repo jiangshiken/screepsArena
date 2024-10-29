@@ -6,10 +6,10 @@ import {
   validEvent,
 } from "../utils/Event";
 import { inResourceArea, leftRate, tick } from "../utils/game";
-import { containers, isOppoGO, resources } from "../utils/gameObjectInitialize";
 import { valid } from "../utils/JS";
-import { findGO, overallMap } from "../utils/overallMap";
 import { atPos, GR, Pos } from "../utils/Pos";
+import { containers, isOppoGO, resources } from "./gameObjectInitialize";
+import { findGO, overallMap } from "./overallMap";
 
 import {
   GameObject,

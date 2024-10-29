@@ -1,12 +1,11 @@
-import { RoomPosition } from "game/prototypes";
 import { getTicks } from "game/utils";
 import { Visual } from "game/visual";
 
+import { overallMap } from "../units/overallMap";
 import { Event } from "./Event";
 import { PL } from "./game";
 import { d2 } from "./JS";
-import { overallMap } from "./overallMap";
-import { Pos, pos00, Pos_C } from "./Pos";
+import { HasPos, Pos, pos00, Pos_C } from "./Pos";
 
 /**
  * the list of SAVis
@@ -23,9 +22,10 @@ export function firstInit_visual() {
 /**
  *  represent a Visual of SA text
  */
-export class SAVis extends Visual implements Event, RoomPosition {
+export class SAVis extends Visual implements HasPos {
   readonly x: number;
   readonly y: number;
+  readonly startTick: Event;
   readonly invokeTick: number = getTicks();
   /** the text to show */
   sayText = "";
@@ -37,6 +37,7 @@ export class SAVis extends Visual implements Event, RoomPosition {
     super(layer, false);
     this.x = pos.x;
     this.y = pos.y;
+    this.startTick = new Event();
     this.textPos = getSATextPos(pos);
     this.sayLine = drawLineComplex(pos, this.textPos, 0.5, "#0000ff");
     //

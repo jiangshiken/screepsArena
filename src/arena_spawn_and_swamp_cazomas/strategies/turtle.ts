@@ -22,7 +22,13 @@ import {
   getFreeEnergy,
   setIsTurtleContainer,
 } from "../units/Cre";
+import {
+  containers,
+  isMyGO,
+  myConstructionSites,
+} from "../units/gameObjectInitialize";
 import { displayPos } from "../units/HasHits";
+import { findGO, overallMap } from "../units/overallMap";
 import { baseLoseRampart } from "../units/ramparts";
 import {
   getSpawnAndBaseContainerEnergy,
@@ -36,13 +42,7 @@ import { SpawnType } from "../units/spawnTypeList";
 import { TB } from "../utils/autoBodys";
 import { set_switchCPUModeOn } from "../utils/CPU";
 import { leftRate, leftVector, tick } from "../utils/game";
-import {
-  containers,
-  isMyGO,
-  myConstructionSites,
-} from "../utils/gameObjectInitialize";
 import { divide0, relu, sum } from "../utils/JS";
-import { findGO, overallMap } from "../utils/overallMap";
 import { currentGuessPlayer, Dooms } from "../utils/player";
 import {
   absRange,

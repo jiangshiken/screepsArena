@@ -3,7 +3,7 @@ import { d2, invalid, valid } from "./JS";
 import { COO, Pos_C } from "./Pos";
 
 /** get print string not print attribute */
-export function toString0(o: any): string {
+export function toString_simple(o: any): string {
   if (invalid(o)) return o;
   else if (typeof o === "object") {
     if (o instanceof Pos_C || o instanceof GameObject) {
@@ -26,7 +26,7 @@ export function toString0(o: any): string {
   }
 }
 /** get print string print 1 layer of attribute */
-export function toString1(o: any): string {
+export function toString_object(o: any): string {
   if (invalid(o)) return o;
   if (typeof o === "string") {
     return o;
@@ -43,7 +43,7 @@ export function toString1(o: any): string {
     }
     let d = o[i];
     if (valid(d)) {
-      d = toString0(d);
+      d = toString_simple(d);
     }
     rtn += i + ":" + d + ",";
   }
@@ -52,22 +52,22 @@ export function toString1(o: any): string {
 }
 
 /** get print string of anything */
-export function S(o: any) {
+export function S(o: any): string {
   if (valid(o)) {
     if (typeof o === "object") {
-      return toString1(o);
+      return toString_object(o);
     } else {
-      return toString0(o);
+      return toString_simple(o);
     }
   } else {
     return o;
   }
 }
 /** get print string of array */
-export function SOA(oa: any[]) {
+export function SOA(oa: any[]): string {
   let rtn = "[";
   for (let o of oa) {
-    rtn += toString0(o) + ",";
+    rtn += toString_simple(o) + ",";
   }
   rtn += "]";
   return rtn;

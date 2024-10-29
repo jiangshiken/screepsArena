@@ -57,6 +57,46 @@ import {
 import { S, SOA } from "../utils/export";
 import { StNumber, getNewTarByArea, tick } from "../utils/game";
 import {
+  divide0,
+  divideReduce,
+  invalid,
+  last,
+  pow2,
+  ranGet,
+  remove,
+  removeIf,
+  valid,
+} from "../utils/JS";
+import { Kerob, getGuessPlayer } from "../utils/player";
+import {
+  Adj,
+  COO,
+  GR,
+  Pos,
+  X_axisDistance,
+  atPos,
+  deltaPosToVec,
+  getRangePoss,
+  pos00,
+  posPlusVec,
+} from "../utils/Pos";
+import {
+  HasTasks,
+  Task,
+  Task_C,
+  findTask,
+  findTaskByFilter,
+  useTasks,
+} from "../utils/Task";
+import {
+  P,
+  SA,
+  drawLineComplex,
+  drawLineLight,
+  drawPolyLight,
+} from "../utils/visual";
+import { CS, getMaxWorthCSS, getMyCSs, progress } from "./constructionSite";
+import {
   Harvable,
   OwnedStructure,
   constructionSites,
@@ -73,49 +113,7 @@ import {
   spawns,
   structures,
   walls,
-} from "../utils/gameObjectInitialize";
-import {
-  divide0,
-  divideReduce,
-  invalid,
-  last,
-  pow2,
-  ranGet,
-  remove,
-  removeIf,
-  valid,
-} from "../utils/JS";
-import { findGO, hasGO, overallMap } from "../utils/overallMap";
-import { Kerob, getGuessPlayer } from "../utils/player";
-import {
-  Adj,
-  COO,
-  GR,
-  Pos,
-  X_axisDistance,
-  atPos,
-  deltaPosToVec,
-  getRangePoss,
-  pos00,
-  posPlusVec,
-} from "../utils/Pos";
-import {
-  HasTasks,
-  MultiTask,
-  Task,
-  Task_C,
-  findTask,
-  findTaskByFilter,
-  useTasks,
-} from "../utils/Task";
-import {
-  P,
-  SA,
-  drawLineComplex,
-  drawLineLight,
-  drawPolyLight,
-} from "../utils/visual";
-import { CS, getMaxWorthCSS, getMyCSs, progress } from "./constructionSite";
+} from "./gameObjectInitialize";
 import {
   Res,
   displayPos,
@@ -126,6 +124,7 @@ import {
   spawnPos,
   validRes,
 } from "./HasHits";
+import { findGO, hasGO, overallMap } from "./overallMap";
 
 export const defFindPathResult: FindPathResult = {
   path: [],
@@ -2800,8 +2799,46 @@ export function pathLen(ori: Pos, tar: Pos) {
     return p.path.length;
   } else return Infinity;
 }
-/** move multi times */
-export class MultiFindPathAndMoveTask extends MultiTask<FindPathAndMoveTask> {}
+
+/**
+ * get the step target from cre to tar,if cre is your spawn and tar is enemy's spawn
+ * that it will search path to the first gate ,then the next gate ,and then search to
+ * the enemy spawn
+ */
+export function getNewTarByArea(cre: Pos, tar: Pos) {
+  let newTar = tar;
+  let creArea = getArea(cre, leftBorder1, rightBorder2, midBorder);
+  let tarArea = getArea(tar, leftBorder1, rightBorder2, midBorder);
+  //
+  let top = topY;
+  let bottom = bottomY;
+  if (creArea === "left" && tarArea === "right") {
+    //go left top
+    if (startGateUp) newTar = { x: leftBorder2, y: top };
+    else newTar = { x: leftBorder2, y: bottom };
+  } else if (creArea === "right" && tarArea === "left") {
+    //go right bottom
+    if (startGateUp) newTar = { x: rightBorder1, y: top };
+    else newTar = { x: rightBorder1, y: bottom };
+  } else if (creArea === "left" && tarArea === "top")
+    newTar = { x: leftBorder2, y: top };
+  else if (creArea === "top" && tarArea === "left")
+    newTar = { x: leftBorder1, y: top };
+  else if (creArea === "left" && tarArea === "bottom")
+    newTar = { x: leftBorder2, y: bottom };
+  else if (creArea === "bottom" && tarArea === "left")
+    newTar = { x: leftBorder1, y: bottom };
+  else if (creArea === "right" && tarArea === "bottom")
+    newTar = { x: rightBorder1, y: bottom };
+  else if (creArea === "bottom" && tarArea === "right")
+    newTar = { x: rightBorder2, y: bottom };
+  else if (creArea === "right" && tarArea === "top")
+    newTar = { x: rightBorder1, y: top };
+  else if (creArea === "top" && tarArea === "right")
+    newTar = { x: rightBorder2, y: top };
+  drawLineComplex(cre, newTar, 0.25, "#222222");
+  return newTar;
+}
 /** move to a position ,will findPath every `findPathStep` ticks*/
 export class FindPathAndMoveTask extends MoveTask {
   findPathStep: number;

@@ -4,12 +4,12 @@ import { getTicks } from "game/utils";
 
 import { Event, Event_C } from "../utils/Event";
 import { S } from "../utils/export";
-import { myConstructionSites } from "../utils/gameObjectInitialize";
 import { invalid } from "../utils/JS";
-import { findGO } from "../utils/overallMap";
 import { atPos, COO, Pos } from "../utils/Pos";
 import { drawLineComplex, SA } from "../utils/visual";
 import { my } from "./Cre";
+import { myConstructionSites } from "./gameObjectInitialize";
+import { findGO } from "./overallMap";
 
 // export let CSs: CS[] = []
 /** extend of ConstructionSite */

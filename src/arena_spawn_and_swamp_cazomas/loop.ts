@@ -34,6 +34,13 @@ import {
   initialCresAtLoopStart,
 } from "./units/Cre";
 import {
+  constructionSites,
+  containers,
+  getPrototype,
+  initialGameObjectsAtLoopStart,
+  spawns,
+} from "./units/gameObjectInitialize";
+import {
   Cont,
   displayPos,
   enemySpawnPos,
@@ -41,6 +48,12 @@ import {
   setSpawnPos,
   spawnPos,
 } from "./units/HasHits";
+import {
+  firstInit_overallMap,
+  overallMapInit,
+  setGameObjectsThisTick,
+  setOverallMap,
+} from "./units/overallMap";
 import { setRamMoveMapValue } from "./units/ramparts";
 import {
   checkSpawns,
@@ -71,20 +84,7 @@ import {
   setTick,
   tick,
 } from "./utils/game";
-import {
-  constructionSites,
-  containers,
-  getPrototype,
-  initialGameObjectsAtLoopStart,
-  spawns,
-} from "./utils/gameObjectInitialize";
 import { divideReduce } from "./utils/JS";
-import {
-  firstInit_overallMap,
-  overallMapInit,
-  setGameObjectsThisTick,
-  setOverallMap,
-} from "./utils/overallMap";
 import { GR, Pos_C } from "./utils/Pos";
 import {
   append_largeSizeText,

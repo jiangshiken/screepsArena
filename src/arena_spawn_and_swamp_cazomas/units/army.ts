@@ -7,7 +7,6 @@ import {
   getFriendForceMapValue,
 } from "../deprecated/maps";
 import { getCPUPercent, lowCPUMode } from "../utils/CPU";
-import { myRamparts, resources } from "../utils/gameObjectInitialize";
 import { divide0, divideReduce, goInRange, ranGet, sum } from "../utils/JS";
 import { currentGuessPlayer, Dooms } from "../utils/player";
 import {
@@ -39,6 +38,7 @@ import {
   oppoUnits,
   Unit,
 } from "./Cre";
+import { myRamparts, resources } from "./gameObjectInitialize";
 
 /**find the position that can get protect nearby*/
 export function findProtectPos(cre: Cre): { pos: Pos; rate: number } {

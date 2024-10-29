@@ -1,11 +1,15 @@
-import { valid } from "./JS";
-import { MyMap } from "./MyMap";
-import { Pos } from "./Pos";
+import { MyMap } from "../utils/MyMap";
+import { Pos } from "../utils/Pos";
 
 /**
  * a map store all things has pos in the game
  */
-export let overallMap: MyMap<Pos[]>;
+export const overallMap: MyMap<Pos[]> = new MyMap<Pos[]>(
+  100,
+  100,
+  () => [],
+  []
+);
 export function overallMapInit() {
   overallMap.setByLambda_realIndex((x, y) => {
     const old = overallMap.get_realIndex(x, y);
@@ -20,15 +24,11 @@ export let gameObjectsThisTick: Pos[];
 export function setGameObjectsThisTick(g: Pos[]) {
   gameObjectsThisTick = g;
 }
-
 export function findGO(pos: Pos, goType: any): Pos | undefined {
   return overallMap.get(pos).find(i => i instanceof goType);
 }
 export function hasGO(pos: Pos, goType: any): boolean {
-  return valid(findGO(pos, goType));
-}
-export function firstInit_overallMap() {
-  overallMap = new MyMap<Pos[]>(100, 100, [], []);
+  return findGO(pos, goType) !== undefined;
 }
 /**
  * put all the things has Pos value into this map at every tick

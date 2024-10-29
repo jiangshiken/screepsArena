@@ -17,9 +17,9 @@ import {
   hasThreat,
   Role,
 } from "../units/Cre";
+import { oppoConstructionSites } from "../units/gameObjectInitialize";
 import { inOppoRampart } from "../units/HasHits";
 import { tick } from "../utils/game";
-import { oppoConstructionSites } from "../utils/gameObjectInitialize";
 import { divideReduce } from "../utils/JS";
 import { Adj, atPos, COO, GR, InShotRan, midPoint } from "../utils/Pos";
 import { SA } from "../utils/visual";

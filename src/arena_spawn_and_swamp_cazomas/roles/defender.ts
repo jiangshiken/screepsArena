@@ -4,10 +4,10 @@ import { findClosestByRange } from "game/utils";
 import { cpuBreakJudge } from "../units/army";
 import { Cre, enemies, getEnemyThreats, Role } from "../units/Cre";
 import { spawnPos } from "../units/HasHits";
+import { findGO } from "../units/overallMap";
 import { attackWeakRampart, defendTheRampart } from "../units/ramparts";
 import { spawn } from "../units/spawn";
 import { tick } from "../utils/game";
-import { findGO } from "../utils/overallMap";
 import { GR } from "../utils/Pos";
 import { P, SA } from "../utils/visual";
 

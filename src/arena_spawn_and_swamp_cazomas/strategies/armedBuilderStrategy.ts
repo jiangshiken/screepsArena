@@ -7,6 +7,10 @@ import { harvester } from "../roles/harvester";
 import { jamer } from "../roles/jamer";
 import { spawnRusher } from "../roles/spawnRusher";
 import { createCS } from "../units/constructionSite";
+import {
+  myConstructionSites,
+  myExtensions,
+} from "../units/gameObjectInitialize";
 import { displayPos } from "../units/HasHits";
 import {
   EEB,
@@ -24,10 +28,6 @@ import {
   totalSuperiorityRateReduce,
 } from "../utils/bonus";
 import { addStrategyTick, leftRate, strategyTick, tick } from "../utils/game";
-import {
-  myConstructionSites,
-  myExtensions,
-} from "../utils/gameObjectInitialize";
 import { GR, posPlusVec, Vec, VecMultiplyConst } from "../utils/Pos";
 import { SA, SAN } from "../utils/visual";
 import { useStandardTurtling } from "./turtle";

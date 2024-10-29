@@ -1,7 +1,6 @@
 import { findClosestByRange } from "game/utils";
 import { inRange_int } from "./JS";
 import { Pos, Vec } from "./Pos";
-import { drawLineComplex } from "./visual";
 export type StNumber = number;
 /** the startGate top or bottom ,true is top,will decide the area search*/
 export let startGateUp: boolean = false;
@@ -38,56 +37,22 @@ export function inResourceArea(pos: Pos): boolean {
 export function isOutside(o: Pos): boolean {
   return o.x >= 15 && o.x <= 85;
 }
+export const area_left = "area_left";
+export const area_right = "area_right";
+export const area_top = "area_top";
+export const area_bottom = "area_bottom";
+export type Area = "area_left" | "area_right" | "area_top" | "area_bottom";
 /** get the area by pos and other parameter*/
 export function getArea(
   pos: Pos,
   leftBorder: number,
   rightBorder: number,
   midBorder: number
-): string {
-  if (pos.x <= leftBorder) return "left";
-  else if (pos.x >= rightBorder) return "right";
-  else if (pos.y < midBorder) return "top";
-  else return "bottom";
-}
-/**
- * get the step target from cre to tar,if cre is your spawn and tar is enemy's spawn
- * that it will search path to the first gate ,then the next gate ,and then search to
- * the enemy spawn
- */
-export function getNewTarByArea(cre: Pos, tar: Pos) {
-  let newTar = tar;
-  let creArea = getArea(cre, leftBorder1, rightBorder2, midBorder);
-  let tarArea = getArea(tar, leftBorder1, rightBorder2, midBorder);
-  //
-  let top = topY;
-  let bottom = bottomY;
-  if (creArea === "left" && tarArea === "right") {
-    //go left top
-    if (startGateUp) newTar = { x: leftBorder2, y: top };
-    else newTar = { x: leftBorder2, y: bottom };
-  } else if (creArea === "right" && tarArea === "left") {
-    //go right bottom
-    if (startGateUp) newTar = { x: rightBorder1, y: top };
-    else newTar = { x: rightBorder1, y: bottom };
-  } else if (creArea === "left" && tarArea === "top")
-    newTar = { x: leftBorder2, y: top };
-  else if (creArea === "top" && tarArea === "left")
-    newTar = { x: leftBorder1, y: top };
-  else if (creArea === "left" && tarArea === "bottom")
-    newTar = { x: leftBorder2, y: bottom };
-  else if (creArea === "bottom" && tarArea === "left")
-    newTar = { x: leftBorder1, y: bottom };
-  else if (creArea === "right" && tarArea === "bottom")
-    newTar = { x: rightBorder1, y: bottom };
-  else if (creArea === "bottom" && tarArea === "right")
-    newTar = { x: rightBorder2, y: bottom };
-  else if (creArea === "right" && tarArea === "top")
-    newTar = { x: rightBorder1, y: top };
-  else if (creArea === "top" && tarArea === "right")
-    newTar = { x: rightBorder2, y: top };
-  drawLineComplex(cre, newTar, 0.25, "#222222");
-  return newTar;
+): Area {
+  if (pos.x <= leftBorder) return "area_left";
+  else if (pos.x >= rightBorder) return "area_right";
+  else if (pos.y < midBorder) return "area_top";
+  else return "area_bottom";
 }
 export function closest(pos: Pos, arr: Pos[]): Pos | undefined {
   if (arr.length === 0) {
@@ -97,7 +62,7 @@ export function closest(pos: Pos, arr: Pos[]): Pos | undefined {
   }
 }
 export function printError<E>(o: E): E {
-  // PL(new Error().stack)
+  PL(new Error().stack);
   return o;
 }
 /**tick inside strategy to make sure every strategy worked even if time out */

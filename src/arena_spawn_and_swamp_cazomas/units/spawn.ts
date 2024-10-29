@@ -13,16 +13,6 @@ import { StructureSpawn } from "game/prototypes";
 
 import { S } from "../utils/export";
 import { set_startGateUp, startGateUp } from "../utils/game";
-import {
-  containers,
-  extensions,
-  gameObjects,
-  myExtensions,
-  mySpawns,
-  oppoExtensions,
-  spawns,
-  structures,
-} from "../utils/gameObjectInitialize";
 import { arrayEqual } from "../utils/JS";
 import {
   getRangePoss,
@@ -44,6 +34,16 @@ import {
   Role,
   SpawnInfo,
 } from "./Cre";
+import {
+  containers,
+  extensions,
+  gameObjects,
+  myExtensions,
+  mySpawns,
+  oppoExtensions,
+  spawns,
+  structures,
+} from "./gameObjectInitialize";
 
 /** your first StructureSpawn*/
 export let spawn: Spa;

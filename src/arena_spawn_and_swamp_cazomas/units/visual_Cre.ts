@@ -13,9 +13,9 @@ import {
   Unit,
 } from "./Cre";
 
-import { myStructures } from "../utils/gameObjectInitialize";
 import { valid } from "../utils/JS";
 import { drawRangeComplex, P } from "../utils/visual";
+import { myStructures } from "./gameObjectInitialize";
 
 const VISUAL_LAYER = 6;
 /**

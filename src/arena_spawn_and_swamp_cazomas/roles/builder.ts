@@ -39,7 +39,9 @@ import {
   setIsBuilding,
   Task_Cre,
 } from "../units/Cre";
+import { myConstructionSites, myRamparts } from "../units/gameObjectInitialize";
 import { getOutsideContainers } from "../units/HasHits";
+import { overallMap } from "../units/overallMap";
 import {
   defendTheRampart,
   getMyHealthyRamparts,
@@ -57,9 +59,7 @@ import {
 } from "../units/spawn";
 import { S } from "../utils/export";
 import { tick } from "../utils/game";
-import { myConstructionSites, myRamparts } from "../utils/gameObjectInitialize";
 import { d2, getClassName, invalid } from "../utils/JS";
-import { overallMap } from "../utils/overallMap";
 import { atPos, COO, getRangePoss, GR, midPoint, Pos } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA, SAN } from "../utils/visual";
