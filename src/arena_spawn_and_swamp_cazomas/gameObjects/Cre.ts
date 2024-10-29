@@ -95,28 +95,25 @@ import {
   drawLineLight,
   drawPolyLight,
 } from "../utils/visual";
-import { CS, getMaxWorthCSS, getMyCSs, progress } from "./constructionSite";
+import { CS, getMaxWorthCSS, getMyCSs, progress } from "./CS";
 import {
   Harvable,
   OwnedStructure,
   constructionSites,
   containers,
-  creeps,
   isMyGO,
   isMyRampart,
   isMySpawn,
   isOppoRampart,
   isOppoSpawn,
   myStructures,
-  oppoStructures,
   resources,
   spawns,
   structures,
   walls,
-} from "./gameObjectInitialize";
+} from "./GameObjectInitialize";
 import {
   Res,
-  displayPos,
   getMyContainers,
   getRess,
   inRampart,
@@ -188,56 +185,7 @@ export function atSpawnPos(pos: Pos): boolean {
   let rtn: boolean = spawns.find(i => atPos(i, pos)) !== undefined;
   return rtn;
 }
-export function initCre(
-  ca: Creep_advance,
-  role?: Role,
-  spawnInfo?: SpawnInfo,
-  whenSpawnStart: boolean = false
-): Cre {
-  if (!ca.advance) {
-    ca.advance = new Cre(ca);
-  }
-  let newCre = ca.advance;
-  SA(displayPos(), "initCre");
-  if (whenSpawnStart) {
-    if (role) {
-      // SA(displayPos(), "new TaskRole");
-      newCre.role = role;
-      new Task_Role(newCre, role);
-    }
-    if (spawnInfo) {
-      newCre.spawnInfo = spawnInfo;
-    }
-  } else {
-    // SA(ca, "         isSpawning(ca)=" + isSpawning(ca))
-    cres.push(ca.advance);
-  }
-  return newCre;
-}
-export function initialCresAtLoopStart() {
-  P("initialCresAtLoopStart");
-  //remove dead Cre
-  cres = cres.filter(i => exist(i.master));
-  //add new Cre
-  for (let creep of creeps) {
-    const ca: Creep_advance = <Creep_advance>creep;
-    // SA(creep, "creep.spawning=" + creep.spawning)
-    const exp0 = !isSpawning(ca);
-    // const exp1 = !ca.advance
-    const exp2 = !cres.find(i => i.master === creep);
-    // SA(ca, " exp0=" + exp0 + " exp2=" + exp2)
-    // SA(ca, " exp0=" + exp0 + " exp1=" + exp1 + " exp2=" + exp2)
-    if (exp0 && exp2) {
-      P("ca=" + S(ca));
-      initCre(ca);
-    }
-  }
-  //team array
-  friends = cres.filter(i => my(i));
-  enemies = cres.filter(i => oppo(i));
-  myUnits = (<Unit[]>friends).concat(myStructures);
-  oppoUnits = (<Unit[]>enemies).concat(oppoStructures);
-}
+
 export function getAllUnits(): Unit[] {
   return myUnits.concat(oppoUnits);
 }

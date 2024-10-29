@@ -11,12 +11,12 @@ import {
   hasThreat,
   is5MA,
   sumForceByArr,
-} from "../units/Cre";
+} from "../gameObjects/Cre";
 import {
   spawn,
   spawnAndExtensionsEnergy,
   spawnNearBlockedAround,
-} from "../units/spawn";
+} from "../gameObjects/Spa";
 import { StNumber } from "./game";
 import { divide0, divideReduce, goInRange, relu, sum } from "./JS";
 import { GR, Pos, X_axisDistance } from "./Pos";

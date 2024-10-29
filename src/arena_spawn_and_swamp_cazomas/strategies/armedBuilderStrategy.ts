@@ -1,24 +1,24 @@
 import { CARRY } from "game/constants";
 import { StructureExtension } from "game/prototypes";
 
-import { builderStandard } from "../roles/builder";
-import { defender_rampart } from "../roles/defender";
-import { harvester } from "../roles/harvester";
-import { jamer } from "../roles/jamer";
-import { spawnRusher } from "../roles/spawnRusher";
-import { createCS } from "../units/constructionSite";
+import { createCS } from "../gameObjects/CS";
 import {
   myConstructionSites,
   myExtensions,
-} from "../units/gameObjectInitialize";
-import { displayPos } from "../units/HasHits";
+} from "../gameObjects/GameObjectInitialize";
+import { displayPos } from "../gameObjects/HasHits";
 import {
   EEB,
   resetStartGateAvoidFromEnemies,
   spawn,
   spawnAndExtensionsEnergy,
-} from "../units/spawn";
-import { spawnBySpawnTypeList, SpawnType } from "../units/spawnTypeList";
+} from "../gameObjects/Spa";
+import { spawnBySpawnTypeList, SpawnType } from "../gameObjects/spawnTypeList";
+import { builderStandard } from "../roles/builder";
+import { defender_rampart } from "../roles/defender";
+import { harvester } from "../roles/harvester";
+import { jamer } from "../roles/jamer";
+import { spawnRusher } from "../roles/spawnRusher";
 import { TB } from "../utils/autoBodys";
 import {
   enemyArmyReduce,

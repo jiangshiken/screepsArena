@@ -6,10 +6,8 @@ import {
   LEFT,
   RIGHT,
   TOP,
-  TOP_LEFT,
   TOP_RIGHT,
 } from "game/constants";
-import { GameObject, RoomPosition } from "game/prototypes";
 import { getDirection, getRange } from "game/utils";
 
 import { printError } from "./game";
@@ -18,20 +16,25 @@ import { inRange_int, isWhole, valid } from "./JS";
 /**
  * represent a position type
  */
-export type Pos = GameObject | Pos_C | HasPos;
-export interface HasPos {
-  readonly x: number;
-  readonly y: number;
+export interface Pos {
+  x(): number;
+  y(): number;
 }
 /**
  * represent a position of the map
  */
-export class Pos_C implements RoomPosition {
-  readonly x: number;
-  readonly y: number;
+export class Pos_C implements Pos {
+  readonly data_x: number;
+  readonly data_y: number;
   constructor(x: number, y: number) {
-    this.x = validAxis(x) ? x : printError(0);
-    this.y = validAxis(y) ? y : printError(0);
+    this.data_x = validAxis(x) ? x : printError(0);
+    this.data_y = validAxis(y) ? y : printError(0);
+  }
+  x(): number {
+    return this.data_x;
+  }
+  y(): number {
+    return this.data_y;
   }
 }
 /**
@@ -45,14 +48,14 @@ export class Vec {
     this.vec_y = validNum(y) ? y : printError(0);
   }
 }
-export function validNum(x: number): boolean {
-  return valid(x) && !isNaN(x);
+export function validNum(num: number): boolean {
+  return valid(num) && !isNaN(num);
 }
-export function validAxis(x: number): boolean {
-  return validNum(x) && isWhole(x) && inRange_int(x, 0, 100);
+export function validAxis(num: number): boolean {
+  return validNum(num) && isWhole(num) && inRange_int(num, 0, 100);
 }
 export function PosToPos_C(p: Pos) {
-  return new Pos_C(p.x, p.y);
+  return new Pos_C(p.x(), p.y());
 }
 export const midPoint: Pos_C = new Pos_C(50, 50);
 export const pos00: Pos_C = new Pos_C(0, 0);
@@ -70,21 +73,20 @@ export function oppoVector(vec: Vec): Vec {
   return new Vec(-vec.vec_x, -vec.vec_y);
 }
 export function getDirectionByPos(posFrom: Pos, posTo: Pos): DirectionConstant {
-  return getDirection(posTo.x - posFrom.x, posTo.y - posFrom.y);
+  return getDirection(posTo.x() - posFrom.x(), posTo.y() - posFrom.y());
 }
 /**
  * add a direction constant to a `Pos`
  */
-export function posPlusDirection(pos: Pos, dir: DirectionConstant): Pos {
-  if (dir == TOP) return { x: pos.x, y: pos.y - 1 };
-  else if (dir == TOP_RIGHT) return { x: pos.x + 1, y: pos.y - 1 };
-  else if (dir == RIGHT) return { x: pos.x + 1, y: pos.y };
-  else if (dir == BOTTOM_RIGHT) return { x: pos.x + 1, y: pos.y + 1 };
-  else if (dir == BOTTOM) return { x: pos.x, y: pos.y + 1 };
-  else if (dir == BOTTOM_LEFT) return { x: pos.x - 1, y: pos.y + 1 };
-  else if (dir == LEFT) return { x: pos.x - 1, y: pos.y };
-  else if (dir == TOP_LEFT) return { x: pos.x - 1, y: pos.y - 1 };
-  else return { x: pos.x, y: pos.y };
+export function DirectionToVec(dir: DirectionConstant): Vec {
+  if (dir == TOP) return new Vec(0, -1);
+  else if (dir == TOP_RIGHT) return new Vec(1, -1);
+  else if (dir == RIGHT) return new Vec(1, 0);
+  else if (dir == BOTTOM_RIGHT) return new Vec(1, 1);
+  else if (dir == BOTTOM) return new Vec(0, 1);
+  else if (dir == BOTTOM_LEFT) return new Vec(-1, 1);
+  else if (dir == LEFT) return new Vec(-1, 0);
+  else return new Vec(-1, -1);
 }
 /**
  * give a list of `Pos` that link the `ori` and `tar`
@@ -94,12 +96,12 @@ export function possFromTo(ori: Pos, tar: Pos): Pos[] {
   let nowPos = ori;
   rtn.push(ori);
   const r = GR(ori, tar);
-  const deltaX = (tar.x - ori.x) / r;
-  const deltaY = (tar.y - ori.y) / r;
+  const deltaX = (tar.x() - ori.x()) / r;
+  const deltaY = (tar.y() - ori.y()) / r;
   for (let i = 0; i < r; i++) {
-    const posX = Math.floor(ori.x + deltaX * i);
-    const posY = Math.floor(ori.y + deltaY * i);
-    const pos = { x: posX, y: posY };
+    const posX = Math.floor(ori.x() + deltaX * i);
+    const posY = Math.floor(ori.y() + deltaY * i);
+    const pos = new Pos_C(posX, posY);
     if (!atPos(pos, nowPos)) {
       rtn.push(pos);
       nowPos = pos;
@@ -134,19 +136,19 @@ export function VecMultiplyConst(vec: Vec, n: number): Vec {
  * return |`ori.x`-`tar.x`|
  */
 export function X_axisDistance(ori: Pos, tar: Pos): number {
-  return Math.abs(ori.x - tar.x);
+  return Math.abs(ori.x() - tar.x());
 }
 /**
  * return |`ori.y`-`tar.y`|
  */
 export function Y_axisDistance(ori: Pos, tar: Pos): number {
-  return Math.abs(ori.y - tar.y);
+  return Math.abs(ori.y() - tar.y());
 }
 /**
  * return |`a.x`-`b.x`|+|`a.y`-`b.y`|
  */
 export function absRange(a: Pos, b: Pos): number {
-  return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+  return Math.abs(a.x() - b.x()) + Math.abs(a.y() - b.y());
 }
 /**
  *  get a list of `Pos` in range but by step
@@ -158,8 +160,8 @@ export function getRangePossByStep(
   range: number,
   step: number
 ): Pos[] {
-  const cx = pos.x;
-  const cy = pos.y;
+  const cx = pos.x();
+  const cy = pos.y();
   let rtn: Pos[] = [];
   for (let i = cx - range; i <= cx + range; i += step) {
     for (let j = cy - range; j <= cy + range; j += step) {
@@ -170,10 +172,10 @@ export function getRangePossByStep(
   return rtn;
 }
 export function posPlusVec(pos: Pos, vec: Vec): Pos {
-  return new Pos_C(pos.x + vec.vec_x, pos.y + vec.vec_y);
+  return new Pos_C(pos.x() + vec.vec_x, pos.y() + vec.vec_y);
 }
 export function deltaPosToVec(pos1: Pos, pos2: Pos): Vec {
-  return new Vec(pos2.x - pos1.x, pos2.y - pos1.y);
+  return new Vec(pos2.x() - pos1.x(), pos2.y() - pos1.y());
 }
 /**
  * return `v1`+`v2`
@@ -201,7 +203,10 @@ export function minusVector(v1: Vec, v2: Vec): Vec {
  * the same as {@link myGetRange}
  */
 export function GR(p1: Pos, p2: Pos): number {
-  return getRange(p1, p2);
+  return getRange(PosToRoomPosition(p1), PosToRoomPosition(p2));
+}
+export function PosToRoomPosition(pos: Pos): { x: number; y: number } {
+  return { x: pos.x(), y: pos.y() };
 }
 export function Adj(p1: Pos, p2: Pos): boolean {
   return GR(p1, p2) <= 1;
@@ -213,14 +218,14 @@ export function InShotRan(p1: Pos, p2: Pos): boolean {
  *  return the print string of a `Pos`
  */
 export function str_coordinate(tar: Pos | undefined): string {
-  if (tar) return " {x=" + tar.x + " y=" + tar.y + "} ";
+  if (tar) return " {x=" + tar.x() + " y=" + tar.y() + "} ";
   else return "" + tar;
 }
 /**
  *  judge if is at the same position
  */
 export function atPos(cre: Pos, tar: Pos): boolean {
-  return cre.x === tar.x && cre.y === tar.y;
+  return cre.x() === tar.x() && cre.y() === tar.y();
 }
 /**
  *  the same as {@link str_coordinate}

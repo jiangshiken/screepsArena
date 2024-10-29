@@ -1,4 +1,6 @@
 import { set_setMoveMapAvoidFarOn } from "./deprecated/maps";
+import { displayPos } from "./gameObjects/HasHits";
+import { showHealthBars } from "./gameObjects/visual_Cre";
 import { firstInit, loopEnd, loopStart } from "./loop";
 import { set_harvesterNotFleeAtStart } from "./roles/harvester";
 import { useArmedBuilderStrategy } from "./strategies/armedBuilderStrategy";
@@ -11,8 +13,6 @@ import { spawnStartHarvester } from "./strategies/strategyTool";
 import { useTailStrategy } from "./strategies/tailStrategy";
 import { useTest } from "./strategies/testMode";
 import { useTurtleStrategy } from "./strategies/turtle";
-import { displayPos } from "./units/HasHits";
-import { showHealthBars } from "./units/visual_Cre";
 import { ct, lowCPUMode, pt } from "./utils/CPU";
 import { tick } from "./utils/game";
 import {

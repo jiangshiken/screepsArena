@@ -38,7 +38,7 @@ import {
   oppoUnits,
   Unit,
 } from "./Cre";
-import { myRamparts, resources } from "./gameObjectInitialize";
+import { myRamparts, resources } from "./GameObjectInitialize";
 
 /**find the position that can get protect nearby*/
 export function findProtectPos(cre: Cre): { pos: Pos; rate: number } {

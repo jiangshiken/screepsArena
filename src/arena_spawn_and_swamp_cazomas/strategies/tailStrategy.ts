@@ -1,13 +1,17 @@
 import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
 import { StructureExtension, StructureSpawn } from "game/prototypes";
 import { getTicks } from "game/utils";
+import { PullTarsTask } from "../gameObjects/pullTasks";
+import {
+  enemySpawn,
+  spawn,
+  spawnCleared,
+  spawnCreep,
+} from "../gameObjects/Spa";
 import { stdShoter } from "../roles/fighters_std";
 import { jamer } from "../roles/jamer";
-import { PullTarsTask } from "../units/pullTasks";
-import { enemySpawn, spawn, spawnCleared, spawnCreep } from "../units/spawn";
 
 import { set_swampIgnore } from "../deprecated/maps";
-import { toughDefender } from "../roles/toughDefender";
 import {
   Cre,
   enemies,
@@ -19,8 +23,9 @@ import {
   oppoUnits,
   Role,
   Unit,
-} from "../units/Cre";
-import { displayPos, inRampart } from "../units/HasHits";
+} from "../gameObjects/Cre";
+import { displayPos, inRampart } from "../gameObjects/HasHits";
+import { toughDefender } from "../roles/toughDefender";
 import { TB } from "../utils/autoBodys";
 import { best, first, goInRange, inRange, ranBool, sum } from "../utils/JS";
 import { Dooms, getGuessPlayer, Kerob, Tigga } from "../utils/player";

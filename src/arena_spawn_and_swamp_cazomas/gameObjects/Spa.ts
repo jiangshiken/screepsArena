@@ -9,7 +9,6 @@ import {
   TOUGH,
   WORK,
 } from "game/constants";
-import { StructureSpawn } from "game/prototypes";
 
 import { S } from "../utils/export";
 import { set_startGateUp, startGateUp } from "../utils/game";
@@ -43,7 +42,8 @@ import {
   oppoExtensions,
   spawns,
   structures,
-} from "./gameObjectInitialize";
+} from "./GameObjectInitialize";
+import { OwnedStru } from "./Stru";
 
 /** your first StructureSpawn*/
 export let spawn: Spa;
@@ -111,7 +111,7 @@ export function fromSpawnPos(x: number, y: number) {
   return posPlusVec(spawn, { vec_x: x, vec_y: y });
 }
 /** extend of Spawn */
-export class Spa extends StructureSpawn {
+export class Spa extends OwnedStru {
   /** is init */
   inited: boolean | undefined;
   /** the time count down of spawning creep */

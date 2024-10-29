@@ -8,7 +8,7 @@ import { invalid } from "../utils/JS";
 import { atPos, COO, Pos } from "../utils/Pos";
 import { drawLineComplex, SA } from "../utils/visual";
 import { my } from "./Cre";
-import { myConstructionSites } from "./gameObjectInitialize";
+import { myConstructionSites } from "./GameObjectInitialize";
 import { findGO } from "./overallMap";
 
 // export let CSs: CS[] = []

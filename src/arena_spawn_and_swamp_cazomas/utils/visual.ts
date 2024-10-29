@@ -1,11 +1,11 @@
 import { getTicks } from "game/utils";
 import { Visual } from "game/visual";
 
-import { overallMap } from "../units/overallMap";
+import { overallMap } from "../gameObjects/overallMap";
 import { Event } from "./Event";
 import { PL } from "./game";
 import { d2 } from "./JS";
-import { HasPos, Pos, pos00, Pos_C } from "./Pos";
+import { Pos, pos00, Pos_C } from "./Pos";
 
 /**
  * the list of SAVis
@@ -22,9 +22,9 @@ export function firstInit_visual() {
 /**
  *  represent a Visual of SA text
  */
-export class SAVis extends Visual implements HasPos {
-  readonly x: number;
-  readonly y: number;
+export class SAVis extends Visual implements Pos {
+  readonly data_x: number;
+  readonly data_y: number;
   readonly startTick: Event;
   readonly invokeTick: number = getTicks();
   /** the text to show */
@@ -35,14 +35,20 @@ export class SAVis extends Visual implements HasPos {
   readonly sayLine: Visual;
   constructor(pos: Pos, layer: number) {
     super(layer, false);
-    this.x = pos.x;
-    this.y = pos.y;
+    this.data_x = pos.x();
+    this.data_y = pos.y();
     this.startTick = new Event();
     this.textPos = getSATextPos(pos);
     this.sayLine = drawLineComplex(pos, this.textPos, 0.5, "#0000ff");
     //
     overallMap.get(pos).push(this);
     SAVisList.push(this);
+  }
+  x(): number {
+    return this.data_x;
+  }
+  y(): number {
+    return this.data_y;
   }
 }
 //functions
@@ -75,8 +81,8 @@ export function drawLargeSizeText() {
  */
 function getSATextPos(pos: Pos): Pos {
   const len = 5;
-  const tarX = Math.floor(pos.x / len) * len;
-  const tarY = pos.y + (pos.x % len) / len;
+  const tarX = Math.floor(pos.x() / len) * len;
+  const tarY = pos.y + (pos.x() % len) / len;
   const tarPos = { x: tarX, y: tarY };
   return tarPos;
 }
@@ -241,7 +247,7 @@ export function drawRangeComplex(
   opacity: number,
   color: string
 ): (Visual | undefined)[] {
-  const cx = cre.x;
+  const cx = cre.x();
   const cy = cre.y;
   const leftTop = { x: cx - rad, y: cy - rad };
   const rightTop = { x: cx + rad, y: cy - rad };

@@ -1,4 +1,4 @@
-import { findFitOppoUnit } from "../units/army";
+import { findFitOppoUnit } from "../gameObjects/army";
 import {
   Cre,
   enemies,
@@ -6,7 +6,7 @@ import {
   getRangePosArr,
   hasThreat,
   Role,
-} from "../units/Cre";
+} from "../gameObjects/Cre";
 import { tick } from "../utils/game";
 import { COO, GR } from "../utils/Pos";
 import { SA } from "../utils/visual";

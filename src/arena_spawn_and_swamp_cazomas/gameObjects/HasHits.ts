@@ -8,7 +8,7 @@ import {
 import { inResourceArea, leftRate, tick } from "../utils/game";
 import { valid } from "../utils/JS";
 import { atPos, GR, Pos } from "../utils/Pos";
-import { containers, isOppoGO, resources } from "./gameObjectInitialize";
+import { containers, isOppoGO, resources } from "./GameObjectInitialize";
 import { findGO, overallMap } from "./overallMap";
 
 import {
@@ -20,12 +20,15 @@ import {
 } from "game/prototypes";
 import { getObjectsByPrototype, getRange } from "game/utils";
 import { SA } from "../utils/visual";
+import { Cre } from "./Cre";
 
-interface HasHits {
+export interface HasHits {
   hits(): number;
-  maxHits(): number;
+  hitsMax(): number;
 }
 export function getConts(): Cont[] {
+  let bb: any = undefined;
+  let aa = bb instanceof Cre;
   return <Cont[]>containers;
 }
 export function getWildConts(): Cont[] {

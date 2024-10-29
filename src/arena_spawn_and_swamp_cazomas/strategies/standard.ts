@@ -6,12 +6,6 @@ import {
   getFriendForceMapValue,
   miniForceMap_fri,
 } from "../deprecated/maps";
-import { builderStandard, isBuilderOutSide } from "../roles/builder";
-import { defender_rampart } from "../roles/defender";
-import { stdAttacker, stdHealer, stdShoter } from "../roles/fighters_std";
-import { harvester } from "../roles/harvester";
-import { jamer } from "../roles/jamer";
-import { toughDefender } from "../roles/toughDefender";
 import {
   calculateForce,
   Cre,
@@ -23,10 +17,16 @@ import {
   set_spawnDps,
   set_spawnExtraTaunt,
   sumForceByArr,
-} from "../units/Cre";
-import { displayPos } from "../units/HasHits";
-import { EEB, spawn, spawnAndExtensionsEnergy } from "../units/spawn";
-import { spawnBySpawnTypeList, SpawnType } from "../units/spawnTypeList";
+} from "../gameObjects/Cre";
+import { displayPos } from "../gameObjects/HasHits";
+import { EEB, spawn, spawnAndExtensionsEnergy } from "../gameObjects/Spa";
+import { spawnBySpawnTypeList, SpawnType } from "../gameObjects/spawnTypeList";
+import { builderStandard, isBuilderOutSide } from "../roles/builder";
+import { defender_rampart } from "../roles/defender";
+import { stdAttacker, stdHealer, stdShoter } from "../roles/fighters_std";
+import { harvester } from "../roles/harvester";
+import { jamer } from "../roles/jamer";
+import { toughDefender } from "../roles/toughDefender";
 import { TB } from "../utils/autoBodys";
 import {
   enemy5MABonus,

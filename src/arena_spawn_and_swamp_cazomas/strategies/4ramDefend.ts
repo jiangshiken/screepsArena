@@ -1,13 +1,13 @@
+import { supplyCS } from "../gameObjects/CS";
+import { friends } from "../gameObjects/Cre";
+import { spawn, spawnCleared, spawnCreep } from "../gameObjects/Spa";
 import { builder4Ram } from "../roles/builder";
-import { supplyCS } from "../units/constructionSite";
-import { friends } from "../units/Cre";
-import { spawn, spawnCleared, spawnCreep } from "../units/spawn";
 import { TB } from "../utils/autoBodys";
 import { SA } from "../utils/visual";
 import { spawnStartHarvester } from "./strategyTool";
 
 import { StructureRampart } from "game/prototypes";
-import { displayPos } from "../units/HasHits";
+import { displayPos } from "../gameObjects/HasHits";
 import { leftRate } from "../utils/game";
 
 /**use 4 ramparts to defend the base*/

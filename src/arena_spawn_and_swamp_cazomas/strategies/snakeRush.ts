@@ -13,11 +13,6 @@ import {
   set_moveCostForceRate,
   set_swampFirst,
 } from "../deprecated/maps";
-import { shortDistanceFight } from "../roles/fighters_std";
-import { jamer } from "../roles/jamer";
-import { toughDefender } from "../roles/toughDefender";
-import { PullTarsTask } from "../units/pullTasks";
-import { enemyRampartIsHealthy } from "../units/ramparts";
 import {
   enemySpawn,
   getBodiesCost,
@@ -29,9 +24,15 @@ import {
   spawnCleared,
   spawnCreep,
   spawnCreep_ifHasEnergy,
-} from "../units/spawn";
+} from "../gameObjects/Spa";
+import { PullTarsTask } from "../gameObjects/pullTasks";
+import { enemyRampartIsHealthy } from "../gameObjects/ramparts";
+import { shortDistanceFight } from "../roles/fighters_std";
+import { jamer } from "../roles/jamer";
+import { toughDefender } from "../roles/toughDefender";
 
 import { GTB } from "../deprecated/bodyParts";
+import { supplyCS } from "../gameObjects/CS";
 import {
   Cre,
   Role,
@@ -59,11 +60,13 @@ import {
   oppoUnits,
   setEnRamAroundCost,
   sumForceByArr,
-} from "../units/Cre";
-import { displayPos, inRampart } from "../units/HasHits";
-import { supplyCS } from "../units/constructionSite";
-import { constructionSites, oppoRamparts } from "../units/gameObjectInitialize";
-import { findGO } from "../units/overallMap";
+} from "../gameObjects/Cre";
+import {
+  constructionSites,
+  oppoRamparts,
+} from "../gameObjects/GameObjectInitialize";
+import { displayPos, inRampart } from "../gameObjects/HasHits";
+import { findGO } from "../gameObjects/overallMap";
 import { ct, et } from "../utils/CPU";
 import { Event, Event_C, validEvent } from "../utils/Event";
 import { best, invalid, maxWorth_lamb, sum } from "../utils/JS";

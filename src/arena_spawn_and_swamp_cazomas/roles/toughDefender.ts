@@ -1,8 +1,8 @@
 import { CostMatrix } from "game/path-finder";
 import { findClosestByRange } from "game/utils";
 
-import { Cre, enemies, friends, Role } from "../units/Cre";
-import { spawn } from "../units/spawn";
+import { Cre, enemies, friends, Role } from "../gameObjects/Cre";
+import { spawn } from "../gameObjects/Spa";
 import { leftVector } from "../utils/game";
 import { getGuessPlayer, Tigga } from "../utils/player";
 import {

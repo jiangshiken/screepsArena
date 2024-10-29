@@ -1,9 +1,9 @@
 import { CARRY, MOVE } from "game/constants";
 
+import { friends } from "../gameObjects/Cre";
+import { displayPos } from "../gameObjects/HasHits";
+import { spawn, spawnCleared, spawnCreep } from "../gameObjects/Spa";
 import { harvester } from "../roles/harvester";
-import { friends } from "../units/Cre";
-import { displayPos } from "../units/HasHits";
-import { spawn, spawnCleared, spawnCreep } from "../units/spawn";
 import { TB } from "../utils/autoBodys";
 import { tick } from "../utils/game";
 import { sum } from "../utils/JS";

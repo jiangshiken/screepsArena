@@ -19,8 +19,6 @@ import {
   loopStart_maps,
   setMoveMatrix,
 } from "./deprecated/maps";
-import { sum_snakePart0 } from "./strategies/snakeRush";
-import { CS, initCS } from "./units/constructionSite";
 import {
   controlCreeps,
   cres,
@@ -32,14 +30,15 @@ import {
   getGameObjects,
   getMyProducers,
   initialCresAtLoopStart,
-} from "./units/Cre";
+} from "./gameObjects/Cre";
+import { CS, initCS } from "./gameObjects/CS";
 import {
   constructionSites,
   containers,
   getPrototype,
   initialGameObjectsAtLoopStart,
   spawns,
-} from "./units/gameObjectInitialize";
+} from "./gameObjects/GameObjectInitialize";
 import {
   Cont,
   displayPos,
@@ -47,14 +46,14 @@ import {
   setEnemySpawnPos,
   setSpawnPos,
   spawnPos,
-} from "./units/HasHits";
+} from "./gameObjects/HasHits";
 import {
   firstInit_overallMap,
   overallMapInit,
   setGameObjectsThisTick,
   setOverallMap,
-} from "./units/overallMap";
-import { setRamMoveMapValue } from "./units/ramparts";
+} from "./gameObjects/overallMap";
+import { setRamMoveMapValue } from "./gameObjects/ramparts";
 import {
   checkSpawns,
   enemySpawn,
@@ -63,8 +62,9 @@ import {
   setSpawn,
   Spa,
   spawn,
-} from "./units/spawn";
-import { showEnemies, showHits } from "./units/visual_Cre";
+} from "./gameObjects/Spa";
+import { showEnemies, showHits } from "./gameObjects/visual_Cre";
+import { sum_snakePart0 } from "./strategies/snakeRush";
 import { getSuperior, getSuperiorRate } from "./utils/bonus";
 import {
   ct,

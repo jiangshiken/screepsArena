@@ -9,11 +9,11 @@ import { TOUGH } from "game/constants";
 import { CostMatrix, searchPath } from "game/path-finder";
 import { StructureExtension } from "game/prototypes";
 
+import { Cre, friends, id, Role } from "../gameObjects/Cre";
+import { createCS } from "../gameObjects/CS";
+import { enemySpawn, spawn, spawnCreep } from "../gameObjects/Spa";
 import { builder4Ram } from "../roles/builder";
 import { harvester } from "../roles/harvester";
-import { createCS } from "../units/constructionSite";
-import { Cre, friends, id, Role } from "../units/Cre";
-import { enemySpawn, spawn, spawnCreep } from "../units/spawn";
 import { TB } from "../utils/autoBodys";
 import { ct, pt } from "../utils/CPU";
 import { validEvent } from "../utils/Event";

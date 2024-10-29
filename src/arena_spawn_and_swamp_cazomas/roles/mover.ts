@@ -11,7 +11,7 @@ import {
   hasMovePart,
   Role,
   Task_Cre,
-} from "../units/Cre";
+} from "../gameObjects/Cre";
 import { validEvent } from "../utils/Event";
 import { S } from "../utils/export";
 import { remove } from "../utils/JS";

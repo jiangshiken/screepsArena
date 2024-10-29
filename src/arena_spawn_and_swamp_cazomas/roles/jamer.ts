@@ -6,8 +6,7 @@ import {
   cpuBreakJudge,
   fleeWeakComplex,
   givePositionToImpartantFriend,
-} from "../units/army";
-import { getProgressRate } from "../units/constructionSite";
+} from "../gameObjects/army";
 import {
   blocked,
   Cre,
@@ -16,9 +15,10 @@ import {
   hasEnemyAround_lamb,
   hasThreat,
   Role,
-} from "../units/Cre";
-import { oppoConstructionSites } from "../units/gameObjectInitialize";
-import { inOppoRampart } from "../units/HasHits";
+} from "../gameObjects/Cre";
+import { getProgressRate } from "../gameObjects/CS";
+import { oppoConstructionSites } from "../gameObjects/GameObjectInitialize";
+import { inOppoRampart } from "../gameObjects/HasHits";
 import { tick } from "../utils/game";
 import { divideReduce } from "../utils/JS";
 import { Adj, atPos, COO, GR, InShotRan, midPoint } from "../utils/Pos";

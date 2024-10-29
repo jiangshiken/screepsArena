@@ -23,10 +23,10 @@ import {
   hits,
   my,
 } from "./Cre";
-import { myRamparts, oppoRamparts } from "./gameObjectInitialize";
+import { myRamparts, oppoRamparts } from "./GameObjectInitialize";
 import { spawnPos } from "./HasHits";
 import { findGO, overallMap } from "./overallMap";
-import { enemySpawn, spawn } from "./spawn";
+import { enemySpawn, spawn } from "./Spa";
 
 export function myRampartAt(pos: Pos): StructureRampart {
   return <StructureRampart>findGO(pos, StructureRampart);

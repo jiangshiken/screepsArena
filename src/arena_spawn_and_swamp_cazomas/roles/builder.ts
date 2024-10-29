@@ -6,15 +6,7 @@ import {
 } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
-import { cpuBreakJudge } from "../units/army";
-import {
-  createCS,
-  CS,
-  getMaxWorthCSS,
-  getMyCSs,
-  getProgressRate,
-  hasConstructionSite,
-} from "../units/constructionSite";
+import { cpuBreakJudge } from "../gameObjects/army";
 import {
   blocked,
   calAroundEnergy,
@@ -38,10 +30,21 @@ import {
   Role,
   setIsBuilding,
   Task_Cre,
-} from "../units/Cre";
-import { myConstructionSites, myRamparts } from "../units/gameObjectInitialize";
-import { getOutsideContainers } from "../units/HasHits";
-import { overallMap } from "../units/overallMap";
+} from "../gameObjects/Cre";
+import {
+  createCS,
+  CS,
+  getMaxWorthCSS,
+  getMyCSs,
+  getProgressRate,
+  hasConstructionSite,
+} from "../gameObjects/CS";
+import {
+  myConstructionSites,
+  myRamparts,
+} from "../gameObjects/GameObjectInitialize";
+import { getOutsideContainers } from "../gameObjects/HasHits";
+import { overallMap } from "../gameObjects/overallMap";
 import {
   defendTheRampart,
   getMyHealthyRamparts,
@@ -49,14 +52,14 @@ import {
   inMyHealthyRampart,
   inMyRampart,
   myRampartAt,
-} from "../units/ramparts";
+} from "../gameObjects/ramparts";
 import {
   enemySpawn,
   getSpawnAndBaseContainerEnergy,
   inMyBaseRan,
   resetStartGateAvoidFromEnemies,
   spawn,
-} from "../units/spawn";
+} from "../gameObjects/Spa";
 import { S } from "../utils/export";
 import { tick } from "../utils/game";
 import { d2, getClassName, invalid } from "../utils/JS";

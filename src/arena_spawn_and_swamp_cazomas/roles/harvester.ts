@@ -12,8 +12,8 @@ import {
   Producer,
   Role,
   Task_Cre,
-} from "../units/Cre";
-import { containers, Harvable } from "../units/gameObjectInitialize";
+} from "../gameObjects/Cre";
+import { containers, Harvable } from "../gameObjects/GameObjectInitialize";
 import {
   Cont,
   getContWorth,
@@ -21,8 +21,8 @@ import {
   getWildConts,
   setResourceDrop,
   validRes,
-} from "../units/HasHits";
-import { inMyBaseRan, spawn } from "../units/spawn";
+} from "../gameObjects/HasHits";
+import { inMyBaseRan, spawn } from "../gameObjects/Spa";
 import { S } from "../utils/export";
 import { inResourceArea } from "../utils/game";
 import { COO, GR } from "../utils/Pos";

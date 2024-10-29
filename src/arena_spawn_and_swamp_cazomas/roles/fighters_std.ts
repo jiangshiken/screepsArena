@@ -11,7 +11,7 @@ import {
   findProtectPos,
   getForceTarAndPosRate,
   getRoundFightAndAvoidNum,
-} from "../units/army";
+} from "../gameObjects/army";
 import {
   blocked,
   calculateForce,
@@ -42,11 +42,11 @@ import {
   Role,
   sumForceByArr,
   Unit,
-} from "../units/Cre";
-import { myRamparts } from "../units/gameObjectInitialize";
-import { inOppoRampart, inRampart } from "../units/HasHits";
-import { inMyHealthyRampart } from "../units/ramparts";
-import { enemySpawn, spawn } from "../units/spawn";
+} from "../gameObjects/Cre";
+import { myRamparts } from "../gameObjects/GameObjectInitialize";
+import { inOppoRampart, inRampart } from "../gameObjects/HasHits";
+import { inMyHealthyRampart } from "../gameObjects/ramparts";
+import { enemySpawn, spawn } from "../gameObjects/Spa";
 import {
   getSuperior,
   getSuperiorRate,

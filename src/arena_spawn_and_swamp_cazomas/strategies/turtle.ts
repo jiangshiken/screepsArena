@@ -10,26 +10,22 @@ import { getTicks } from "game/utils";
 import { CARRY } from "game/constants";
 import { bodyCM } from "../deprecated/bodyParts";
 import { set_setMiniForceMapOn } from "../deprecated/maps";
-import { builderTurtle } from "../roles/builder";
-import { defender_rampart } from "../roles/defender";
-import { harvester } from "../roles/harvester";
-import { jamer } from "../roles/jamer";
-import { createCS, createCS_wait, supplyCS } from "../units/constructionSite";
 import {
   enemyAWeight,
   friends,
   getEnemyArmies,
   getFreeEnergy,
   setIsTurtleContainer,
-} from "../units/Cre";
+} from "../gameObjects/Cre";
+import { createCS, createCS_wait, supplyCS } from "../gameObjects/CS";
 import {
   containers,
   isMyGO,
   myConstructionSites,
-} from "../units/gameObjectInitialize";
-import { displayPos } from "../units/HasHits";
-import { findGO, overallMap } from "../units/overallMap";
-import { baseLoseRampart } from "../units/ramparts";
+} from "../gameObjects/GameObjectInitialize";
+import { displayPos } from "../gameObjects/HasHits";
+import { findGO, overallMap } from "../gameObjects/overallMap";
+import { baseLoseRampart } from "../gameObjects/ramparts";
 import {
   getSpawnAndBaseContainerEnergy,
   resetStartGateAvoidFromEnemies,
@@ -37,8 +33,12 @@ import {
   spawnCleared,
   spawnCreep,
   spawnCreepInFront,
-} from "../units/spawn";
-import { SpawnType } from "../units/spawnTypeList";
+} from "../gameObjects/Spa";
+import { SpawnType } from "../gameObjects/spawnTypeList";
+import { builderTurtle } from "../roles/builder";
+import { defender_rampart } from "../roles/defender";
+import { harvester } from "../roles/harvester";
+import { jamer } from "../roles/jamer";
 import { TB } from "../utils/autoBodys";
 import { set_switchCPUModeOn } from "../utils/CPU";
 import { leftRate, leftVector, tick } from "../utils/game";
