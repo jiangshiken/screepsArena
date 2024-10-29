@@ -1,86 +1,50 @@
 import { arenaInfo } from "game";
 import { getCpuTime } from "game/utils";
-import { Event_C, Event_Number } from "./event";
-import { tick } from "./game";
+import { Event_Number } from "./Event";
 import { KNumber } from "./JS";
 import { P } from "./visual";
-
-export let cpuRateHistory = 0
+/**cpu rate history that get an average cpu rate of previous ticks */
+export let cpuRateHistory = 0;
 export function recordEmergencyHistory(cpuUsed: number) {
-	const totalCPU = arenaInfo.cpuTimeLimit
-	const cpuRate = cpuUsed / totalCPU
-	const rate = 1 * cpuRate
-	cpuRateHistory = 0.9 * cpuRateHistory + 0.1 * rate
-}
-export function getCPUEmergency(): number {
-	const cpuRate = 0.5 * getCPUPercent() + 0.5 * cpuRateHistory
-	const remainCPU = 1 - cpuRate
-	return 1 / (remainCPU + 0.05)
-}
-// export let emergencyCurrent=0
-let sampleTrigEvent: Event_C | undefined
-
-/** The action that has more hunger will more likely to be called.
- The action that has more emergency will more likely to be called.
- When cpu competitionRate is high,the action that has low call Rate
-	will be passed and may be called afterward.
- */
-function sampleFunction() {
-	const hungerRate = sampleTrigEvent ? 1 * (tick - sampleTrigEvent.invokeTick) : 100
-	const actionNeedRate = 1
-	const emergency = getCPUEmergency()
-	const bias = 4 * emergency
-	const trigRate = hungerRate * actionNeedRate - bias
-	if (trigRate > 0) {
-		sampleTrigEvent = new Event_C()
-		//do action
-	} else {
-		//being passed
-	}
+  const totalCPU = arenaInfo.cpuTimeLimit;
+  const cpuRate = cpuUsed / totalCPU;
+  const rate = 1 * cpuRate;
+  cpuRateHistory = 0.9 * cpuRateHistory + 0.1 * rate;
 }
 /**
- * used to calculate the CPU time
+ * end calculate time and get the time period
  */
 export function et(t: number) {
-	return ct() - t;
+  return ct() - t;
 }
 /**
  * used to print the CPU time
  */
 export function pt(s: string, t: number) {
-	let tt = et(t);
-	P(s + " " + KNumber(tt) + " cpu");
+  const printedTime = et(t);
+  P(s + " " + KNumber(printedTime) + " cpu");
 }
 /**
  * used to print the CPU time
  */
 export function ptSum(s: string, t: number) {
-	P(s + " " + KNumber(t) + " cpu");
+  P(s + " " + KNumber(t) + " cpu");
 }
 /**
  * used to calculate the CPU time
  */
 export function ct() {
-	return getCpuTime();
+  return getCpuTime();
 }
 export function calSumCPU(e: Event_Number, st: number) {
-	e.increase(et(st))
+  e.increase(et(st));
 }
 export function getCPUK(): number {
-	let cpu = getCpuTime();
-	let cpuK = Math.floor(cpu / 1000);
-	return cpuK;
+  const cpu = getCpuTime();
+  return Math.floor(cpu / 1000);
 }
 export function getCPUPercent(): number {
-	let cpu = getCpuTime();
-	let maxCpu = arenaInfo.cpuTimeLimit;
-	return cpu / maxCpu;
-}
-export let lowCPUMode: boolean = false;
-export function setLowCPUMode(b: boolean) {
-	lowCPUMode = b;
-}
-export let switchCPUModeOn: boolean = true
-export function set_switchCPUModeOn(b: boolean) {
-	switchCPUModeOn = b;
+  const cpu = getCpuTime();
+  const maxCpu = arenaInfo.cpuTimeLimit;
+  return cpu / maxCpu;
 }

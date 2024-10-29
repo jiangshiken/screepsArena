@@ -1,5 +1,6 @@
 {
   "recommendations": [
-    "alfnielsen.vsc-organize-imports"
+    "alfnielsen.vsc-organize-imports",
+    "shouxtech.ts-formatter"
   ]
 }
