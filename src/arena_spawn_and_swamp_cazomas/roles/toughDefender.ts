@@ -2,9 +2,9 @@ import { CostMatrix } from "game/path-finder";
 import { findClosestByRange } from "game/utils";
 
 import { Cre, enemies, friends, Role } from "../gameObjects/Cre";
-import { spawn } from "../gameObjects/Spa";
+import { getGuessPlayer, Tigga } from "../gameObjects/player";
+import { spawn } from "../gameObjects/spawn";
 import { leftVector } from "../utils/game";
-import { getGuessPlayer, Tigga } from "../utils/player";
 import {
   absRange,
   getRangePoss,

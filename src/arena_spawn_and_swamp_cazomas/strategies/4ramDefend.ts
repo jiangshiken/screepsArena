@@ -1,6 +1,6 @@
 import { supplyCS } from "../gameObjects/CS";
 import { friends } from "../gameObjects/Cre";
-import { spawn, spawnCleared, spawnCreep } from "../gameObjects/Spa";
+import { spawn, spawnCleared, spawnCreep } from "../gameObjects/spawn";
 import { builder4Ram } from "../roles/builder";
 import { TB } from "../utils/autoBodys";
 import { SA } from "../utils/visual";

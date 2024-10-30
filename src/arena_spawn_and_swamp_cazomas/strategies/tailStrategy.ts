@@ -7,7 +7,7 @@ import {
   spawn,
   spawnCleared,
   spawnCreep,
-} from "../gameObjects/Spa";
+} from "../gameObjects/spawn";
 import { stdShoter } from "../roles/fighters_std";
 import { jamer } from "../roles/jamer";
 
@@ -25,10 +25,10 @@ import {
   Unit,
 } from "../gameObjects/Cre";
 import { displayPos, inRampart } from "../gameObjects/HasHits";
+import { Dooms, getGuessPlayer, Kerob, Tigga } from "../gameObjects/player";
 import { toughDefender } from "../roles/toughDefender";
 import { TB } from "../utils/autoBodys";
 import { best, first, goInRange, inRange, ranBool, sum } from "../utils/JS";
-import { Dooms, getGuessPlayer, Kerob, Tigga } from "../utils/player";
 import {
   Adj,
   atPos,

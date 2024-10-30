@@ -43,10 +43,29 @@ import {
   spawns,
   structures,
 } from "./GameObjectInitialize";
-import { OwnedStru } from "./Stru";
 
 /** your first StructureSpawn*/
 export let spawn: Spa;
+export function spawnInitCre(
+  creep: Creep,
+  role?: Role,
+  spawnInfo?: SpawnInfo,
+  whenSpawnStart: boolean = false
+) {
+  if (whenSpawnStart) {
+    if (role) {
+      // SA(displayPos(), "new TaskRole");
+      newCre.role = role;
+      new Task_Role(newCre, role);
+    }
+    if (spawnInfo) {
+      newCre.spawnInfo = spawnInfo;
+    }
+  } else {
+    // SA(ca, "         isSpawning(ca)=" + isSpawning(ca))
+    cres.push(ca.advance);
+  }
+}
 export function spawnCleared(s: Spa) {
   return spawnList.length === 0 && s.isSpawning === undefined;
 }
@@ -109,20 +128,6 @@ export function getSpawnCost(bodies: BodyPartConstant[]): number {
 }
 export function fromSpawnPos(x: number, y: number) {
   return posPlusVec(spawn, { vec_x: x, vec_y: y });
-}
-/** extend of Spawn */
-export class Spa extends OwnedStru {
-  /** is init */
-  inited: boolean | undefined;
-  /** the time count down of spawning creep */
-  timeLimit: number | undefined;
-  isSpawning: Cre | undefined;
-}
-export function initSpa(spa: Spa) {
-  if (!spa.inited) {
-    spa.timeLimit = 0;
-    spa.inited = true;
-  }
 }
 export function getExistListAndSpawningFriendsNum(
   lamb: (i: Cre) => boolean,

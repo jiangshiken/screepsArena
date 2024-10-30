@@ -12,7 +12,7 @@ import {
   resetStartGateAvoidFromEnemies,
   spawn,
   spawnAndExtensionsEnergy,
-} from "../gameObjects/Spa";
+} from "../gameObjects/spawn";
 import { spawnBySpawnTypeList, SpawnType } from "../gameObjects/spawnTypeList";
 import { builderStandard } from "../roles/builder";
 import { defender_rampart } from "../roles/defender";

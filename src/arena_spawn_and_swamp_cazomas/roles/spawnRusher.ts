@@ -1,7 +1,7 @@
 import { findPath } from "game/utils";
 
 import { Cre, friends, Role } from "../gameObjects/Cre";
-import { enemySpawn } from "../gameObjects/Spa";
+import { enemySpawn } from "../gameObjects/spawn";
 import { Event_C, validEvent } from "../utils/Event";
 import { COO, GR } from "../utils/Pos";
 import { drawPolyLight, SA } from "../utils/visual";

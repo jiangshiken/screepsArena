@@ -1,3 +1,4 @@
 export interface HasMy {
-  my(): boolean;
+  my: boolean;
+  oppo: boolean;
 }

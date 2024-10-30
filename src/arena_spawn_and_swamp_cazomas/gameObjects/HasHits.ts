@@ -23,8 +23,8 @@ import { SA } from "../utils/visual";
 import { Cre } from "./Cre";
 
 export interface HasHits {
-  hits(): number;
-  hitsMax(): number;
+  hits: number;
+  hitsMax: number;
 }
 export function getConts(): Cont[] {
   let bb: any = undefined;

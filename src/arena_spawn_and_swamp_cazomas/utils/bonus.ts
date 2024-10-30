@@ -16,7 +16,7 @@ import {
   spawn,
   spawnAndExtensionsEnergy,
   spawnNearBlockedAround,
-} from "../gameObjects/Spa";
+} from "../gameObjects/spawn";
 import { StNumber } from "./game";
 import { divide0, divideReduce, goInRange, relu, sum } from "./JS";
 import { GR, Pos, X_axisDistance } from "./Pos";

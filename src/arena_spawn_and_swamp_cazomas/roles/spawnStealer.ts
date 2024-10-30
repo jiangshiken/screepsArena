@@ -1,5 +1,5 @@
 import { Cre, Role } from "../gameObjects/Cre";
-import { enemySpawn } from "../gameObjects/Spa";
+import { enemySpawn } from "../gameObjects/spawn";
 import { SA } from "../utils/visual";
 
 /**tring to attack the enemy spawn when no one noticed*/

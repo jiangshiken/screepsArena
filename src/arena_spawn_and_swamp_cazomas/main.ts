@@ -1,5 +1,13 @@
 import { set_setMoveMapAvoidFarOn } from "./deprecated/maps";
 import { displayPos } from "./gameObjects/HasHits";
+import {
+  Dooms,
+  getGuessPlayer,
+  identifyOpponent,
+  Kerob,
+  startWaitTick,
+  Tigga,
+} from "./gameObjects/player";
 import { showHealthBars } from "./gameObjects/visual_Cre";
 import { firstInit, loopEnd, loopStart } from "./loop";
 import { set_harvesterNotFleeAtStart } from "./roles/harvester";
@@ -15,14 +23,6 @@ import { useTest } from "./strategies/testMode";
 import { useTurtleStrategy } from "./strategies/turtle";
 import { ct, lowCPUMode, pt } from "./utils/CPU";
 import { tick } from "./utils/game";
-import {
-  Dooms,
-  getGuessPlayer,
-  identifyOpponent,
-  Kerob,
-  startWaitTick,
-  Tigga,
-} from "./utils/player";
 import { SA } from "./utils/visual";
 
 //overall variable

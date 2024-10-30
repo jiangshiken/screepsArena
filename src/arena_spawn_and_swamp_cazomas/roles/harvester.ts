@@ -22,7 +22,7 @@ import {
   setResourceDrop,
   validRes,
 } from "../gameObjects/HasHits";
-import { inMyBaseRan, spawn } from "../gameObjects/Spa";
+import { inMyBaseRan, spawn } from "../gameObjects/spawn";
 import { S } from "../utils/export";
 import { inResourceArea } from "../utils/game";
 import { COO, GR } from "../utils/Pos";

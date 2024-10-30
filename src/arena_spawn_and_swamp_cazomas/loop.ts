@@ -36,8 +36,9 @@ import {
   constructionSites,
   containers,
   getPrototype,
-  initialGameObjectsAtLoopStart,
-  spawns,
+  initialGameObjectsAtLoopStart_advance,
+  initialGameObjectsAtLoopStart_basic,
+  initialStrusAtLoopStart,
 } from "./gameObjects/GameObjectInitialize";
 import {
   Cont,
@@ -57,12 +58,11 @@ import { setRamMoveMapValue } from "./gameObjects/ramparts";
 import {
   checkSpawns,
   enemySpawn,
-  initSpa,
   setEnemySpawn,
   setSpawn,
   Spa,
   spawn,
-} from "./gameObjects/Spa";
+} from "./gameObjects/spawn";
 import { showEnemies, showHits } from "./gameObjects/visual_Cre";
 import { sum_snakePart0 } from "./strategies/snakeRush";
 import { getSuperior, getSuperiorRate } from "./utils/bonus";
@@ -153,10 +153,6 @@ function initialAdvancedTypesAtLoopStart() {
     const cs = <CS>constr;
     initCS(cs);
   }
-  for (let spaw of spawns) {
-    const spa = <Spa>spaw;
-    initSpa(spa);
-  }
 }
 function switchLowCPUMode() {
   if (lowCPUMode) {
@@ -195,10 +191,14 @@ export function loopStart() {
   loopStart_visual();
   pt("loopStart_visual", st1);
   const st2 = ct();
-  initialGameObjectsAtLoopStart();
+  initialGameObjectsAtLoopStart_basic();
   pt("initialGameObjects", st2);
   const st3 = ct();
   initialCresAtLoopStart();
+  initialStrusAtLoopStart();
+  const st3p5 = ct();
+  initialGameObjectsAtLoopStart_advance();
+  pt("initialGameObjects", st3p5);
   initialAdvancedTypesAtLoopStart();
   // initialCreepModules()
   pt("init cres and other", st3);

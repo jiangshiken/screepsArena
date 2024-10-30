@@ -67,7 +67,6 @@ import {
   removeIf,
   valid,
 } from "../utils/JS";
-import { Kerob, getGuessPlayer } from "../utils/player";
 import {
   Adj,
   COO,
@@ -98,12 +97,12 @@ import {
 import { CS, getMaxWorthCSS, getMyCSs, progress } from "./CS";
 import {
   Harvable,
-  OwnedStructure,
   constructionSites,
   containers,
   isMyGO,
   isMyRampart,
   isMySpawn,
+  isOppoGO,
   isOppoRampart,
   isOppoSpawn,
   myStructures,
@@ -113,6 +112,7 @@ import {
   walls,
 } from "./GameObjectInitialize";
 import {
+  HasHits,
   Res,
   getMyContainers,
   getRess,
@@ -121,7 +121,9 @@ import {
   spawnPos,
   validRes,
 } from "./HasHits";
+import { HasMy } from "./HasMy";
 import { findGO, hasGO, overallMap } from "./overallMap";
+import { Kerob, getGuessPlayer } from "./player";
 
 export const defFindPathResult: FindPathResult = {
   path: [],
@@ -138,22 +140,7 @@ export class ExtraTauntEvent extends Event_Number {
     this.from = from;
   }
 }
-//types
-/** can be attack,has hits*/
-export type Attackable = Cre | Structure;
-/** all creeps and Structure */
-export type Unit = Cre | OwnedStructure;
-export type Producer = Cre | StructureExtension | StructureSpawn;
-export type HasEnergy = Resource | HasStore;
-/** has store*/
-export type HasStore =
-  | Cre
-  | StructureSpawn
-  | StructureContainer
-  | StructureExtension
-  | StructureTower;
-/**game object */
-export type GO = Attackable | Resource | ConstructionSite;
+
 export function isGO(go: any): boolean {
   return (
     go instanceof Cre ||
@@ -162,28 +149,15 @@ export function isGO(go: any): boolean {
     go instanceof ConstructionSite
   );
 }
-export class Creep_advance extends Creep {
-  advance: Cre | undefined;
-}
-export let cres: Cre[] = [];
-//
-export let friends: Cre[] = [];
-export let enemies: Cre[] = [];
-export let myUnits: Unit[] = [];
-export let oppoUnits: Unit[] = [];
+
 export function getGameObjects(): GO[] {
   return (<GO[]>cres).concat(structures, constructionSites, resources);
 }
-export function isSpawning(cre: Creep_advance): boolean {
-  // return cre.spawning && !atSpawnPos(cre)
-  let rtn1 = atSpawnPos(cre);
-  let rtn2 = cre.spawning;
-  // drawText({ x: cre.x, y: cre.y },"pos=" + COO(cre) + " rtn1=" + rtn1+" cre.spawning=" + rtn2)
-  return rtn1 || rtn2;
+export function isSpawning(cre: Creep): boolean {
+  return cre.spawning; //atSpawnPos(cre) || ;
 }
 export function atSpawnPos(pos: Pos): boolean {
-  let rtn: boolean = spawns.find(i => atPos(i, pos)) !== undefined;
-  return rtn;
+  return spawns.find(i => atPos(i, pos)) !== undefined;
 }
 
 export function getAllUnits(): Unit[] {
@@ -231,7 +205,7 @@ export class PullEvent extends Event_C {
 }
 
 /** extend of `Creep` */
-export class Cre implements HasTasks {
+export class Cre implements HasTasks, HasMy, HasHits {
   master: Creep;
   /** the role */
   role: Role | undefined;
@@ -280,6 +254,12 @@ export class Cre implements HasTasks {
     this.macro = new Macro(this);
     this.crePathFinder = new Cre_pathFinder(this);
     //TODO add member attribute
+  }
+  get my() {
+    return isMyGO(this.master);
+  }
+  get oppo() {
+    return isOppoGO(this.master);
   }
   extraMessage(): any {
     return this.spawnInfo?.extraMessage;
@@ -567,11 +547,7 @@ export class Cre implements HasTasks {
     this.crePathFinder?.moveToJudge(tar, op, step);
   }
   getBodies(type: BodyPartConstant): BodyCre[] {
-    if (this.body()) {
-      return this.body().filter(i => i.type === type);
-    } else {
-      return [];
-    }
+    return this.body().filter(i => i.type === type);
   }
   getBodyArray(): BodyPartConstant[] {
     let rtn: BodyPartConstant[] = [];
@@ -1470,13 +1446,7 @@ export function myGO(go: GO) {
     return isMyGO(go);
   }
 }
-export function my(u: Unit): boolean {
-  if (u instanceof Cre) {
-    return u.master.my;
-  } else {
-    return u.my;
-  }
-}
+
 export function oppo(u: Unit): boolean {
   return !my(u);
 }
@@ -1527,10 +1497,6 @@ export function getExist<E extends Cre | GameObject | null | undefined>(
   cre: E
 ): E | undefined {
   return exist(cre) ? cre : undefined;
-}
-export function exist(cre: Cre | GameObject | null | undefined): boolean {
-  if (cre) return cre.exists;
-  else return false;
 }
 export function damaged(cre: Attackable) {
   if (cre) return hits(cre) < hitsMax(cre);

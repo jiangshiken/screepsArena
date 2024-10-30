@@ -1,26 +1,32 @@
 import { Structure } from "game/prototypes";
 import { HasPos } from "../utils/Pos";
-import { isMyGO } from "./GameObjectInitialize";
+import { isMyGO, isOppoGO } from "./GameObjectInitialize";
 import { HasHits } from "./HasHits";
 import { HasMy } from "./HasMy";
 
 export class Stru implements HasPos {
-  master: Structure;
+  readonly master: Structure;
   constructor(stru: Structure) {
-    super();
     this.master = stru;
   }
-  x: number;
-  y: number;
+  get x(): number {
+    return this.master.x;
+  }
+  get y(): number {
+    return this.master.y;
+  }
 }
 export class OwnedStru extends Stru implements HasHits, HasMy {
-  hitsMax(): number {
+  get hitsMax(): number {
     return this.master.hitsMax;
   }
-  hits(): number {
+  get hits(): number {
     return this.master.hits;
   }
-  my() {
+  get my() {
     return isMyGO(this.master);
+  }
+  get oppo() {
+    return isOppoGO(this.master);
   }
 }

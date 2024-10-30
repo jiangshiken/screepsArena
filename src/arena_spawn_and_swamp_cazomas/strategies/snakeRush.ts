@@ -13,6 +13,8 @@ import {
   set_moveCostForceRate,
   set_swampFirst,
 } from "../deprecated/maps";
+import { PullTarsTask } from "../gameObjects/pullTasks";
+import { enemyRampartIsHealthy } from "../gameObjects/ramparts";
 import {
   enemySpawn,
   getBodiesCost,
@@ -24,9 +26,7 @@ import {
   spawnCleared,
   spawnCreep,
   spawnCreep_ifHasEnergy,
-} from "../gameObjects/Spa";
-import { PullTarsTask } from "../gameObjects/pullTasks";
-import { enemyRampartIsHealthy } from "../gameObjects/ramparts";
+} from "../gameObjects/spawn";
 import { shortDistanceFight } from "../roles/fighters_std";
 import { jamer } from "../roles/jamer";
 import { toughDefender } from "../roles/toughDefender";
@@ -67,6 +67,14 @@ import {
 } from "../gameObjects/GameObjectInitialize";
 import { displayPos, inRampart } from "../gameObjects/HasHits";
 import { findGO } from "../gameObjects/overallMap";
+import {
+  Dooms,
+  Kerob,
+  Other,
+  Tigga,
+  currentGuessPlayer,
+  getGuessPlayer,
+} from "../gameObjects/player";
 import { ct, et } from "../utils/CPU";
 import { Event, Event_C, validEvent } from "../utils/Event";
 import { best, invalid, maxWorth_lamb, sum } from "../utils/JS";
@@ -96,14 +104,6 @@ import {
   strategyTick,
   tick,
 } from "../utils/game";
-import {
-  Dooms,
-  Kerob,
-  Other,
-  Tigga,
-  currentGuessPlayer,
-  getGuessPlayer,
-} from "../utils/player";
 import { P, SA, SAN, drawLineComplex, drawText } from "../utils/visual";
 import { useStandardTurtling } from "./turtle";
 

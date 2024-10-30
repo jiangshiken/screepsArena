@@ -2,7 +2,7 @@ import { CARRY, MOVE } from "game/constants";
 
 import { friends } from "../gameObjects/Cre";
 import { displayPos } from "../gameObjects/HasHits";
-import { spawn, spawnCleared, spawnCreep } from "../gameObjects/Spa";
+import { spawn, spawnCleared, spawnCreep } from "../gameObjects/spawn";
 import { harvester } from "../roles/harvester";
 import { TB } from "../utils/autoBodys";
 import { tick } from "../utils/game";

@@ -1,14 +1,14 @@
 import { CARRY } from "game/constants";
 
-import { enemies, getBodyArrayOfCreep, getEnergy } from "../gameObjects/Cre";
-import { creeps, isOppoGO } from "../gameObjects/GameObjectInitialize";
-import { displayPos } from "../gameObjects/HasHits";
-import { enemySpawn } from "../gameObjects/Spa";
-import { TB } from "./autoBodys";
-import { tick } from "./game";
-import { arrayEquals, best } from "./JS";
-import { GR } from "./Pos";
-import { SA } from "./visual";
+import { TB } from "../utils/autoBodys";
+import { tick } from "../utils/game";
+import { arrayEquals, best } from "../utils/JS";
+import { GR } from "../utils/Pos";
+import { SA } from "../utils/visual";
+import { enemies, getBodyArrayOfCreep, getEnergy } from "./Cre";
+import { creeps, isOppoGO } from "./GameObjectInitialize";
+import { displayPos } from "./HasHits";
+import { enemySpawn } from "./spawn";
 
 //class
 export class Player {

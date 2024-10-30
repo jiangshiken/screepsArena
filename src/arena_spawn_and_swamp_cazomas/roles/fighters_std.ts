@@ -46,7 +46,7 @@ import {
 import { myRamparts } from "../gameObjects/GameObjectInitialize";
 import { inOppoRampart, inRampart } from "../gameObjects/HasHits";
 import { inMyHealthyRampart } from "../gameObjects/ramparts";
-import { enemySpawn, spawn } from "../gameObjects/Spa";
+import { enemySpawn, spawn } from "../gameObjects/spawn";
 import {
   getSuperior,
   getSuperiorRate,

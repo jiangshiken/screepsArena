@@ -6,7 +6,7 @@ import { Cre, enemies, getEnemyThreats, Role } from "../gameObjects/Cre";
 import { spawnPos } from "../gameObjects/HasHits";
 import { findGO } from "../gameObjects/overallMap";
 import { attackWeakRampart, defendTheRampart } from "../gameObjects/ramparts";
-import { spawn } from "../gameObjects/Spa";
+import { spawn } from "../gameObjects/spawn";
 import { tick } from "../utils/game";
 import { GR } from "../utils/Pos";
 import { P, SA } from "../utils/visual";

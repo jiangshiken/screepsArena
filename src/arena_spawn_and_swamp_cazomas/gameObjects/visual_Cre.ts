@@ -1,17 +1,7 @@
 import { Structure } from "game/prototypes";
 import { Visual } from "game/visual";
 
-import {
-  calculateForce,
-  Cre,
-  cres,
-  damaged,
-  enemies,
-  friends,
-  hits,
-  hitsMax,
-  Unit,
-} from "./Cre";
+import { calculateForce, Cre, damaged, hits, hitsMax } from "./Cre";
 
 import { valid } from "../utils/JS";
 import { drawRangeComplex, P } from "../utils/visual";

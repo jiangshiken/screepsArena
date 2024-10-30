@@ -26,7 +26,7 @@ import {
 import { myRamparts, oppoRamparts } from "./GameObjectInitialize";
 import { spawnPos } from "./HasHits";
 import { findGO, overallMap } from "./overallMap";
-import { enemySpawn, spawn } from "./Spa";
+import { enemySpawn, spawn } from "./spawn";
 
 export function myRampartAt(pos: Pos): StructureRampart {
   return <StructureRampart>findGO(pos, StructureRampart);

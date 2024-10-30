@@ -1,3 +1,5 @@
+import { BodyPartConstant } from "game/constants";
+import { Creep } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 import { inRange_int } from "./JS";
 import { Pos, Vec } from "./Pos";
@@ -28,6 +30,9 @@ export function leftVector(): Vec {
   } else {
     return new Vec(1, 0);
   }
+}
+export function creepBodyPartNum(creep: Creep, type: BodyPartConstant): number {
+  return creep.body.filter(i => i.type === type).length;
 }
 /** you are at the area that will gene container*/
 export function inResourceArea(pos: Pos): boolean {

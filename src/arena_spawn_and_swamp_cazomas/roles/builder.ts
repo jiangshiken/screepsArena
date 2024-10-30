@@ -59,7 +59,7 @@ import {
   inMyBaseRan,
   resetStartGateAvoidFromEnemies,
   spawn,
-} from "../gameObjects/Spa";
+} from "../gameObjects/spawn";
 import { S } from "../utils/export";
 import { tick } from "../utils/game";
 import { d2, getClassName, invalid } from "../utils/JS";

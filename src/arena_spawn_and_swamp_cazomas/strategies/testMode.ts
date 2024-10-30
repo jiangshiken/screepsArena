@@ -11,7 +11,7 @@ import { StructureExtension } from "game/prototypes";
 
 import { Cre, friends, id, Role } from "../gameObjects/Cre";
 import { createCS } from "../gameObjects/CS";
-import { enemySpawn, spawn, spawnCreep } from "../gameObjects/Spa";
+import { enemySpawn, spawn, spawnCreep } from "../gameObjects/spawn";
 import { builder4Ram } from "../roles/builder";
 import { harvester } from "../roles/harvester";
 import { TB } from "../utils/autoBodys";

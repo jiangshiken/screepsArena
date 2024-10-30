@@ -25,6 +25,7 @@ import {
 } from "../gameObjects/GameObjectInitialize";
 import { displayPos } from "../gameObjects/HasHits";
 import { findGO, overallMap } from "../gameObjects/overallMap";
+import { currentGuessPlayer, Dooms } from "../gameObjects/player";
 import { baseLoseRampart } from "../gameObjects/ramparts";
 import {
   getSpawnAndBaseContainerEnergy,
@@ -33,7 +34,7 @@ import {
   spawnCleared,
   spawnCreep,
   spawnCreepInFront,
-} from "../gameObjects/Spa";
+} from "../gameObjects/spawn";
 import { SpawnType } from "../gameObjects/spawnTypeList";
 import { builderTurtle } from "../roles/builder";
 import { defender_rampart } from "../roles/defender";
@@ -43,7 +44,6 @@ import { TB } from "../utils/autoBodys";
 import { set_switchCPUModeOn } from "../utils/CPU";
 import { leftRate, leftVector, tick } from "../utils/game";
 import { divide0, relu, sum } from "../utils/JS";
-import { currentGuessPlayer, Dooms } from "../utils/player";
 import {
   absRange,
   atPos,

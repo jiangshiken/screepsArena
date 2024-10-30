@@ -19,7 +19,7 @@ import {
   sumForceByArr,
 } from "../gameObjects/Cre";
 import { displayPos } from "../gameObjects/HasHits";
-import { EEB, spawn, spawnAndExtensionsEnergy } from "../gameObjects/Spa";
+import { EEB, spawn, spawnAndExtensionsEnergy } from "../gameObjects/spawn";
 import { spawnBySpawnTypeList, SpawnType } from "../gameObjects/spawnTypeList";
 import { builderStandard, isBuilderOutSide } from "../roles/builder";
 import { defender_rampart } from "../roles/defender";
