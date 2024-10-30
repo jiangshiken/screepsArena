@@ -10,6 +10,7 @@ import {
   WORK,
 } from "game/constants";
 
+import { Creep } from "game/prototypes";
 import { S } from "../utils/export";
 import { set_startGateUp, startGateUp } from "../utils/game";
 import { arrayEqual } from "../utils/JS";
@@ -24,18 +25,17 @@ import { P, SA, SAN } from "../utils/visual";
 import {
   blocked,
   Cre,
-  Creep_advance,
-  enemies,
-  friends,
   getEnergy,
   hasThreat,
-  initCre,
   Role,
   SpawnInfo,
+  Task_Role,
 } from "./Cre";
 import {
   containers,
+  enemies,
   extensions,
+  friends,
   gameObjects,
   myExtensions,
   mySpawns,
@@ -43,29 +43,11 @@ import {
   spawns,
   structures,
 } from "./GameObjectInitialize";
+import { Spa } from "./Stru";
 
 /** your first StructureSpawn*/
 export let spawn: Spa;
-export function spawnInitCre(
-  creep: Creep,
-  role?: Role,
-  spawnInfo?: SpawnInfo,
-  whenSpawnStart: boolean = false
-) {
-  if (whenSpawnStart) {
-    if (role) {
-      // SA(displayPos(), "new TaskRole");
-      newCre.role = role;
-      new Task_Role(newCre, role);
-    }
-    if (spawnInfo) {
-      newCre.spawnInfo = spawnInfo;
-    }
-  } else {
-    // SA(ca, "         isSpawning(ca)=" + isSpawning(ca))
-    cres.push(ca.advance);
-  }
-}
+
 export function spawnCleared(s: Spa) {
   return spawnList.length === 0 && s.isSpawning === undefined;
 }
@@ -157,13 +139,13 @@ export function spawnIt(theSpawn: Spa) {
       //spawn success
       theSpawn.timeLimit = spawnBody.length * 3;
       // SA(theSpawn,"theSpawn.timeLimit2 ="+theSpawn.timeLimit)
+      const spawnedCreep=sobj.object
+      theSpawn.isSpawning = spawnInitCre(, , );
+      creep.role = spawnRole;
 
-      theSpawn.isSpawning = initCre(
-        <Creep_advance>sobj.object,
-        spawnRole,
-        spawnInfo,
-        true
-      );
+      if (spawnInfo) {
+        creep.spawnInfo = spawnInfo;
+      }
       SA(theSpawn, "theSpawn.isSpawning.role =" + S(spawnRole));
       SA(theSpawn, "theSpawn.isSpawning.spawnInfo =" + S(spawnInfo));
       spawnList.shift();

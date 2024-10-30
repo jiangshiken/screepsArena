@@ -31,11 +31,10 @@ import {
   getMyProducers,
   initialCresAtLoopStart,
 } from "./gameObjects/Cre";
-import { CS, initCS } from "./gameObjects/CS";
 import {
-  constructionSites,
   containers,
   getPrototype,
+  initialCSsAtLoopStart,
   initialGameObjectsAtLoopStart_advance,
   initialGameObjectsAtLoopStart_basic,
   initialStrusAtLoopStart,
@@ -147,13 +146,6 @@ function setHisPoss() {
     cre.battle?.setHisPos();
   }
 }
-function initialAdvancedTypesAtLoopStart() {
-  //other advanced type
-  for (let constr of constructionSites) {
-    const cs = <CS>constr;
-    initCS(cs);
-  }
-}
 function switchLowCPUMode() {
   if (lowCPUMode) {
     append_largeSizeText("🕐");
@@ -196,11 +188,10 @@ export function loopStart() {
   const st3 = ct();
   initialCresAtLoopStart();
   initialStrusAtLoopStart();
+  initialCSsAtLoopStart();
   const st3p5 = ct();
   initialGameObjectsAtLoopStart_advance();
   pt("initialGameObjects", st3p5);
-  initialAdvancedTypesAtLoopStart();
-  // initialCreepModules()
   pt("init cres and other", st3);
   //set overall map
   const st4 = ct();

@@ -105,7 +105,7 @@ import {
   isOppoGO,
   isOppoRampart,
   isOppoSpawn,
-  myStructures,
+  myOwnedStrus,
   resources,
   spawns,
   structures,
@@ -207,8 +207,6 @@ export class PullEvent extends Event_C {
 /** extend of `Creep` */
 export class Cre implements HasTasks, HasMy, HasHits {
   master: Creep;
-  /** the role */
-  role: Role | undefined;
   spawnInfo: SpawnInfo | undefined;
   moveTarget: Event_Pos | undefined;
   moveTargetNextPos: Event_Pos | undefined;
@@ -253,7 +251,11 @@ export class Cre implements HasTasks, HasMy, HasHits {
     this.battle = new Battle(this);
     this.macro = new Macro(this);
     this.crePathFinder = new Cre_pathFinder(this);
+
     //TODO add member attribute
+  }
+  get role(): Role | undefined {
+    return this.spawnInfo?.role;
   }
   get my() {
     return isMyGO(this.master);
@@ -699,7 +701,7 @@ export class Cre implements HasTasks, HasMy, HasHits {
 export class SpawnInfo {
   bodies: BodyPartConstant[];
   role: Role;
-  extraMessage: any;
+  extraMessage: any = {};
   constructor(bodies: BodyPartConstant[], role: Role) {
     this.bodies = bodies;
     this.role = role;
@@ -1994,7 +1996,7 @@ export class Macro {
   /** fill extension static*/
   fillExtension(): boolean {
     const ext = <StructureExtension | undefined>(
-      myStructures.find(
+      myOwnedStrus.find(
         i =>
           i instanceof StructureExtension &&
           GR(i, this.master) <= 1 &&

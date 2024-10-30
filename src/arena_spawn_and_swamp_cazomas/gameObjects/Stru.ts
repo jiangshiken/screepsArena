@@ -1,5 +1,6 @@
 import { Structure } from "game/prototypes";
 import { HasPos } from "../utils/Pos";
+import { Cre } from "./Cre";
 import { isMyGO, isOppoGO } from "./GameObjectInitialize";
 import { HasHits } from "./HasHits";
 import { HasMy } from "./HasMy";
@@ -29,4 +30,7 @@ export class OwnedStru extends Stru implements HasHits, HasMy {
   get oppo() {
     return isOppoGO(this.master);
   }
+}
+export class Spa extends OwnedStru {
+  spawningCreep: Cre | undefined;
 }

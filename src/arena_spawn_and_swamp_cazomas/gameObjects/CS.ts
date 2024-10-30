@@ -13,11 +13,14 @@ import { findGO } from "./overallMap";
 
 // export let CSs: CS[] = []
 /** extend of ConstructionSite */
-export class CS extends ConstructionSite {
-  inited: boolean | undefined;
+export class CS {
+  readonly master: ConstructionSite;
   decayEvent: Event | undefined;
-  useDecay: boolean | undefined;
-  wt: number | undefined;
+  useDecay: boolean = false;
+  wt: number = 0;
+  constructor(cons: ConstructionSite) {
+    this.master = cons;
+  }
 }
 /**initiate all constructionSites to CS*/
 export function initCS(cs: CS) {

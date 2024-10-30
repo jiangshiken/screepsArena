@@ -5,7 +5,7 @@ import { calculateForce, Cre, damaged, hits, hitsMax } from "./Cre";
 
 import { valid } from "../utils/JS";
 import { drawRangeComplex, P } from "../utils/visual";
-import { myStructures } from "./GameObjectInitialize";
+import { cres, enemies, friends, units } from "./GameObjectInitialize";
 
 const VISUAL_LAYER = 6;
 /**
@@ -13,9 +13,7 @@ const VISUAL_LAYER = 6;
  */
 export function showHits() {
   try {
-    const useHPVisual = (<Unit[]>cres)
-      .concat(myStructures)
-      .filter(i => damaged(i));
+    const useHPVisual = units.filter(i => damaged(i));
     for (const UHPV of useHPVisual) {
       new Visual(8, false).text(
         "" + hits(UHPV),

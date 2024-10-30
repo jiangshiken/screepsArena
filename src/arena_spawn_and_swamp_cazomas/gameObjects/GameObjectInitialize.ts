@@ -2,7 +2,6 @@ import {
   ConstructionSite,
   Creep,
   GameObject,
-  OwnedStructure,
   Resource,
   Structure,
   StructureContainer,
@@ -20,13 +19,13 @@ import { S } from "../utils/export";
 import { creepBodyPartNum, PL } from "../utils/game";
 import { invalid, valid } from "../utils/JS";
 import { P } from "../utils/visual";
-import { Cre, isSpawning, oppo } from "./Cre";
+import { Cre, isSpawning, Task_Role } from "./Cre";
 import { Cre_battle } from "./Cre_battle";
 import { Cre_build } from "./Cre_build";
 import { Cre_harvest } from "./Cre_harvest";
 import { Cre_move } from "./Cre_move";
 import { CS } from "./CS";
-import { OwnedStru, Stru } from "./Stru";
+import { OwnedStru, Spa, Stru } from "./Stru";
 //types
 /**OwnedStructure occupied by official Class */
 export type TypeOwnedStructure =
@@ -57,7 +56,9 @@ export let friends: Cre[] = [];
 export let enemies: Cre[] = [];
 export let myUnits: Unit[] = [];
 export let oppoUnits: Unit[] = [];
+export let units: Unit[] = [];
 //stuctures
+export let CSs: CS[] = [];
 export let strus: Stru[] = [];
 export let ownedStrus: OwnedStru[] = [];
 export let containers: Stru[] = [];
@@ -68,17 +69,17 @@ export let spawns: OwnedStru[] = [];
 export let walls: Stru[] = [];
 export let towers: OwnedStru[] = [];
 //team
-export let myStructures: OwnedStru[] = [];
-export let oppoStructures: OwnedStru[] = [];
-export let neutralStructures: Stru[] = [];
+export let myOwnedStrus: OwnedStru[] = [];
+export let oppoOwnedStrus: OwnedStru[] = [];
+export let neutralStrus: Stru[] = [];
 export let myRamparts: OwnedStru[] = [];
 export let oppoRamparts: OwnedStru[] = [];
 export let mySpawns: OwnedStru[] = [];
 export let oppoSpawns: OwnedStru[] = [];
 export let myExtensions: OwnedStru[] = [];
 export let oppoExtensions: OwnedStru[] = [];
-export let myConstructionSites: CS[] = [];
-export let oppoConstructionSites: CS[] = [];
+export let myCSs: CS[] = [];
+export let oppoCSs: CS[] = [];
 export function getPrototype(type: any) {
   const arr = getObjectsByPrototype(type);
   return [...new Set(arr)];
@@ -100,13 +101,19 @@ export function initCre(creep: Creep): Cre {
   } else {
     cre = new Cre(creep);
   }
+  const si = (<any>creep).spawnInfo;
+  if (si) {
+    cre.spawnInfo = si;
+    new Task_Role(cre, si.role);
+  }
   cres.push(cre);
   return cre;
 }
 export function initStru(structure: Structure): Stru {
   let stru: Stru;
-  if (
-    structure instanceof StructureSpawn ||
+  if (structure instanceof StructureSpawn) {
+    stru = new Spa(structure);
+  } else if (
     structure instanceof StructureExtension ||
     structure instanceof StructureTower ||
     structure instanceof StructureRampart
@@ -117,6 +124,11 @@ export function initStru(structure: Structure): Stru {
   }
   strus.push(stru);
   return stru;
+}
+export function initCS(cons: ConstructionSite): CS {
+  let cs: CS = new CS(cons);
+  CSs.push(cs);
+  return cs;
 }
 export function initialCresAtLoopStart() {
   PL("initialCresAtLoopStart");
@@ -144,6 +156,18 @@ export function initialStrusAtLoopStart() {
     }
   }
 }
+export function initialCSsAtLoopStart() {
+  PL("initialCSsAtLoopStart");
+  //remove dead Stru
+  CSs = CSs.filter(i => i.master.exists);
+  //add new Stru
+  for (let cons of constructionSites) {
+    if (CSs.find(i => i.master === cons) === undefined) {
+      P("initCS=" + S(cons));
+      initCS(cons);
+    }
+  }
+}
 /**should be called at loop start , to initialize all gameobject and
  * store it into the array
  */
@@ -157,51 +181,41 @@ export function initialGameObjectsAtLoopStart_basic() {
 }
 export function initialGameObjectsAtLoopStart_advance() {
   //stuctures
-  containers = <StructureContainer[]>(
-    structures.filter(i => i instanceof StructureContainer)
+  containers = <Stru[]>(
+    strus.filter(i => i.master instanceof StructureContainer)
   );
-  extensions = <StructureExtension[]>(
-    structures.filter(i => i instanceof StructureExtension)
+  extensions = <OwnedStru[]>(
+    strus.filter(i => i.master instanceof StructureExtension)
   );
-  ramparts = <StructureRampart[]>(
-    structures.filter(i => i instanceof StructureRampart)
+  ramparts = <OwnedStru[]>(
+    strus.filter(i => i.master instanceof StructureRampart)
   );
-  roads = <StructureRoad[]>structures.filter(i => i instanceof StructureRoad);
-  spawns = <StructureSpawn[]>(
-    structures.filter(i => i instanceof StructureSpawn)
-  );
-  walls = <StructureWall[]>structures.filter(i => i instanceof StructureWall);
-  towers = <StructureTower[]>(
-    structures.filter(i => i instanceof StructureTower)
-  );
+  roads = <Stru[]>strus.filter(i => i.master instanceof StructureRoad);
+  spawns = <OwnedStru[]>strus.filter(i => i.master instanceof StructureSpawn);
+  walls = <Stru[]>strus.filter(i => i.master instanceof StructureWall);
+  towers = <OwnedStru[]>strus.filter(i => i.master instanceof StructureTower);
   //team
-  myStructures = <OwnedStructure[]>structures.filter(i => isMyGO(i));
-  oppoStructures = <OwnedStructure[]>structures.filter(i => isOppoGO(i));
-  neutralStructures = <Structure[]>structures.filter(i => neutral(i));
-  myRamparts = <StructureRampart[]>ramparts.filter(i => isMyGO(i));
-  oppoRamparts = <StructureRampart[]>ramparts.filter(i => isOppoGO(i));
-  mySpawns = <StructureSpawn[]>spawns.filter(i => isMyGO(i));
-  oppoSpawns = <StructureSpawn[]>spawns.filter(i => isOppoGO(i));
-  myExtensions = <StructureExtension[]>extensions.filter(i => isMyGO(i));
-  oppoExtensions = <StructureExtension[]>extensions.filter(i => isOppoGO(i));
-  myConstructionSites = <ConstructionSite[]>(
-    constructionSites.filter(i => isMyGO(i))
-  );
-  oppoConstructionSites = <ConstructionSite[]>(
-    constructionSites.filter(i => isOppoGO(i))
-  );
+  myOwnedStrus = <OwnedStru[]>strus.filter(i => isMyGO(i.master));
+  oppoOwnedStrus = <OwnedStru[]>strus.filter(i => isOppoGO(i.master));
+  neutralStrus = <Stru[]>strus.filter(i => neutral(i.master));
+  myRamparts = <OwnedStru[]>ramparts.filter(i => isMyGO(i.master));
+  oppoRamparts = <OwnedStru[]>ramparts.filter(i => isOppoGO(i.master));
+  mySpawns = <OwnedStru[]>spawns.filter(i => isMyGO(i.master));
+  oppoSpawns = <OwnedStru[]>spawns.filter(i => isOppoGO(i.master));
+  myExtensions = <OwnedStru[]>extensions.filter(i => isMyGO(i.master));
+  oppoExtensions = <OwnedStru[]>extensions.filter(i => isOppoGO(i.master));
+  myCSs = <CS[]>CSs.filter(i => isMyGO(i.master));
+  oppoCSs = <CS[]>CSs.filter(i => isOppoGO(i.master));
   //team array
-  friends = cres.filter(i => my(i));
-  enemies = cres.filter(i => oppo(i));
-  myUnits = (<Unit[]>friends).concat(myStructures);
-  oppoUnits = (<Unit[]>enemies).concat(oppoStructures);
+  friends = cres.filter(i => i.my);
+  enemies = cres.filter(i => i.oppo);
+  myUnits = (<Unit[]>friends).concat(myOwnedStrus);
+  oppoUnits = (<Unit[]>enemies).concat(oppoOwnedStrus);
+  units = myUnits.concat(oppoUnits);
 }
 
 export function neutral(g: GameObject): boolean {
   return invalid((<any>g).my);
-}
-export function isUnit(g: GameObject): boolean {
-  return valid((<any>g).my);
 }
 export function isMyGO(g: GameObject): boolean {
   return valid((<any>g).my) && (<any>g).my;
