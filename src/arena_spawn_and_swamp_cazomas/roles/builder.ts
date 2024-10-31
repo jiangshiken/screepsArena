@@ -172,7 +172,7 @@ export function builderTurtleJob(cre: Cre) {
     if (
       (tick > 600 &&
         !spawnHasRam &&
-        getEnergy(cre) >= 5 * cre.getBodiesNum(WORK)) ||
+        getEnergy(cre) >= 5 * cre.getBodypartsNum(WORK)) ||
       getIsBuilding(cre)
     ) {
       SA(cre, "normalBuild");
@@ -301,7 +301,7 @@ export function builderStandardJob(cre: Cre) {
   //
   const task = findTask(cre, BuilderStandardTask);
   if (!task) {
-    if (cre.getBodiesNum(ATTACK) > 0) {
+    if (cre.getBodypartsNum(ATTACK) > 0) {
       SA(cre, "new ArmedBuilderTask(cre)");
       new ArmedBuilderTask(cre);
     } else {
@@ -332,7 +332,7 @@ export class BuilderStandardTask extends Task_Cre {
   constructor(master: Cre) {
     super(master);
     resetStartGateAvoidFromEnemies();
-    if (master.getBodiesNum(ATTACK) > 0) {
+    if (master.getBodypartsNum(ATTACK) > 0) {
       this.fleeRange = 12;
       this.fleeBias = 7;
     } else {
@@ -487,7 +487,7 @@ export class BuilderStandardTask extends Task_Cre {
         this.step = build_extensions;
       } else {
         createCS(cre, StructureRampart, 5, true);
-        if (hasEnemyArmyAround(cre, 1) && cre.getBodies(ATTACK).length > 0) {
+        if (hasEnemyArmyAround(cre, 1) && cre.getBody(ATTACK).length > 0) {
           cre.fight();
         } else {
           cre.macro.buildStatic();
@@ -552,10 +552,7 @@ export class BuilderStandardTask extends Task_Cre {
                 this.step = goto_outside_resource;
               }
             }
-            if (
-              hasEnemyArmyAround(cre, 1) &&
-              cre.getBodies(ATTACK).length > 0
-            ) {
+            if (hasEnemyArmyAround(cre, 1) && cre.getBody(ATTACK).length > 0) {
               cre.fight();
             } else {
               cre.macro.buildStatic();

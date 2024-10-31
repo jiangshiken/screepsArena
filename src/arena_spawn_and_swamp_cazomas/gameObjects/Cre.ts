@@ -55,7 +55,20 @@ import {
   validEvent,
 } from "../utils/Event";
 import { S, SOA } from "../utils/export";
-import { StNumber, getNewTarByArea, tick } from "../utils/game";
+import {
+  StNumber,
+  bottomY,
+  getArea,
+  getNewTarByArea,
+  leftBorder1,
+  leftBorder2,
+  midBorder,
+  rightBorder1,
+  rightBorder2,
+  startGateUp,
+  tick,
+  topY,
+} from "../utils/game";
 import {
   divide0,
   divideReduce,
@@ -96,9 +109,16 @@ import {
 } from "../utils/visual";
 import { CS, getMaxWorthCSS, getMyCSs, progress } from "./CS";
 import {
+  GO,
   Harvable,
-  constructionSites,
+  HasEnergy,
+  HasStore,
+  Producer,
+  Unit,
   containers,
+  cres,
+  enemies,
+  friends,
   isMyGO,
   isMyRampart,
   isMySpawn,
@@ -106,9 +126,10 @@ import {
   isOppoRampart,
   isOppoSpawn,
   myOwnedStrus,
+  myUnits,
+  oppoUnits,
   resources,
   spawns,
-  structures,
   walls,
 } from "./GameObjectInitialize";
 import {
@@ -150,9 +171,6 @@ export function isGO(go: any): boolean {
   );
 }
 
-export function getGameObjects(): GO[] {
-  return (<GO[]>cres).concat(structures, constructionSites, resources);
-}
 export function isSpawning(cre: Creep): boolean {
   return cre.spawning; //atSpawnPos(cre) || ;
 }
@@ -203,7 +221,10 @@ export class PullEvent extends Event_C {
     this.bePulledOne = bePulledOne;
   }
 }
-
+export type BodyCre = {
+  type: BodyPartConstant;
+  hits: number;
+};
 /** extend of `Creep` */
 export class Cre implements HasTasks, HasMy, HasHits {
   master: Creep;
@@ -406,7 +427,7 @@ export class Cre implements HasTasks, HasMy, HasHits {
     }
   }
   hasMoveBodyPart() {
-    return this.getBodies(MOVE).length > 0;
+    return this.getBody(MOVE).length > 0;
   }
   moveTo_follow(tar: Pos) {
     SA(this.master, "moveTo_follow" + COO(tar));
@@ -505,8 +526,8 @@ export class Cre implements HasTasks, HasMy, HasHits {
     }
   }
   onlyHasMoveAndCarry() {
-    const mNum = this.getBodies(MOVE).length;
-    const cNum = this.getBodies(CARRY).length;
+    const mNum = this.getBody(MOVE).length;
+    const cNum = this.getBody(CARRY).length;
     const rtn = mNum + cNum === this.body().length;
     return rtn;
   }
@@ -548,7 +569,7 @@ export class Cre implements HasTasks, HasMy, HasHits {
   MTJ(tar: Pos, op?: FindPathOpts, step: number = getMoveStepDef(this)): void {
     this.crePathFinder?.moveToJudge(tar, op, step);
   }
-  getBodies(type: BodyPartConstant): BodyCre[] {
+  getBody(type: BodyPartConstant): BodyCre[] {
     return this.body().filter(i => i.type === type);
   }
   getBodyArray(): BodyPartConstant[] {
@@ -558,14 +579,14 @@ export class Cre implements HasTasks, HasMy, HasHits {
     }
     return rtn;
   }
-  getHealthyBodies(type: BodyPartConstant): BodyCre[] {
-    return this.getBodies(type).filter(i => i.hits > 0);
+  getHealthyBodyParts(type: BodyPartConstant): BodyCre[] {
+    return this.getBody(type).filter(i => i.hits > 0);
   }
-  getBodiesNum(type: BodyPartConstant): number {
-    return this.getBodies(type).length;
+  getBodypartsNum(type: BodyPartConstant): number {
+    return this.getBody(type).length;
   }
-  getHealthyBodiesNum(type: BodyPartConstant): number {
-    return this.getHealthyBodies(type).length;
+  getHealthyBodyPartsNum(type: BodyPartConstant): number {
+    return this.getHealthyBodyParts(type).length;
   }
   /** the Cre[] of this creep is pulling ,include self */
   getPullingTargetList(): Cre[] {
@@ -623,7 +644,7 @@ export class Cre implements HasTasks, HasMy, HasHits {
       for (let tar of pl) {
         const tarBody = tar.master.body;
         if (tarBody) {
-          const tarMoveNum = tar.getHealthyBodies(MOVE).length;
+          const tarMoveNum = tar.getHealthyBodyParts(MOVE).length;
           const tarBodyNum = tarBody.filter(
             i => i.type !== MOVE && i.type !== CARRY
           ).length;
@@ -766,7 +787,7 @@ export function getHarvestableAroundNum(pos: Pos): number {
  * get the number of harvestable around
  */
 export function hasMovePart(cre: Cre): boolean {
-  return cre.getBodies(MOVE).length > 0;
+  return cre.getBody(MOVE).length > 0;
 }
 /** find friend at the position */
 export function findFriendAtPos(pos: Pos): Cre | undefined {
@@ -923,7 +944,7 @@ export function getFriendsThreated() {
   return friends.filter(i => hasThreat(i));
 }
 export function hasThreat(cre: Cre): boolean {
-  return cre.getBodies(ATTACK).length + cre.getBodies(RANGED_ATTACK).length > 0;
+  return cre.getBody(ATTACK).length + cre.getBody(RANGED_ATTACK).length > 0;
 }
 export function getEmptyPosInRange(pos: Pos, range: number) {
   const poss = getRangePoss(pos, range);
@@ -931,22 +952,22 @@ export function getEmptyPosInRange(pos: Pos, range: number) {
   return ranGet(possEmpty);
 }
 export function isWorker(cre: Cre): boolean {
-  return cre.getBodiesNum(CARRY) + cre.getBodiesNum(WORK) > 0;
+  return cre.getBodypartsNum(CARRY) + cre.getBodypartsNum(WORK) > 0;
 }
 export function isHealer(cre: Cre): boolean {
-  return cre.getBodiesNum(HEAL) > 0;
+  return cre.getBodypartsNum(HEAL) > 0;
 }
 export function isHealer_restrict(cre: Cre): boolean {
   return (
-    cre.getBodiesNum(HEAL) > 0 &&
-    cre.getBodiesNum(ATTACK) === 0 &&
-    cre.getBodiesNum(RANGED_ATTACK) === 0
+    cre.getBodypartsNum(HEAL) > 0 &&
+    cre.getBodypartsNum(ATTACK) === 0 &&
+    cre.getBodypartsNum(RANGED_ATTACK) === 0
   );
 }
 export function isSlowShoter(cre: Cre): boolean {
   let rtn =
-    cre.getBodiesNum(RANGED_ATTACK) > 0 &&
-    cre.getBodiesNum(ATTACK) === 0 &&
+    cre.getBodypartsNum(RANGED_ATTACK) > 0 &&
+    cre.getBodypartsNum(ATTACK) === 0 &&
     cre.getSpeed_general() < 1;
   SA(cre, "i'm slowShoter");
   return rtn;
@@ -954,8 +975,8 @@ export function isSlowShoter(cre: Cre): boolean {
 export function is5MA(cre: Cre) {
   return (
     cre.body().length === 6 &&
-    cre.getBodiesNum(ATTACK) === 1 &&
-    cre.getBodiesNum(MOVE) === 5
+    cre.getBodypartsNum(ATTACK) === 1 &&
+    cre.getBodypartsNum(MOVE) === 5
   );
 }
 /**
@@ -1010,7 +1031,7 @@ export function isUnit(a: Attackable): boolean {
   );
 }
 export function getTauntShot(cre: Cre, tar: Attackable): StNumber {
-  const RANum = cre.getHealthyBodies(RANGED_ATTACK).length;
+  const RANum = cre.getHealthyBodyParts(RANGED_ATTACK).length;
   const taunt = isUnit(tar) ? getTaunt(<Unit>tar) : 0;
   const oppoTaunt =
     tar instanceof Cre || tar instanceof Structure ? taunt : 0.2;
@@ -1018,7 +1039,7 @@ export function getTauntShot(cre: Cre, tar: Attackable): StNumber {
   return 0.1 * dmg * oppoTaunt;
 }
 export function getTauntMass(cre: Cre): StNumber {
-  const RANum = cre.getHealthyBodies(RANGED_ATTACK).length;
+  const RANum = cre.getHealthyBodyParts(RANGED_ATTACK).length;
   const oppos = oppoUnits.filter(i => GR(i, cre) <= 3);
   let rtn: number = 0;
   for (let oppo of oppos) {
@@ -1148,13 +1169,13 @@ export function isEnemyProducer(unit: Unit): boolean {
     oppo(unit) &&
     (unit instanceof StructureSpawn ||
       unit instanceof StructureExtension ||
-      (unit instanceof Cre && unit.getBodiesNum(WORK) > 0))
+      (unit instanceof Cre && unit.getBodypartsNum(WORK) > 0))
   );
 }
 export function isWorkingBuilder(cre: Cre): boolean {
   return (
-    cre.getHealthyBodiesNum(CARRY) >= 1 &&
-    cre.getHealthyBodiesNum(WORK) >= 1 &&
+    cre.getHealthyBodyPartsNum(CARRY) >= 1 &&
+    cre.getHealthyBodyPartsNum(WORK) >= 1 &&
     (cre.macro ? cre.macro.getIsWorking() : false) &&
     (cre.macro ? cre.macro.getIsBuilding() : false)
   );
@@ -1378,26 +1399,26 @@ export function getDps(
         rateH = 0.5;
       }
       const attackNum =
-        rateT * cr.getBodies(ATTACK).length +
-        rateH * cr.getHealthyBodies(ATTACK).length;
+        rateT * cr.getBody(ATTACK).length +
+        rateH * cr.getHealthyBodyParts(ATTACK).length;
       const rangedAttackNum =
-        rateT * cr.getBodies(RANGED_ATTACK).length +
-        rateH * cr.getHealthyBodies(RANGED_ATTACK).length;
+        rateT * cr.getBody(RANGED_ATTACK).length +
+        rateH * cr.getHealthyBodyParts(RANGED_ATTACK).length;
       const healNum =
-        rateT * cr.getBodies(HEAL).length +
-        rateH * cr.getHealthyBodies(HEAL).length;
+        rateT * cr.getBody(HEAL).length +
+        rateH * cr.getHealthyBodyParts(HEAL).length;
       const buildNum =
-        rateT * cr.getBodies(WORK).length +
-        rateH * cr.getHealthyBodies(WORK).length;
+        rateT * cr.getBody(WORK).length +
+        rateH * cr.getHealthyBodyParts(WORK).length;
       const moveNum =
-        rateT * cr.getBodies(MOVE).length +
-        rateH * cr.getHealthyBodies(MOVE).length;
+        rateT * cr.getBody(MOVE).length +
+        rateH * cr.getHealthyBodyParts(MOVE).length;
       const carryNum =
-        rateT * cr.getBodies(CARRY).length +
-        rateH * cr.getHealthyBodies(CARRY).length;
+        rateT * cr.getBody(CARRY).length +
+        rateH * cr.getHealthyBodyParts(CARRY).length;
       const toughNum =
-        rateT * cr.getBodies(TOUGH).length +
-        rateH * cr.getHealthyBodies(TOUGH).length;
+        rateT * cr.getBody(TOUGH).length +
+        rateH * cr.getHealthyBodyParts(TOUGH).length;
       if (valueMode) {
         //value mode
         rtn =
@@ -1461,14 +1482,21 @@ export function getHPRate(a: Attackable): number {
   if (valid(a) && hitsMax(a) != 0) return hits(a) / hitsMax(a);
   else return 0;
 }
-export function getEnergy(a: HasEnergy): number {
-  if (exist(a)) {
-    if (a instanceof Resource) {
-      return a.amount;
-    } else {
-      return a.store[RESOURCE_ENERGY];
-    }
-  } else return 0;
+export function getEnergy(a: GO): number {
+  if (a instanceof Resource) {
+    return a.amount;
+  } else if (a instanceof Cre && a.getBodypartsNum(CARRY) > 0) {
+    return a.master.store[RESOURCE_ENERGY];
+  } else if (
+    a.master instanceof StructureSpawn ||
+    a.master instanceof StructureContainer ||
+    a.master instanceof StructureExtension ||
+    a.master instanceof StructureTower
+  ) {
+    return a.master.store[RESOURCE_ENERGY];
+  } else {
+    return 0;
+  }
 }
 export function live(go: HasEnergy) {
   return getEnergy(go) > 0;
@@ -1585,7 +1613,7 @@ export function enemyAWeight(): number {
 export function enemyRangedAttackNum(): number {
   let sum = 0;
   for (let en of enemies) {
-    let enemyAttackNum = en.getBodies(RANGED_ATTACK).length;
+    let enemyAttackNum = en.getBody(RANGED_ATTACK).length;
     sum += enemyAttackNum;
   }
   return sum;
@@ -1593,7 +1621,7 @@ export function enemyRangedAttackNum(): number {
 export function enemyAttackNum(): number {
   let sum = 0;
   for (let en of enemies) {
-    let enemyAttackNum = en.getBodies(ATTACK).length;
+    let enemyAttackNum = en.getBody(ATTACK).length;
     sum += enemyAttackNum;
   }
   return sum;
@@ -1635,8 +1663,8 @@ export class Battle {
     let tarFriends = friends.filter(i => GR(this.master, i) <= 3);
     let UTShot = findMaxTaunt(tars);
     let UTHeal = findMaxTaunt(tarFriends, true, this.master);
-    let RANum = this.master.getHealthyBodies(RANGED_ATTACK).length;
-    let HNum = this.master.getHealthyBodies(HEAL).length;
+    let RANum = this.master.getHealthyBodyParts(RANGED_ATTACK).length;
+    let HNum = this.master.getHealthyBodyParts(HEAL).length;
     let tarShot = UTShot.unit;
     let tarHeal = UTHeal.unit;
     if (tarHeal && tarShot && GR(this.master, tarHeal) >= 2) {
@@ -1674,7 +1702,7 @@ export class Battle {
   }
   /** ranged attack static, will find fit enemy  */
   shot(): boolean {
-    if (this.master.getBodies(RANGED_ATTACK).length > 0) {
+    if (this.master.getBody(RANGED_ATTACK).length > 0) {
       let tars = oppoUnits.filter(i => GR(this.master, i) <= 3);
       let tar = findMaxTaunt(tars).unit;
       if (tar != undefined && exist(tar)) {
@@ -1691,10 +1719,10 @@ export class Battle {
     const meleeScanRange = range;
     const shotScanRange = range + 2;
     const roundEnemyAttackers = enemies.filter(
-      i => GR(i, cre) <= meleeScanRange && i.getBodiesNum(ATTACK) > 0
+      i => GR(i, cre) <= meleeScanRange && i.getBodypartsNum(ATTACK) > 0
     );
     const roundEnemyShoters = enemies.filter(
-      i => GR(i, cre) <= shotScanRange && i.getBodiesNum(RANGED_ATTACK) > 0
+      i => GR(i, cre) <= shotScanRange && i.getBodypartsNum(RANGED_ATTACK) > 0
     );
     if (roundEnemyAttackers.length + roundEnemyShoters.length > 0) {
       const scanTars = roundEnemyAttackers.concat(roundEnemyShoters);
@@ -1769,7 +1797,7 @@ export class Battle {
   }
   /** heal static */
   restore() {
-    if (this.master.getBodies(HEAL).length > 0) {
+    if (this.master.getBody(HEAL).length > 0) {
       let tars = friends.filter(i => GR(this.master, i) <= 3);
       let tar = findMaxTaunt(tars, true, this.master).unit;
       if (tar != undefined && exist(tar)) {
@@ -1867,7 +1895,7 @@ export class Battle {
   /**melee attack if enemies in ranged 1*/
   melee(): boolean {
     // SA(this,"melee 1")
-    if (this.master.getBodies(ATTACK).length > 0) {
+    if (this.master.getBody(ATTACK).length > 0) {
       // SA(this,"melee 2")
       let tars = oppoUnits.filter(i => GR(this.master, i) <= 1);
 
@@ -1897,9 +1925,9 @@ export class Battle {
         walls.find(i => Adj(i, this.master)) !== undefined)
     ) {
       //if can attack
-      if (this.master.getHealthyBodies(ATTACK).length > 0) {
+      if (this.master.getHealthyBodyParts(ATTACK).length > 0) {
         let tars1 = oppoUnits.filter(i => GR(this.master, i) <= 1);
-        let ANum = this.master.getHealthyBodies(ATTACK).length;
+        let ANum = this.master.getHealthyBodyParts(ATTACK).length;
         //find max taunt
         let tauntA = 30 * ANum * findMaxTaunt(tars1).taunt;
         //targets in range 3
@@ -1909,7 +1937,7 @@ export class Battle {
         // let tauntR = 10 * RANum * findMaxTaunt(tars3).taunt;
         //
         let tarFriends = friends.filter(i => GR(this.master, i) <= 3);
-        let HNum = this.master.getHealthyBodies(HEAL).length;
+        let HNum = this.master.getHealthyBodyParts(HEAL).length;
         //taunt of heal
         let tauntH =
           12 * HNum * findMaxTaunt(tarFriends, true, this.master).taunt;
@@ -1934,11 +1962,11 @@ export class Battle {
   }
   /**attack wall*/
   attackWall() {
-    if (this.master.getHealthyBodies(ATTACK).length > 0) {
+    if (this.master.getHealthyBodyParts(ATTACK).length > 0) {
       const w = walls.find(i => GR(i, this.master) <= 1);
       if (w) this.attackNormal(w);
     }
-    if (this.master.getHealthyBodies(RANGED_ATTACK).length > 0) {
+    if (this.master.getHealthyBodyParts(RANGED_ATTACK).length > 0) {
       const w = walls.find(i => GR(i, this.master) <= 3);
       if (w) this.shotTarget(w);
     }
@@ -2373,7 +2401,7 @@ export function canBeBuildByCre(cs: CS, cre: Cre): boolean {
   ) {
     return false;
   }
-  let workNum = cre.getBodies(WORK).length;
+  let workNum = cre.getBody(WORK).length;
   let limitProgress: number = 200 - workNum * 5;
   return canBeBuild(cs, limitProgress);
 }

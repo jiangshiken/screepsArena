@@ -71,7 +71,7 @@ export function jamerOldJob(cre: Cre) {
       givePositionToImpartantFriend(cre);
       const enemyCSsHasEnemyBuilderAround = oppoConstructionSites.filter(
         i =>
-          hasEnemyAround_lamb(j => j.getBodiesNum(WORK) > 0, i, 3) &&
+          hasEnemyAround_lamb(j => j.getBodypartsNum(WORK) > 0, i, 3) &&
           !(blocked(i) && !atPos(i, cre))
       );
       const enemyCSComparers: {

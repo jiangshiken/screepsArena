@@ -49,7 +49,7 @@ export function spawnBySpawnTypeList(spl: SpawnType[]) {
   }
   //spawn maxNeedSpawnType
   if (
-    spawnAndSpawnListEmpty() &&
+    spawnAndSpawnListEmpty(spawn) &&
     maxNeedSpawnType &&
     enoughEnergy(spawn, maxNeedSpawnType.body)
   ) {

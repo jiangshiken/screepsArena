@@ -10,7 +10,6 @@ import {
   WORK,
 } from "game/constants";
 
-import { Creep } from "game/prototypes";
 import { S } from "../utils/export";
 import { set_startGateUp, startGateUp } from "../utils/game";
 import { arrayEqual } from "../utils/JS";
@@ -19,20 +18,14 @@ import {
   GR,
   Pos,
   posPlusVec,
+  Vec,
   X_axisDistance,
 } from "../utils/Pos";
 import { P, SA, SAN } from "../utils/visual";
-import {
-  blocked,
-  Cre,
-  getEnergy,
-  hasThreat,
-  Role,
-  SpawnInfo,
-  Task_Role,
-} from "./Cre";
+import { blocked, Cre, getEnergy, hasThreat, Role, SpawnInfo } from "./Cre";
 import {
   containers,
+  cres,
   enemies,
   extensions,
   friends,
@@ -40,7 +33,6 @@ import {
   myExtensions,
   mySpawns,
   oppoExtensions,
-  spawns,
   structures,
 } from "./GameObjectInitialize";
 import { Spa } from "./Stru";
@@ -49,7 +41,7 @@ import { Spa } from "./Stru";
 export let spawn: Spa;
 
 export function spawnCleared(s: Spa) {
-  return spawnList.length === 0 && s.isSpawning === undefined;
+  return spawnList.length === 0 && s.spawningCreep === undefined;
 }
 export function setSpawn(s: Spa) {
   spawn = s;
@@ -81,7 +73,7 @@ export function enoughEnergy(
 
 /**check all spawns */
 export function checkSpawns() {
-  const spawns = getMySpawns();
+  const spawns = mySpawns;
   for (let theSpawn of spawns) {
     checkSpawn(theSpawn);
   }
@@ -109,17 +101,19 @@ export function getSpawnCost(bodies: BodyPartConstant[]): number {
   return rtn;
 }
 export function fromSpawnPos(x: number, y: number) {
-  return posPlusVec(spawn, { vec_x: x, vec_y: y });
+  return posPlusVec(spawn, new Vec(x, y));
 }
 export function getExistListAndSpawningFriendsNum(
   lamb: (i: Cre) => boolean,
   lambSpawnInfo: (i: SpawnInfo) => boolean
 ): number {
-  let existFri = friends.filter(lamb).length;
+  const existFri = friends.filter(lamb).length;
   P("existFri=" + existFri);
-  let isSpawningNum = spawn.isSpawning ? (lamb(spawn.isSpawning) ? 1 : 0) : 0;
+  const spawningCreep = spawn.spawningCreep;
+  const spawningCre = cres.find(i => i.master === spawningCreep);
+  const isSpawningNum = spawningCre ? (lamb(spawningCre) ? 1 : 0) : 0;
   P("isSpawningNum=" + isSpawningNum);
-  let inListHarvesterNum = spawnList.filter(i => lambSpawnInfo(i)).length;
+  const inListHarvesterNum = spawnList.filter(i => lambSpawnInfo(i)).length;
   P("inListHarvesterNum=" + inListHarvesterNum);
   return existFri + isSpawningNum + inListHarvesterNum;
 }
@@ -133,19 +127,10 @@ export function spawnIt(theSpawn: Spa) {
   const requiredEnergy: number = getSpawnCost(spawnBody);
   if (spawnEnergy >= requiredEnergy) {
     //if enough energy
-    const sobj = theSpawn.spawnCreep(spawnBody);
-    if (sobj.object) {
-      SA(theSpawn, "my?=" + sobj.object.my);
-      //spawn success
-      theSpawn.timeLimit = spawnBody.length * 3;
-      // SA(theSpawn,"theSpawn.timeLimit2 ="+theSpawn.timeLimit)
-      const spawnedCreep=sobj.object
-      theSpawn.isSpawning = spawnInitCre(, , );
-      creep.role = spawnRole;
-
-      if (spawnInfo) {
-        creep.spawnInfo = spawnInfo;
-      }
+    const spawnResult = theSpawn.master.spawnCreep(spawnBody);
+    const spawnedCreep = spawnResult.object;
+    if (spawnedCreep) {
+      (<any>spawnedCreep).spawnInfo = spawnInfo;
       SA(theSpawn, "theSpawn.isSpawning.role =" + S(spawnRole));
       SA(theSpawn, "theSpawn.isSpawning.spawnInfo =" + S(spawnInfo));
       spawnList.shift();
@@ -157,24 +142,16 @@ export function getSpawnAndBaseContainerEnergy(): number {
   const baseCon = containers.find(i => GR(i, spawn) <= 1);
   return getEnergy(spawn) + (baseCon ? getEnergy(baseCon) : 0);
 }
+function remainingTime(theSpawn: Spa) {
+  return theSpawn.master.spawning.remainingTime;
+}
 /** check if can spawn */
 export function checkSpawn(theSpawn: Spa) {
   SA(spawn, "checkSpawn");
   try {
-    if (theSpawn.timeLimit !== undefined) {
-      theSpawn.timeLimit--;
-      if (theSpawn.timeLimit > 0) {
-        SA(theSpawn, "theSpawn.timeLimit=" + S(theSpawn.timeLimit));
-      } else {
-        SA(theSpawn, "isSpawning=" + S(theSpawn.isSpawning));
-        //clean the isSpawning of the past spawn creep
-        if (theSpawn.isSpawning) {
-          //when time tick over the creep.isBirth=true
-          theSpawn.isSpawning = undefined;
-        }
-        if (spawnList.length > 0) {
-          spawnIt(theSpawn);
-        }
+    if (remainingTime(theSpawn) === undefined) {
+      if (spawnList.length > 0) {
+        spawnIt(theSpawn);
       }
     }
   } catch (ex) {
@@ -199,14 +176,14 @@ export function spawnAndExtensionsEnergy(
   }
   let sum = 0;
   for (let ex of exs) {
-    let eng = getEnergy(ex);
+    const eng = getEnergy(ex);
     sum += eng;
     if (console) {
       SAN(ex, "eng", eng);
       SAN(ex, "sum", sum);
     }
   }
-  let engSpawn = getEnergy(theSpawn);
+  const engSpawn = getEnergy(theSpawn);
   sum += engSpawn;
   if (console) {
     SAN(theSpawn, "engSpawn", engSpawn);
@@ -246,16 +223,16 @@ export function spawnCreep_ifHasEnergy(
 export function EEB(amount: number, rate: number): number {
   return spawnAndExtensionsEnergy(spawn) >= amount ? rate : 1;
 }
-export function spawnAndSpawnListEmpty(): boolean {
-  return !spawn.isSpawning && spawnList.length === 0;
+export function spawnAndSpawnListEmpty(theSpawn: Spa): boolean {
+  return !theSpawn.spawningCreep && spawnList.length === 0;
 }
 /**
  * spawn is blocked by 8 block unit around
  * @param limit the allow empty pos num
  */
 export function spawnNearBlockedAround(theSpawn: Spa, limit: number) {
-  let spawnAroundPoss = getRangePoss(theSpawn, 1);
-  let emptyPoss = spawnAroundPoss.filter(i => !blocked(i));
+  const spawnAroundPoss = getRangePoss(theSpawn, 1);
+  const emptyPoss = spawnAroundPoss.filter(i => !blocked(i));
   if (emptyPoss.length <= limit) {
     return true;
   } else {
@@ -266,20 +243,10 @@ export function spawnNearBlockedAround(theSpawn: Spa, limit: number) {
  * spawn a creep ,and put it into the front of the {@link spawnList}
  */
 export function spawnCreepInFront(bodies: BodyPartConstant[], role: Role) {
-  let si = new SpawnInfo(bodies, role);
+  const si = new SpawnInfo(bodies, role);
   spawnList.unshift(si);
 }
-export function getMySpawns(): Spa[] {
-  return mySpawns.map(i => <Spa>i);
-}
-export function getSpawns(): Spa[] {
-  return spawns.map(i => <Spa>i);
-}
-
-//@SASVariables
-
 /** you are at the enemy base side*/
-
 export function inEnBaseRan(cre: Pos): boolean {
   return X_axisDistance(cre, enemySpawn) <= 7;
 }
@@ -287,7 +254,6 @@ export function inMyBaseRan(cre: Pos): boolean {
   return X_axisDistance(cre, spawn) <= 7;
 }
 /** set startGate by enemy num*/
-
 export function resetStartGateAvoidFromEnemies(avoid: boolean = true): void {
   const spawnY = spawn.y;
   const upEnemies = enemies.filter(i => i.y < spawnY && hasThreat(i));

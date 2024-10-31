@@ -43,7 +43,7 @@ class pullFatigueFriendTask extends Task_Cre {
         //
       }
       //check end
-      let creMoveNum = cre.getHealthyBodies(MOVE).length;
+      let creMoveNum = cre.getHealthyBodyParts(MOVE).length;
       //
       let mb = tar.getMoveAndFatigueNum();
       let moveNum = mb.moveNum;

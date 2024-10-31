@@ -37,6 +37,7 @@ export type Harvable = StructureContainer | Resource;
 export type Producer = Creep | StructureExtension | StructureSpawn;
 export type Unit = Cre | OwnedStru;
 export type HasEnergy = Resource | HasStore;
+export type GO = Cre | Stru | CS | Resource;
 /** has store*/
 export type HasStore =
   | Creep
@@ -74,8 +75,8 @@ export let oppoOwnedStrus: OwnedStru[] = [];
 export let neutralStrus: Stru[] = [];
 export let myRamparts: OwnedStru[] = [];
 export let oppoRamparts: OwnedStru[] = [];
-export let mySpawns: OwnedStru[] = [];
-export let oppoSpawns: OwnedStru[] = [];
+export let mySpawns: Spa[] = [];
+export let oppoSpawns: Spa[] = [];
 export let myExtensions: OwnedStru[] = [];
 export let oppoExtensions: OwnedStru[] = [];
 export let myCSs: CS[] = [];
@@ -83,6 +84,9 @@ export let oppoCSs: CS[] = [];
 export function getPrototype(type: any) {
   const arr = getObjectsByPrototype(type);
   return [...new Set(arr)];
+}
+export function getGOs(): GO[] {
+  return (<GO[]>cres).concat(strus, CSs, resources);
 }
 export function initCre(creep: Creep): Cre {
   let cre: Cre;
@@ -200,8 +204,8 @@ export function initialGameObjectsAtLoopStart_advance() {
   neutralStrus = <Stru[]>strus.filter(i => neutral(i.master));
   myRamparts = <OwnedStru[]>ramparts.filter(i => isMyGO(i.master));
   oppoRamparts = <OwnedStru[]>ramparts.filter(i => isOppoGO(i.master));
-  mySpawns = <OwnedStru[]>spawns.filter(i => isMyGO(i.master));
-  oppoSpawns = <OwnedStru[]>spawns.filter(i => isOppoGO(i.master));
+  mySpawns = <Spa[]>spawns.filter(i => isMyGO(i.master));
+  oppoSpawns = <Spa[]>spawns.filter(i => isOppoGO(i.master));
   myExtensions = <OwnedStru[]>extensions.filter(i => isMyGO(i.master));
   oppoExtensions = <OwnedStru[]>extensions.filter(i => isOppoGO(i.master));
   myCSs = <CS[]>CSs.filter(i => isMyGO(i.master));

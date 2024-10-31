@@ -200,9 +200,9 @@ export function stdShoterJob(cre: Cre) {
     const protectPos = findProtectPos(cre).pos;
     const enemyRAs = getEnemyThreats().filter(
       i =>
-        i.getBodiesNum(RANGED_ATTACK) > 0 &&
+        i.getBodypartsNum(RANGED_ATTACK) > 0 &&
         GR(i, cre) <= 10 &&
-        i.getBodiesNum(ATTACK) > 0 &&
+        i.getBodypartsNum(ATTACK) > 0 &&
         GR(i, cre) <= 2
     );
     const goFight: boolean = enemyRAs.length === 0;

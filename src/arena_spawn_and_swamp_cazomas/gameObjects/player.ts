@@ -5,8 +5,8 @@ import { tick } from "../utils/game";
 import { arrayEquals, best } from "../utils/JS";
 import { GR } from "../utils/Pos";
 import { SA } from "../utils/visual";
-import { enemies, getBodyArrayOfCreep, getEnergy } from "./Cre";
-import { creeps, isOppoGO } from "./GameObjectInitialize";
+import { getBodyArrayOfCreep, getEnergy } from "./Cre";
+import { creeps, enemies, isOppoGO } from "./GameObjectInitialize";
 import { displayPos } from "./HasHits";
 import { enemySpawn } from "./spawn";
 
@@ -48,7 +48,9 @@ export function identifyOpponent() {
   if (tick === startWaitTick - 1) {
     const ens = enemies.filter(
       i =>
-        GR(i, enemySpawn) <= 1 && i.getBodiesNum(CARRY) > 0 && getEnergy(i) > 0
+        GR(i, enemySpawn) <= 1 &&
+        i.getBodypartsNum(CARRY) > 0 &&
+        getEnergy(i) > 0
     );
     if (ens.length >= 2) {
       SA(displayPos(), "tigga1 triggered");

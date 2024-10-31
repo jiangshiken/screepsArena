@@ -179,7 +179,7 @@ export let sum_snakePart0: number = 0;
 export function snakePartJob(cre: Cre) {
   SA(cre, "i'm snakePart");
   drawText(new Pos_C(50, 55), "E");
-  if (cre.getBodiesNum(WORK) > 0) {
+  if (cre.getBodypartsNum(WORK) > 0) {
     if (Adj(cre, spawn)) {
       SA(cre, "ad");
       if (getEnergy(cre) === 0) {
@@ -201,7 +201,7 @@ export function snakePartJob(cre: Cre) {
   }
   const index = cre.upgrade.spIndex;
   SA(cre, "index=" + index);
-  if (cre.getBodiesNum(WORK) > 0) {
+  if (cre.getBodypartsNum(WORK) > 0) {
   } else {
     cre.fight();
   }
@@ -228,7 +228,7 @@ export function snakePartJob(cre: Cre) {
           cre.MTJ_follow(tar);
         }
       } else {
-        const scanRange = cre.getBodies(RANGED_ATTACK).length > 0 ? 10 : 7;
+        const scanRange = cre.getBody(RANGED_ATTACK).length > 0 ? 10 : 7;
         const b = defendInArea(cre, spawn, scanRange);
         if (!b) {
           const tar = assemblePoint(cre);
@@ -379,7 +379,8 @@ export function snakePartJob(cre: Cre) {
           if (
             GR(cre, enemySpawn) === 2 &&
             nearFriendNearSpawn &&
-            cre.getBodiesNum(ATTACK) > nearFriendNearSpawn.getBodiesNum(ATTACK)
+            cre.getBodypartsNum(ATTACK) >
+              nearFriendNearSpawn.getBodiesNum(ATTACK)
           ) {
             SA(cre, "exchange Pos");
             exchangePos(cre, nearFriendNearSpawn);
@@ -912,7 +913,7 @@ function command() {
       const targets = oppoUnits.filter(
         i =>
           oppo(i) &&
-          ((i instanceof Cre && (i.isArmy() || i.getBodiesNum(WORK) > 0)) ||
+          ((i instanceof Cre && (i.isArmy() || i.getBodypartsNum(WORK) > 0)) ||
             (i instanceof StructureExtension && !inRampart(i)) ||
             i instanceof StructureSpawn)
       );
@@ -932,15 +933,16 @@ function command() {
                 if (getGuessPlayer() === Tigga) {
                   typeBonus = 3;
                 } else {
-                  if (i.getBodiesNum(WORK) > 0) {
+                  if (i.getBodypartsNum(WORK) > 0) {
                     typeBonus = 1;
                   } else if (
                     GR(i, enemySpawn) <= 7 &&
-                    i.getBodiesNum(ATTACK) >= 2
+                    i.getBodypartsNum(ATTACK) >= 2
                   ) {
                     typeBonus = 0.3;
                   } else if (
-                    i.getBodiesNum(ATTACK) + i.getBodiesNum(RANGED_ATTACK) <=
+                    i.getBodypartsNum(ATTACK) +
+                      i.getBodypartsNum(RANGED_ATTACK) <=
                     1
                   ) {
                     typeBonus = 0.01;
@@ -1037,13 +1039,13 @@ function command() {
             i => i.getBodiesNum(HEAL) > 0 && GR(i, second) <= 7
           );
           const healNum = sum(enemyHealer, i => i.getBodiesNum(HEAL));
-          if (second.getBodiesNum(RANGED_ATTACK) >= 4) {
+          if (second.getBodypartsNum(RANGED_ATTACK) >= 4) {
             SA(second, "-1");
             second.master.rangedMassAttack();
             second.battle.melee();
           } else if (
-            second.getBodiesNum(ATTACK) === 3 &&
-            second.getHealthyBodiesNum(ATTACK) < 3
+            second.getBodypartsNum(ATTACK) === 3 &&
+            second.getHealthyBodyPartsNum(ATTACK) < 3
           ) {
             drawText(second, "A");
             second.master.heal(second.master);
@@ -1184,17 +1186,17 @@ function command() {
           }
         } else {
           let ifChase: boolean;
-          if (target instanceof Cre && target.getBodiesNum(ATTACK) === 0) {
+          if (target instanceof Cre && target.getBodypartsNum(ATTACK) === 0) {
             ifChase = true;
           } else if (
             target instanceof Cre &&
-            target.getBodiesNum(WORK) > 0 &&
+            target.getBodypartsNum(WORK) > 0 &&
             inRampart(target)
           ) {
             ifChase = false;
           } else if (
             target instanceof Cre &&
-            target.getBodiesNum(WORK) > 0 &&
+            target.getBodypartsNum(WORK) > 0 &&
             !inRampart(target)
           ) {
             ifChase = true;

@@ -15,25 +15,20 @@ import {
 } from "./roles/fighters_std";
 
 import {
-  firstInit_maps,
-  loopStart_maps,
-  setMoveMatrix,
-} from "./deprecated/maps";
-import {
   controlCreeps,
-  cres,
-  friends,
   getAllUnits,
   getDecideSearchRtn,
   getEnemyProducers,
   getEnergy,
-  getGameObjects,
   getMyProducers,
-  initialCresAtLoopStart,
 } from "./gameObjects/Cre";
 import {
   containers,
+  cres,
+  friends,
+  getGOs,
   getPrototype,
+  initialCresAtLoopStart,
   initialCSsAtLoopStart,
   initialGameObjectsAtLoopStart_advance,
   initialGameObjectsAtLoopStart_basic,
@@ -48,7 +43,6 @@ import {
   spawnPos,
 } from "./gameObjects/HasHits";
 import {
-  firstInit_overallMap,
   overallMapInit,
   setGameObjectsThisTick,
   setOverallMap,
@@ -59,22 +53,13 @@ import {
   enemySpawn,
   setEnemySpawn,
   setSpawn,
-  Spa,
   spawn,
 } from "./gameObjects/spawn";
+import { Spa } from "./gameObjects/Stru";
 import { showEnemies, showHits } from "./gameObjects/visual_Cre";
 import { sum_snakePart0 } from "./strategies/snakeRush";
 import { getSuperior, getSuperiorRate } from "./utils/bonus";
-import {
-  ct,
-  getCPUPercent,
-  lowCPUMode,
-  pt,
-  ptSum,
-  setLowCPUMode,
-  switchCPUModeOn,
-} from "./utils/CPU";
-import { Event_C, validEvent } from "./utils/Event";
+import { ct, getCPUPercent, pt, ptSum } from "./utils/CPU";
 import {
   inResourceArea,
   PL,
@@ -84,7 +69,7 @@ import {
   tick,
 } from "./utils/game";
 import { divideReduce } from "./utils/JS";
-import { GR, Pos_C } from "./utils/Pos";
+import { GR, Pos, Pos_C } from "./utils/Pos";
 import {
   append_largeSizeText,
   drawText,
@@ -195,7 +180,7 @@ export function loopStart() {
   pt("init cres and other", st3);
   //set overall map
   const st4 = ct();
-  setGameObjectsThisTick(getGameObjects());
+  setGameObjectsThisTick(<Pos[]>getGOs());
   setOverallMap();
   //
   append_largeSizeText("Status:");

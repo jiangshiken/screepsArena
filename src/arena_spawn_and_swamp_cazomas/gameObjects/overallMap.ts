@@ -11,8 +11,8 @@ export const overallMap: MyMap<Pos[]> = new MyMap<Pos[]>(
   []
 );
 export function overallMapInit() {
-  overallMap.setByLambda_realIndex((x, y) => {
-    const old = overallMap.get_realIndex(x, y);
+  overallMap.setByLambda(pos => {
+    const old = overallMap.get(pos);
     if (old.length > 0) {
       return [];
     } else {

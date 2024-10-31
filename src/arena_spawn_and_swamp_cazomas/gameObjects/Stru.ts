@@ -1,7 +1,6 @@
-import { Structure } from "game/prototypes";
+import { Creep, Structure, StructureSpawn } from "game/prototypes";
 import { HasPos } from "../utils/Pos";
-import { Cre } from "./Cre";
-import { isMyGO, isOppoGO } from "./GameObjectInitialize";
+import { isMyGO, isOppoGO, TypeOwnedStructure } from "./GameObjectInitialize";
 import { HasHits } from "./HasHits";
 import { HasMy } from "./HasMy";
 
@@ -18,6 +17,11 @@ export class Stru implements HasPos {
   }
 }
 export class OwnedStru extends Stru implements HasHits, HasMy {
+  master: TypeOwnedStructure;
+  constructor(master: TypeOwnedStructure) {
+    super(master);
+    this.master = master;
+  }
   get hitsMax(): number {
     return this.master.hitsMax;
   }
@@ -32,5 +36,12 @@ export class OwnedStru extends Stru implements HasHits, HasMy {
   }
 }
 export class Spa extends OwnedStru {
-  spawningCreep: Cre | undefined;
+  master: StructureSpawn;
+  constructor(master: StructureSpawn) {
+    super(master);
+    this.master = master;
+  }
+  get spawningCreep(): Creep {
+    return this.master.spawning.creep;
+  }
 }

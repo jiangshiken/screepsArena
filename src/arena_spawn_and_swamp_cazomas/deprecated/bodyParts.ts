@@ -1,4 +1,3 @@
-
 // import { ATTACK, BodyPartConstant, CARRY, HEAL, MOVE, RANGED_ATTACK, TOUGH, WORK } from "game/constants";
 
 // /**
@@ -25,10 +24,7 @@
 // export function GCB(n: number = 1): BodyPartConstant[] {
 // 	return GB(CARRY, n);
 // }
-// export type BodyCre = {
-// 	type: BodyPartConstant;
-// 	hits: number;
-// };
+
 // /**get body part constant list by single body part ,repeat n times*/
 // export function GB(b: BodyPartConstant, n: number): BodyPartConstant[] {
 // 	let rtn: BodyPartConstant[] = [];
