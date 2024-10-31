@@ -179,7 +179,7 @@ export let sum_snakePart0: number = 0;
 export function snakePartJob(cre: Cre) {
   SA(cre, "i'm snakePart");
   drawText(new Pos_C(50, 55), "E");
-  if (cre.getBodypartsNum(WORK) > 0) {
+  if (cre.getBodyPartsNum(WORK) > 0) {
     if (Adj(cre, spawn)) {
       SA(cre, "ad");
       if (getEnergy(cre) === 0) {
@@ -201,7 +201,7 @@ export function snakePartJob(cre: Cre) {
   }
   const index = cre.upgrade.spIndex;
   SA(cre, "index=" + index);
-  if (cre.getBodypartsNum(WORK) > 0) {
+  if (cre.getBodyPartsNum(WORK) > 0) {
   } else {
     cre.fight();
   }
@@ -379,7 +379,7 @@ export function snakePartJob(cre: Cre) {
           if (
             GR(cre, enemySpawn) === 2 &&
             nearFriendNearSpawn &&
-            cre.getBodypartsNum(ATTACK) >
+            cre.getBodyPartsNum(ATTACK) >
               nearFriendNearSpawn.getBodiesNum(ATTACK)
           ) {
             SA(cre, "exchange Pos");
@@ -913,7 +913,7 @@ function command() {
       const targets = oppoUnits.filter(
         i =>
           oppo(i) &&
-          ((i instanceof Cre && (i.isArmy() || i.getBodypartsNum(WORK) > 0)) ||
+          ((i instanceof Cre && (i.isArmy() || i.getBodyPartsNum(WORK) > 0)) ||
             (i instanceof StructureExtension && !inRampart(i)) ||
             i instanceof StructureSpawn)
       );
@@ -933,16 +933,16 @@ function command() {
                 if (getGuessPlayer() === Tigga) {
                   typeBonus = 3;
                 } else {
-                  if (i.getBodypartsNum(WORK) > 0) {
+                  if (i.getBodyPartsNum(WORK) > 0) {
                     typeBonus = 1;
                   } else if (
                     GR(i, enemySpawn) <= 7 &&
-                    i.getBodypartsNum(ATTACK) >= 2
+                    i.getBodyPartsNum(ATTACK) >= 2
                   ) {
                     typeBonus = 0.3;
                   } else if (
-                    i.getBodypartsNum(ATTACK) +
-                      i.getBodypartsNum(RANGED_ATTACK) <=
+                    i.getBodyPartsNum(ATTACK) +
+                      i.getBodyPartsNum(RANGED_ATTACK) <=
                     1
                   ) {
                     typeBonus = 0.01;
@@ -1039,12 +1039,12 @@ function command() {
             i => i.getBodiesNum(HEAL) > 0 && GR(i, second) <= 7
           );
           const healNum = sum(enemyHealer, i => i.getBodiesNum(HEAL));
-          if (second.getBodypartsNum(RANGED_ATTACK) >= 4) {
+          if (second.getBodyPartsNum(RANGED_ATTACK) >= 4) {
             SA(second, "-1");
             second.master.rangedMassAttack();
             second.battle.melee();
           } else if (
-            second.getBodypartsNum(ATTACK) === 3 &&
+            second.getBodyPartsNum(ATTACK) === 3 &&
             second.getHealthyBodyPartsNum(ATTACK) < 3
           ) {
             drawText(second, "A");
@@ -1186,17 +1186,17 @@ function command() {
           }
         } else {
           let ifChase: boolean;
-          if (target instanceof Cre && target.getBodypartsNum(ATTACK) === 0) {
+          if (target instanceof Cre && target.getBodyPartsNum(ATTACK) === 0) {
             ifChase = true;
           } else if (
             target instanceof Cre &&
-            target.getBodypartsNum(WORK) > 0 &&
+            target.getBodyPartsNum(WORK) > 0 &&
             inRampart(target)
           ) {
             ifChase = false;
           } else if (
             target instanceof Cre &&
-            target.getBodypartsNum(WORK) > 0 &&
+            target.getBodyPartsNum(WORK) > 0 &&
             !inRampart(target)
           ) {
             ifChase = true;

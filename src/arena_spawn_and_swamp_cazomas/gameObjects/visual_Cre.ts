@@ -1,11 +1,11 @@
 import { Structure } from "game/prototypes";
 import { Visual } from "game/visual";
-
-import { calculateForce, Cre, damaged, hits, hitsMax } from "./Cre";
-
 import { valid } from "../utils/JS";
 import { drawRangeComplex, P } from "../utils/visual";
+import { calculateForce } from "./battle";
+import { Cre } from "./Cre";
 import { cres, enemies, friends, units } from "./GameObjectInitialize";
+import { damaged } from "./HasHits";
 
 const VISUAL_LAYER = 6;
 /**
@@ -16,7 +16,7 @@ export function showHits() {
     const useHPVisual = units.filter(i => damaged(i));
     for (const UHPV of useHPVisual) {
       new Visual(8, false).text(
-        "" + hits(UHPV),
+        "" + UHPV.hits,
         { x: UHPV.x, y: UHPV.y - 0.5 },
         {
           font: "0.25",
@@ -47,7 +47,7 @@ export function showHealthBar(obj: Cre | Structure) {
       { color: "#727272", opacity: 0.4 }
     );
     // 算比例
-    const ratio = hits(obj) / hitsMax(obj);
+    const ratio = obj.hits / obj.hitsMax;
     // 撸颜色
     const colorScheme = {
       low: "#ff0000",
@@ -71,7 +71,7 @@ export function showHealthBar(obj: Cre | Structure) {
 }
 export function showHealthBars() {
   for (let c of cres) {
-    if (hits(c) < hitsMax(c)) {
+    if (c.hits < c.hitsMax) {
       showHealthBar(c);
     }
   }

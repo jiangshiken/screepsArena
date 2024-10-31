@@ -192,17 +192,17 @@ function tailMeleeJob(cre: Cre) {
     // SA(cre,"C")
     let typeBonus: number = 0;
     if (tar instanceof Cre) {
-      if (tar.getBodypartsNum(WORK) > 0) {
+      if (tar.getBodyPartsNum(WORK) > 0) {
         typeBonus = 0.2;
-      } else if (GR(tar, enemySpawn) <= 7 && tar.getBodypartsNum(ATTACK) >= 2) {
+      } else if (GR(tar, enemySpawn) <= 7 && tar.getBodyPartsNum(ATTACK) >= 2) {
         typeBonus = 0.5;
       } else if (
-        tar.getBodypartsNum(ATTACK) + tar.getBodypartsNum(RANGED_ATTACK) <=
+        tar.getBodyPartsNum(ATTACK) + tar.getBodyPartsNum(RANGED_ATTACK) <=
         1
       ) {
         typeBonus = 1.5;
       } else if (
-        tar.getBodypartsNum(ATTACK) + tar.getBodypartsNum(RANGED_ATTACK) >
+        tar.getBodyPartsNum(ATTACK) + tar.getBodyPartsNum(RANGED_ATTACK) >
         1
       ) {
         typeBonus = 3;
@@ -316,17 +316,17 @@ function tailMeleeJob(cre: Cre) {
         fleeAction(cre, myGroup, head, tail, second);
       } else {
         let ifChase: boolean;
-        if (target instanceof Cre && target.getBodypartsNum(ATTACK) === 0) {
+        if (target instanceof Cre && target.getBodyPartsNum(ATTACK) === 0) {
           ifChase = true;
         } else if (
           target instanceof Cre &&
-          target.getBodypartsNum(WORK) > 0 &&
+          target.getBodyPartsNum(WORK) > 0 &&
           inRampart(target)
         ) {
           ifChase = false;
         } else if (
           target instanceof Cre &&
-          target.getBodypartsNum(WORK) > 0 &&
+          target.getBodyPartsNum(WORK) > 0 &&
           !inRampart(target)
         ) {
           ifChase = true;
@@ -335,7 +335,7 @@ function tailMeleeJob(cre: Cre) {
         }
         if (Adj(head, target) && !ifChase) {
           stopAction(cre, head, myGroup);
-        } else if (head.getBodypartsNum(RANGED_ATTACK) >= 3) {
+        } else if (head.getBodyPartsNum(RANGED_ATTACK) >= 3) {
           const hasAllyMelee =
             friends.find(
               i => GR(i, cre) <= 3 && i.getBodiesNum(ATTACK) >= 6

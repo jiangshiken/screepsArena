@@ -1,6 +1,13 @@
 import { Cre_harvest } from "./Cre_harvest";
 
 export class Cre_battle extends Cre_harvest {
+  /**calculation*/
+  cal_taunt_fight: Event_Number | undefined;
+  cal_taunt_value: Event_Number | undefined;
+  cal_force_includeRam: Event_Number | undefined;
+  cal_force_not_includeRam: Event_Number | undefined;
+  /** the `Attackable` that the creep is targeting */
+  target: HasHits | undefined = undefined;
   /**do attack ,ranged ,heal at the same tick,will judge which to use
    * when conflict
    */
@@ -94,24 +101,6 @@ export class Cre_battle extends Cre_harvest {
   /** set the `hisPos` of the creep */
   setHisPos() {
     this.hisPos = new Event_Pos({ x: this.master.x, y: this.master.y });
-  }
-  /**
-   * creep that has {@link ATTACK} or {@link RANGED_ATTACK} or {@link HEAL}
-   */
-  isArmy(): boolean {
-    let bodies: BodyCre[] = this.master.body();
-    if (bodies) {
-      for (let body of bodies) {
-        if (
-          body.type === ATTACK ||
-          body.type === RANGED_ATTACK ||
-          body.type === HEAL
-        ) {
-          return true;
-        }
-      }
-      return false;
-    } else return false;
   }
   /**melee attack if enemies in ranged 1*/
   melee(): boolean {

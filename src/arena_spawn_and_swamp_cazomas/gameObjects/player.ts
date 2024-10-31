@@ -49,7 +49,7 @@ export function identifyOpponent() {
     const ens = enemies.filter(
       i =>
         GR(i, enemySpawn) <= 1 &&
-        i.getBodypartsNum(CARRY) > 0 &&
+        i.getBodyPartsNum(CARRY) > 0 &&
         getEnergy(i) > 0
     );
     if (ens.length >= 2) {

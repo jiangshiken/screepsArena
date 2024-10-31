@@ -24,9 +24,9 @@ export function useTasks(hasTasks: HasTasks) {
   }
 }
 /**
- * Task,cre has a TaskList ,every `Task` in {@link Cre.tasks}(the TaskList of Cre) will be trig
+ * Task,cre has a TaskList ,every `Task` in tasks (the TaskList of Cre) will be trig
  * one time in every loop.if the task is not pause.
- * when the `Task` end ,it will be remove from the {@link Cre.tasks}
+ * when the `Task` end ,it will be remove from the tasks
  */
 export class Task {
   /** if task completed */
@@ -51,4 +51,8 @@ export class Task {
     this.complete = true;
     remove(this.master.tasks, this);
   }
+}
+export function cancelOldTask(task: Task, type: any): void {
+  const oldTask = task.master.tasks.find(t => t instanceof type && t !== task);
+  if (oldTask) oldTask.end();
 }

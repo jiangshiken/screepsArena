@@ -125,7 +125,7 @@ function getMainArmyNum(fri: Cre[]): number {
   // const supplyAParts = fri.filter(i => inDoubleRange(i.getBodiesNum(ATTACK), 1, 5)).map(i => i.getBodiesNum(ATTACK)).reduce((a, b) => a + b, 0)
   // const rtn = num6A + 1.2 * numOver6A + 0.1 * supplyAParts
   const rtn: number =
-    0.5 * sumForceByArr(fri.filter(i => i.getBodypartsNum(ATTACK) > 0));
+    0.5 * sumForceByArr(fri.filter(i => i.getBodyPartsNum(ATTACK) > 0));
   // PS("mainArmyNum=" + rtn)
   return rtn;
 }
@@ -263,8 +263,8 @@ export function getSpawnTypeList_st(): SpawnType[] {
         fri.filter(
           i =>
             i.role === stdAttacker &&
-            i.getBodypartsNum(ATTACK) === 1 &&
-            i.getBodypartsNum(MOVE) === 5
+            i.getBodyPartsNum(ATTACK) === 1 &&
+            i.getBodyPartsNum(MOVE) === 5
         ).length
     ),
     // //650+320=970
@@ -327,7 +327,7 @@ export function getSpawnTypeList_st(): SpawnType[] {
       1.5 * TKR2_4 * TSRB * EEB(300, 2.5),
       TB("5CM"),
       fri =>
-        fri.filter(i => i.role === harvester && i.getBodypartsNum(CARRY) >= 2)
+        fri.filter(i => i.role === harvester && i.getBodyPartsNum(CARRY) >= 2)
           .length
     ),
     //200
@@ -336,7 +336,7 @@ export function getSpawnTypeList_st(): SpawnType[] {
       1.8 * TKR2_4 * TSRB * EEB(200, 1.5),
       TB("3CM"),
       fri =>
-        fri.filter(i => i.role === harvester && i.getBodypartsNum(CARRY) >= 2)
+        fri.filter(i => i.role === harvester && i.getBodyPartsNum(CARRY) >= 2)
           .length
     ),
     // //1000

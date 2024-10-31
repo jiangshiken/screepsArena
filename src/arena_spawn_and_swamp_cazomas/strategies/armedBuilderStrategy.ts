@@ -153,7 +153,7 @@ export function useArmedBuilderStrategy() {
       0.4 * EEB(200, 1.4),
       TB("3CM"),
       fri =>
-        fri.filter(i => i.role === harvester && i.getBodypartsNum(CARRY) >= 2)
+        fri.filter(i => i.role === harvester && i.getBodyPartsNum(CARRY) >= 2)
           .length
     ),
   ];

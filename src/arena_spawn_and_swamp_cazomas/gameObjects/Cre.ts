@@ -5,53 +5,35 @@ import {
   HEAL,
   MOVE,
   RANGED_ATTACK,
-  RESOURCE_ENERGY,
-  TOUGH,
   WORK,
 } from "game/constants";
-import {
-  Creep,
-  GameObject,
-  Resource,
-  StructureContainer,
-  StructureExtension,
-  StructureRampart,
-  StructureSpawn,
-  StructureTower,
-} from "game/prototypes";
-import { findClosestByRange, getTicks } from "game/utils";
-
-// import { CS, getMaxWorthCSS, getMyCSs, progress } from "../utils_pincer";
-
+import { Creep, Resource } from "game/prototypes";
+import { getTicks } from "game/utils";
 import { ct, et, ptSum } from "../utils/CPU";
-import { Event, Event_Number, Event_Pos } from "../utils/Event";
-import { StNumber } from "../utils/game";
+import { Event_Number } from "../utils/Event";
+import { StNumber, closest } from "../utils/game";
 import { divide0, pow2, ranGet, valid } from "../utils/JS";
-import { GR, Pos, getRangePoss, pos00 } from "../utils/Pos";
-import { HasTasks, Task, Task_C, useTasks } from "../utils/Task";
+import { GR, Pos, getRangePoss } from "../utils/Pos";
+import { HasTasks, Task, cancelOldTask, useTasks } from "../utils/Task";
 import { P, SA } from "../utils/visual";
+import { blocked } from "./Cre_move";
 import {
   GO,
-  HasEnergy,
-  HasStore,
-  Unit,
   containers,
   cres,
   enemies,
   friends,
   isMyGO,
   isOppoGO,
-  oppoUnits,
 } from "./GameObjectInitialize";
 import { HasHits, spawnPos } from "./HasHits";
 import { HasMy } from "./HasMy";
-import { findGO, overallMap } from "./overallMap";
+import { findGO } from "./overallMap";
+import { SpawnInfo } from "./spawn";
+import { getEnergy, getFreeEnergy } from "./UnitTool";
 
-export function isSpawning(cre: Creep): boolean {
-  return cre.spawning; //atSpawnPos(cre) || ;
-}
 /** the Task of Creep*/
-export class Task_Cre extends Task_C {
+export class Task_Cre extends Task {
   master: Cre;
   constructor(master: Cre) {
     super(master);
@@ -64,11 +46,7 @@ export class Task_Role extends Task_Cre {
   constructor(master: Cre, role: Role) {
     super(master);
     this.role = role;
-    //cancel old task
-    const pt = this.master.tasks.find(
-      task => task instanceof Task_Role && task != this
-    );
-    if (pt) pt.end();
+    cancelOldTask(this, Task_Role);
   }
   loop_task(): void {
     // SA(this.master,"Task_Role_loop")
@@ -84,41 +62,18 @@ export type BodyCre = {
 };
 /** extend of `Creep` */
 export class Cre implements HasTasks, HasMy, HasHits {
-  master: Creep;
+  readonly master: Creep;
   spawnInfo: SpawnInfo | undefined;
-  moveTarget: Event_Pos | undefined;
-  moveTargetNextPos: Event_Pos | undefined;
-  /** if it want move ,it related to if other Creep will pull it */
-  wantMove: Event | undefined;
   /** tasks list */
-  tasks: Task[] = [];
-  //modules
-
-  /** the `Attackable` that the creep is targeting */
-  target: HasHits | undefined = undefined;
-  /** used to predict the movement of the creep ,can only predict a little distance */
-  deltaPredictPos: Pos;
-  // moveSelecter: Selecter<Pos>;
+  readonly tasks: Task[] = [];
+  /**task execute order */
+  readonly taskPriority: number = 10;
   /**extra infomation*/
-  upgrade: any = {};
-  taskPriority: number = 10;
-  pureMeleeMode: boolean = false;
-  appointmentMovement: Event_Pos | undefined;
-  /**calculation*/
-  cal_taunt_fight: Event_Number | undefined;
-  cal_taunt_value: Event_Number | undefined;
-  cal_force_includeRam: Event_Number | undefined;
-  cal_force_not_includeRam: Event_Number | undefined;
+  readonly upgrade: any = {};
   constructor(creep: Creep) {
-    // P("constructor creep=" + creep)
     this.master = creep;
-    // P("this.master=" + this.master)
     this.tasks = [];
-    this.deltaPredictPos = pos00;
-    // this.moveSelecter = this.getInitMoveSelector();
     this.upgrade = {};
-
-    //TODO add member attribute
   }
   get role(): Role | undefined {
     return this.spawnInfo?.role;
@@ -129,10 +84,9 @@ export class Cre implements HasTasks, HasMy, HasHits {
   get oppo() {
     return isOppoGO(this.master);
   }
-  extraMessage(): any {
+  get extraMessage(): any {
     return this.spawnInfo?.extraMessage;
   }
-
   get x() {
     return this.master.x;
   }
@@ -157,19 +111,16 @@ export class Cre implements HasTasks, HasMy, HasHits {
   get body(): BodyCre[] {
     return this.master.body;
   }
-
-  hasMoveBodyPart() {
-    return this.getBody(MOVE).length > 0;
+  hasMoveBodyPart(): boolean {
+    return this.getBodyPartsNum(MOVE) > 0;
   }
-
   onlyHasMoveAndCarry() {
-    const mNum = this.getBody(MOVE).length;
-    const cNum = this.getBody(CARRY).length;
-    const rtn = mNum + cNum === this.body().length;
-    return rtn;
+    const mNum = this.getBodyPartsNum(MOVE);
+    const cNum = this.getBodyPartsNum(CARRY);
+    return mNum + cNum === this.body.length;
   }
   getBody(type: BodyPartConstant): BodyCre[] {
-    return this.body().filter(i => i.type === type);
+    return this.body.filter(i => i.type === type);
   }
   getBodyArray(): BodyPartConstant[] {
     let rtn: BodyPartConstant[] = [];
@@ -181,7 +132,7 @@ export class Cre implements HasTasks, HasMy, HasHits {
   getHealthyBodyParts(type: BodyPartConstant): BodyCre[] {
     return this.getBody(type).filter(i => i.hits > 0);
   }
-  getBodypartsNum(type: BodyPartConstant): number {
+  getBodyPartsNum(type: BodyPartConstant): number {
     return this.getBody(type).length;
   }
   getHealthyBodyPartsNum(type: BodyPartConstant): number {
@@ -194,10 +145,10 @@ export let roleList: Role[] = [];
  * a Role which is decide what a Creep do at every tick
  */
 export class Role {
-  roleName: string;
+  readonly roleName: string;
   /**the Function that will be called every tick
    */
-  roleFunc: Function | undefined;
+  readonly roleFunc: Function | undefined;
   /**
    * used to calculate CPU cost
    */
@@ -212,102 +163,40 @@ export class Role {
     roleList.push(this);
   }
 }
-/**
- * get the number of harvestable around
- */
-export function hasMovePart(cre: Cre): boolean {
-  return cre.getBody(MOVE).length > 0;
-}
 /** find friend at the position */
 export function findFriendAtPos(pos: Pos): Cre | undefined {
-  const fRtn = findGO(pos, Cre);
-  if (fRtn && my(<Cre>fRtn)) return <Cre>fRtn;
+  const fRtn = <Cre | undefined>findGO(pos, Cre);
+  if (fRtn && fRtn.my) return fRtn;
   else return undefined;
 }
 export function findEnemyAtPos(pos: Pos): Cre | undefined {
-  const fRtn = findGO(pos, Cre);
-  if (fRtn && oppo(<Cre>fRtn)) return <Cre>fRtn;
+  const fRtn = <Cre | undefined>findGO(pos, Cre);
+  if (fRtn && fRtn.oppo) return fRtn;
   else return undefined;
 }
 
 export function getClosestEnemy(pos: Pos): Cre | undefined {
-  return findClosestByRange(pos, enemies);
+  return <Cre | undefined>closest(pos, enemies);
 }
-export function moveBlockFriend(pos: Pos): void {
-  const creBlock = findFriendAtPos(pos);
-  if (creBlock) {
-    moveToRandomEmptyAround(creBlock);
-  }
-}
-
-export function hasEnemyArmyAtPos(pos: Pos) {
-  const fRtn = findGO(pos, Cre);
-  return fRtn && (<Cre>fRtn).isEnemyArmy();
-}
-export function hasCreepAtPos(pos: Pos) {
-  const list = overallMap.get(pos);
-  const cc = list.find(i => i instanceof Cre);
-  return valid(cc);
+export function findCreAtPos(pos: Pos): Cre | undefined {
+  const fRtn = <Cre | undefined>findGO(pos, Cre);
+  if (fRtn) return fRtn;
+  else return undefined;
 }
 export function getEnemyArmies(): Cre[] {
-  return enemies.filter(i => i.isEnemyArmy());
+  return enemies.filter(i => isArmy(i));
 }
 export function getEnemyThreats(): Cre[] {
-  return enemies.filter(i => isEnemyThreat(i));
-}
-export function hasEnemyAround(pos: Pos, n: number) {
-  const enA = enemies.find(i => GR(pos, i) <= n);
-  return valid(enA);
-}
-export function hasEnemyAround_lamb(
-  lamb: (cre: Cre) => boolean,
-  pos: Pos,
-  n: number
-) {
-  const enA = enemies.find(i => GR(pos, i) <= n && lamb(i));
-  return valid(enA);
-}
-export function hasFriendAround(pos: Pos, n: number) {
-  const enA = friends.find(i => GR(pos, i) <= n);
-  return valid(enA);
-}
-export function hasOtherFriendAround(cre: Cre, pos: Pos, n: number) {
-  const enA = getOtherFriends(cre).find(i => GR(pos, i) <= n);
-  return valid(enA);
-}
-export function hasOppoUnitAround(pos: Pos, n: number) {
-  const enA = oppoUnits.find(i => GR(pos, i) <= n);
-  return valid(enA);
+  return enemies.filter(i => hasThreat(i));
 }
 export function isEnemyThreat(cre: Cre) {
-  return hasThreat(cre) && oppo(cre);
+  return hasThreat(cre) && cre.oppo;
 }
-export function hasEnemyThreatAround(pos: Pos, n: number) {
-  const enA = enemies.find(i => isEnemyThreat(i) && GR(pos, i) <= n);
-  return valid(enA);
+export function hasEnemyThreatAround(pos: Pos, range: number): boolean {
+  return enemies.find(i => hasThreat(i) && GR(pos, i) <= range) !== undefined;
 }
-export function hasEnemyArmyAround(pos: Pos, n: number) {
-  const enA = enemies.find(i => i.isEnemyArmy() && GR(pos, i) <= n);
-  return valid(enA);
-}
-export function hasEnemyHealerAround(pos: Pos, n: number) {
-  const enA = enemies.find(i => isHealer(i) && GR(pos, i) <= n);
-  return valid(enA);
-}
-export function getRoundEmptyPosLeave1Empty(
-  cre: Pos,
-  containerBlock: boolean = false
-): Pos | undefined {
-  const roundPoss = getRangePoss(cre, 1);
-  const emptyRoundPoss = roundPoss.filter(
-    i => !blocked(i, true, false, false, containerBlock)
-  );
-  if (emptyRoundPoss.length == 1) {
-    //leave 1 empty avoid block Creep in 8 blocker
-    return undefined;
-  } else if (emptyRoundPoss.length >= 2) {
-    return emptyRoundPoss[0];
-  } else return undefined;
+export function hasEnemyArmyAround(pos: Pos, range: number): boolean {
+  return enemies.find(i => isArmy(i) && GR(pos, i) <= range) !== undefined;
 }
 export function getRoundEmptyPos(cre: Pos): Pos | undefined {
   const roundPoss = getRangePoss(cre, 1);
@@ -322,28 +211,36 @@ export function getFriendsThreated() {
 export function hasThreat(cre: Cre): boolean {
   return cre.getBody(ATTACK).length + cre.getBody(RANGED_ATTACK).length > 0;
 }
+export function isArmy(cre: Cre): boolean {
+  return (
+    cre.getBody(ATTACK).length +
+      cre.getBody(RANGED_ATTACK).length +
+      cre.getBody(HEAL).length >
+    0
+  );
+}
 export function getEmptyPosInRange(pos: Pos, range: number) {
   const poss = getRangePoss(pos, range);
   const possEmpty = poss.filter(i => !blocked(i));
   return ranGet(possEmpty);
 }
 export function isWorker(cre: Cre): boolean {
-  return cre.getBodypartsNum(CARRY) + cre.getBodypartsNum(WORK) > 0;
+  return cre.getBodyPartsNum(CARRY) + cre.getBodyPartsNum(WORK) > 0;
 }
 export function isHealer(cre: Cre): boolean {
-  return cre.getBodypartsNum(HEAL) > 0;
+  return cre.getBodyPartsNum(HEAL) > 0;
 }
 export function isHealer_restrict(cre: Cre): boolean {
   return (
-    cre.getBodypartsNum(HEAL) > 0 &&
-    cre.getBodypartsNum(ATTACK) === 0 &&
-    cre.getBodypartsNum(RANGED_ATTACK) === 0
+    cre.getBodyPartsNum(HEAL) > 0 &&
+    cre.getBodyPartsNum(ATTACK) === 0 &&
+    cre.getBodyPartsNum(RANGED_ATTACK) === 0
   );
 }
 export function isSlowShoter(cre: Cre): boolean {
   let rtn =
-    cre.getBodypartsNum(RANGED_ATTACK) > 0 &&
-    cre.getBodypartsNum(ATTACK) === 0 &&
+    cre.getBodyPartsNum(RANGED_ATTACK) > 0 &&
+    cre.getBodyPartsNum(ATTACK) === 0 &&
     cre.getSpeed_general() < 1;
   SA(cre, "i'm slowShoter");
   return rtn;
@@ -351,8 +248,8 @@ export function isSlowShoter(cre: Cre): boolean {
 export function is5MA(cre: Cre) {
   return (
     cre.body().length === 6 &&
-    cre.getBodypartsNum(ATTACK) === 1 &&
-    cre.getBodypartsNum(MOVE) === 5
+    cre.getBodyPartsNum(ATTACK) === 1 &&
+    cre.getBodyPartsNum(MOVE) === 5
   );
 }
 export let enRamAroundCost: number = 30;
@@ -464,88 +361,6 @@ export function getEarning_value(
       : enemyValue * (1 - winOneRemainRate);
   return 0.5 * (loseOneExtra + winOneExtra);
 }
-/**
- * get DPS of a Creep ,DPS of Structure represent the threat of it
- */
-export function getDps(
-  cre: Unit,
-  valueMode: boolean = false,
-  byCalculateForce: boolean = false
-): StNumber {
-  let rtn: number;
-  if (exist(cre)) {
-    if (cre instanceof Cre) {
-      const cr: Cre = <Cre>cre;
-      let rateT;
-      let rateH;
-      if (byCalculateForce) {
-        rateT = 0.1;
-        rateH = 0.9;
-      } else {
-        rateT = 0.5;
-        rateH = 0.5;
-      }
-      const attackNum =
-        rateT * cr.getBody(ATTACK).length +
-        rateH * cr.getHealthyBodyParts(ATTACK).length;
-      const rangedAttackNum =
-        rateT * cr.getBody(RANGED_ATTACK).length +
-        rateH * cr.getHealthyBodyParts(RANGED_ATTACK).length;
-      const healNum =
-        rateT * cr.getBody(HEAL).length +
-        rateH * cr.getHealthyBodyParts(HEAL).length;
-      const buildNum =
-        rateT * cr.getBody(WORK).length +
-        rateH * cr.getHealthyBodyParts(WORK).length;
-      const moveNum =
-        rateT * cr.getBody(MOVE).length +
-        rateH * cr.getHealthyBodyParts(MOVE).length;
-      const carryNum =
-        rateT * cr.getBody(CARRY).length +
-        rateH * cr.getHealthyBodyParts(CARRY).length;
-      const toughNum =
-        rateT * cr.getBody(TOUGH).length +
-        rateH * cr.getHealthyBodyParts(TOUGH).length;
-      if (valueMode) {
-        //value mode
-        rtn =
-          8 * attackNum +
-          15 * rangedAttackNum +
-          25 * healNum +
-          10 * buildNum +
-          5 * moveNum +
-          5 * carryNum +
-          1 * toughNum;
-      } else {
-        //battle mode
-        rtn =
-          30 * attackNum +
-          12 * rangedAttackNum +
-          15 * healNum +
-          3 * buildNum +
-          1 * moveNum +
-          4 * carryNum +
-          0.1 * toughNum;
-      }
-    } else if (cre instanceof StructureRampart) {
-      rtn = 0.5;
-    } else if (cre instanceof StructureSpawn) {
-      let totalForce;
-      if (my(cre)) {
-        totalForce = sumForceByArr(getFriendArmies());
-      } else {
-        totalForce = sumForceByArr(getEnemyArmies());
-      }
-      rtn = spawnDps * (1 + 0.5 * totalForce);
-    } else if (cre instanceof StructureExtension) {
-      const enBonus = 1 + (2 * getEnergy(cre)) / 100;
-      rtn = 13 * enBonus;
-    } else {
-      rtn = 1;
-    }
-  } else rtn = 0;
-  return 0.03 * rtn;
-}
 export function getArmies() {
   return cres.filter(i => i.isArmy());
 }
@@ -556,10 +371,6 @@ export function myGO(go: GO) {
     return isMyGO(go);
   }
 }
-
-export function oppo(u: Unit): boolean {
-  return !my(u);
-}
 //Attackables
 export function getDamagedRate(a: Attackable): number {
   if (valid(a) && hitsMax(a) != 0) return (hitsMax(a) - hits(a)) / hitsMax(a);
@@ -568,64 +379,6 @@ export function getDamagedRate(a: Attackable): number {
 export function getHPRate(a: Attackable): number {
   if (valid(a) && hitsMax(a) != 0) return hits(a) / hitsMax(a);
   else return 0;
-}
-export function getEnergy(a: GO): number {
-  if (a instanceof Resource) {
-    return a.amount;
-  } else if (a instanceof Cre && a.getBodypartsNum(CARRY) > 0) {
-    return a.master.store[RESOURCE_ENERGY];
-  } else if (
-    a.master instanceof StructureSpawn ||
-    a.master instanceof StructureContainer ||
-    a.master instanceof StructureExtension ||
-    a.master instanceof StructureTower
-  ) {
-    return a.master.store[RESOURCE_ENERGY];
-  } else {
-    return 0;
-  }
-}
-export function live(go: HasEnergy) {
-  return getEnergy(go) > 0;
-}
-export function getEmptyCapacity(cre: HasStore): number {
-  return getFreeEnergy(cre);
-}
-export function getCapacity(cre: HasStore): number {
-  let rtn = cre.store.getCapacity(RESOURCE_ENERGY);
-  return rtn ? rtn : 0;
-}
-export function getFreeEnergy(cre: HasStore): number {
-  const rtn = cre.store.getFreeCapacity(RESOURCE_ENERGY);
-  return rtn ? rtn : 0;
-}
-export function hitsMax(unit: Attackable): number {
-  if (unit.hitsMax) return unit.hitsMax;
-  else return 0;
-}
-export function hits(unit: Attackable): number {
-  if (unit.hits) {
-    return unit.hits;
-  } else {
-    return 0;
-  }
-}
-export function getExist<E extends Cre | GameObject | null | undefined>(
-  cre: E
-): E | undefined {
-  return exist(cre) ? cre : undefined;
-}
-
-/**
- * calculate energy around
- */
-export function calAroundEnergy(pos: Pos) {
-  let sources = getHarvables().filter(i => GR(pos, i) <= 1);
-  let sum: number = 0;
-  for (let sou of sources) {
-    sum += getEnergy(sou);
-  }
-  return sum;
 }
 
 //@Game

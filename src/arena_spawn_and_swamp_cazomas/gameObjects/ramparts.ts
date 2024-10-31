@@ -186,7 +186,7 @@ export function gotoTargetRampart(cre: Cre, targetRampart: Pos) {
           i =>
             GR(i, cre) <= 1 &&
             inMyHealthyRampart(i) &&
-            !(cre.getBodypartsNum(WORK) > 0 && cre.macro
+            !(cre.getBodyPartsNum(WORK) > 0 && cre.macro
               ? cre.macro.getIsWorking()
               : false) &&
             i.getHealthyBodyPartsNum(ATTACK) <
@@ -241,8 +241,8 @@ export function goinRampartAssign(cre: Cre, calBlocked: Pos[]) {
           tick <= 400
             ? friends.filter(
                 i =>
-                  i.getBodypartsNum(ATTACK) > 0 ||
-                  i.getBodypartsNum(RANGED_ATTACK) > 0
+                  i.getBodyPartsNum(ATTACK) > 0 ||
+                  i.getBodyPartsNum(RANGED_ATTACK) > 0
               )
             : friends;
         const newFriend = tarFriends.find(i => atPos(i, aroundRamNotCaled));

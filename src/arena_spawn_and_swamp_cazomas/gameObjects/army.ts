@@ -263,7 +263,7 @@ export function getFitRate(
   if (
     currentGuessPlayer === Dooms &&
     unit instanceof Cre &&
-    unit.getBodypartsNum(WORK) >= 2
+    unit.getBodyPartsNum(WORK) >= 2
   ) {
     SA(unit, "dooms high taunt!!");
     taunt *= 6;
@@ -302,7 +302,7 @@ export function getFitRate(
   const extraBonusRate: number = extraBonus ? extraBonus(unit) : 1;
   const damagedBonus = 1 + 5 * getDamagedRate(unit);
   const attackBodyPartBonus =
-    unit instanceof Cre ? 1 + 0.5 * unit.getBodypartsNum(ATTACK) : 1;
+    unit instanceof Cre ? 1 + 0.5 * unit.getBodyPartsNum(ATTACK) : 1;
   const healerBonus = isHealer ? damagedBonus * attackBodyPartBonus : 1;
   const speedEnoughBonus =
     unit instanceof Cre
@@ -313,7 +313,7 @@ export function getFitRate(
   const quickRangerBonus =
     speedEnoughBonus < 1 &&
     unit instanceof Cre &&
-    unit.getBodypartsNum(RANGED_ATTACK) > 0
+    unit.getBodyPartsNum(RANGED_ATTACK) > 0
       ? 0.5
       : 1;
   //final cal

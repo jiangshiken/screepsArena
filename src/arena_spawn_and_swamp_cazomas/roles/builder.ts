@@ -172,7 +172,7 @@ export function builderTurtleJob(cre: Cre) {
     if (
       (tick > 600 &&
         !spawnHasRam &&
-        getEnergy(cre) >= 5 * cre.getBodypartsNum(WORK)) ||
+        getEnergy(cre) >= 5 * cre.getBodyPartsNum(WORK)) ||
       getIsBuilding(cre)
     ) {
       SA(cre, "normalBuild");
@@ -301,7 +301,7 @@ export function builderStandardJob(cre: Cre) {
   //
   const task = findTask(cre, BuilderStandardTask);
   if (!task) {
-    if (cre.getBodypartsNum(ATTACK) > 0) {
+    if (cre.getBodyPartsNum(ATTACK) > 0) {
       SA(cre, "new ArmedBuilderTask(cre)");
       new ArmedBuilderTask(cre);
     } else {
@@ -332,7 +332,7 @@ export class BuilderStandardTask extends Task_Cre {
   constructor(master: Cre) {
     super(master);
     resetStartGateAvoidFromEnemies();
-    if (master.getBodypartsNum(ATTACK) > 0) {
+    if (master.getBodyPartsNum(ATTACK) > 0) {
       this.fleeRange = 12;
       this.fleeBias = 7;
     } else {
@@ -589,4 +589,19 @@ export class ArmedBuilderTask extends BuilderStandardTask {
       super.loop_task();
     }
   }
+}
+export function getRoundEmptyPosLeave1Empty(
+  cre: Pos,
+  containerBlock: boolean = false
+): Pos | undefined {
+  const roundPoss = getRangePoss(cre, 1);
+  const emptyRoundPoss = roundPoss.filter(
+    i => !blocked(i, true, false, false, containerBlock)
+  );
+  if (emptyRoundPoss.length == 1) {
+    //leave 1 empty avoid block Creep in 8 blocker
+    return undefined;
+  } else if (emptyRoundPoss.length >= 2) {
+    return emptyRoundPoss[0];
+  } else return undefined;
 }

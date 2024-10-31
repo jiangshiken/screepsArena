@@ -263,3 +263,86 @@ getTauntBonus(): Event_Number[] {
   addTauntBonus(taunt: number, name: string = "no name", from?: Unit): void {
     this.battle?.tauntBonus.push(new ExtraTauntEvent(taunt, name, from));
   }
+
+/**
+ * get DPS of a Creep ,DPS of Structure represent the threat of it
+ */
+export function getDps(
+  cre: Unit,
+  valueMode: boolean = false,
+  byCalculateForce: boolean = false
+): StNumber {
+  let rtn: number;
+  if (exist(cre)) {
+    if (cre instanceof Cre) {
+      const cr: Cre = <Cre>cre;
+      let rateT;
+      let rateH;
+      if (byCalculateForce) {
+        rateT = 0.1;
+        rateH = 0.9;
+      } else {
+        rateT = 0.5;
+        rateH = 0.5;
+      }
+      const attackNum =
+        rateT * cr.getBody(ATTACK).length +
+        rateH * cr.getHealthyBodyParts(ATTACK).length;
+      const rangedAttackNum =
+        rateT * cr.getBody(RANGED_ATTACK).length +
+        rateH * cr.getHealthyBodyParts(RANGED_ATTACK).length;
+      const healNum =
+        rateT * cr.getBody(HEAL).length +
+        rateH * cr.getHealthyBodyParts(HEAL).length;
+      const buildNum =
+        rateT * cr.getBody(WORK).length +
+        rateH * cr.getHealthyBodyParts(WORK).length;
+      const moveNum =
+        rateT * cr.getBody(MOVE).length +
+        rateH * cr.getHealthyBodyParts(MOVE).length;
+      const carryNum =
+        rateT * cr.getBody(CARRY).length +
+        rateH * cr.getHealthyBodyParts(CARRY).length;
+      const toughNum =
+        rateT * cr.getBody(TOUGH).length +
+        rateH * cr.getHealthyBodyParts(TOUGH).length;
+      if (valueMode) {
+        //value mode
+        rtn =
+          8 * attackNum +
+          15 * rangedAttackNum +
+          25 * healNum +
+          10 * buildNum +
+          5 * moveNum +
+          5 * carryNum +
+          1 * toughNum;
+      } else {
+        //battle mode
+        rtn =
+          30 * attackNum +
+          12 * rangedAttackNum +
+          15 * healNum +
+          3 * buildNum +
+          1 * moveNum +
+          4 * carryNum +
+          0.1 * toughNum;
+      }
+    } else if (cre instanceof StructureRampart) {
+      rtn = 0.5;
+    } else if (cre instanceof StructureSpawn) {
+      let totalForce;
+      if (my(cre)) {
+        totalForce = sumForceByArr(getFriendArmies());
+      } else {
+        totalForce = sumForceByArr(getEnemyArmies());
+      }
+      rtn = spawnDps * (1 + 0.5 * totalForce);
+    } else if (cre instanceof StructureExtension) {
+      const enBonus = 1 + (2 * getEnergy(cre)) / 100;
+      rtn = 13 * enBonus;
+    } else {
+      rtn = 1;
+    }
+  } else rtn = 0;
+  return 0.03 * rtn;
+}

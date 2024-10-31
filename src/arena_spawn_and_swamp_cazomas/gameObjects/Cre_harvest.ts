@@ -363,3 +363,14 @@ export function getMyProducers(): Producer[] {
 export function getEnemyProducers(): Producer[] {
   return <Producer[]>oppoUnits.filter(i => isEnemyProducer(i));
 }
+/**
+ * calculate energy around
+ */
+export function calAroundEnergy(pos: Pos) {
+  let sources = getHarvables().filter(i => GR(pos, i) <= 1);
+  let sum: number = 0;
+  for (let sou of sources) {
+    sum += getEnergy(sou);
+  }
+  return sum;
+}

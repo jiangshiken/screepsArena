@@ -43,7 +43,7 @@ function findOtherTester(cre: Cre, role: Role) {
 //## TEST and LOOP
 export function tester_PFC2_Job(cre: Cre) {
   SA(cre, "i'm tester_PFC2");
-  if (cre.getBodypartsNum(TOUGH) > 0) {
+  if (cre.getBodyPartsNum(TOUGH) > 0) {
     SA(cre, "i'm tougher");
     if (!validEvent(cre.bePulledTarget, 0)) {
       cre.moveToNormal(enemySpawn);
@@ -74,19 +74,19 @@ export function tester_PFC_Job(cre: Cre) {
   const pos4 = posPlusVec(spawn, { vec_x: 1, vec_y: 1 });
   const testTick = 50;
   if (tick <= testTick) {
-    if (cre.getBodypartsNum(TOUGH) > 0) {
+    if (cre.getBodyPartsNum(TOUGH) > 0) {
       cre.master.moveTo(pos1);
     } else {
       cre.master.moveTo(pos2);
     }
   }
   if (tick === testTick + 1) {
-    if (cre.getBodypartsNum(TOUGH) > 0) {
+    if (cre.getBodyPartsNum(TOUGH) > 0) {
       cre.master.moveTo(pos3);
     }
   }
   if (tick === testTick + 2) {
-    if (cre.getBodypartsNum(TOUGH) === 0) {
+    if (cre.getBodyPartsNum(TOUGH) === 0) {
       const otherFri = findOtherTester(cre, tester_PFC);
       if (otherFri) {
         cre.pullTar(otherFri);
