@@ -39,7 +39,32 @@ import {
 } from "./Cre";
 import { myRamparts, resources } from "./GameObjectInitialize";
 import { currentGuessPlayer, Dooms } from "./player";
-
+export function myContainersEnergy() {
+  let myContainers = getMyContainers();
+  let sum = 0;
+  for (let con of myContainers) {
+    sum += getEnergy(con);
+  }
+  return sum;
+}
+export function defendInArea(cre: Cre, pos: Pos, range: number): boolean {
+  const enInArea = enemies.filter(i => GR(pos, i) <= range);
+  if (enInArea.length > 0) {
+    const en = <Cre>cre.findClosestByRange(enInArea);
+    cre.MTJ(en);
+    return true;
+  } else {
+    cre.MTJ(pos);
+    return false;
+  }
+}
+export function isTerrainRoad(pos: Pos): boolean {
+  return hasGO(pos, StructureRoad);
+}
+export let isTurtleContainer: boolean = false;
+export function setIsTurtleContainer(b: boolean) {
+  isTurtleContainer = b;
+}
 /**find the position that can get protect nearby*/
 export function findProtectPos(cre: Cre): { pos: Pos; rate: number } {
   //find the min force*cost pos
@@ -335,10 +360,7 @@ export function findFitUnits(
   extraBonus?: (tar: Unit) => number
 ): { maxFitEn: Unit; maxFitRate: number } {
   //if current target invalid or at tick delay
-  if (
-    units.length >= 1 &&
-    (!exist(cre.targetAttackable) || isMyTick(cre, delay))
-  ) {
+  if (units.length >= 1 && (!exist(cre.target) || isMyTick(cre, delay))) {
     let maxFitRate: number = -1;
     let maxFitEn: Unit = units[0];
     for (let u of units) {
@@ -352,11 +374,11 @@ export function findFitUnits(
       }
     }
     //return new target
-    cre.targetAttackable = <any>maxFitEn;
+    cre.target = <any>maxFitEn;
     SAN(cre, "maxFitRate", maxFitRate);
     return { maxFitEn: maxFitEn, maxFitRate: maxFitRate };
   } else {
-    const tarEn = <Unit>cre.targetAttackable;
+    const tarEn = <Unit>cre.target;
     if (tarEn) {
       const fitRate = getFitRate(cre, tarEn, isHealer);
       return { maxFitEn: tarEn, maxFitRate: fitRate };

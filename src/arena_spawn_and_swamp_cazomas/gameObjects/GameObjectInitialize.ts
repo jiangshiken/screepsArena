@@ -81,6 +81,14 @@ export let myExtensions: OwnedStru[] = [];
 export let oppoExtensions: OwnedStru[] = [];
 export let myCSs: CS[] = [];
 export let oppoCSs: CS[] = [];
+export function isGO(go: any): boolean {
+  return (
+    go instanceof Cre ||
+    go instanceof Structure ||
+    go instanceof Resource ||
+    go instanceof ConstructionSite
+  );
+}
 export function getPrototype(type: any) {
   const arr = getObjectsByPrototype(type);
   return [...new Set(arr)];

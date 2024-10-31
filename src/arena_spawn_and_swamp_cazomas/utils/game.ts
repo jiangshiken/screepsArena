@@ -1,6 +1,6 @@
-import { BodyPartConstant } from "game/constants";
+import { BodyPartConstant, TERRAIN_SWAMP, TERRAIN_WALL } from "game/constants";
 import { Creep } from "game/prototypes";
-import { findClosestByRange } from "game/utils";
+import { findClosestByRange, getTerrainAt } from "game/utils";
 import { inRange_int } from "./JS";
 import { Pos, Vec } from "./Pos";
 export type StNumber = number;
@@ -30,6 +30,12 @@ export function leftVector(): Vec {
   } else {
     return new Vec(1, 0);
   }
+}
+export function isTerrainWall(pos: Pos) {
+  return getTerrainAt(pos) === TERRAIN_WALL;
+}
+export function isTerrainSwamp(pos: Pos) {
+  return getTerrainAt(pos) === TERRAIN_SWAMP;
 }
 export function creepBodyPartNum(creep: Creep, type: BodyPartConstant): number {
   return creep.body.filter(i => i.type === type).length;

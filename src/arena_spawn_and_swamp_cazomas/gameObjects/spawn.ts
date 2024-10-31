@@ -71,6 +71,21 @@ export function enoughEnergy(
   return spawnAndExtensionsEnergy(theSpawn) >= getBodiesCost(bodies);
 }
 
+/**
+ * info of spawn
+ */
+export class SpawnInfo {
+  bodies: BodyPartConstant[];
+  role: Role;
+  extraMessage: any = {};
+  constructor(bodies: BodyPartConstant[], role: Role) {
+    this.bodies = bodies;
+    this.role = role;
+  }
+  toString(): string {
+    return this.role.roleName + "(" + this.bodies.length + ")";
+  }
+}
 /**check all spawns */
 export function checkSpawns() {
   const spawns = mySpawns;

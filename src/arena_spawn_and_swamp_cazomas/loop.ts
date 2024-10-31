@@ -16,7 +16,6 @@ import {
 
 import {
   controlCreeps,
-  getAllUnits,
   getDecideSearchRtn,
   getEnemyProducers,
   getEnergy,
@@ -140,7 +139,7 @@ function switchLowCPUMode() {
     const superiorExtra = getSuperior() > 30 && sr > 3 ? 2 : 0;
     const tickExtra = tick > 800 ? 1 : 0;
     const friendExtra = 0.1 * friends.length;
-    const unitExtra = 0.03 * getAllUnits().length;
+    const unitExtra = 0.03 * units.length;
     const switchExtra = superiorExtra + tickExtra + friendExtra + unitExtra;
     if (switchExtra > 5) {
       setLowCPUMode(true);

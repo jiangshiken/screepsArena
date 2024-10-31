@@ -12,7 +12,6 @@ import {
   cres,
   enemies,
   friends,
-  getAllUnits,
   getTaunt,
   set_spawnDps,
   set_spawnExtraTaunt,
@@ -86,7 +85,7 @@ export function useStandardStrategy() {
   // if (tick === 1) {
   // 	init_predictTickList();
   // }
-  for (let unit of getAllUnits()) {
+  for (let unit of units) {
     SAN(unit, "taunt_V", getTaunt(unit, true));
     SAN(unit, "taunt", getTaunt(unit));
   }

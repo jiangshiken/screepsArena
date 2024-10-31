@@ -21,6 +21,10 @@ import {
 import { getObjectsByPrototype, getRange } from "game/utils";
 import { SA } from "../utils/visual";
 import { Cre } from "./Cre";
+export function damaged(cre: HasHits) {
+  if (cre) return cre.hits < cre.hitsMax;
+  else return false;
+}
 
 export interface HasHits {
   hits: number;
