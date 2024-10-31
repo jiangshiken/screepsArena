@@ -4,11 +4,11 @@ import { TB } from "../utils/autoBodys";
 import { tick } from "../utils/game";
 import { arrayEquals, best } from "../utils/JS";
 import { GR } from "../utils/Pos";
-import { SA } from "../utils/visual";
-import { getBodyArrayOfCreep, getEnergy } from "./Cre";
+import { displayPos, SA } from "../utils/visual";
+import { getBodyArrayOfCreep } from "./Cre";
 import { creeps, enemies, isOppoGO } from "./GameObjectInitialize";
-import { displayPos } from "./HasHits";
 import { enemySpawn } from "./spawn";
+import { getEnergy } from "./UnitTool";
 
 //class
 export class Player {

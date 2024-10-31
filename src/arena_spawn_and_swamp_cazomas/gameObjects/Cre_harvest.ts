@@ -374,3 +374,21 @@ export function calAroundEnergy(pos: Pos) {
   }
   return sum;
 }
+
+export class ResourceDropEvent extends Event_Pos {
+  constructor(pos: Pos) {
+    super(pos);
+  }
+}
+/**
+ * be droped in 1 tick is not a valid Resource,
+ * cause it may be pick and drop transported by the harvester
+ */
+export function validRes(res: Res) {
+  let dropEvents = filterEventList(
+    tick - 1,
+    tick + 1,
+    i => i instanceof ResourceDropEvent && atPos(i, res)
+  );
+  return dropEvents.length === 0;
+}

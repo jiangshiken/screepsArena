@@ -1,8 +1,8 @@
 import { ConstructionSite } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
-import { cpuBreakJudge } from "../gameObjects/army";
 import { Cre, enemies, getEnemyThreats, Role } from "../gameObjects/Cre";
+import { cpuBreakJudge } from "../gameObjects/CreTool";
 import { spawnPos } from "../gameObjects/HasHits";
 import { findGO } from "../gameObjects/overallMap";
 import { attackWeakRampart, defendTheRampart } from "../gameObjects/ramparts";

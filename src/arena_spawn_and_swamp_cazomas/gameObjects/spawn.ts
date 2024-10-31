@@ -22,7 +22,7 @@ import {
   X_axisDistance,
 } from "../utils/Pos";
 import { P, SA, SAN } from "../utils/visual";
-import { blocked, Cre, getEnergy, hasThreat, Role, SpawnInfo } from "./Cre";
+import { Cre, hasThreat, Role } from "./Cre";
 import {
   containers,
   cres,
@@ -36,6 +36,7 @@ import {
   structures,
 } from "./GameObjectInitialize";
 import { Spa } from "./Stru";
+import { blocked, getEnergy } from "./UnitTool";
 
 /** your first StructureSpawn*/
 export let spawn: Spa;

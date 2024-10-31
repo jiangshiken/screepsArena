@@ -1,4 +1,4 @@
-import { ExtraTauntEvent } from "./army";
+import { ExtraTauntEvent } from "./CreTool";
 
 export interface HasTaunt {
   tauntBonus: ExtraTauntEvent[];

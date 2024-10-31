@@ -1,4 +1,3 @@
-import { findFitOppoUnit } from "../gameObjects/army";
 import {
   Cre,
   enemies,
@@ -7,6 +6,7 @@ import {
   hasThreat,
   Role,
 } from "../gameObjects/Cre";
+import { findFitOppoUnit } from "../gameObjects/CreTool";
 import { tick } from "../utils/game";
 import { COO, GR } from "../utils/Pos";
 import { SA } from "../utils/visual";

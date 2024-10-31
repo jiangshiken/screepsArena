@@ -12,7 +12,7 @@ import { getTicks } from "game/utils";
 import { ct, et, ptSum } from "../utils/CPU";
 import { Event_Number } from "../utils/Event";
 import { StNumber, closest } from "../utils/game";
-import { divide0, pow2, ranGet, valid } from "../utils/JS";
+import { divide0, pow2, ranGet } from "../utils/JS";
 import { GR, Pos, getRangePoss } from "../utils/Pos";
 import { HasTasks, Task, cancelOldTask, useTasks } from "../utils/Task";
 import { P, SA } from "../utils/visual";
@@ -370,15 +370,6 @@ export function myGO(go: GO) {
   } else {
     return isMyGO(go);
   }
-}
-//Attackables
-export function getDamagedRate(a: Attackable): number {
-  if (valid(a) && hitsMax(a) != 0) return (hitsMax(a) - hits(a)) / hitsMax(a);
-  else return 0;
-}
-export function getHPRate(a: Attackable): number {
-  if (valid(a) && hitsMax(a) != 0) return hits(a) / hitsMax(a);
-  else return 0;
 }
 
 //@Game

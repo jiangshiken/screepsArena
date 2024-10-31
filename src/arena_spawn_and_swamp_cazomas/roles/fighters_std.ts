@@ -5,14 +5,6 @@ import {
   getFriendForceMapValue,
 } from "../deprecated/maps";
 import {
-  cpuBreakJudge,
-  findFitDamagedFriend,
-  findFitOppoUnit,
-  findProtectPos,
-  getForceTarAndPosRate,
-  getRoundFightAndAvoidNum,
-} from "../gameObjects/army";
-import {
   blocked,
   calculateForce,
   Cre,
@@ -43,6 +35,14 @@ import {
   sumForceByArr,
   Unit,
 } from "../gameObjects/Cre";
+import {
+  cpuBreakJudge,
+  findFitDamagedFriend,
+  findFitOppoUnit,
+  findProtectPos,
+  getForceTarAndPosRate,
+  getRoundFightAndAvoidNum,
+} from "../gameObjects/CreTool";
 import { myRamparts } from "../gameObjects/GameObjectInitialize";
 import { inOppoRampart, inRampart } from "../gameObjects/HasHits";
 import { inMyHealthyRampart } from "../gameObjects/ramparts";

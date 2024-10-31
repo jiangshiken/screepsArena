@@ -6,7 +6,6 @@ import {
 } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
-import { cpuBreakJudge } from "../gameObjects/army";
 import {
   blocked,
   calAroundEnergy,
@@ -31,6 +30,7 @@ import {
   setIsBuilding,
   Task_Cre,
 } from "../gameObjects/Cre";
+import { cpuBreakJudge } from "../gameObjects/CreTool";
 import {
   createCS,
   CS,

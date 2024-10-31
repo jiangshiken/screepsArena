@@ -17,7 +17,7 @@ export class Event {
    *  if `getTicks()` is 4 ,that this function will return true
    * @param permitTime the time that allow an Event valid
    */
-  validEvent(permitTime: number): boolean {
+  validEvent(permitTime: number = 0): boolean {
     return getTicks() <= this.invokeTick + permitTime;
   }
 }

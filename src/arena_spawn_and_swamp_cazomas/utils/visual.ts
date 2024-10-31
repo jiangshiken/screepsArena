@@ -2,8 +2,8 @@ import { getTicks } from "game/utils";
 import { Visual } from "game/visual";
 
 import { overallMap } from "../gameObjects/overallMap";
-import { Event } from "./Event";
-import { PL } from "./game";
+import { Event, Event_Number } from "./Event";
+import { leftRate, PL } from "./game";
 import { d2 } from "./JS";
 import { HasPos, Pos, pos00, Pos_C } from "./Pos";
 
@@ -294,4 +294,16 @@ export function drawRect(
     fill: color,
     opacity: opacity,
   });
+}
+// export let displayPos: Pos = pos00
+let displayAccumulate: Event_Number = new Event_Number(0);
+export function displayPos(): Pos {
+  if (!displayAccumulate.validEvent()) {
+    displayAccumulate = new Event_Number(0);
+  }
+  displayAccumulate.num++;
+  const acc = displayAccumulate.num;
+  const xBias = Math.floor((50 + leftRate() * 40) / 5) * 5;
+  const yBias = 50;
+  return { x: xBias + (acc % 5), y: yBias + Math.floor(acc / 5) };
 }

@@ -3,11 +3,6 @@ import { ConstructionSite } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
 import {
-  cpuBreakJudge,
-  fleeWeakComplex,
-  givePositionToImpartantFriend,
-} from "../gameObjects/army";
-import {
   blocked,
   Cre,
   enemies,
@@ -16,6 +11,11 @@ import {
   hasThreat,
   Role,
 } from "../gameObjects/Cre";
+import {
+  cpuBreakJudge,
+  fleeWeakComplex,
+  givePositionToImpartantFriend,
+} from "../gameObjects/CreTool";
 import { getProgressRate } from "../gameObjects/CS";
 import { oppoConstructionSites } from "../gameObjects/GameObjectInitialize";
 import { inOppoRampart } from "../gameObjects/HasHits";

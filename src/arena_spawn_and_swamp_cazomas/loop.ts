@@ -31,6 +31,7 @@ import {
   initialCSsAtLoopStart,
   initialGameObjectsAtLoopStart_advance,
   initialGameObjectsAtLoopStart_basic,
+  initialressAtLoopStart,
   initialStrusAtLoopStart,
 } from "./gameObjects/GameObjectInitialize";
 import {
@@ -173,6 +174,7 @@ export function loopStart() {
   initialCresAtLoopStart();
   initialStrusAtLoopStart();
   initialCSsAtLoopStart();
+  initialressAtLoopStart();
   const st3p5 = ct();
   initialGameObjectsAtLoopStart_advance();
   pt("initialGameObjects", st3p5);
