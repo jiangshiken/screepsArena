@@ -2,18 +2,19 @@ import { createConstructionSite } from "game";
 import { ConstructionSite, StructureRampart } from "game/prototypes";
 import { getTicks } from "game/utils";
 
-import { Event, Event_C } from "../utils/Event";
+import { Event } from "../utils/Event";
 import { S } from "../utils/export";
-import { invalid } from "../utils/JS";
-import { atPos, COO, Pos } from "../utils/Pos";
+import { best, invalid } from "../utils/JS";
+import { atPos, COO, HasPos, Pos } from "../utils/Pos";
 import { drawLineComplex, SA } from "../utils/visual";
-import { my } from "./Cre";
-import { myConstructionSites } from "./GameObjectInitialize";
+import { CSs, isMyGO, isOppoGO, myCSs } from "./GameObjectInitialize";
+import { HasMy } from "./HasMy";
 import { findGO } from "./overallMap";
+import { inMyRampart } from "./ramparts";
 
 // export let CSs: CS[] = []
 /** extend of ConstructionSite */
-export class CS {
+export class CS implements HasPos, HasMy {
   readonly master: ConstructionSite;
   decayEvent: Event | undefined;
   useDecay: boolean = false;
@@ -21,24 +22,25 @@ export class CS {
   constructor(cons: ConstructionSite) {
     this.master = cons;
   }
-}
-/**initiate all constructionSites to CS*/
-export function initCS(cs: CS) {
-  if (!cs.inited) {
-    cs.wt = 0;
-    cs.useDecay = true;
-    cs.inited = true;
+  get my() {
+    return isMyGO(this.master);
   }
-}
-/**get all CSs of yours*/
-export function getMyCSs() {
-  return myConstructionSites.map(i => <CS>i);
+  get oppo() {
+    return isOppoGO(this.master);
+  }
+  get x(): number {
+    return this.master.x;
+  }
+  get y(): number {
+    return this.master.y;
+  }
 }
 /**has a construction site of specific type at a pos*/
 export function hasConstructionSiteByType(pos: Pos, type: any): boolean {
   return (
-    getMyCSs().find(i => atPos(i, pos) && i.structure instanceof type) !==
-    undefined
+    CSs.find(
+      i => i.my && atPos(i, pos) && i.master.structure instanceof type
+    ) !== undefined
   );
 }
 /**has a construction site of rampart at a pos*/
@@ -48,18 +50,17 @@ export function hasConstructionSite_rampart(pos: Pos): boolean {
 /**has a construction site of not rampart at a pos*/
 export function hasConstructionSite_notRampart(pos: Pos): boolean {
   return (
-    getMyCSs().find(
-      i => atPos(i, pos) && !(i.structure instanceof StructureRampart)
+    CSs.find(
+      i =>
+        i.my &&
+        atPos(i, pos) &&
+        !(i.master.structure instanceof StructureRampart)
     ) !== undefined
   );
 }
 /**has a construction site at a pos*/
 export function hasConstructionSite(pos: Pos): boolean {
-  return getMyCSs().find(i => atPos(i, pos)) !== undefined;
-}
-/**get the worth of CS*/
-export function getCSWT(cs: CS): number {
-  return cs.wt ? cs.wt : 0;
+  return CSs.find(i => atPos(i, pos)) !== undefined;
 }
 /**init an action Sequence*/
 export function initActionSequence(...actions: (() => void)[]): {
@@ -83,7 +84,7 @@ export function createCSInSequence(
 ) {
   for (let actionTask of actionTasks) {
     if (!actionTask.complete) {
-      if (myConstructionSites.length <= 8) {
+      if (myCSs.length <= 8) {
         actionTask.action();
         actionTask.complete = true;
         break;
@@ -122,7 +123,7 @@ export function createCS_wait(
   allowMultiRampart: boolean = false,
   print: boolean = false
 ): boolean {
-  if (myConstructionSites.length < csLimitBias) {
+  if (myCSs.length < csLimitBias) {
     if (print) {
       SA(pos, "createCS");
     }
@@ -162,7 +163,6 @@ export function createCS(
     b = !hasConstructionSite_notRampart(pos);
   }
   if (b) {
-    const myCSs = myConstructionSites;
     if (myCSs.length >= csLimitBias) {
       //cancel other ,find the min worth of cs on the map and remove it
       let minWorth = Infinity;
@@ -171,7 +171,7 @@ export function createCS(
         const myCS = <CS>cs;
         let csw: number;
         if (invalid(myCS)) csw = 0;
-        else csw = getCSWT(myCS);
+        else csw = myCS.wt;
         //progressRate bonus
         const pr = getProgressRate(myCS); //0~1
         const prBonus = 1 + 2 * pr;
@@ -189,7 +189,7 @@ export function createCS(
       if (minCS) {
         drawLineComplex(pos, minCS, 0.8, "#aabbff");
         SA(minCS, "remove min worth CS by action " + COO(pos) + " " + type);
-        minCS.remove();
+        minCS.master.remove();
       }
     }
     SA(pos, "create cons");
@@ -198,24 +198,14 @@ export function createCS(
     SA(pos, "rtnObj=" + S(rtn.object));
     let rtnObj: CS = <CS>(<any>rtn.object);
     if (rtn && rtnObj) {
-      rtnObj.decayEvent = new Event_C();
+      rtnObj.decayEvent = new Event();
       rtnObj.useDecay = useDecay;
       rtnObj.wt = worth;
-      rtnObj.inited = true;
       return true;
     }
   }
   return false;
 }
-function inMyRampart(pos: Pos): boolean {
-  const ram = findGO(pos, StructureRampart);
-  return ram !== undefined && my(<StructureRampart>ram);
-}
-// /***/
-// export function getCSs(): CS[] {
-// 	return CSs;
-// }
-
 /**
  * if not build {@link CS} a mount of time ,it will get decay of `worth`
  */
@@ -235,55 +225,20 @@ export function getCSDecayReduce(cs: CS) {
  * get the {@link CS} that is the max `worth`
  */
 export function getMaxWorthCSS(css: CS[]): CS | undefined {
-  let maxWorth: number = -Infinity;
-  let rtn;
-  for (let cs of css) {
-    let w = getCSWT(cs);
-    if (w === undefined) w = 0;
-    if (w > maxWorth) {
-      maxWorth = w;
-      rtn = cs;
-    }
-  }
-  return <CS | undefined>rtn;
+  return best(css, i => i.wt);
 }
-
-// /**rebuild the ramparts around the base*/
-// export function reBuildAroundRampart(range: number = 1) {
-// 	let poss = getRangePoss(spawn, range);
-// 	for (let pos of poss) {
-// 		const successCreate = createCS(pos, StructureRampart);
-// 		if (successCreate) {
-// 			break;
-// 		}
-// 	}
-// }
-// /**
-//  * rebuild rampart top ,bottom, left and right of the spawn
-//  */
-// export function reBuildCrossRampart(range: number = 1) {
-// 	let poss = getRangePoss(spawn, range);
-// 	for (let pos of poss) {
-// 		if (absRange(pos, spawn) === range) {
-// 			let successCreate = createCS(pos, StructureRampart);
-// 			if (successCreate) {
-// 				break;
-// 			}
-// 		}
-// 	}
-// }
 /**the progress of a construction site*/
-export function progress(cs: ConstructionSite): number {
-  if (cs.progress) {
-    return cs.progress;
+export function progress(cs: CS): number {
+  if (cs.master.progress) {
+    return cs.master.progress;
   } else {
     return 0;
   }
 }
 /**the progress total of a construction site*/
-export function progressTotal(cs: ConstructionSite): number {
-  if (cs.progressTotal) {
-    return cs.progressTotal;
+export function progressTotal(cs: CS): number {
+  if (cs.master.progressTotal) {
+    return cs.master.progressTotal;
   } else {
     return 0;
   }
@@ -291,7 +246,7 @@ export function progressTotal(cs: ConstructionSite): number {
 /**
  * get the progress rate of a `ConstructionSite`
  */
-export function getProgressRate(cs: ConstructionSite): number {
+export function getProgressRate(cs: CS): number {
   if (cs) {
     return progress(cs) / progressTotal(cs);
   } else return 0;

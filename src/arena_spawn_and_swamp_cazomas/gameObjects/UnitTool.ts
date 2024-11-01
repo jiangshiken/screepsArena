@@ -97,6 +97,12 @@ export function isMyBaseContainer(con: Con) {
 export function isOppoBaseContainer(con: Con) {
   return con instanceof StructureContainer && GR(con, enemySpawn) <= 7;
 }
+export function getSpawnAroundFreeContainers() {
+  return containers.filter(i => GR(i, spawn) <= 1 && getFreeEnergy(i) > 0);
+}
+export function getSpawnAroundLiveContainers() {
+  return containers.filter(i => GR(i, spawn) <= 1 && getEnergy(i) > 0);
+}
 export function getTowerDamage(range: number) {
   if (range <= 5) {
     return 150;

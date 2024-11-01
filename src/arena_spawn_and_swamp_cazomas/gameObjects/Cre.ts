@@ -16,21 +16,19 @@ import { divide0, pow2, ranGet } from "../utils/JS";
 import { GR, Pos, getRangePoss } from "../utils/Pos";
 import { HasTasks, Task, cancelOldTask, useTasks } from "../utils/Task";
 import { P, SA } from "../utils/visual";
-import { blocked } from "./Cre_move";
 import {
   GO,
-  containers,
   cres,
   enemies,
   friends,
   isMyGO,
   isOppoGO,
 } from "./GameObjectInitialize";
-import { HasHits, spawnPos } from "./HasHits";
+import { HasHits } from "./HasHits";
 import { HasMy } from "./HasMy";
 import { findGO } from "./overallMap";
 import { SpawnInfo } from "./spawn";
-import { getEnergy, getFreeEnergy } from "./UnitTool";
+import { blocked } from "./UnitTool";
 
 /** the Task of Creep*/
 export class Task_Cre extends Task {
@@ -203,7 +201,7 @@ export function getRoundEmptyPos(cre: Pos): Pos | undefined {
   return roundPoss.find(i => !blocked(i));
 }
 export function getFriendArmies() {
-  return friends.filter(i => i.isArmy());
+  return friends.filter(i => isArmy(i));
 }
 export function getFriendsThreated() {
   return friends.filter(i => hasThreat(i));
@@ -241,13 +239,13 @@ export function isSlowShoter(cre: Cre): boolean {
   let rtn =
     cre.getBodyPartsNum(RANGED_ATTACK) > 0 &&
     cre.getBodyPartsNum(ATTACK) === 0 &&
-    cre.getSpeed_general() < 1;
+    cre.getBodyPartsNum(MOVE) / cre.getBodyPartsNum(RANGED_ATTACK) < 5;
   SA(cre, "i'm slowShoter");
   return rtn;
 }
 export function is5MA(cre: Cre) {
   return (
-    cre.body().length === 6 &&
+    cre.body.length === 6 &&
     cre.getBodyPartsNum(ATTACK) === 1 &&
     cre.getBodyPartsNum(MOVE) === 5
   );
@@ -261,14 +259,9 @@ export let spawnExtraTaunt: number = 4;
 export function set_spawnExtraTaunt(se: number) {
   spawnExtraTaunt = se;
 }
-export function getSpawnAroundFreeContainers() {
-  return containers.filter(i => GR(i, spawnPos) <= 1 && getFreeEnergy(i) > 0);
-}
-export function getSpawnAroundLiveContainers() {
-  return containers.filter(i => GR(i, spawnPos) <= 1 && getEnergy(i) > 0);
-}
+
 export function getHealthyBodies_total(cre: Cre) {
-  return cre.body().filter(i => i.hits > 0);
+  return cre.body.filter(i => i.hits > 0);
 }
 export function getSurfaceBody(cre: Cre) {
   const hbs = getHealthyBodies_total(cre);
@@ -362,18 +355,8 @@ export function getEarning_value(
   return 0.5 * (loseOneExtra + winOneExtra);
 }
 export function getArmies() {
-  return cres.filter(i => i.isArmy());
+  return cres.filter(i => isArmy(i));
 }
-export function myGO(go: GO) {
-  if (go instanceof Cre) {
-    return my(go);
-  } else {
-    return isMyGO(go);
-  }
-}
-
-//@Game
-
 export function id(o: GO): number {
   if (o) {
     if (o instanceof Resource) {

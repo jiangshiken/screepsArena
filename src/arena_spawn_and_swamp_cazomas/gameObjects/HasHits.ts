@@ -5,7 +5,7 @@ export interface HasHits {
   hitsMax: number;
 }
 export function damaged(hh: HasHits) {
-  return hh.hits# < hh.hitsMax;
+  return hh.hits < hh.hitsMax;
 }
 export function damageAmount(hh: HasHits) {
   return hh.hitsMax - hh.hits;
