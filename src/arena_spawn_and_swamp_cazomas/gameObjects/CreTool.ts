@@ -236,6 +236,16 @@ export function goinRampartAssign(cre: Cre, calBlocked: Pos[]) {
     }
   }
 }
+//functions
+export function moveToRandomEmptyAround(cre: Cre): void {
+  SA(cre, "moveToRandomEmptyAround");
+  const poss = getRangePoss(cre, 1);
+  const empPoss = poss.filter(i => !blocked(i));
+  const pos = ranGet(empPoss);
+  if (pos) {
+    cre.moveToNormal(pos);
+  }
+}
 export function attackWeakRampart(cre: Cre) {
   SA(cre, "try attackWeakRampart");
   let myRamAround = myRamparts.filter(i => GR(i, cre) <= 1);
