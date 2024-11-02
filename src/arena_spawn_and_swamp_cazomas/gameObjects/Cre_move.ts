@@ -1,12 +1,11 @@
 import { FindPathOpts } from "game/path-finder";
-import { findPath, getDirection } from "game/utils";
+import { findPath } from "game/utils";
 import { Event, Event_Pos } from "../utils/Event";
 import { valid } from "../utils/JS";
 import { COO, GR, Pos, atPos } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA, drawLineLight } from "../utils/visual";
 import { Cre, getRoundEmptyPos } from "./Cre";
-import { FindPathAndMoveTask, MoveTask, getMoveStepDef } from "./findPath";
 import { PullEvent } from "./pull";
 
 export class Cre_move extends Cre {
@@ -121,25 +120,6 @@ export class Cre_move extends Cre {
   moveContinue(): void {
     const t = <MoveTask>findTask(this.master, MoveTask);
     if (t) t.pause = false;
-  }
-
-  /** normal moveTo,but will block to the tile it want to move next tick */
-  moveTo_Basic(tar: Pos): void {
-    setMoveMapAndMatrixBlock(tar);
-    this.master.moveTargetNextPos = new Event_Pos(tar);
-    // SA(this.master, "moveTo_Basic=" + COO(tar))
-    this.master.master.moveTo(tar);
-  }
-  //move to ,use move() that use direction,not find path
-  moveTo_Basic_Direct(tar: Pos): void {
-    setMoveMapAndMatrixBlock(tar);
-    this.master.moveTargetNextPos = new Event_Pos(tar);
-    const dx = tar.x - this.master.x;
-    const dy = tar.y - this.master.y;
-    const direc = getDirection(dx, dy);
-    SA(this.master, "moveTo_Basic_Direct=" + direc + "tar=" + tar);
-    SA(this.master, "dx=" + dx + "dy=" + dy);
-    this.master.master.move(direc);
   }
 
   /**move to judge most general move action */

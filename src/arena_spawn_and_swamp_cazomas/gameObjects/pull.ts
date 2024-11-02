@@ -52,14 +52,6 @@ export function newPullTarsTask(
       new PullTask(master, tarCre, tarPos, nextStep, leaderStop);
     }
   }
-  // export let pullGoSwamp: Boolean = false
-  // export function setPullGoSwamp(b: Boolean) {
-  // 	pullGoSwamp = b
-  // }
-  // export let pullIgnoreSwamp: Boolean = false
-  // export function set_pullIgnoreSwamp(b: Boolean) {
-  // 	pullIgnoreSwamp = b
-  // }
   /**
    * Task of pull ,the creep will pull a creep to a position
    * @param nextStep the pos creep will go next ,

@@ -7,7 +7,7 @@ import {
   StructureTower,
 } from "game/prototypes";
 import { inResourceArea, isTerrainWall } from "../utils/game";
-import { GR, Pos } from "../utils/Pos";
+import { getRangePoss, GR, Pos } from "../utils/Pos";
 import { Cre } from "./Cre";
 import { containers, GO, HasStore } from "./GameObjectInitialize";
 import { findGO, overallMap } from "./overallMap";
@@ -127,4 +127,8 @@ export function getOutsideContainers() {
 export function hasResourceOnGround(pos: Pos, amount: number) {
   const res = <Resource | undefined>findGO(pos, Resource);
   return res && res.amount >= amount;
+}
+export function aroundBlock(pos: Pos) {
+  //if has no empty around
+  return getRangePoss(pos, 1).find(i => !blocked(i)) === undefined;
 }

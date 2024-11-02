@@ -1,13 +1,10 @@
 import { CARRY, MOVE } from "game/constants";
+import { CostMatrix, FindPathResult, searchPath } from "game/path-finder";
 import {
-  CostMatrix,
-  FindPathOpts,
-  FindPathResult,
-  searchPath,
-} from "game/path-finder";
-import { findClosestByRange } from "game/utils";
-import { ct, et } from "../utils/CPU";
-import {
+  area_bottom,
+  area_left,
+  area_right,
+  area_top,
   bottomY,
   getArea,
   isTerrainSwamp,
@@ -19,30 +16,17 @@ import {
   startGateUp,
   topY,
 } from "../utils/game";
-import { divide0, last, valid } from "../utils/JS";
-import { GR, Pos, atPos, getRangePoss } from "../utils/Pos";
-import {
-  P,
-  SA,
-  drawLineComplex,
-  drawLineLight,
-  drawPolyLight,
-} from "../utils/visual";
-import { Cre, Task_Cre, calEventNumberCPUTime, isMyTick } from "./Cre";
+import { divide0 } from "../utils/JS";
+import { Pos, atPos } from "../utils/Pos";
+import { P, drawLineComplex, drawPolyLight } from "../utils/visual";
+import { Cre } from "./Cre";
 import { isTerrainRoad } from "./CreTool";
-import { blocked, getCapacity, getEnergy } from "./UnitTool";
+import { getCapacity, getEnergy } from "./UnitTool";
 
-export const defFindPathResult: FindPathResult = {
-  path: [],
-  ops: 0,
-  cost: 0,
-  incomplete: true,
-};
-export const moveBlockCostMatrix: CostMatrix = new CostMatrix();
 /** search the closest path of multiple targets ,like findPath but will
  * calculate terrain cost by this creep
  */
-export function searchPathByCost(
+export function searchPathByCreCost(
   cre: Cre,
   tar: Pos,
   useWorkerCost: boolean = true
@@ -52,40 +36,10 @@ export function searchPathByCost(
     plainCost = 1;
     swampCost = 2;
   } else {
-    plainCost = getMoveTimeByTerrain(cre, false);
-    swampCost = getMoveTimeByTerrain(cre, true);
+    plainCost = getMoveTimeByTerrain([cre], false);
+    swampCost = getMoveTimeByTerrain([cre], true);
   }
   return searchPath_noArea(cre, tar, undefined, plainCost, swampCost);
-}
-/** search the path to the target.
- * calculate terrain cost by this creep
- */
-export function getDecideSearchRtnByCre(
-  tar: Pos,
-  op?: FindPathOpts | undefined
-): FindPathResult {
-  const ifWorker = this.master.onlyHasMoveAndCarry(); //if worker set 1 and 2
-  let plainCost, swampCost;
-  if (ifWorker) {
-    plainCost = 1;
-    swampCost = 2;
-  } else {
-    plainCost = this.master.getMoveTimeByTerrain(false);
-    swampCost = this.master.getMoveTimeByTerrain(true);
-  }
-  let ops: FindPathOpts;
-  if (op !== undefined) {
-    ops = op;
-    if (ops.plainCost === undefined) ops.plainCost = plainCost;
-    if (ops.swampCost === undefined) ops.swampCost = swampCost;
-  } else {
-    ops = {
-      plainCost: plainCost,
-      swampCost: swampCost,
-    };
-  }
-  const rtn: FindPathResult = getDecideSearchRtn(this.master, tar, ops);
-  return rtn;
 }
 /** get move and fatigue number of a creep ,all pulling and bePulled will
  *  be calculate too
@@ -157,116 +111,54 @@ export function getMoveTimeByTerrain(
   );
   return time;
 }
-export function getMoveTime(extraEnergy: number = 0): number {
-  return this.getMoveTimeByTerrain(
-    isTerrainSwamp(this),
-    isTerrainRoad(this),
+export function getMoveTime(
+  pos: Pos,
+  pullList: Cre[],
+  extraEnergy: number = 0
+): number {
+  return getMoveTimeByTerrain(
+    pullList,
+    isTerrainSwamp(pos),
+    isTerrainRoad(pos),
     extraEnergy
   );
 }
-export function getMoveTime_general(): number {
-  const timeOnTerrain = this.getMoveTimeByTerrain(false);
-  const timeOnSawmp = this.getMoveTimeByTerrain(true);
+export function getMoveTime_general(pullList: Cre[]): number {
+  const timeOnTerrain = getMoveTimeByTerrain(pullList, false);
+  const timeOnSawmp = getMoveTimeByTerrain(pullList, true);
   return 0.5 * timeOnTerrain + 0.5 * timeOnSawmp;
 }
-export function getSpeed(): number {
-  return 1 / this.getMoveTime();
+export function getSpeed(pos: Pos, pullList: Cre[]): number {
+  return 1 / getMoveTime(pos, pullList);
 }
-export function getSpeed_general(): number {
-  return 1 / this.getMoveTime_general();
+export function getSpeed_general(pullList: Cre[]): number {
+  return 1 / getMoveTime_general(pullList);
 }
-export function isFullSpeed(): boolean {
-  return this.getMoveTime() === 1;
+export function isFullSpeed(pos: Pos, pullList: Cre[]): boolean {
+  return getMoveTime(pos, pullList) === 1;
 }
-/**
- * a task used to move
- */
-export class MoveTask extends Task_Cre {
-  /** target position */
-  tar: Pos;
-  /** memoryed path*/
-  path: Pos[];
-  constructor(master: Cre, tar: Pos, path: Pos[] = []) {
-    super(master);
-    this.tar = tar;
-    this.path = path;
-    //cancel old task
-    let pt = this.master.tasks.find(
-      task => task instanceof MoveTask && task != this
-    );
-    if (pt) pt.end();
-  }
-  loop_task(): void {
-    // SA(this.master, "MoveTask")
-    drawLineLight(this.master, this.tar);
-    if (this.pause) return;
-    if (this.path.length > 0) {
-      let tempTar: Pos = this.path[0];
-      drawLineComplex(this.master, tempTar, 0.75, "#777777");
-      // SA(tempTar,"moveTo tempTar="+COO(tempTar))
-      this.master.crePathFinder?.moveTo_Basic(tempTar);
-      this.master.wantMove = new Event_C();
-      //
-      if (GR(this.master, tempTar) <= 1) {
-        this.path.shift();
-      }
-    } else {
-      this.end();
-    }
-  }
-  end(): void {
-    super.end();
-  }
-}
-/**
- * get the target by {@link FindPathResult},it will return the closest target of the last position of the path
- */
-export function getTargetBySRtn<T extends Pos>(
-  ori: Pos,
-  sRtn: FindPathResult,
-  tars: searchPathTarOOA<T>
-): T | undefined {
-  //ERR
-  // SA(cre,"sRtn="+S(sRtn))
-  if (valid(sRtn)) {
-    // SA(cre,"sRtn.path="+S(sRtn.path))
-    if (sRtn.path) {
-      // SA(cre,"sRtn.path.length="+S(sRtn.path.length))
-      let newOri: Pos | undefined = ori;
-      if (sRtn.path.length > 0) {
-        newOri = last(sRtn.path);
-      }
-      if (newOri) {
-        let target: T;
-        if (Array.isArray(tars)) {
-          const tars2 = <(T | { pos: T; range: number })[]>tars;
-          target = findClosestByRange(ori, <T[]>tars2);
-        } else target = <T>tars;
-        return target;
-      }
-    }
-  }
-  return;
-}
-
-export function getDecideSearchRtn(
+export const def_plainCost = 1;
+export const def_swampCost = 3;
+export function searchPath_area(
   ori: Pos,
   tar: Pos,
-  op?: FindPathOpts | undefined
+  costMatrix: CostMatrix | undefined = undefined,
+  plainCost: number = def_plainCost,
+  swampCost: number = def_swampCost
 ): FindPathResult {
   let newTar: Pos;
   newTar = getNewTarByArea(ori, tar);
-  let SR1 = searchPath_noArea(ori, newTar, op);
+  let SR1 = searchPath_noArea(ori, newTar, costMatrix, plainCost, swampCost);
   let SR2: FindPathResult | undefined;
   let SR3: FindPathResult | undefined;
   // SA(ori,"area0")
   if (!atPos(newTar, tar)) {
     // SA(ori,"area1")
-    let newTar2 = getNewTarByArea(newTar, tar);
-    SR2 = searchPath_noArea(newTar, newTar2, op);
+    const newTar2 = getNewTarByArea(newTar, tar);
+    SR2 = searchPath_noArea(newTar, newTar2, costMatrix, plainCost, swampCost);
     if (!atPos(newTar2, tar)) {
       // SA(ori,"area2")
-      SR3 = searchPath_noArea(newTar2, tar, op);
+      SR3 = searchPath_noArea(newTar2, tar, costMatrix, plainCost, swampCost);
     }
   }
   let newPath: Pos[] = SR1.path;
@@ -287,13 +179,12 @@ export function getDecideSearchRtn(
     newCost += SR3.cost;
     newIncomplete = newIncomplete && SR3.incomplete;
   }
-  let rtn = {
+  return {
     path: newPath,
     ops: newOps,
     cost: newCost,
     incomplete: newIncomplete,
   };
-  return rtn;
 }
 
 /**
@@ -304,8 +195,8 @@ export function searchPath_noArea(
   ori: Pos,
   tar: Pos,
   costMatrix: CostMatrix | undefined = undefined,
-  plainCost: number,
-  swampCost: number
+  plainCost: number = def_plainCost,
+  swampCost: number = def_swampCost
 ): FindPathResult {
   const rtn = searchPath(ori, tar, {
     costMatrix: costMatrix,
@@ -321,8 +212,8 @@ export function searchPath_flee(
   tar: Pos,
   range: number,
   costMatrix: CostMatrix | undefined = undefined,
-  plainCost: number,
-  swampCost: number
+  plainCost: number = def_plainCost,
+  swampCost: number = def_swampCost
 ): FindPathResult {
   const rtn = searchPath(
     ori,
@@ -342,7 +233,7 @@ export function searchPath_flee(
  * path len from `ori` to `tar`
  */
 export function pathLen(ori: Pos, tar: Pos) {
-  let p = getDecideSearchRtn(ori, tar);
+  let p = searchPath_area(ori, tar);
   if (p) {
     return p.path.length;
   } else return Infinity;
@@ -353,116 +244,39 @@ export function pathLen(ori: Pos, tar: Pos) {
  * that it will search path to the first gate ,then the next gate ,and then search to
  * the enemy spawn
  */
-export function getNewTarByArea(cre: Pos, tar: Pos) {
+export function getNewTarByArea(cre: Pos, tar: Pos): Pos {
   let newTar = tar;
-  let creArea = getArea(cre, leftBorder1, rightBorder2, midBorder);
-  let tarArea = getArea(tar, leftBorder1, rightBorder2, midBorder);
+  const creArea = getArea(cre, leftBorder1, rightBorder2, midBorder);
+  const tarArea = getArea(tar, leftBorder1, rightBorder2, midBorder);
   //
-  let top = topY;
-  let bottom = bottomY;
-  if (creArea === "left" && tarArea === "right") {
+  const yAxis_top = topY;
+  const yAxis_bottom = bottomY;
+  if (creArea === area_left && tarArea === area_right) {
     //go left top
-    if (startGateUp) newTar = { x: leftBorder2, y: top };
-    else newTar = { x: leftBorder2, y: bottom };
-  } else if (creArea === "right" && tarArea === "left") {
+    if (startGateUp) newTar = { x: leftBorder2, y: yAxis_top };
+    else newTar = { x: leftBorder2, y: yAxis_bottom };
+  } else if (creArea === area_right && tarArea === area_left) {
     //go right bottom
-    if (startGateUp) newTar = { x: rightBorder1, y: top };
-    else newTar = { x: rightBorder1, y: bottom };
-  } else if (creArea === "left" && tarArea === "top")
-    newTar = { x: leftBorder2, y: top };
-  else if (creArea === "top" && tarArea === "left")
-    newTar = { x: leftBorder1, y: top };
-  else if (creArea === "left" && tarArea === "bottom")
-    newTar = { x: leftBorder2, y: bottom };
-  else if (creArea === "bottom" && tarArea === "left")
-    newTar = { x: leftBorder1, y: bottom };
-  else if (creArea === "right" && tarArea === "bottom")
-    newTar = { x: rightBorder1, y: bottom };
-  else if (creArea === "bottom" && tarArea === "right")
-    newTar = { x: rightBorder2, y: bottom };
-  else if (creArea === "right" && tarArea === "top")
-    newTar = { x: rightBorder1, y: top };
-  else if (creArea === "top" && tarArea === "right")
-    newTar = { x: rightBorder2, y: top };
+    if (startGateUp) newTar = { x: rightBorder1, y: yAxis_top };
+    else newTar = { x: rightBorder1, y: yAxis_bottom };
+  } else if (area_right && tarArea === area_top)
+    newTar = { x: leftBorder2, y: yAxis_top };
+  else if (area_top && area_left) newTar = { x: leftBorder1, y: yAxis_top };
+  else if (creArea === area_left && tarArea === area_bottom)
+    newTar = { x: leftBorder2, y: yAxis_bottom };
+  else if (creArea === area_bottom && tarArea === area_left)
+    newTar = { x: leftBorder1, y: yAxis_bottom };
+  else if (creArea === area_right && tarArea === area_bottom)
+    newTar = { x: rightBorder1, y: yAxis_bottom };
+  else if (creArea === area_bottom && tarArea === area_right)
+    newTar = { x: rightBorder2, y: yAxis_bottom };
+  else if (creArea === area_right && tarArea === area_top)
+    newTar = { x: rightBorder1, y: yAxis_top };
+  else if (creArea === area_top && tarArea === area_right)
+    newTar = { x: rightBorder2, y: yAxis_top };
   drawLineComplex(cre, newTar, 0.25, "#222222");
   return newTar;
 }
-/** move to a position ,will findPath every `findPathStep` ticks*/
-export class FindPathAndMoveTask extends MoveTask {
-  findPathStep: number;
-  op: FindPathOpts | undefined;
-  /** the temparary target ,it will reFindPath if close to it*/
-  tempTar: Pos;
-  /** default `findPathStep` */
-  constructor(
-    master: Cre,
-    tar: Pos,
-    step: number = getMoveStepDef(master),
-    op?: FindPathOpts | undefined
-  ) {
-    super(master, tar);
-    this.op = op;
-    this.path = this.findPath_task(master, tar);
-    //for initialize
-    if (this.path.length > 0) {
-      let lp = last(this.path);
-      if (lp) {
-        this.tempTar = lp;
-      } else {
-        this.tempTar = tar;
-      }
-    } else this.tempTar = tar;
-    //
-    this.findPathStep = step;
-    // SA(master,"pathLen="+this.path.length)
-    // drawPoly(this.path,1,"#aaffaa")
-  }
-  loop_task(): void {
-    let st = ct();
-    // SA(this.master, "findPath loop")
-    if (!this.tar) {
-      this.end();
-    }
-    if (
-      isMyTick(this.master, this.findPathStep) ||
-      GR(this.tempTar, this.master) <= 1 ||
-      GR(this.tar, this.master) <= 1 ||
-      (this.path.length > 0 && blocked(this.path[0]))
-    ) {
-      this.path = this.findPath_task(this.master, this.tar);
-    }
-    super.loop_task();
-    let t = et(st);
-    if (this.master.role) calEventNumberCPUTime(this.master.role, t, false);
-  }
-  findPath_task(master: Cre, tar: Pos): Pos[] {
-    SA(this.master, "findPath_task");
-    const sRtn: FindPathResult = master.crePathFinder
-      ? master.crePathFinder.getDecideSearchRtnByCre(this.tar, this.op)
-      : defFindPathResult;
-    const path: Pos[] = sRtn.path;
-    if (path.length > 0) {
-      const lp = last(path);
-      if (lp) {
-        this.tempTar = lp;
-      } else {
-        this.tempTar = tar;
-      }
-    } else this.tempTar = tar;
-    return path;
-  }
-}
-// //PATH FINDER
-// /** searchPath target*/
-// export type searchPathTarOOA<T extends Pos> =
-//   | T
-//   | { pos: T; range: number }
-//   | (T | { pos: T; range: number })[];
-
-export function aroundBlock(pos: Pos) {
-  //if has no empty around
-  return getRangePoss(pos, 1).find(i => !blocked(i)) === undefined;
-}
-export function getMoveStepDef(cre: Cre): number {
-  return 10 * cre.getMoveTime();
+export function getMoveStepDef(cre: Cre, pullList: Cre[]): number {
+  return 10 * getMoveTime(cre, pullList);
 }
