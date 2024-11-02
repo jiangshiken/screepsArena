@@ -1,11 +1,17 @@
-import { CostMatrix, FindPathOpts, FindPathResult } from "game/path-finder";
+import { CostMatrix, FindPathResult } from "game/path-finder";
 import { getDirection } from "game/utils";
 import { ct, et } from "../utils/CPU";
 import { last } from "../utils/JS";
 import { GR, Pos } from "../utils/Pos";
+import { cancelOldTask } from "../utils/Task";
 import { drawLineComplex, drawLineLight, SA } from "../utils/visual";
 import { calEventNumberCPUTime, Cre, isMyTick, Task_Cre } from "./Cre";
-import { getMoveStepDef } from "./findPath";
+import {
+  def_plainCost,
+  def_swampCost,
+  getMoveStepDef,
+  searchPath_area,
+} from "./findPath";
 import { blocked } from "./UnitTool";
 
 export const moveBlockCostMatrix: CostMatrix = new CostMatrix();
@@ -22,10 +28,7 @@ export class MoveTask extends Task_Cre {
     this.tar = tar;
     this.path = path;
     //cancel old task
-    let pt = this.master.tasks.find(
-      task => task instanceof MoveTask && task != this
-    );
-    if (pt) pt.end();
+    cancelOldTask(this, MoveTask);
   }
   loop_task(): void {
     // SA(this.master, "MoveTask")
@@ -34,9 +37,7 @@ export class MoveTask extends Task_Cre {
     if (this.path.length > 0) {
       let tempTar: Pos = this.path[0];
       drawLineComplex(this.master, tempTar, 0.75, "#777777");
-      // SA(tempTar,"moveTo tempTar="+COO(tempTar))
-      moveTo_basic(tempTar);
-      this.master.wantMove = new Event_C();
+      moveTo_basic(this.master, tempTar);
       //
       if (GR(this.master, tempTar) <= 1) {
         this.path.shift();
@@ -53,36 +54,42 @@ export class MoveTask extends Task_Cre {
 /** move to a position ,will findPath every `findPathStep` ticks*/
 export class FindPathAndMoveTask extends MoveTask {
   findPathStep: number;
-  op: FindPathOpts | undefined;
   /** the temparary target ,it will reFindPath if close to it*/
   tempTar: Pos;
+  pullList: Cre[];
+  costMatrix: CostMatrix | undefined;
+  plainCost: number;
+  swampCost: number;
   /** default `findPathStep` */
   constructor(
     master: Cre,
     tar: Pos,
-    step: number = getMoveStepDef(master),
-    op?: FindPathOpts | undefined
+    pullList: Cre[] = [master],
+    step: number = getMoveStepDef(master, pullList),
+    costMatrix: CostMatrix | undefined = undefined,
+    plainCost: number = def_plainCost,
+    swampCost: number = def_swampCost
   ) {
     super(master, tar);
-    this.op = op;
-    this.path = this.findPath_task(master, tar);
+    this.pullList = pullList;
+    this.path = this.findPath_task(tar);
+    this.costMatrix = costMatrix;
+    this.plainCost = plainCost;
+    this.swampCost = swampCost;
     //for initialize
     if (this.path.length > 0) {
-      let lp = last(this.path);
-      if (lp) {
-        this.tempTar = lp;
+      const lastPos = last(this.path);
+      if (lastPos) {
+        this.tempTar = lastPos;
       } else {
         this.tempTar = tar;
       }
     } else this.tempTar = tar;
     //
     this.findPathStep = step;
-    // SA(master,"pathLen="+this.path.length)
-    // drawPoly(this.path,1,"#aaffaa")
   }
   loop_task(): void {
     let st = ct();
-    // SA(this.master, "findPath loop")
     if (!this.tar) {
       this.end();
     }
@@ -92,17 +99,21 @@ export class FindPathAndMoveTask extends MoveTask {
       GR(this.tar, this.master) <= 1 ||
       (this.path.length > 0 && blocked(this.path[0]))
     ) {
-      this.path = this.findPath_task(this.master, this.tar);
+      this.path = this.findPath_task(this.tar);
     }
     super.loop_task();
-    let t = et(st);
-    if (this.master.role) calEventNumberCPUTime(this.master.role, t, false);
+    if (this.master.role)
+      calEventNumberCPUTime(this.master.role, et(st), false);
   }
-  findPath_task(master: Cre, tar: Pos): Pos[] {
+  findPath_task(tar: Pos): Pos[] {
     SA(this.master, "findPath_task");
-    const sRtn: FindPathResult = master.crePathFinder
-      ? master.crePathFinder.getDecideSearchRtnByCre(this.tar, this.op)
-      : defFindPathResult;
+    const sRtn: FindPathResult = searchPath_area(
+      this.master,
+      this.tar,
+      this.costMatrix,
+      this.plainCost,
+      this.swampCost
+    );
     const path: Pos[] = sRtn.path;
     if (path.length > 0) {
       const lp = last(path);
