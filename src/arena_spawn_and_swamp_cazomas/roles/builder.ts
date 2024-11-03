@@ -6,49 +6,37 @@ import {
 } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
+import { protectSelfExtraTaunt } from "../gameObjects/battle";
 import {
-  blocked,
-  calAroundEnergy,
-  canBeBuildByCre,
   Cre,
-  friends,
-  getCapacity,
   getEnemyThreats,
-  getEnergy,
-  getFreeEnergy,
-  getHarvables,
-  getIsBuilding,
-  getRoundEmptyPosLeave1Empty,
-  getSpawnAroundFreeContainers,
-  getSpawnAroundLiveContainers,
   hasEnemyArmyAround,
   hasEnemyThreatAround,
-  HasStore,
-  live,
-  protectSelfExtraTaunt,
   Role,
-  setIsBuilding,
   Task_Cre,
 } from "../gameObjects/Cre";
-import { cpuBreakJudge } from "../gameObjects/CreTool";
+import { canBeBuildByCre } from "../gameObjects/Cre_build";
+import { calAroundEnergy, getHarvables } from "../gameObjects/Cre_harvest";
+import {
+  cpuBreakJudge,
+  defendTheRampart,
+  gotoTargetRampart,
+} from "../gameObjects/CreTool";
 import {
   createCS,
   CS,
   getMaxWorthCSS,
-  getMyCSs,
   getProgressRate,
   hasConstructionSite,
 } from "../gameObjects/CS";
 import {
-  myConstructionSites,
+  friends,
+  HasStore,
   myRamparts,
 } from "../gameObjects/GameObjectInitialize";
-import { getOutsideContainers } from "../gameObjects/HasHits";
 import { overallMap } from "../gameObjects/overallMap";
 import {
-  defendTheRampart,
   getMyHealthyRamparts,
-  gotoTargetRampart,
   inMyHealthyRampart,
   inMyRampart,
   myRampartAt,
@@ -60,6 +48,15 @@ import {
   resetStartGateAvoidFromEnemies,
   spawn,
 } from "../gameObjects/spawn";
+import {
+  blocked,
+  getCapacity,
+  getEnergy,
+  getFreeEnergy,
+  getOutsideContainers,
+  getSpawnAroundFreeContainers,
+  getSpawnAroundLiveContainers,
+} from "../gameObjects/UnitTool";
 import { S } from "../utils/export";
 import { tick } from "../utils/game";
 import { d2, getClassName, invalid } from "../utils/JS";
@@ -311,14 +308,6 @@ export function builderStandardJob(cre: Cre) {
   }
 }
 // /**the*/
-// export function getBuildWorthAndTarget(cre: Cre): { worth: number, target: CS } {
-// 	let myCSs = getMyCSs()
-// 	let sRtnCS = getDecideSearchRtnNoArea(cre, myCSs);
-// 	let costCS = sRtnCS.cost;
-// 	let target = <CS>getTargetBySRtn(cre, sRtnCS, myCSs);
-// 	let CSWorth = 1 / costCS;
-// 	return { worth: CSWorth, target: target };
-// }
 /**steps*/
 const goto_outside_resource: string = "goto outside resource";
 const drop_on_the_ground = "drop on the ground";

@@ -6,7 +6,6 @@ import { findMaxTaunt, getTauntMass, getTauntShot } from "./battle";
 import { Cre } from "./Cre";
 import { Cre_harvest } from "./Cre_harvest";
 import { friends, oppoUnits, walls } from "./GameObjectInitialize";
-import { HasHits } from "./HasHits";
 import { getGuessPlayer, Kerob } from "./player";
 import { CanBeAttacked } from "./UnitTool";
 
@@ -17,7 +16,7 @@ export class Cre_battle extends Cre_harvest {
   cal_force_includeRam: Event_Number | undefined;
   cal_force_not_includeRam: Event_Number | undefined;
   /** the `HasHits` that the creep is targeting */
-  target: HasHits | undefined = undefined;
+  target: CanBeAttacked | undefined = undefined;
   /**do attack ,ranged ,heal at the same tick,will judge which to use
    * when conflict
    */

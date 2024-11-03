@@ -1,56 +1,80 @@
 import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
 import { getRange } from "game/utils";
 
+import { getCPUPercent } from "../utils/CPU";
 import {
-  getEnemyForceMapValue,
-  getForceMapValue,
-  getFriendForceMapValue,
-} from "../deprecated/maps";
-import { getCPUPercent, lowCPUMode } from "../utils/CPU";
-import { divide0, divideReduce, goInRange, ranGet, sum } from "../utils/JS";
+  best,
+  divide0,
+  divideReduce,
+  goInRange,
+  last,
+  ranGet,
+  sum,
+} from "../utils/JS";
+import { atPos, COO, getRangePoss, GR, Pos } from "../utils/Pos";
 import {
-  atPos,
-  COO,
-  getRangePoss,
-  getRangePossByStep,
-  GR,
-  Pos,
-} from "../utils/Pos";
-import { drawLineComplex, SA, SAN } from "../utils/visual";
+  dotted,
+  drawLineComplex,
+  drawPolyLight,
+  SA,
+  SAN,
+} from "../utils/visual";
+
+import { StructureRoad } from "game/prototypes";
+import { rangeReduce } from "../utils/bonus";
+import { closest, tick } from "../utils/game";
+import { calculateForce, getForce_tradition, getTaunt } from "./battle";
 import {
-  blocked,
-  calculateForce,
   Cre,
-  damaged,
-  exist,
-  friends,
-  getDamagedRate,
   getEarning,
-  getEnergy,
-  getFriendArmies,
+  getEnemyArmies,
   getOtherFriends,
-  getTaunt,
   hasEnemyThreatAround,
-  is5MA,
   isMyTick,
-  moveToRandomEmptyAround,
-  oppoUnits,
-  Unit,
 } from "./Cre";
-import { myRamparts, resources } from "./GameObjectInitialize";
+import { Cre_battle } from "./Cre_battle";
+import { Cre_build } from "./Cre_build";
+import { Cre_move } from "./Cre_move";
+import {
+  getMoveTime,
+  getSpeed_general,
+  searchPath_noArea,
+  searchPathByCreCost,
+} from "./findPath";
+import {
+  enemies,
+  friends,
+  myRamparts,
+  oppoUnits,
+  resources,
+  Unit,
+} from "./GameObjectInitialize";
+import { damaged, damagedRate } from "./HasHits";
+import { moveTo_basic } from "./MoveTask";
+import { findGO, hasGO } from "./overallMap";
 import { currentGuessPlayer, Dooms } from "./player";
+import {
+  getMyHealthyRamparts,
+  getMyHealthyRamparts_around,
+  inMyHealthyRampart,
+  rampartIsHealthy,
+  ramSaveCostMatrix,
+  refreshRampartSaveCostMatrix,
+} from "./ramparts";
+import { spawn } from "./spawn";
+import { blocked, getEnergy, getMyBaseContainers } from "./UnitTool";
 export function myContainersEnergy() {
-  let myContainers = getMyContainers();
+  const myContainers = getMyBaseContainers();
   let sum = 0;
   for (let con of myContainers) {
     sum += getEnergy(con);
   }
   return sum;
 }
-export function defendInArea(cre: Cre, pos: Pos, range: number): boolean {
+export function defendInArea(cre: Cre_move, pos: Pos, range: number): boolean {
   const enInArea = enemies.filter(i => GR(pos, i) <= range);
   if (enInArea.length > 0) {
-    const en = <Cre>cre.findClosestByRange(enInArea);
+    const en = <Cre>closest(cre, enInArea);
     cre.MTJ(en);
     return true;
   } else {
@@ -65,7 +89,7 @@ export let isTurtleContainer: boolean = false;
 export function setIsTurtleContainer(b: boolean) {
   isTurtleContainer = b;
 }
-export function moveToAllEmptyRampart(cre: Cre) {
+export function moveToAllEmptyRampart(cre: Cre_move) {
   SA(cre, " select all empty ");
   const healthyRamparts = myRamparts.filter(i => rampartIsHealthy(i));
   const emptyRamparts = healthyRamparts.filter(i => !blocked(i));
@@ -74,7 +98,7 @@ export function moveToAllEmptyRampart(cre: Cre) {
     cre.MTJ(rampart);
   } else SA(cre, " can not find rampart ");
 }
-export function defendTheRampart(cre: Cre) {
+export function defendTheRampart(cre: Cre_move) {
   const scanRange = 20;
   const enemyArmys = getEnemyArmies().filter(i => GR(i, cre) <= scanRange);
   const target = best(enemyArmys, en => {
@@ -96,7 +120,7 @@ export function defendTheRampart(cre: Cre) {
   }
   moveToRampart(cre, target);
 }
-export function moveToRampart(cre: Cre, enemy: Pos | undefined) {
+export function moveToRampart(cre: Cre_move, enemy: Pos | undefined) {
   SA(cre, "move to rampart ,enemy=" + COO(enemy));
   const healthyRamparts = myRamparts.filter(i => rampartIsHealthy(i));
   const emptyHealthyRamparts = healthyRamparts.filter(i => !blocked(i));
@@ -134,12 +158,10 @@ export function moveToRampart(cre: Cre, enemy: Pos | undefined) {
     }
   }
 }
-export function gotoTargetRampart(cre: Cre, targetRampart: Pos) {
+export function gotoTargetRampart(cre: Cre_move, targetRampart: Pos) {
   SA(cre, "gotoTargetRampart " + COO(targetRampart));
   refreshRampartSaveCostMatrix(cre, 20);
-  const sRtn = getDecideSearchRtnNoArea(cre, targetRampart, {
-    costMatrix: ramSaveCostMatrix,
-  });
+  const sRtn = searchPath_noArea(cre, targetRampart, ramSaveCostMatrix);
   let cost = sRtn.cost;
   const path = sRtn.path;
   drawPolyLight(path);
@@ -157,16 +179,16 @@ export function gotoTargetRampart(cre: Cre, targetRampart: Pos) {
           i =>
             GR(i, cre) <= 1 &&
             inMyHealthyRampart(i) &&
-            !(cre.getBodyPartsNum(WORK) > 0 && cre.macro
-              ? cre.macro.getIsWorking()
-              : false) &&
+            !(cre instanceof Cre_build && cre.getIsWorking()) &&
             i.getHealthyBodyPartsNum(ATTACK) <
               cre.getHealthyBodyPartsNum(ATTACK)
         );
         if (tarFriends.length > 0) {
-          const tarFriend = findClosestByRange(targetRampart, tarFriends);
+          const tarFriend = <Cre>closest(targetRampart, tarFriends);
           SA(cre, "exchangePos_A " + COO(tarFriend));
-          cre.exchangePos_setAppointment(tarFriend);
+          if (tarFriend instanceof Cre_move) {
+            cre.exchangePos_setAppointment(tarFriend);
+          }
         }
       } else {
         SA(cre, "goto target rampart " + COO(firstPos));
@@ -174,9 +196,11 @@ export function gotoTargetRampart(cre: Cre, targetRampart: Pos) {
           findGO(firstPos, Cre)
         );
         if (blockFri) {
-          cre.exchangePos_setAppointment(blockFri);
+          if (blockFri instanceof Cre_move) {
+            cre.exchangePos_setAppointment(blockFri);
+          }
         } else {
-          cre.moveToNormal(firstPos);
+          cre.MTJ(firstPos);
         }
       }
     } else {
@@ -187,7 +211,7 @@ export function gotoTargetRampart(cre: Cre, targetRampart: Pos) {
     goinRampartAssign(cre, [spawn, cre]);
   }
 }
-export function goinRampartAssign(cre: Cre, calBlocked: Pos[]) {
+export function goinRampartAssign(cre: Cre_move, calBlocked: Pos[]) {
   SA(cre, "goinRampartAssign " + COO(cre));
   const aroundRams = getMyHealthyRamparts_around(cre);
   const aroundEmptyRams = aroundRams.filter(i => !blocked(i, false));
@@ -195,7 +219,7 @@ export function goinRampartAssign(cre: Cre, calBlocked: Pos[]) {
   if (aroundRams.length > 0) {
     if (aroundEmptyRam) {
       SA(cre, "go around empty ram" + COO(aroundEmptyRam));
-      cre.moveToNormal_setAppointment(aroundEmptyRam);
+      cre.moveTo_setAppointment(aroundEmptyRam);
     } else if (calBlocked.length < 6) {
       SA(cre, "need assign again");
       const aroundRamNotCaled = aroundRams.find(i => {
@@ -211,11 +235,11 @@ export function goinRampartAssign(cre: Cre, calBlocked: Pos[]) {
               )
             : friends;
         const newFriend = tarFriends.find(i => atPos(i, aroundRamNotCaled));
-        if (newFriend) {
+        if (newFriend && newFriend instanceof Cre_move) {
           SA(cre, "new friend:" + COO(newFriend));
           calBlocked.push(newFriend);
           drawLineComplex(cre, newFriend, 0.8, "#654321");
-          cre.moveToNormal_setAppointment(aroundRamNotCaled);
+          cre.moveTo_setAppointment(aroundRamNotCaled);
           goinRampartAssign(newFriend, calBlocked);
         } else {
           SA(cre, "no new friend " + COO(aroundRamNotCaled));
@@ -237,47 +261,25 @@ export function goinRampartAssign(cre: Cre, calBlocked: Pos[]) {
   }
 }
 //functions
-export function moveToRandomEmptyAround(cre: Cre): void {
+export function moveToRandomEmptyAround(cre: Cre_move): void {
   SA(cre, "moveToRandomEmptyAround");
   const poss = getRangePoss(cre, 1);
   const empPoss = poss.filter(i => !blocked(i));
   const pos = ranGet(empPoss);
   if (pos) {
-    cre.moveToNormal(pos);
+    moveTo_basic(cre, pos);
   }
 }
-export function attackWeakRampart(cre: Cre) {
+export function attackWeakRampart(cre: Cre_battle) {
   SA(cre, "try attackWeakRampart");
   let myRamAround = myRamparts.filter(i => GR(i, cre) <= 1);
   let weakMyRamAround = myRamAround.find(
-    i => !rampartIsHealthy(i, true, false) && !atPos(i, spawnPos)
+    i => !rampartIsHealthy(i, true, false) && !atPos(i, spawn)
   );
   if (weakMyRamAround) {
     SA(cre, "attacking WeakRampart");
-    cre.battle?.attackNormal(weakMyRamAround);
+    cre.attackNormal(weakMyRamAround);
   }
-}
-/**find the position that can get protect nearby*/
-export function findProtectPos(cre: Cre): { pos: Pos; rate: number } {
-  //find the min force*cost pos
-  const ranPoss1 = getRangePoss(cre, 2);
-  const ranPoss2 = getRangePossByStep(cre, 35, 5);
-  const rams = myRamparts.filter(i => !blocked(i));
-  const scanFriends = getFriendArmies();
-  const ranPoss = ranPoss1.concat(ranPoss2, rams, scanFriends);
-  let bestWorth = -Infinity;
-  let bestPos: Pos = cre;
-  for (let pos of ranPoss) {
-    const force = getForceMapValue(pos);
-    const cost = GR(cre, pos);
-    const thisWorth = 0.5 * force * divideReduce(cost, 15);
-    if (thisWorth > bestWorth) {
-      bestWorth = thisWorth;
-      bestPos = pos;
-    }
-  }
-  SA(bestPos, "best protect pos here " + bestWorth);
-  return { pos: bestPos, rate: bestWorth };
 }
 export function getRoundFightAndAvoidNum(
   cre: Cre,
@@ -289,14 +291,14 @@ export function getRoundFightAndAvoidNum(
   );
   const fightNum = sum(roundOtherAttackers, i =>
     i.upgrade.fight === true
-      ? (0.5 + i.getSpeed_general()) *
+      ? (0.5 + getSpeed_general([i])) *
         divideReduce(GR(i, cre), scanRange / 2) *
         calculateForce(i)
       : 0
   );
   const avoidNum = sum(roundOtherAttackers, i =>
     i.upgrade.fight === false
-      ? (0.5 + i.getSpeed_general()) *
+      ? (0.5 + getSpeed_general([i])) *
         divideReduce(GR(i, cre), scanRange / 2) *
         calculateForce(i)
       : 0
@@ -304,9 +306,9 @@ export function getRoundFightAndAvoidNum(
   return { fightNum: fightNum, avoidNum: avoidNum };
 }
 /**get the rate if need to protect it self */
-export function getForceTarAndPosRate(cre: Cre, target: Pos) {
-  const forceAtPos = getForceMapValue(cre);
-  const forceAtTarget = getForceMapValue(target);
+export function getForceTarAndPosRate(cre: Cre, target: Cre) {
+  const forceAtPos = getForce_tradition(cre);
+  const forceAtTarget = getForce_tradition(target);
   SA(cre, "target=" + COO(target));
   //force of this cre
   // const forceCre = calculateForce(cre);
@@ -325,18 +327,8 @@ export function getForceTarAndPosRate(cre: Cre, target: Pos) {
   SAN(cre, "targetExtra", targetExtra);
   return rtn;
 }
-/** try protect self */
-export function protectSelf(cre: Cre): boolean {
-  let protectPos = findProtectPos(cre).pos;
-  if (!atPos(protectPos, cre)) {
-    cre.MTJ(protectPos);
-    return true;
-  } else {
-    return false;
-  }
-}
 /**move to a place that has no resource*/
-export function moveToNoResourcePlace(cre: Cre, needCloseArr: Pos[]) {
+export function moveToNoResourcePlace(cre: Cre_move, needCloseArr: Pos[]) {
   //find pos have no resource
   let rangePos = getRangePoss(cre, 1);
   if (getEnergy(cre) > 0) {
@@ -370,11 +362,12 @@ export function moveToNoResourcePlace(cre: Cre, needCloseArr: Pos[]) {
   }
 }
 /** give position to important firend*/
-export function givePositionToImpartantFriend(cre: Cre): boolean {
+export function givePositionToImpartantFriend(cre: Cre_move): boolean {
   SA(cre, "givePositionToImpartantFriend");
   const myForce = calculateForce(cre);
   const importantFriend = friends.find(
-    i => GR(i, cre) <= 1 && i.canMove() && calculateForce(i) > myForce
+    i =>
+      GR(i, cre) <= 1 && cre.master.fatigue === 0 && calculateForce(i) > myForce
   );
   if (importantFriend) {
     SA(cre, "give pos to important");
@@ -388,7 +381,7 @@ export function exchangePositionWithImpartantFriend(cre: Cre): boolean {
 }
 /**used on normal role ,judge if cpu over used.If it is ,return true*/
 export function cpuBreakJudge(cre: Cre): boolean {
-  if (getCPUPercent() > 0.8 || lowCPUMode) {
+  if (getCPUPercent() > 0.8) {
     if (isMyTick(cre, 20)) {
       SA(cre, "my turn");
     } else {
@@ -399,11 +392,11 @@ export function cpuBreakJudge(cre: Cre): boolean {
   return false;
 }
 /**flee from every threated enemy*/
-export function fleeWeakComplex(cre: Cre) {
-  if (cre.battle.flee_weak(3, 8)) {
+export function fleeWeakComplex(cre: Cre_move) {
+  if (cre.flee(3, 8)) {
     SA(cre, "flee");
     return true;
-  } else if (cre.battle.flee_weak(5, 13)) {
+  } else if (cre.flee(5, 13)) {
     SA(cre, "flee2");
     return true;
   } else {
@@ -411,18 +404,18 @@ export function fleeWeakComplex(cre: Cre) {
   }
 }
 /**find a fit target of damaged friend*/
-export function findFitDamagedFriend(cre: Cre): {
+export function findFitDamagedFriend(cre: Cre_battle): {
   maxFitEn: Unit;
   maxFitRate: number;
 } {
   const ifSelf = damaged(cre) ? friends : getOtherFriends(cre);
   const targets = ifSelf.filter(i => damaged(i));
-  return findFitUnits(cre, targets, true, 8 * cre.getMoveTime());
+  return findFitUnits(cre, targets, true, 8 * getMoveTime(cre, [cre]));
 }
 /**find a fit target of opponent unit*/
 export function findFitOppoUnit(
-  cre: Cre,
-  delay: number = 8 * cre.getMoveTime(),
+  cre: Cre_battle,
+  delay: number = 8,
   range: number = 100,
   extraBonus?: (tar: Unit) => number
 ): { maxFitEn: Unit; maxFitRate: number } {
@@ -460,24 +453,9 @@ export function getFitRate(
     SA(unit, "dooms high taunt!!");
     taunt *= 6;
   }
-  //is 5MA
-  if (is5MA(cre) && unit instanceof Cre) {
-    if (
-      unit.battle.tauntBonus.find(
-        i =>
-          i.name === "protectSelf" &&
-          i.from instanceof Cre &&
-          i.from.getBodypartsNum(WORK) > 0
-      ) !== undefined
-    ) {
-      SA(unit, "protect self extra taunt");
-      taunt *= 3;
-    }
-  }
   //calculate earn
-  const friendForce =
-    getFriendForceMapValue(cre) + getFriendForceMapValue(unit);
-  const enemyForce = getEnemyForceMapValue(cre) + getEnemyForceMapValue(unit);
+  const friendForce = calculateForce(cre) + calculateForce(unit);
+  const enemyForce = calculateForce(cre) + calculateForce(unit);
   const earn = isHealer ? 0 : getEarning(friendForce, enemyForce);
   //calculate cost
   let cost;
@@ -485,20 +463,20 @@ export function getFitRate(
     cost = 3 * range;
   } else {
     //get the searchRtnCost
-    const searchRtn = cre.getDecideSearchRtnByCre(unit);
+    const searchRtn = searchPathByCreCost(cre, unit);
     cost = searchRtn.cost;
   }
   //other parameter
-  const friendForceExtra = 0.1 * getFriendForceMapValue(unit);
+  const friendForceExtra = 0.1 * calculateForce(unit);
   const costConst = 30;
   const extraBonusRate: number = extraBonus ? extraBonus(unit) : 1;
-  const damagedBonus = 1 + 5 * getDamagedRate(unit);
+  const damagedBonus = 1 + 5 * damagedRate(unit);
   const attackBodyPartBonus =
     unit instanceof Cre ? 1 + 0.5 * unit.getBodyPartsNum(ATTACK) : 1;
   const healerBonus = isHealer ? damagedBonus * attackBodyPartBonus : 1;
   const speedEnoughBonus =
     unit instanceof Cre
-      ? cre.getSpeed_general() > unit.getSpeed_general()
+      ? getSpeed_general([cre]) > getSpeed_general([unit])
         ? 1
         : 0.5
       : 1;
@@ -545,14 +523,14 @@ export function getFitRate(
  * set `isHealer` true.
  */
 export function findFitUnits(
-  cre: Cre,
+  cre: Cre_battle,
   units: Unit[],
   isHealer: boolean,
   delay: number,
   extraBonus?: (tar: Unit) => number
 ): { maxFitEn: Unit; maxFitRate: number } {
   //if current target invalid or at tick delay
-  if (units.length >= 1 && (!exist(cre.target) || isMyTick(cre, delay))) {
+  if (units.length >= 1 && (!cre.target?.exists || isMyTick(cre, delay))) {
     let maxFitRate: number = -1;
     let maxFitEn: Unit = units[0];
     for (let u of units) {

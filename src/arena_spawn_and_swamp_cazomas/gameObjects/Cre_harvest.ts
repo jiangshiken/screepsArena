@@ -14,7 +14,6 @@ import { divideReduce, valid } from "../utils/JS";
 import { COO, GR, Pos, X_axisDistance, getRangePoss } from "../utils/Pos";
 import { SA, drawLineComplex, drawLineLight } from "../utils/visual";
 import { Cre } from "./Cre";
-import { isWorkingBuilder } from "./Cre_build";
 import { Cre_move } from "./Cre_move";
 import { isTurtleContainer } from "./CreTool";
 import { searchPathByCreCost } from "./findPath";
@@ -375,7 +374,9 @@ export function isProducer(unit: Unit): boolean {
     unit.my &&
     (unit instanceof StructureSpawn ||
       unit instanceof StructureExtension ||
-      (unit instanceof Cre && isWorkingBuilder(<Cre>unit)))
+      (unit instanceof Cre &&
+        unit.getBodyPartsNum(WORK) > 0 &&
+        getFreeEnergy(unit) > 0))
   );
 }
 export function isEnemyProducer(unit: Unit): boolean {
