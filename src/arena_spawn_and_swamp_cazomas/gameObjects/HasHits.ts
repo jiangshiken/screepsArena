@@ -1,5 +1,4 @@
 import { divide0 } from "../utils/JS";
-
 export interface HasHits {
   hits: number;
   hitsMax: number;

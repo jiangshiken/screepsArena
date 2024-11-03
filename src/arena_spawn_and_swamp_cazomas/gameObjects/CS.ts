@@ -7,6 +7,7 @@ import { S } from "../utils/export";
 import { best, invalid } from "../utils/JS";
 import { atPos, COO, HasPos, Pos } from "../utils/Pos";
 import { drawLineComplex, SA } from "../utils/visual";
+import { GameObj } from "./GameObj";
 import { CSs, isMyGO, isOppoGO, myCSs } from "./GameObjectInitialize";
 import { HasMy } from "./HasMy";
 import { findGO } from "./overallMap";
@@ -14,12 +15,13 @@ import { inMyRampart } from "./ramparts";
 
 // export let CSs: CS[] = []
 /** extend of ConstructionSite */
-export class CS implements HasPos, HasMy {
+export class CS extends GameObj implements HasPos, HasMy {
   readonly master: ConstructionSite;
   decayEvent: Event | undefined;
   useDecay: boolean = false;
   wt: number = 0;
   constructor(cons: ConstructionSite) {
+    super(cons);
     this.master = cons;
   }
   get my() {

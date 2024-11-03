@@ -1,15 +1,14 @@
 //functions
 
-import { getRange } from "game/utils";
-import { Event } from "../utils/Event";
 import { SOA } from "../utils/export";
 import { arrayEqual, invalid, last, remove, valid } from "../utils/JS";
 import { GR, Pos, atPos } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA, drawLineComplex } from "../utils/visual";
-import { Cre, Task_Cre } from "./Cre";
+import { Cre, PullEvent, Task_Cre } from "./Cre";
 import { moveToRandomEmptyAround } from "./CreTool";
-import { FindPathAndMoveTask, moveTo_basic } from "./MoveTask";
+import { getSpeed } from "./findPath";
+import { FindPathAndMoveTask, moveTo_basic, moveTo_direct } from "./MoveTask";
 
 /**
  * new a {@link PullTarsTask}, will cancel if already have same task
@@ -153,19 +152,6 @@ export class PullTask extends Task_Cre {
   }
 }
 
-/** represent a event of pull function */
-export class PullEvent extends Event {
-  /** one who pulled other creep */
-  pullOne: Cre;
-  /** one who be pulled */
-  bePulledOne: Cre;
-  constructor(pullOne: Cre, bePulledOne: Cre) {
-    super();
-    this.pullOne = pullOne;
-    this.bePulledOne = bePulledOne;
-  }
-}
-
 /** go to a target Creep ,and const it pull this */
 export function directBePulled(cre: Cre, tar: Cre): boolean {
   SA(tar, "directBePulled");
@@ -180,22 +166,22 @@ export function directBePulled(cre: Cre, tar: Cre): boolean {
     SA(tar, "lastOne==this");
     lastOne = tl[tl.length - 2];
   }
-  const pte = cre.bePulledTarget;
-  if (pte != undefined && validEvent(pte, 1) && pte.pullOne === lastOne) {
+  const pte = cre.bePulledEvent;
+  if (pte != undefined && pte.validEvent(1) && pte.pullOne === lastOne) {
     //if is being pulled
     const OneWhoPullCre = pte.pullOne;
-    OneWhoPullCre.normalPull(this);
+    normalPull(OneWhoPullCre, cre);
     return true;
   } else {
     // if not being pulled
     if (invalid(lastOne)) {
       return false;
-    } else if (GR(this, lastOne) > 1) {
+    } else if (GR(cre, lastOne) > 1) {
       // SA(this,"MTJ="+COO(lastOne));
-      this.MTJ(lastOne);
+      moveTo_basic(cre, lastOne);
       return false;
     } else {
-      if (lastOne.normalPull(this))
+      if (normalPull(lastOne, cre))
         //lastOne.pullingTarget.target=cre
         return true;
       else return false;
@@ -208,97 +194,82 @@ export function normalPull(
   tar: Cre,
   direct: boolean = false
 ): boolean {
-  if (GR(this, tar) <= 1) {
+  if (GR(cre, tar) <= 1) {
     //draw green line
-    drawLineComplex(this, tar, 0.5, "#00ff00");
+    drawLineComplex(cre, tar, 0.5, "#00ff00");
     //pull
-    this.master.pull(tar.master);
+    cre.master.pull(tar.master);
     //set Event
-    const pe = new PullEvent(this, tar);
-    this.pullTarget = pe;
-    tar.bePulledTarget = pe;
+    cre.pullEvent = new PullEvent(cre, tar);
+    tar.bePulledEvent = new PullEvent(cre, tar);
     //tar move this
     if (direct) {
       // tar.moveToDirect(this);
-      tar.crePathFinder?.moveTo_Basic_Direct(this);
+      moveTo_direct(tar, cre);
     } else {
-      tar.moveToNormal(this);
+      moveTo_basic(tar, cre);
     }
     return true;
   } else return false;
 }
 /** move and pull */
 export function pullTar(cre: Cre, tar: Cre): boolean {
-  const range = getRange(this, tar);
+  const range = GR(cre, tar);
   if (range > 1) {
-    //go to tar
-    this.MTJ(tar);
-    // sayAppend(this," move to tar ");
+    moveTo_basic(cre, tar);
     return false;
   } else {
-    // pull it
-    // MTJ(tar,this);
-    this.normalPull(tar);
-    this.stopByTar(tar); //TODO
-    // sayAppend(this," pulling tar");
+    normalPull(cre, tar);
     return true;
   }
 }
 
 /** move and pull */
 export function moveAndBePulled(cre: Cre, tar: Cre): boolean {
-  const range = getRange(this, tar);
+  const range = GR(cre, tar);
   if (range > 1) {
-    //go to tar
-    this.MTJ(tar);
-    // sayAppend(this," move to tar ");
+    moveTo_basic(cre, tar);
     return false;
   } else {
-    // pull it
-    // MTJ(tar,this);
-    tar.normalPull(this);
-    this.stopByTar(tar); //TODO
-    // sayAppend(this," pulling tar");
+    normalPull(tar, cre);
     return true;
   }
 }
 /** the Cre[] of this creep is pulling ,include self */
 export function getPullingTargetList(cre: Cre): Cre[] {
-  let pt = this.pullTarget;
+  let pe: PullEvent | undefined = cre.pullEvent;
   const rtn: Cre[] = [];
-  rtn.push(this);
-  let w = 20;
-  while (pt && validEvent(pt, 1)) {
-    w -= 1;
-    if (w <= 0) {
+  rtn.push(cre);
+  while (pe !== undefined && pe.validEvent()) {
+    if (rtn.find(i => i === pe?.bePulledOne) !== undefined) {
       break;
+    } else {
+      rtn.push(pe.bePulledOne);
     }
-    rtn.push(pt.bePulledOne);
-    pt = pt.bePulledOne.pullTarget;
+    pe = pe.bePulledOne.pullEvent;
   }
   return rtn;
 }
 /** the Cre[] that is pulling this creep ,include self */
 export function getBePullingTargetList(cre: Cre): Cre[] {
-  let pt = this.bePulledTarget;
+  let pe: PullEvent | undefined = cre.bePulledEvent;
   const rtn: Cre[] = [];
-  rtn.push(this);
-  let w = 10;
-  while (pt && validEvent(pt, 1)) {
-    w -= 1;
-    if (w <= 0) {
+  rtn.push(cre);
+  while (pe !== undefined && pe.validEvent()) {
+    if (rtn.find(i => i === pe?.pullOne) !== undefined) {
       break;
+    } else {
+      rtn.push(pe.pullOne);
     }
-    rtn.push(pt.pullOne);
-    pt = pt.pullOne.bePulledTarget;
+    pe = pe.pullOne.pullEvent;
   }
   return rtn;
 }
 /** all Cre[] pulled this or ,is being pulled by this*/
 export function getAllPullTargetList(cre: Cre): Cre[] {
-  var pt1 = this.getPullingTargetList();
-  var pt2 = this.getBePullingTargetList();
-  var rtn = pt1.concat(pt2);
+  const pt1 = getPullingTargetList(cre);
+  const pt2 = getBePullingTargetList(cre);
+  const rtn = pt1.concat(pt2);
   rtn.shift();
   return rtn;
 }
@@ -340,9 +311,6 @@ export class PullTarsTask extends Task_Cre {
   end(): void {
     super.end();
     this.master.tasks.find(i => i instanceof PullTask)?.end();
-    // for (let tar of this.tarCres) {
-    // 	tar.tasks.find(i => i instanceof PullTask)?.end()
-    // }
   }
   loop_task(): void {
     // if have pull task
@@ -363,10 +331,10 @@ export class PullTarsTask extends Task_Cre {
       //
       // SA(this.master, "try pull tar");
       // let pulling=tar.pullTar(tarNext);
-      let pulling = tarNext.moveAndBePulled(tar);
+      let pulling = moveAndBePulled(tarNext, tar);
       if (!pulling) {
         allPulling = false;
-        let tarSpeed = tarNext.getSpeed();
+        let tarSpeed = getSpeed(tarNext, [tarNext]);
         if (
           this.useLeaderPull &&
           creIdle &&
@@ -396,7 +364,7 @@ export class PullTarsTask extends Task_Cre {
       );
     } else if (creIdle) {
       //this is idle,approach first
-      this.master.MTJ(tarCres[0]);
+      moveTo_basic(this.master, tarCres[0]);
     } else {
     }
   }

@@ -14,6 +14,7 @@ import { findGO, overallMap } from "./overallMap";
 import { enemySpawn, spawn } from "./spawn";
 import { Con, Ram, Roa, Stru } from "./Stru";
 
+export type CanBeAttacked = Stru | Cre;
 export function getEnergy(a: GO): number {
   if (a instanceof Resource) {
     return a.amount;

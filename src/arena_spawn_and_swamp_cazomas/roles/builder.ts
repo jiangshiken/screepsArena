@@ -487,7 +487,7 @@ export class BuilderStandardTask extends Task_Cre {
         this.step = build_extensions;
       } else {
         createCS(cre, StructureRampart, 5, true);
-        if (hasEnemyArmyAround(cre, 1) && cre.getBody(ATTACK).length > 0) {
+        if (hasEnemyArmyAround(cre, 1) && cre.getBodyParts(ATTACK).length > 0) {
           cre.fight();
         } else {
           cre.macro.buildStatic();
@@ -552,7 +552,10 @@ export class BuilderStandardTask extends Task_Cre {
                 this.step = goto_outside_resource;
               }
             }
-            if (hasEnemyArmyAround(cre, 1) && cre.getBody(ATTACK).length > 0) {
+            if (
+              hasEnemyArmyAround(cre, 1) &&
+              cre.getBodyParts(ATTACK).length > 0
+            ) {
               cre.fight();
             } else {
               cre.macro.buildStatic();

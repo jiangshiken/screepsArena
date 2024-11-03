@@ -1,4 +1,45 @@
+import { OK, RESOURCE_ENERGY, WORK } from "game/constants";
+import {
+  Resource,
+  Structure,
+  StructureContainer,
+  StructureExtension,
+  StructureSpawn,
+} from "game/prototypes";
+import { findClosestByRange, getRange } from "game/utils";
+import { Event_Pos } from "../utils/Event";
+import { S } from "../utils/export";
+import { tick } from "../utils/game";
+import { divideReduce, valid } from "../utils/JS";
+import { COO, GR, Pos, X_axisDistance, getRangePoss } from "../utils/Pos";
+import { SA, drawLineComplex, drawLineLight } from "../utils/visual";
+import { Cre } from "./Cre";
+import { isWorkingBuilder } from "./Cre_build";
 import { Cre_move } from "./Cre_move";
+import { isTurtleContainer } from "./CreTool";
+import { searchPathByCreCost } from "./findPath";
+import {
+  Harvable,
+  HasEnergy,
+  HasStore,
+  Producer,
+  Unit,
+  containers,
+  myExtensions,
+  myUnits,
+  oppoUnits,
+  resources,
+  ress,
+} from "./GameObjectInitialize";
+import { findGO, overallMap } from "./overallMap";
+import { spawn } from "./spawn";
+import { Ext, Res } from "./Stru";
+import {
+  getCapacity,
+  getEnergy,
+  getFreeEnergy,
+  isOppoBaseContainer,
+} from "./UnitTool";
 
 export class Cre_harvest extends Cre_move {
   /** withdraw by amount */
@@ -6,32 +47,28 @@ export class Cre_harvest extends Cre_move {
     if (getEnergy(tar) < amount) {
       amount = getEnergy(tar);
     }
-    return this.master.master.withdraw(<any>tar, RESOURCE_ENERGY, amount);
+    return this.master.withdraw(<any>tar, RESOURCE_ENERGY, amount);
   }
   /** transfer by amount */
   transferAmount(tar: HasStore, amount: number) {
     if (valid(this.master) && valid(tar)) {
-      if (getEnergy(this.master) < amount) {
-        amount = getEnergy(this.master);
+      if (getEnergy(this) < amount) {
+        amount = getEnergy(this);
       }
-      return this.master.master.transfer(
-        tar instanceof Cre ? tar.master : tar,
-        RESOURCE_ENERGY,
-        amount
-      );
+      return this.master.transfer(tar.master, RESOURCE_ENERGY, amount);
     } else return null;
   }
 
   /**drop energy by amount.It will drop all if not enough*/
   dropEnergyByAmount(amount: number) {
-    if (getEnergy(this.master) < amount) {
-      amount = getEnergy(this.master);
+    if (getEnergy(this) < amount) {
+      amount = getEnergy(this);
     }
-    this.master.master.drop(RESOURCE_ENERGY, amount);
+    this.master.drop(RESOURCE_ENERGY, amount);
   }
   /**drop all energy*/
   dropEnergy(): void {
-    this.master.master.drop(RESOURCE_ENERGY);
+    this.master.drop(RESOURCE_ENERGY);
   }
   /**pick up resources*/
   pickUpResources() {
@@ -54,20 +91,20 @@ export class Cre_harvest extends Cre_move {
     //TODO back to base
     drawLineLight(this.master, con);
     if (GR(con, this.master) > 1) {
-      this.master.MTJ(con);
+      this.MTJ(con);
     } else {
-      this.master.stop();
+      this.stop();
     }
     return this.withdrawNormal(con);
   }
   /**withdraw normal*/
   withdrawNormal(con: HasEnergy): boolean {
     if (con instanceof Resource) {
-      return this.master.master.pickup(con) === OK;
+      return this.master.pickup(con) === OK;
     } else if (con instanceof Structure)
-      return this.master.master.withdraw(con, RESOURCE_ENERGY) === OK;
+      return this.master.withdraw(con, RESOURCE_ENERGY) === OK;
     else if (con instanceof Cre)
-      return con.master.transfer(this.master.master, RESOURCE_ENERGY) === OK;
+      return con.master.transfer(this.master, RESOURCE_ENERGY) === OK;
     else return false;
   }
   /**withdraw target*/
@@ -78,7 +115,7 @@ export class Cre_harvest extends Cre_move {
   }
   /** move and withdraw then drop */
   directWithdrawAndDrop(con: HasStore): void {
-    if (getEnergy(this.master) === 0) {
+    if (getEnergy(this) === 0) {
       this.directWithdraw(con);
     } else {
       this.dropEnergy();
@@ -90,7 +127,7 @@ export class Cre_harvest extends Cre_move {
     if (GR(this.master, tar) <= 1) {
       return this.transferNormal(tar);
     } else {
-      this.master.MTJ(tar);
+      this.MTJ(tar);
       return false;
     }
   }
@@ -120,8 +157,8 @@ export class Cre_harvest extends Cre_move {
     }[] = needTransHarvable.map(harvable => {
       let range = GR(this.master, harvable);
       let baseRangeBonus =
-        1 + 3 * divideReduce(X_axisDistance(harvable, spawnPos), 10);
-      let volumn = getCapacity(this.master);
+        1 + 3 * divideReduce(X_axisDistance(harvable, spawn), 10);
+      let volumn = getCapacity(this);
       let energy = Math.min(getEnergy(harvable), volumn);
       let worth = (baseRangeBonus * energy) / (range + 4);
       drawLineComplex(this.master, harvable, 0.1 * worth, "#22bb22");
@@ -149,7 +186,7 @@ export class Cre_harvest extends Cre_move {
       return true;
     } else {
       SA(this.master, "MTJ");
-      this.master.MTJ(tar);
+      this.MTJ(tar);
       return false;
     }
   }
@@ -158,7 +195,7 @@ export class Cre_harvest extends Cre_move {
   directHarve(har: Harvable | null) {
     //TODO back to base
     if (har === null) return null;
-    if (getFreeEnergy(this.master) === 0) {
+    if (getFreeEnergy(this) === 0) {
       return this.transToProducers();
     } else {
       return this.directWithdraw(har);
@@ -196,7 +233,7 @@ export class Cre_harvest extends Cre_move {
       if (getFreeEnergy(tar) === 0) {
         if (tick <= notDropLimitTick) {
           SA(this.master, "stop" + S(tar));
-          this.master.stop();
+          this.stop();
         } else {
           SA(this.master, "dropEnergy" + S(tar));
           this.dropEnergy();
@@ -211,12 +248,7 @@ export class Cre_harvest extends Cre_move {
   /** normal transfer  */
   transferNormal(tar: HasStore): boolean {
     SA(this.master, "transferNormal " + S(tar));
-    return (
-      this.master.master.transfer(
-        tar instanceof Cre ? tar.master : tar,
-        RESOURCE_ENERGY
-      ) === OK
-    );
+    return this.master.transfer(tar.master, RESOURCE_ENERGY) === OK;
   }
   /**transfer energy to target*/
   transferTarget(tar: HasStore): boolean {
@@ -229,8 +261,8 @@ export class Cre_harvest extends Cre_move {
   }
   /**move and pick up resource*/
   directPickUp(resource: Resource) {
-    this.master.master.pickup(resource);
-    this.master.MTJ(resource);
+    this.master.pickup(resource);
+    this.MTJ(resource);
   }
   /**find a fit producer*/
   findFitProducer(): Producer | undefined {
@@ -239,7 +271,7 @@ export class Cre_harvest extends Cre_move {
     let maxWorth: number = -Infinity;
     let maxWorthTarget: Producer | undefined;
     for (let producer of myProducers) {
-      const sRtnFree = this.master.getDecideSearchRtnByCre(producer);
+      const sRtnFree = searchPathByCreCost(this, producer);
       const costFree = sRtnFree.cost;
       let typeRate: number;
       if (producer instanceof Cre) {
@@ -247,7 +279,7 @@ export class Cre_harvest extends Cre_move {
       } else if (producer instanceof StructureSpawn) {
         typeRate = 1;
       } else if (producer instanceof StructureExtension) {
-        if (GR(producer, spawnPos) <= 7) {
+        if (GR(producer, spawn) <= 7) {
           typeRate = 0.75;
         } else {
           typeRate = 0.5;
@@ -266,13 +298,8 @@ export class Cre_harvest extends Cre_move {
   }
   /** fill extension static*/
   fillExtension(): boolean {
-    const ext = <StructureExtension | undefined>(
-      myOwnedStrus.find(
-        i =>
-          i instanceof StructureExtension &&
-          GR(i, this.master) <= 1 &&
-          getFreeEnergy(i) > 0
-      )
+    const ext = <Ext | undefined>(
+      myExtensions.find(i => GR(i, this) <= 1 && getFreeEnergy(i) > 0)
     );
     if (ext) {
       this.transferNormal(ext);
@@ -287,15 +314,15 @@ const notDropLimitTick = 420;
  *  resouce and outside not empty containers and not containers at enemy base
  */
 export function getHarvables(): Harvable[] {
-  return (<Harvable[]>getRess().filter(i => validRes(i))).concat(
+  return (<Harvable[]>ress.filter(i => validRes(i))).concat(
     containers.filter(
       i =>
-        exist(i) &&
+        i.master.exists &&
         getEnergy(i) > 0 &&
-        !isOppoContainer(i) &&
+        !isOppoBaseContainer(i) &&
         !(
-          GR(i, spawnPos) <= 1 &&
-          (getFreeEnergy(spawnPos) === 0 || isTurtleContainer)
+          GR(i, spawn) <= 1 &&
+          (getFreeEnergy(spawn) === 0 || isTurtleContainer)
         )
     )
   );
@@ -306,8 +333,10 @@ export function getHarvables(): Harvable[] {
  */
 export function getHarvablesIncludeDrop(): Harvable[] {
   //resouce and outside/my not empty containers
-  return (<Harvable[]>resources).concat(
-    containers.filter(i => i.exists && getEnergy(i) > 0 && !isOppoContainer(i))
+  return (<Harvable[]>ress).concat(
+    containers.filter(
+      i => i.master.exists && getEnergy(i) > 0 && !isOppoBaseContainer(i)
+    )
   );
 }
 
@@ -343,7 +372,7 @@ export function isFullProducer(go: Unit) {
  */
 export function isProducer(unit: Unit): boolean {
   return (
-    my(unit) &&
+    unit.my &&
     (unit instanceof StructureSpawn ||
       unit instanceof StructureExtension ||
       (unit instanceof Cre && isWorkingBuilder(<Cre>unit)))
@@ -351,10 +380,10 @@ export function isProducer(unit: Unit): boolean {
 }
 export function isEnemyProducer(unit: Unit): boolean {
   return (
-    oppo(unit) &&
+    unit.oppo &&
     (unit instanceof StructureSpawn ||
       unit instanceof StructureExtension ||
-      (unit instanceof Cre && unit.getBodypartsNum(WORK) > 0))
+      (unit instanceof Cre && unit.getBodyPartsNum(WORK) > 0))
   );
 }
 export function getMyProducers(): Producer[] {
@@ -385,10 +414,12 @@ export class ResourceDropEvent extends Event_Pos {
  * cause it may be pick and drop transported by the harvester
  */
 export function validRes(res: Res) {
-  let dropEvents = filterEventList(
-    tick - 1,
-    tick + 1,
-    i => i instanceof ResourceDropEvent && atPos(i, res)
+  const DropEvent = <ResourceDropEvent | undefined>(
+    findGO(res, ResourceDropEvent)
   );
-  return dropEvents.length === 0;
+  if (DropEvent && DropEvent.validEvent(1)) {
+    return false;
+  } else {
+    return true;
+  }
 }

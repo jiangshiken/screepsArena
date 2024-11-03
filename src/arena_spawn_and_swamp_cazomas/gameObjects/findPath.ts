@@ -209,23 +209,22 @@ export function searchPath_noArea(
 }
 export function searchPath_flee(
   ori: Pos,
-  tar: Pos,
+  tars: Pos[],
   range: number,
   costMatrix: CostMatrix | undefined = undefined,
   plainCost: number = def_plainCost,
   swampCost: number = def_swampCost
 ): FindPathResult {
-  const rtn = searchPath(
-    ori,
-    { pos: tar, range: range },
-    {
-      flee: true,
-      costMatrix: costMatrix,
-      plainCost: plainCost,
-      swampCost: swampCost,
-      maxOps: 2000,
-    }
-  );
+  const tarRangeArr = tars.map(i => {
+    return { pos: i, range: range };
+  });
+  const rtn = searchPath(ori, tarRangeArr, {
+    flee: true,
+    costMatrix: costMatrix,
+    plainCost: plainCost,
+    swampCost: swampCost,
+    maxOps: 2000,
+  });
   drawPolyLight(rtn.path);
   return rtn;
 }

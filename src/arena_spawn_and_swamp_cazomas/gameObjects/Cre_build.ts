@@ -1,4 +1,20 @@
+import {
+  CARRY,
+  CreepActionReturnCode,
+  ERR_NOT_IN_RANGE,
+  OK,
+  WORK,
+} from "game/constants";
+import { ConstructionSite, StructureRampart } from "game/prototypes";
+import { S } from "../utils/export";
+import { GR, atPos } from "../utils/Pos";
+import { findTask } from "../utils/Task";
+import { SA, drawLineLight } from "../utils/visual";
+import { Cre, Task_Cre, hasEnemyAround } from "./Cre";
 import { Cre_battle } from "./Cre_battle";
+import { CS, getMaxWorthCSS, progress } from "./CS";
+import { overallMap } from "./overallMap";
+import { getEnergy, getFreeEnergy, inRampart } from "./UnitTool";
 
 export class Cre_build extends Cre_battle {
   isProducer: boolean = false;
@@ -8,8 +24,8 @@ export function isWorkingBuilder(cre: Cre): boolean {
   return (
     cre.getHealthyBodyPartsNum(CARRY) >= 1 &&
     cre.getHealthyBodyPartsNum(WORK) >= 1 &&
-    (cre.macro ? cre.macro.getIsWorking() : false) &&
-    (cre.macro ? cre.macro.getIsBuilding() : false)
+    getIsWorking() &&
+    getIsBuilding()
   );
 }
 /**if can be build by Cre which has no enemy or friend at pos

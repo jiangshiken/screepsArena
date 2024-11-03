@@ -228,7 +228,7 @@ export function snakePartJob(cre: Cre) {
           cre.MTJ_follow(tar);
         }
       } else {
-        const scanRange = cre.getBody(RANGED_ATTACK).length > 0 ? 10 : 7;
+        const scanRange = cre.getBodyParts(RANGED_ATTACK).length > 0 ? 10 : 7;
         const b = defendInArea(cre, spawn, scanRange);
         if (!b) {
           const tar = assemblePoint(cre);

@@ -10,12 +10,14 @@ import {
 import { Creep, Resource } from "game/prototypes";
 import { getTicks } from "game/utils";
 import { ct, et, ptSum } from "../utils/CPU";
-import { Event_Number } from "../utils/Event";
+import { Event, Event_Number } from "../utils/Event";
 import { StNumber, closest } from "../utils/game";
 import { divide0, pow2, ranGet } from "../utils/JS";
 import { GR, Pos, getRangePoss } from "../utils/Pos";
 import { HasTasks, Task, cancelOldTask, useTasks } from "../utils/Task";
 import { P, SA } from "../utils/visual";
+import { ExtraTauntEvent } from "./battle";
+import { GameObj } from "./GameObj";
 import {
   GO,
   cres,
@@ -24,6 +26,7 @@ import {
   isMyGO,
   isOppoGO,
 } from "./GameObjectInitialize";
+import { HasBattleStats } from "./HasBattleStats";
 import { HasHits } from "./HasHits";
 import { HasMy } from "./HasMy";
 import { findGO } from "./overallMap";
@@ -58,10 +61,30 @@ export type BodyCre = {
   type: BodyPartConstant;
   hits: number;
 };
+
+/** represent a event of pull function */
+export class MoveEvent extends Event {
+  /** one who pulled other creep */
+  readonly tar: Pos;
+  /** one who be pulled */
+  readonly nextStep: Pos;
+  constructor(tar: Cre, nextStep: Cre) {
+    super();
+    this.tar = tar;
+    this.nextStep = nextStep;
+  }
+}
+
 /** extend of `Creep` */
-export class Cre implements HasTasks, HasMy, HasHits {
+export class Cre
+  extends GameObj
+  implements HasTasks, HasMy, HasHits, HasBattleStats
+{
   readonly master: Creep;
   spawnInfo: SpawnInfo | undefined;
+  pullEvent: PullEvent | undefined; //get cre that pulled by this
+  bePulledEvent: PullEvent | undefined; //get cre that pull this
+  moveEvent: MoveEvent | undefined;
   /** tasks list */
   readonly tasks: Task[] = [];
   /**task execute order */
@@ -69,10 +92,14 @@ export class Cre implements HasTasks, HasMy, HasHits {
   /**extra infomation*/
   readonly upgrade: any = {};
   constructor(creep: Creep) {
+    super(creep);
     this.master = creep;
     this.tasks = [];
     this.upgrade = {};
   }
+  taunt: Event_Number | undefined;
+  force: Event_Number | undefined;
+  extraTauntList: ExtraTauntEvent[] = [];
   get role(): Role | undefined {
     return this.spawnInfo?.role;
   }
@@ -100,9 +127,6 @@ export class Cre implements HasTasks, HasMy, HasHits {
   get hitsMax() {
     return this.master.hitsMax;
   }
-  get exists() {
-    return this.master.exists;
-  }
   get id() {
     return this.master.id;
   }
@@ -117,7 +141,7 @@ export class Cre implements HasTasks, HasMy, HasHits {
     const cNum = this.getBodyPartsNum(CARRY);
     return mNum + cNum === this.body.length;
   }
-  getBody(type: BodyPartConstant): BodyCre[] {
+  getBodyParts(type: BodyPartConstant): BodyCre[] {
     return this.body.filter(i => i.type === type);
   }
   getBodyArray(): BodyPartConstant[] {
@@ -128,13 +152,23 @@ export class Cre implements HasTasks, HasMy, HasHits {
     return rtn;
   }
   getHealthyBodyParts(type: BodyPartConstant): BodyCre[] {
-    return this.getBody(type).filter(i => i.hits > 0);
+    return this.getBodyParts(type).filter(i => i.hits > 0);
   }
   getBodyPartsNum(type: BodyPartConstant): number {
-    return this.getBody(type).length;
+    return this.getBodyParts(type).length;
   }
   getHealthyBodyPartsNum(type: BodyPartConstant): number {
     return this.getHealthyBodyParts(type).length;
+  }
+}
+/** represent a event of pull function */
+export class PullEvent extends Event {
+  readonly pullOne: Cre;
+  readonly bePulledOne: Cre;
+  constructor(pullOne: Cre, bePulledOne: Cre) {
+    super();
+    this.pullOne = pullOne;
+    this.bePulledOne = bePulledOne;
   }
 }
 //Role
@@ -196,6 +230,9 @@ export function hasEnemyThreatAround(pos: Pos, range: number): boolean {
 export function hasEnemyArmyAround(pos: Pos, range: number): boolean {
   return enemies.find(i => isArmy(i) && GR(pos, i) <= range) !== undefined;
 }
+export function hasEnemyAround(pos: Pos, range: number): boolean {
+  return enemies.find(i => GR(pos, i) <= range) !== undefined;
+}
 export function getRoundEmptyPos(cre: Pos): Pos | undefined {
   const roundPoss = getRangePoss(cre, 1);
   return roundPoss.find(i => !blocked(i));
@@ -207,13 +244,15 @@ export function getFriendsThreated() {
   return friends.filter(i => hasThreat(i));
 }
 export function hasThreat(cre: Cre): boolean {
-  return cre.getBody(ATTACK).length + cre.getBody(RANGED_ATTACK).length > 0;
+  return (
+    cre.getBodyParts(ATTACK).length + cre.getBodyParts(RANGED_ATTACK).length > 0
+  );
 }
 export function isArmy(cre: Cre): boolean {
   return (
-    cre.getBody(ATTACK).length +
-      cre.getBody(RANGED_ATTACK).length +
-      cre.getBody(HEAL).length >
+    cre.getBodyParts(ATTACK).length +
+      cre.getBodyParts(RANGED_ATTACK).length +
+      cre.getBodyParts(HEAL).length >
     0
   );
 }
@@ -385,7 +424,7 @@ export function enemyAWeight(): number {
 export function enemyRangedAttackNum(): number {
   let sum = 0;
   for (let en of enemies) {
-    let enemyAttackNum = en.getBody(RANGED_ATTACK).length;
+    let enemyAttackNum = en.getBodyParts(RANGED_ATTACK).length;
     sum += enemyAttackNum;
   }
   return sum;
@@ -393,7 +432,7 @@ export function enemyRangedAttackNum(): number {
 export function enemyAttackNum(): number {
   let sum = 0;
   for (let en of enemies) {
-    let enemyAttackNum = en.getBody(ATTACK).length;
+    let enemyAttackNum = en.getBodyParts(ATTACK).length;
     sum += enemyAttackNum;
   }
   return sum;

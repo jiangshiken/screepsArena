@@ -10,14 +10,19 @@ import {
   StructureTower,
   StructureWall,
 } from "game/prototypes";
+import { Event_Number } from "../utils/Event";
 import { HasPos } from "../utils/Pos";
+import { ExtraTauntEvent } from "./battle";
+import { GameObj } from "./GameObj";
 import { isMyGO, isOppoGO, Type_OwnedStructure } from "./GameObjectInitialize";
+import { HasBattleStats } from "./HasBattleStats";
 import { HasHits } from "./HasHits";
 import { HasMy } from "./HasMy";
 
-export class Stru implements HasPos {
+export class Stru extends GameObj implements HasPos {
   readonly master: Structure;
   constructor(stru: Structure) {
+    super(stru);
     this.master = stru;
   }
   get x(): number {
@@ -27,12 +32,15 @@ export class Stru implements HasPos {
     return this.master.y;
   }
 }
-export class OwnedStru extends Stru implements HasHits, HasMy {
+export class OwnedStru extends Stru implements HasHits, HasMy, HasBattleStats {
   master: Type_OwnedStructure;
   constructor(master: Type_OwnedStructure) {
     super(master);
     this.master = master;
   }
+  taunt: Event_Number | undefined;
+  force: Event_Number | undefined;
+  extraTauntList: ExtraTauntEvent[] = [];
   get hitsMax(): number {
     return this.master.hitsMax;
   }
@@ -99,9 +107,10 @@ export class Roa extends Stru {
     this.master = master;
   }
 }
-export class Res implements HasPos {
+export class Res extends GameObj implements HasPos {
   master: Resource;
   constructor(master: Resource) {
+    super(master);
     this.master = master;
   }
   get x(): number {
