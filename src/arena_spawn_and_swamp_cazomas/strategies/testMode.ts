@@ -9,19 +9,22 @@ import { TOUGH } from "game/constants";
 import { CostMatrix, searchPath } from "game/path-finder";
 import { StructureExtension } from "game/prototypes";
 
-import { Cre, friends, id, Role } from "../gameObjects/Cre";
+import { Cre, id, Role } from "../gameObjects/Cre";
+import { Cre_move } from "../gameObjects/Cre_move";
 import { createCS } from "../gameObjects/CS";
+import { friends } from "../gameObjects/GameObjectInitialize";
+import { moveTo_basic } from "../gameObjects/MoveTask";
+import { pullTar } from "../gameObjects/pull";
 import { enemySpawn, spawn, spawnCreep } from "../gameObjects/spawn";
 import { builder4Ram } from "../roles/builder";
 import { harvester } from "../roles/harvester";
 import { TB } from "../utils/autoBodys";
 import { ct, pt } from "../utils/CPU";
-import { validEvent } from "../utils/Event";
 import { S } from "../utils/export";
 import { tick } from "../utils/game";
 import { divideReduce } from "../utils/JS";
 import { MyMap } from "../utils/MyMap";
-import { atPos, GR, midPoint, posPlusVec } from "../utils/Pos";
+import { atPos, GR, midPoint, Pos_C, posPlusVec } from "../utils/Pos";
 import {
   drawPolyLight,
   drawRangeComplex,
@@ -41,24 +44,24 @@ function findOtherTester(cre: Cre, role: Role) {
   return friends.find(i => i !== cre && i.role === role);
 }
 //## TEST and LOOP
-export function tester_PFC2_Job(cre: Cre) {
+export function tester_PFC2_Job(cre: Cre_move) {
   SA(cre, "i'm tester_PFC2");
   if (cre.getBodyPartsNum(TOUGH) > 0) {
     SA(cre, "i'm tougher");
-    if (!validEvent(cre.bePulledTarget, 0)) {
-      cre.moveToNormal(enemySpawn);
+    if (!cre.bePulledEvent?.validEvent()) {
+      moveTo_basic(cre, enemySpawn);
     }
   } else {
-    const tougher = friends.find(i => i.getBodiesNum(TOUGH) > 0);
+    const tougher = friends.find(i => i.getBodyPartsNum(TOUGH) > 0);
     const target = tougher;
     // const target = friends.find(i => !i.canMove())
     // if(cre.canMove()){
-    if (target && cre.canMove()) {
-      const nextTar = target.moveTargetNextPos?.pos;
+    if (target && cre.master.fatigue === 0) {
+      const nextTar = target.moveEvent?.nextStep;
       if (nextTar) {
         if (!atPos(cre, nextTar)) {
           cre.master.moveTo(nextTar);
-        } else if (cre.pullTar(target)) {
+        } else if (pullTar(cre, target)) {
           cre.master.moveTo(enemySpawn);
         }
       }
@@ -89,7 +92,7 @@ export function tester_PFC_Job(cre: Cre) {
     if (cre.getBodyPartsNum(TOUGH) === 0) {
       const otherFri = findOtherTester(cre, tester_PFC);
       if (otherFri) {
-        cre.pullTar(otherFri);
+        pullTar(cre, otherFri);
         cre.master.moveTo(pos4);
       }
     }
@@ -260,11 +263,11 @@ export function useTest() {
       sum += cc;
     }
     pt("lamb", st3);
-    const arr2D = new MyMap<number>(100, 100, 0, 0);
+    const arr2D = new MyMap<number>(100, 100, () => 0, 0);
     const st4 = ct();
     for (let i = 0; i < stepX; i++) {
       for (let j = 0; j < stepY; j++) {
-        arr2D.set_realIndex(i, j, 0);
+        arr2D.set(new Pos_C(i, j), 0);
       }
     }
     pt("[][]", st4);

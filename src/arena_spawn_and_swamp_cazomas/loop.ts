@@ -7,12 +7,6 @@ import {
   getTicks,
 } from "game/utils";
 
-import {
-  sum_stdAttacker0,
-  sum_stdAttacker1,
-  sum_stdHealer0,
-} from "./roles/fighters_std";
-
 import { controlCreeps, isMyTick } from "./gameObjects/Cre";
 import { getEnemyProducers, getMyProducers } from "./gameObjects/Cre_harvest";
 import { searchPath_area } from "./gameObjects/findPath";
@@ -236,7 +230,4 @@ export function printCPU() {
 }
 function displayRoleCPU() {
   ptSum("sum_snakePart0", sum_snakePart0);
-  ptSum("sum_stdAttacker0", sum_stdAttacker0.num);
-  ptSum("sum_stdHealer0", sum_stdHealer0.num);
-  ptSum("sum_stdAttacker1", sum_stdAttacker1.num);
 }

@@ -98,7 +98,7 @@ import {
   drawLineComplex,
   drawText,
 } from "../utils/visual";
-import { useStandardTurtling } from "./turtle";
+import { useStandardTurtling } from "./4ramDefendTool";
 
 /**the part of the snake*/
 export const snakePart: Role = new Role("snakePart", snakePartJob);

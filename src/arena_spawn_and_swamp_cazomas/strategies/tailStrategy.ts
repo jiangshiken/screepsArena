@@ -7,7 +7,6 @@ import {
   spawnCleared,
   spawnCreep,
 } from "../gameObjects/spawn";
-import { stdShoter } from "../roles/fighters_std";
 import { jamer } from "../roles/jamer";
 
 import { getTaunt } from "../gameObjects/battle";
@@ -25,6 +24,7 @@ import { MoveTask } from "../gameObjects/MoveTask";
 import { Dooms, getGuessPlayer, Kerob, Tigga } from "../gameObjects/player";
 import { PullTarsTask } from "../gameObjects/pull";
 import { inRampart } from "../gameObjects/UnitTool";
+import { spawnStealer } from "../roles/spawnStealer";
 import { toughDefender } from "../roles/toughDefender";
 import { TB } from "../utils/autoBodys";
 import { best, first, goInRange, inRange, ranBool, sum } from "../utils/JS";
@@ -125,7 +125,7 @@ export function useTailStrategy() {
       // if(friends.filter(i=>i.role===jamer).length<=8){
       //     spawnCreep(TB('M'),jamer)
       // }else{
-      spawnCreep(TB("5MR"), stdShoter);
+      spawnCreep(TB("5MR"), spawnStealer);
       // }
     }
   }

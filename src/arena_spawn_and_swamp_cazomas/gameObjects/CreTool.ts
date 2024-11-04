@@ -21,9 +21,9 @@ import {
 } from "../utils/visual";
 
 import { StructureRoad } from "game/prototypes";
-import { rangeReduce } from "../utils/bonus";
 import { closest, tick } from "../utils/game";
 import { calculateForce, getForce_tradition, getTaunt } from "./battle";
+import { rangeReduce } from "./bonus";
 import {
   Cre,
   getEarning,

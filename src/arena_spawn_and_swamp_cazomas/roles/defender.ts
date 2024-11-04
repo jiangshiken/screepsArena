@@ -1,8 +1,14 @@
 import { ConstructionSite } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
-import { Cre, getEnemyThreats, Role } from "../gameObjects/Cre";
-import { cpuBreakJudge } from "../gameObjects/CreTool";
+import { getEnemyThreats, Role } from "../gameObjects/Cre";
+import { Cre_battle } from "../gameObjects/Cre_battle";
+import {
+  attackWeakRampart,
+  cpuBreakJudge,
+  defendTheRampart,
+} from "../gameObjects/CreTool";
+import { enemies } from "../gameObjects/GameObjectInitialize";
 import { findGO } from "../gameObjects/overallMap";
 import { spawn } from "../gameObjects/spawn";
 import { tick } from "../utils/game";
@@ -20,20 +26,20 @@ export const defender_rampart: Role = new Role(
  * is near broken.It will trying to approach the closest enemy while it can reach
  * it only pass the healthy rampart of mine.
  */
-export function defender_RampartJob(cre: Cre) {
+export function defender_RampartJob(cre: Cre_battle) {
   SA(cre, "defender_RampartJob");
   P("defender_RampartJob");
   cre.fight();
   const EnemyAroundSpawn = getEnemyThreats().filter(i => GR(i, spawn) <= 1);
   if (
     EnemyAroundSpawn.length > 0 &&
-    ((tick > 1950 && !findGO(spawnPos, ConstructionSite)) || tick > 1965)
+    ((tick > 1950 && !findGO(spawn, ConstructionSite)) || tick > 1965)
   ) {
     SA(cre, "final protect mode");
     const tar = findClosestByRange(cre, EnemyAroundSpawn);
     if (GR(cre, tar) > 1) {
       SA(cre, "MTJ_follow");
-      cre.MTJ_follow(tar);
+      cre.MTJ(tar);
     } else {
       SA(cre, "stop");
       cre.stop();
