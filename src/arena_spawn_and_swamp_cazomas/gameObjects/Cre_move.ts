@@ -34,7 +34,7 @@ export class Cre_move extends Cre {
   MTJ_stop(
     tar: Pos,
     pullList: Cre[] = [this],
-    step: number = getMoveStepDef(this, pullList),
+    step: number = getMoveStepDef(pullList),
     costMatrix: CostMatrix | undefined = undefined,
     plainCost: number = def_plainCost,
     swampCost: number = def_swampCost
@@ -105,7 +105,7 @@ export class Cre_move extends Cre {
   MTJ(
     tar: Pos,
     pullList: Cre[] = [this],
-    step: number = getMoveStepDef(this, pullList),
+    step: number = getMoveStepDef(pullList),
     costMatrix: CostMatrix | undefined = undefined,
     plainCost: number = def_plainCost,
     swampCost: number = def_swampCost

@@ -1,6 +1,5 @@
 import { arenaInfo } from "game";
 import { CostMatrix, searchPath } from "game/path-finder";
-import { StructureSpawn } from "game/prototypes";
 import {
   findClosestByRange,
   getCpuTime,
@@ -14,40 +13,27 @@ import {
   sum_stdHealer0,
 } from "./roles/fighters_std";
 
-import {
-  controlCreeps,
-  getDecideSearchRtn,
-  getEnemyProducers,
-  getEnergy,
-  getMyProducers,
-} from "./gameObjects/Cre";
+import { controlCreeps, isMyTick } from "./gameObjects/Cre";
+import { getEnemyProducers, getMyProducers } from "./gameObjects/Cre_harvest";
+import { searchPath_area } from "./gameObjects/findPath";
 import {
   containers,
-  cres,
-  friends,
   getGOs,
-  getPrototype,
   initialCresAtLoopStart,
   initialCSsAtLoopStart,
   initialGameObjectsAtLoopStart_advance,
   initialGameObjectsAtLoopStart_basic,
   initialressAtLoopStart,
   initialStrusAtLoopStart,
+  mySpawns,
+  oppoSpawns,
 } from "./gameObjects/GameObjectInitialize";
-import {
-  Cont,
-  displayPos,
-  enemySpawnPos,
-  setEnemySpawnPos,
-  setSpawnPos,
-  spawnPos,
-} from "./gameObjects/HasHits";
+import {} from "./gameObjects/HasHits";
 import {
   overallMapInit,
   setGameObjectsThisTick,
   setOverallMap,
 } from "./gameObjects/overallMap";
-import { setRamMoveMapValue } from "./gameObjects/ramparts";
 import {
   checkSpawns,
   enemySpawn,
@@ -55,10 +41,10 @@ import {
   setSpawn,
   spawn,
 } from "./gameObjects/spawn";
-import { Spa } from "./gameObjects/Stru";
+import { Con } from "./gameObjects/Stru";
+import { getEnergy } from "./gameObjects/UnitTool";
 import { showEnemies, showHits } from "./gameObjects/visual_Cre";
 import { sum_snakePart0 } from "./strategies/snakeRush";
-import { getSuperior, getSuperiorRate } from "./utils/bonus";
 import { ct, getCPUPercent, pt, ptSum } from "./utils/CPU";
 import {
   inResourceArea,
@@ -66,12 +52,12 @@ import {
   set_left,
   set_startGateUp,
   setTick,
-  tick,
 } from "./utils/game";
 import { divideReduce } from "./utils/JS";
 import { GR, Pos, Pos_C } from "./utils/Pos";
 import {
   append_largeSizeText,
+  displayPos,
   drawText,
   firstInit_visual,
   loopEnd_visual,
@@ -87,16 +73,10 @@ export function loopEnd() {
   controlCreeps();
   displayRoleCPU();
   pt("controlCreeps", st0);
-  if (getCPUPercent() > 0.8 && switchCPUModeOn) {
-    setLowCPUMode(true);
-  }
   drawText(new Pos_C(50, 57), "G");
   const st1 = ct();
-  if (!lowCPUMode) {
-    setHisPoss(); //history pos
-    showHits();
-    showEnemies();
-  }
+  showHits();
+  showEnemies();
   doLongProgress();
   drawText(new Pos_C(50, 58), "H");
   printCPU();
@@ -116,44 +96,6 @@ function doLongProgress() {
     if (getCPUPercent() > 0.9) {
       break;
     }
-  }
-}
-// function predictOppos() {
-// 	for (let en of enemies) {
-// 		en.battle.predictOppo()
-// 	}
-// }
-/**
- * set all the hisPos of Creeps
- */
-function setHisPoss() {
-  for (let cre of cres) {
-    cre.battle?.setHisPos();
-  }
-}
-function switchLowCPUMode() {
-  if (lowCPUMode) {
-    append_largeSizeText("🕐");
-  }
-  if (switchCPUModeOn) {
-    const sr = getSuperiorRate();
-    const superiorExtra = getSuperior() > 30 && sr > 3 ? 2 : 0;
-    const tickExtra = tick > 800 ? 1 : 0;
-    const friendExtra = 0.1 * friends.length;
-    const unitExtra = 0.03 * units.length;
-    const switchExtra = superiorExtra + tickExtra + friendExtra + unitExtra;
-    if (switchExtra > 5) {
-      setLowCPUMode(true);
-    } else {
-      setLowCPUMode(false);
-    }
-    SAN(displayPos(), "getSuperiorRate", sr);
-    SA(displayPos(), "lowCPUMode=" + lowCPUMode);
-    SAN(displayPos(), "switchExtra", switchExtra);
-    //
-    P("getSuperiorRate=" + sr);
-    P("lowCPUMode=" + lowCPUMode);
-    P("switchExtra=" + switchExtra);
   }
 }
 export let useAvoidEnRam = false;
@@ -177,54 +119,39 @@ export function loopStart() {
   initialressAtLoopStart();
   const st3p5 = ct();
   initialGameObjectsAtLoopStart_advance();
+
   pt("initialGameObjects", st3p5);
   pt("init cres and other", st3);
   //set overall map
   const st4 = ct();
   setGameObjectsThisTick(<Pos[]>getGOs());
+  setSpawn(mySpawns[0]);
+  setEnemySpawn(oppoSpawns[0]);
   setOverallMap();
   //
   append_largeSizeText("Status:");
-  switchLowCPUMode();
-  pt("area0", st4);
-  // if (!lowCPUMode) {
-  loopStart_maps();
-  if (useAvoidEnRam) {
-    setRamMoveMapValue();
-  }
-  setMoveMatrix();
-  // } else {
-  // 	loopStart_maps();
-  // 	if (randomBool(0.1)) {
-  // 		setMoveMatrix();
-  // 	}
-  // }
+
   const st_predictOppos = ct();
-  // useTasks(predictTasks);
-  // if (!lowCPUMode)
-  // 	predictOppos()
+
   pt("predictOppos and setRamMoveMapValue", st_predictOppos);
   const st_checkSpawns = ct();
   checkSpawns();
-  // P("setWorthForContainersb start");
   pt("checkSpawns", st_checkSpawns);
   const st5 = ct();
   setWorthForContainers();
   pt("setWorthForContainers", st5);
-  // P("setWorthForContainersb end");
   P("loopStart end");
 }
 export function setWorthForContainers() {
-  const conts: Cont[] = <Cont[]>containers.filter(i => inResourceArea(i));
+  const conts: Con[] = <Con[]>containers.filter(i => inResourceArea(i));
   P("setWorthForContainers:" + conts.length);
   for (let cont of conts) {
     setWorthForContainer(cont);
   }
 }
-export function setWorthForContainer(cont: Cont): void {
+export function setWorthForContainer(cont: Con): void {
   //
-  if (cont.inited === undefined || !validEvent(cont.inited, 25)) {
-    cont.inited = new Event_C();
+  if (isMyTick(cont, 25)) {
     const myProducers = getMyProducers();
     const myProducer = findClosestByRange(cont, myProducers);
     const myProducerCost = myProducer ? GR(myProducer, cont) : 100;
@@ -237,8 +164,8 @@ export function setWorthForContainer(cont: Cont): void {
     const enemyProducerCost = enemyProducer ? GR(enemyProducer, cont) : 100;
     const enemyDisProducerExtra = -divideReduce(enemyProducerCost, 10);
     //
-    const mySpCost = getDecideSearchRtn(cont, spawnPos).cost;
-    const enSpCost = getDecideSearchRtn(cont, enemySpawnPos).cost;
+    const mySpCost = searchPath_area(cont, spawn).cost;
+    const enSpCost = searchPath_area(cont, enemySpawn).cost;
     // const mySpCost = searchPath(cont, spawnPos).cost
     // const enSpCost = searchPath(cont, enemySpawnPos).cost
     const spExtra = -0.001 * mySpCost + 0.001 * enSpCost;
@@ -260,19 +187,9 @@ export function setWorthForContainer(cont: Cont): void {
 export function firstInit() {
   if (getTicks() === 1) {
     PL("startGame");
-    firstInit_overallMap();
     firstInit_visual();
-    setSpawn(
-      <Spa>(<StructureSpawn[]>getPrototype(StructureSpawn)).find(i => i.my)
-    );
-    setEnemySpawn(
-      <Spa>(<StructureSpawn[]>getPrototype(StructureSpawn)).find(i => !i.my)
-    );
-    setSpawnPos(spawn);
-    setEnemySpawnPos(enemySpawn);
     set_left(spawn.x < 50);
     setStartGate();
-    firstInit_maps();
   }
 }
 // function setTopAndBottomY(): void {

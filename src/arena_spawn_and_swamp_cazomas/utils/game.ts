@@ -65,7 +65,7 @@ export function getArea(
   else if (pos.y < midBorder) return "area_top";
   else return "area_bottom";
 }
-export function closest(pos: Pos, arr: Pos[]): Pos | undefined {
+export function closest<E extends Pos>(pos: Pos, arr: E[]): E | undefined {
   if (arr.length === 0) {
     return undefined;
   } else {

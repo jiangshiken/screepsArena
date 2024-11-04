@@ -1,10 +1,11 @@
 import { CostMatrix } from "game/path-finder";
-import { findClosestByRange } from "game/utils";
 
-import { Cre, enemies, friends, Role } from "../gameObjects/Cre";
+import { Role } from "../gameObjects/Cre";
+import { Cre_battle } from "../gameObjects/Cre_battle";
+import { enemies, friends } from "../gameObjects/GameObjectInitialize";
 import { getGuessPlayer, Tigga } from "../gameObjects/player";
 import { spawn } from "../gameObjects/spawn";
-import { leftVector } from "../utils/game";
+import { closest, leftVector } from "../utils/game";
 import {
   absRange,
   getRangePoss,
@@ -20,7 +21,7 @@ import { SA } from "../utils/visual";
  * the base
  */
 export const toughDefender: Role = new Role("toughDefender", toughDefenderJob);
-export function toughDefenderJob(cre: Cre) {
+export function toughDefenderJob(cre: Cre_battle) {
   cre.fight();
   const cm = new CostMatrix();
   if (getGuessPlayer() === Tigga) {
@@ -35,22 +36,22 @@ export function toughDefenderJob(cre: Cre) {
     if (ind === 1) {
       SA(cre, "1");
       const stop_pos = posPlusVec(spawn, vecPlusVec(leftVec, upVec));
-      cre.moveToNormal(stop_pos);
+      cre.MTJ(stop_pos);
     } else if (ind === 2) {
       SA(cre, "2");
       const stop_pos = posPlusVec(
         spawn,
         vecPlusVec(upVec, VecMultiplyConst(leftVec, 2))
       );
-      cre.moveToNormal(stop_pos);
+      cre.MTJ(stop_pos);
     } else if (ind === 3) {
       SA(cre, "3");
       const stop_pos = posPlusVec(spawn, leftVec);
-      cre.moveToNormal(stop_pos);
+      cre.MTJ(stop_pos);
     } else if (ind === 4) {
       SA(cre, "4");
       const stop_pos = posPlusVec(spawn, VecMultiplyConst(leftVec, 2));
-      cre.moveToNormal(stop_pos);
+      cre.MTJ(stop_pos);
     } else {
       SA(cre, "XX");
     }
@@ -65,11 +66,11 @@ export function toughDefenderJob(cre: Cre) {
         cm.set(pos.x, pos.y, 255);
       }
     }
-    const en = findClosestByRange(spawn, enemies);
+    const en = closest(spawn, enemies);
     if (en) {
       //if not at spawn dont chase
       if (GR(en, cre) > 1 || GR(en, spawn) === 1) {
-        cre.moveToNormal(en, { costMatrix: cm });
+        cre.MTJ(en, [cre], 1, cm);
       }
     }
   }

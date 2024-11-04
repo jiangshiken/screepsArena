@@ -4,7 +4,7 @@ import { getTicks } from "game/utils";
 
 import { Event } from "../utils/Event";
 import { S } from "../utils/export";
-import { best, invalid } from "../utils/JS";
+import { best, divide0, invalid } from "../utils/JS";
 import { atPos, COO, HasPos, Pos } from "../utils/Pos";
 import { drawLineComplex, SA } from "../utils/visual";
 import { GameObj } from "./GameObj";
@@ -35,6 +35,28 @@ export class CS extends GameObj implements HasPos, HasMy {
   }
   get y(): number {
     return this.master.y;
+  }
+  /**the progress of a construction site*/
+  get progress(): number {
+    if (this.master.progress) {
+      return this.master.progress;
+    } else {
+      return 0;
+    }
+  }
+  /**the progress total of a construction site*/
+  get progressTotal(): number {
+    if (this.master.progressTotal) {
+      return this.master.progressTotal;
+    } else {
+      return 0;
+    }
+  }
+  /**
+   * get the progress rate of a `ConstructionSite`
+   */
+  get progressRate(): number {
+    return divide0(this.progress, this.progressTotal);
   }
 }
 /**has a construction site of specific type at a pos*/
@@ -175,7 +197,7 @@ export function createCS(
         if (invalid(myCS)) csw = 0;
         else csw = myCS.wt;
         //progressRate bonus
-        const pr = getProgressRate(myCS); //0~1
+        const pr = myCS.progressRate; //0~1
         const prBonus = 1 + 2 * pr;
         csw *= prBonus;
         //decay reduce
@@ -228,28 +250,4 @@ export function getCSDecayReduce(cs: CS) {
  */
 export function getMaxWorthCSS(css: CS[]): CS | undefined {
   return best(css, i => i.wt);
-}
-/**the progress of a construction site*/
-export function progress(cs: CS): number {
-  if (cs.master.progress) {
-    return cs.master.progress;
-  } else {
-    return 0;
-  }
-}
-/**the progress total of a construction site*/
-export function progressTotal(cs: CS): number {
-  if (cs.master.progressTotal) {
-    return cs.master.progressTotal;
-  } else {
-    return 0;
-  }
-}
-/**
- * get the progress rate of a `ConstructionSite`
- */
-export function getProgressRate(cs: CS): number {
-  if (cs) {
-    return progress(cs) / progressTotal(cs);
-  } else return 0;
 }

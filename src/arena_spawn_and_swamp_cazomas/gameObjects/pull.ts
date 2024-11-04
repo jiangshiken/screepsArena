@@ -6,6 +6,7 @@ import { GR, Pos, atPos } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA, drawLineComplex } from "../utils/visual";
 import { Cre, PullEvent, Task_Cre } from "./Cre";
+import { Cre_move } from "./Cre_move";
 import { moveToRandomEmptyAround } from "./CreTool";
 import { getSpeed } from "./findPath";
 import { FindPathAndMoveTask, moveTo_basic, moveTo_direct } from "./MoveTask";
@@ -14,7 +15,7 @@ import { FindPathAndMoveTask, moveTo_basic, moveTo_direct } from "./MoveTask";
  * new a {@link PullTarsTask}, will cancel if already have same task
  */
 export function newPullTarsTask(
-  master: Cre,
+  master: Cre_move,
   tarCres: Cre[],
   tarPos: Pos,
   nextStep?: Pos
@@ -39,7 +40,7 @@ export function newPullTarsTask(
  * new a {@link PullTask}, will cancel if already have same task
  */
 export function newPullTask(
-  master: Cre,
+  master: Cre_move,
   tarCre: Cre,
   tarPos: Pos,
   nextStep?: Pos,
@@ -68,6 +69,7 @@ export function newPullTask(
  *  if is undefined the creep will move random at last position of path
  */
 export class PullTask extends Task_Cre {
+  master: Cre_move;
   tarCre: Cre;
   tarPos: Pos;
   nextStep: Pos | undefined;
@@ -75,13 +77,14 @@ export class PullTask extends Task_Cre {
   moveTask2: FindPathAndMoveTask | undefined = undefined;
   leaderStop: boolean;
   constructor(
-    master: Cre,
+    master: Cre_move,
     tarCre: Cre,
     tarPos: Pos,
     nextStep?: Pos,
     leaderStop: boolean = false
   ) {
     super(master);
+    this.master = master;
     this.tarCre = tarCre;
     this.tarPos = tarPos;
     this.nextStep = nextStep;
@@ -279,13 +282,14 @@ export function getAllPullTargetList(cre: Cre): Cre[] {
  *  if is undefined the creep will move random at last position of path
  */
 export class PullTarsTask extends Task_Cre {
+  master: Cre_move;
   tarCres: Cre[];
   tarPos: Pos;
   nextStep: Pos | undefined;
   useLeaderPull: boolean;
   leaderStop: boolean;
   constructor(
-    master: Cre,
+    master: Cre_move,
     tarCres: Cre[],
     tarPos: Pos,
     nextStep?: Pos,
@@ -293,6 +297,7 @@ export class PullTarsTask extends Task_Cre {
     leaderStop: boolean = false //for direct move of leader
   ) {
     super(master);
+    this.master = master;
     SA(master, "new PullTarsTask");
     this.tarCres = tarCres;
     this.tarPos = tarPos;
@@ -334,7 +339,7 @@ export class PullTarsTask extends Task_Cre {
       let pulling = moveAndBePulled(tarNext, tar);
       if (!pulling) {
         allPulling = false;
-        let tarSpeed = getSpeed(tarNext, [tarNext]);
+        let tarSpeed = getSpeed([tarNext]);
         if (
           this.useLeaderPull &&
           creIdle &&

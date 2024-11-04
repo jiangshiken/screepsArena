@@ -410,7 +410,7 @@ export function findFitDamagedFriend(cre: Cre_battle): {
 } {
   const ifSelf = damaged(cre) ? friends : getOtherFriends(cre);
   const targets = ifSelf.filter(i => damaged(i));
-  return findFitUnits(cre, targets, true, 8 * getMoveTime(cre, [cre]));
+  return findFitUnits(cre, targets, true, 8 * getMoveTime([cre]));
 }
 /**find a fit target of opponent unit*/
 export function findFitOppoUnit(

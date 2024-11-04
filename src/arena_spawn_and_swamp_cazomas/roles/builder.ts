@@ -1,9 +1,5 @@
 import { ATTACK, WORK } from "game/constants";
-import {
-  ConstructionSite,
-  StructureExtension,
-  StructureRampart,
-} from "game/prototypes";
+import { StructureExtension, StructureRampart } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
 import { protectSelfExtraTaunt } from "../gameObjects/battle";
@@ -15,7 +11,7 @@ import {
   Role,
   Task_Cre,
 } from "../gameObjects/Cre";
-import { canBeBuildByCre } from "../gameObjects/Cre_build";
+import { canBeBuildByCre, Cre_build } from "../gameObjects/Cre_build";
 import { calAroundEnergy, getHarvables } from "../gameObjects/Cre_harvest";
 import {
   cpuBreakJudge,
@@ -26,12 +22,13 @@ import {
   createCS,
   CS,
   getMaxWorthCSS,
-  getProgressRate,
   hasConstructionSite,
 } from "../gameObjects/CS";
 import {
   friends,
+  HasEnergy,
   HasStore,
+  myCSs,
   myRamparts,
 } from "../gameObjects/GameObjectInitialize";
 import { overallMap } from "../gameObjects/overallMap";
@@ -50,6 +47,7 @@ import {
 } from "../gameObjects/spawn";
 import {
   blocked,
+  energylive,
   getCapacity,
   getEnergy,
   getFreeEnergy,
@@ -58,7 +56,7 @@ import {
   getSpawnAroundLiveContainers,
 } from "../gameObjects/UnitTool";
 import { S } from "../utils/export";
-import { tick } from "../utils/game";
+import { closest, tick } from "../utils/game";
 import { d2, getClassName, invalid } from "../utils/JS";
 import { atPos, COO, getRangePoss, GR, midPoint, Pos } from "../utils/Pos";
 import { findTask } from "../utils/Task";
@@ -81,14 +79,12 @@ export function isBuilderOutSide(role: Role | undefined): boolean {
   return role === builderStandard || role === builder4Ram;
 }
 /**job of builder4Ram*/
-export function builder4RamJob(cre: Cre) {
+export function builder4RamJob(cre: Cre_build) {
   SA(cre, "builder4RamJob");
   const scanCSRange = 8;
-  if (getMyCSs().find(i => GR(spawn, i) <= scanCSRange)) {
+  if (myCSs.find(i => GR(spawn, i) <= scanCSRange)) {
     let css = <CS[]>(
-      getMyCSs().filter(
-        i => GR(i, spawn) <= scanCSRange && canBeBuildByCre(i, cre)
-      )
+      myCSs.filter(i => GR(i, spawn) <= scanCSRange && canBeBuildByCre(i, cre))
     );
     let cs = getMaxWorthCSS(css);
     if (cs) {
@@ -96,7 +92,7 @@ export function builder4RamJob(cre: Cre) {
       builderNormalControl(cre, cs);
     } else {
       SA(cre, "job has no cs");
-      if (myConstructionSites.find(i => atPos(i, cre))) {
+      if (myCSs.find(i => atPos(i, cre))) {
         SA(cre, "random move");
         cre.randomMove();
       }
@@ -120,7 +116,7 @@ export function spawnAndBuilderEnergy() {
 /**builder that build base structures and assign base containers.
  * Can be used as defender
  */
-export function builderTurtleJob(cre: Cre) {
+export function builderTurtleJob(cre: Cre_build) {
   SA(cre, "builderTurtleControl");
   cre.fight();
   cre.taskPriority = 9;
@@ -128,7 +124,7 @@ export function builderTurtleJob(cre: Cre) {
   cre.useAppointMovement();
   //
   const scanCSRange = 4;
-  const css = getMyCSs().filter(
+  const css = myCSs.filter(
     i => canBeBuildByCre(i, cre) && GR(i, spawn) <= scanCSRange
   );
   const canUseEnergy = getEnergy(cre) + getSpawnAndBaseContainerEnergy();
@@ -138,7 +134,7 @@ export function builderTurtleJob(cre: Cre) {
   const hasEmptyRampart: boolean = emptyRamparts.length > 0;
   const spawnHasRam = myRampartAt(spawn) !== undefined;
   SA(cre, "spawnHasRam=" + spawnHasRam);
-  cre.macro.setIsWorking(false);
+  cre.setIsWorking(false);
   if (!inMyRampart(cre) && hasEmptyRampart) {
     //if not in ram,move to ram
     SA(cre, "not in ram");
@@ -159,7 +155,7 @@ export function builderTurtleJob(cre: Cre) {
     }
     defendTheRampart(cre);
   } else if (cs) {
-    cre.macro.setIsWorking(true);
+    cre.setIsWorking(true);
     SA(cre, "build");
     if (cre.appointMovementIsActived()) {
       SA(cre, "appointMovementIsActived");
@@ -170,19 +166,19 @@ export function builderTurtleJob(cre: Cre) {
       (tick > 600 &&
         !spawnHasRam &&
         getEnergy(cre) >= 5 * cre.getBodyPartsNum(WORK)) ||
-      getIsBuilding(cre)
+      cre.getIsBuilding()
     ) {
       SA(cre, "normalBuild");
-      cre.macro.normalBuild(cs);
+      cre.normalBuild(cs);
     } else if (tick <= 300) {
       //time for build ramparts
       SA(cre, "collectResource");
-      let harvables = getHarvables()
-        .filter(i => GR(i, spawn) <= 3)
-        .concat(spawn);
-      let harvable = cre.findClosestByRange(harvables);
+      const harvables = (<HasEnergy[]>(
+        getHarvables().filter(i => GR(i, spawn) <= 3)
+      )).concat(spawn);
+      const harvable = <HasEnergy>closest(cre, harvables);
       if (harvable) {
-        cre.macro.directWithdraw(harvable);
+        cre.directWithdraw(harvable);
       }
     } else {
       //time after tick 300
@@ -190,7 +186,7 @@ export function builderTurtleJob(cre: Cre) {
       builderTurtleWithdrawNormal(cre);
     }
   } else {
-    cre.macro.setIsWorking(false);
+    cre.setIsWorking(false);
     //assign spawn energy to container
     if (getFreeEnergy(spawn) === 0) {
       SA(cre, "withdraw spawn to container");
@@ -201,7 +197,7 @@ export function builderTurtleJob(cre: Cre) {
         if (con) {
           SA(cre, "has container");
           if (GR(con, cre) <= 1) {
-            cre.macro.transferNormal(con);
+            cre.transferNormal(con);
           } else {
             gotoTargetRampart(cre, con);
           }
@@ -209,7 +205,7 @@ export function builderTurtleJob(cre: Cre) {
       } else {
         SA(cre, "no en");
         if (GR(cre, spawn) <= 1) {
-          cre.macro.withdrawNormal(spawn);
+          cre.withdrawNormal(spawn);
         } else {
           gotoTargetRampart(cre, spawn);
         }
@@ -227,27 +223,20 @@ export function builderTurtleJob(cre: Cre) {
     }
   }
 }
-export function builderTurtleWithdrawNormal(cre: Cre) {
+export function builderTurtleWithdrawNormal(cre: Cre_build) {
   let target: HasStore;
   const cons = getSpawnAroundLiveContainers();
   const con = findClosestByRange(cre, cons);
-  if (con && live(con)) {
+  if (con && energylive(con)) {
     SA(cre, "withdraw con");
     target = con;
   } else {
     SA(cre, "withdraw spawn");
     target = spawn;
   }
-  // if (getEnergy(spawn) > 50 || !con) {
-  // 	SA(cre, "withdraw spawn");
-  // 	target = spawn
-  // } else {
-  // 	SA(cre, "withdraw con");
-  // 	target = con
-  // }
   if (GR(cre, target) <= 1) {
     SA(cre, "withdraw it");
-    cre.macro.withdrawNormal(target);
+    cre.withdrawNormal(target);
   } else {
     SA(cre, "go it");
     gotoTargetRampart(cre, target);
@@ -263,7 +252,7 @@ export function buildStructureByWorth(
 ): Pos | undefined {
   SA(pos, "buildStructure here type=" + getClassName(type));
   let poss = getRangePoss(pos, 1);
-  let mc = getMyCSs();
+  let mc = myCSs;
   let validPos = poss.find(i => !hasConstructionSite(i) && !blocked(i));
   if (validPos) {
     let rtn = createCS(validPos, type, worth, true);
@@ -276,23 +265,23 @@ export function hasBuilderStandardAround(pos: Pos) {
   return bss.length > 0;
 }
 /**the job of builderNormal*/
-export function builderNormalControl(cre: Cre, tar: CS): boolean {
-  if (getIsBuilding(cre)) {
+export function builderNormalControl(cre: Cre_build, tar: CS): boolean {
+  if (cre.getIsBuilding()) {
     SA(cre, "directBuild");
-    return cre.macro.directBuild(tar);
+    return cre.directBuild(tar);
   } else {
     SA(cre, "harvesterControl");
     if (getEnergy(cre) > 0) {
-      setIsBuilding(cre, true);
+      cre.setIsBuilding(true);
     } else {
       const target = findClosestByRange(cre, getHarvables());
-      cre.macro.directWithdraw(target);
+      cre.directWithdraw(target);
     }
     return true;
   }
 }
 /**the job of builderStandard*/
-export function builderStandardJob(cre: Cre) {
+export function builderStandardJob(cre: Cre_build) {
   SA(cre, "melee");
   cre.fight();
   //
@@ -314,12 +303,14 @@ const drop_on_the_ground = "drop on the ground";
 const build_rampart = "build rampart";
 const build_extensions = "build extensions";
 export class BuilderStandardTask extends Task_Cre {
+  master: Cre_build;
   step: string = goto_outside_resource;
   fleeRange: number;
   isWorking: boolean = true;
   fleeBias: number;
-  constructor(master: Cre) {
+  constructor(master: Cre_build) {
     super(master);
+    this.master = master;
     resetStartGateAvoidFromEnemies();
     if (master.getBodyPartsNum(ATTACK) > 0) {
       this.fleeRange = 12;
@@ -333,18 +324,16 @@ export class BuilderStandardTask extends Task_Cre {
   loop_task(): void {
     const cre = this.master;
     if (cpuBreakJudge(cre)) {
-      cre.macro.buildStatic();
+      cre.buildStatic();
       return;
     }
     SA(cre, "step=" + this.step);
     const closestEnemy = findClosestByRange(cre, getEnemyThreats());
-    const cs = <ConstructionSite | undefined>(
+    const cs = <CS | undefined>(
       overallMap
         .get(cre)
         .find(
-          i =>
-            i instanceof ConstructionSite &&
-            i.structure instanceof StructureRampart
+          i => i instanceof CS && i.master.structure instanceof StructureRampart
         )
     );
     SA(cre, "cs=" + S(cs));
@@ -365,9 +354,9 @@ export class BuilderStandardTask extends Task_Cre {
       );
       const realFleeRange = this.fleeRange + workingExtra;
       if (ram) {
-        cre.MTJ_follow(ram);
+        cre.MTJ(ram);
         doStep = false;
-      } else if (cre.battle.flee(realFleeRange, realFleeRange * 2)) {
+      } else if (cre.flee(realFleeRange, realFleeRange * 2)) {
         SA(cre, "flee");
         doStep = false;
       } else {
@@ -420,10 +409,10 @@ export class BuilderStandardTask extends Task_Cre {
         let j0 = getEnergy(i) > 500;
         let j1 = GR(i, spawn) >= 5;
         let j2 = !(hasBuilderStandardAround(i) && !(GR(cre, i) <= 1));
-        let j3 = cre.macro.reachableHarvable(i);
+        let j3 = cre.reachableHarvable(i);
         return j0 && j1 && j2 && j3;
       });
-      let har = cre.findClosestByRange(harvestables);
+      let har = closest(cre, harvestables);
       if (har) {
         cre.MTJ(har);
         cre.dropEnergy();
@@ -440,22 +429,18 @@ export class BuilderStandardTask extends Task_Cre {
   dropOntheGround() {
     //drop con
     const cre = this.master;
-    let ccs = getOutsideContainers().filter(
+    const ccs = getOutsideContainers().filter(
       i => getEnergy(i) > 0 && GR(i, cre) <= 1
     );
-    let cc = cre.findClosestByRange(ccs);
+    const cc = closest(cre, ccs);
     if (cc) {
-      cre.macro.directWithdrawAndDrop(cc);
+      cre.directWithdrawAndDrop(cc);
     } else {
       this.step = build_rampart;
     }
   }
   /**build the rampart for itself.It will not build it finished if not dangerous*/
-  buildRampart(
-    cs: ConstructionSite | undefined,
-    closestEnemy: Cre,
-    fleeRange: number
-  ) {
+  buildRampart(cs: CS | undefined, closestEnemy: Cre, fleeRange: number) {
     const cre = this.master;
     //if rampart is far from finished and enemy is still far away from here,
     //give up the building and directly build extensions
@@ -463,7 +448,7 @@ export class BuilderStandardTask extends Task_Cre {
       cs &&
       GR(cre, closestEnemy) - fleeRange >
         (cs.progressTotal - cs.progress) / 5 &&
-      getProgressRate(cs) < 0.8
+      cs.progressRate < 0.8
     ) {
       this.step = build_extensions;
       (<CS>cs).wt = 5;
@@ -479,7 +464,7 @@ export class BuilderStandardTask extends Task_Cre {
         if (hasEnemyArmyAround(cre, 1) && cre.getBodyParts(ATTACK).length > 0) {
           cre.fight();
         } else {
-          cre.macro.buildStatic();
+          cre.buildStatic();
         }
       }
     } else {
@@ -487,11 +472,7 @@ export class BuilderStandardTask extends Task_Cre {
     }
   }
   /**build extensions and fill it until all energy exhaust*/
-  buildExtensions(
-    cs: ConstructionSite | undefined,
-    closestEnemy: Cre,
-    fleeRange: number
-  ) {
+  buildExtensions(cs: CS | undefined, closestEnemy: Cre, fleeRange: number) {
     const cre = this.master;
     if (
       !inMyRampart(cre) &&
@@ -506,13 +487,13 @@ export class BuilderStandardTask extends Task_Cre {
     SA(cre, "sumEn=" + d2(sumEn));
     if (sumEn > 0) {
       if (getEnergy(cre) > 0) {
-        let fb = cre.macro.fillExtension();
+        let fb = cre.fillExtension();
         if (!fb) {
           SA(cre, "fillExtension=" + fb);
           if (sumEn > 0) {
-            let css = getMyCSs().find(i => {
+            let css = myCSs.find(i => {
               let j0 = GR(i, cre) <= 3;
-              let j1 = i.structure instanceof StructureExtension;
+              let j1 = i.master.structure instanceof StructureExtension;
               let j2 = !blocked(i);
               // SA(i,"j0="+j0)
               // SA(i,"j1="+j1)
@@ -547,14 +528,14 @@ export class BuilderStandardTask extends Task_Cre {
             ) {
               cre.fight();
             } else {
-              cre.macro.buildStatic();
+              cre.buildStatic();
             }
           } else {
             this.step = goto_outside_resource;
           }
         }
       } else {
-        cre.macro.withDrawStatic();
+        cre.withDrawStatic();
       }
     } else {
       this.step = goto_outside_resource;
@@ -564,7 +545,7 @@ export class BuilderStandardTask extends Task_Cre {
 /**the builderStandardTask when there is ATTACK part on the builder*/
 export class ArmedBuilderTask extends BuilderStandardTask {
   rush: boolean;
-  constructor(master: Cre) {
+  constructor(master: Cre_build) {
     super(master);
     this.rush = false;
   }
@@ -576,7 +557,7 @@ export class ArmedBuilderTask extends BuilderStandardTask {
     if (tick >= 1700 || cre.upgrade.rush) {
       //rush enemySpawn
       cre.dropEnergy();
-      cre.MTJ_follow(enemySpawn);
+      cre.MTJ(enemySpawn);
     } else {
       super.loop_task();
     }
@@ -587,9 +568,7 @@ export function getRoundEmptyPosLeave1Empty(
   containerBlock: boolean = false
 ): Pos | undefined {
   const roundPoss = getRangePoss(cre, 1);
-  const emptyRoundPoss = roundPoss.filter(
-    i => !blocked(i, true, false, false, containerBlock)
-  );
+  const emptyRoundPoss = roundPoss.filter(i => !blocked(i, true));
   if (emptyRoundPoss.length == 1) {
     //leave 1 empty avoid block Creep in 8 blocker
     return undefined;

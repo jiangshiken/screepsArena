@@ -1,5 +1,3 @@
-import { set_setMoveMapAvoidFarOn } from "./deprecated/maps";
-import { displayPos } from "./gameObjects/HasHits";
 import {
   Dooms,
   getGuessPlayer,
@@ -11,19 +9,15 @@ import {
 import { showHealthBars } from "./gameObjects/visual_Cre";
 import { firstInit, loopEnd, loopStart } from "./loop";
 import { set_harvesterNotFleeAtStart } from "./roles/harvester";
-import { useArmedBuilderStrategy } from "./strategies/armedBuilderStrategy";
 import {
   set_snakePartsTotalNum,
   useSnakeRushStrategy,
 } from "./strategies/snakeRush";
-import { useStandardStrategy } from "./strategies/standard";
 import { spawnStartHarvester } from "./strategies/strategyTool";
 import { useTailStrategy } from "./strategies/tailStrategy";
-import { useTest } from "./strategies/testMode";
-import { useTurtleStrategy } from "./strategies/turtle";
-import { ct, lowCPUMode, pt } from "./utils/CPU";
+import { ct, pt } from "./utils/CPU";
 import { tick } from "./utils/game";
-import { SA } from "./utils/visual";
+import { displayPos, SA } from "./utils/visual";
 
 //overall variable
 let useMod: string;
@@ -46,7 +40,7 @@ export function loop(): void {
   pt("loopStart", st0);
   //show health bars
   const st1 = ct();
-  if (!lowCPUMode) showHealthBars();
+  showHealthBars();
   //identify opponent
   identifyOpponent();
   //set useMode
@@ -80,7 +74,6 @@ export function loop(): void {
       if (antiDoomsMode === 0) {
         //use turtle
         set_harvesterNotFleeAtStart(true);
-        set_setMoveMapAvoidFarOn(true);
         useMod = turtleStrategy;
       } else if (antiDoomsMode === 1) {
         //use snake
@@ -103,15 +96,15 @@ export function loop(): void {
   //main strategy
   const st = ct();
   if (useMod == standardStrategy) {
-    useStandardStrategy();
+    // useStandardStrategy();
   } else if (useMod === testMod) {
-    useTest();
+    // useTest();
   } else if (useMod === turtleStrategy) {
-    useTurtleStrategy();
+    // useTurtleStrategy();
   } else if (useMod === snakeRushStrategy) {
     useSnakeRushStrategy();
   } else if (useMod === armedBuilderStrategy) {
-    useArmedBuilderStrategy();
+    // useArmedBuilderStrategy();
   } else if (useMod === tailStrategy) {
     useTailStrategy();
   } else {

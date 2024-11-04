@@ -13,7 +13,7 @@ import { findTask } from "../utils/Task";
 import { SA, drawLineLight } from "../utils/visual";
 import { Cre, Task_Cre, hasEnemyAround } from "./Cre";
 import { Cre_battle } from "./Cre_battle";
-import { CS, getMaxWorthCSS, progress } from "./CS";
+import { CS, getMaxWorthCSS } from "./CS";
 import { myCSs } from "./GameObjectInitialize";
 import { overallMap } from "./overallMap";
 import { getEnergy, getFreeEnergy, inRampart } from "./UnitTool";
@@ -144,7 +144,7 @@ export function canBeBuild(cs: CS, limitProgress: number): boolean {
     if (inRampart(cs)) {
       return false;
     } else {
-      if (progress(cs) < limitProgress) {
+      if (cs.progress < limitProgress) {
         return true;
       } else {
         let findRtn = overallMap
@@ -154,7 +154,7 @@ export function canBeBuild(cs: CS, limitProgress: number): boolean {
               i instanceof CS &&
               i !== cs &&
               i.master.structure instanceof StructureRampart &&
-              progress(i) < limitProgress
+              i.progress < limitProgress
           );
         return !findRtn;
       }

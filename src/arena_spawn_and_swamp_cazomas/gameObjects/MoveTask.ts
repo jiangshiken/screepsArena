@@ -65,7 +65,7 @@ export class FindPathAndMoveTask extends MoveTask {
     master: Cre,
     tar: Pos,
     pullList: Cre[] = [master],
-    step: number = getMoveStepDef(master, pullList),
+    step: number = getMoveStepDef(pullList),
     costMatrix: CostMatrix | undefined = undefined,
     plainCost: number = def_plainCost,
     swampCost: number = def_swampCost

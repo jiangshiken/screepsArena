@@ -88,7 +88,7 @@ export class Cre
   /** tasks list */
   readonly tasks: Task[] = [];
   /**task execute order */
-  readonly taskPriority: number = 10;
+  taskPriority: number = 10;
   /**extra infomation*/
   readonly upgrade: any = {};
   constructor(creep: Creep) {

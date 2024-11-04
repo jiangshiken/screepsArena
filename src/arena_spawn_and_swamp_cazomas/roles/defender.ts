@@ -1,11 +1,9 @@
 import { ConstructionSite } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
-import { Cre, enemies, getEnemyThreats, Role } from "../gameObjects/Cre";
+import { Cre, getEnemyThreats, Role } from "../gameObjects/Cre";
 import { cpuBreakJudge } from "../gameObjects/CreTool";
-import { spawnPos } from "../gameObjects/HasHits";
 import { findGO } from "../gameObjects/overallMap";
-import { attackWeakRampart, defendTheRampart } from "../gameObjects/ramparts";
 import { spawn } from "../gameObjects/spawn";
 import { tick } from "../utils/game";
 import { GR } from "../utils/Pos";

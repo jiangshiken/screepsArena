@@ -1,32 +1,24 @@
 import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
-import { ConstructionSite } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
-import {
-  blocked,
-  Cre,
-  enemies,
-  friends,
-  hasEnemyAround_lamb,
-  hasThreat,
-  Role,
-} from "../gameObjects/Cre";
+import { hasThreat, Role } from "../gameObjects/Cre";
+import { Cre_move } from "../gameObjects/Cre_move";
 import {
   cpuBreakJudge,
   fleeWeakComplex,
   givePositionToImpartantFriend,
 } from "../gameObjects/CreTool";
-import { getProgressRate } from "../gameObjects/CS";
-import { oppoConstructionSites } from "../gameObjects/GameObjectInitialize";
-import { inOppoRampart } from "../gameObjects/HasHits";
+import { enemies, friends, oppoCSs } from "../gameObjects/GameObjectInitialize";
+import { moveAndBePulled } from "../gameObjects/pull";
+import { blocked, inOppoRampart } from "../gameObjects/UnitTool";
 import { tick } from "../utils/game";
-import { divideReduce } from "../utils/JS";
+import { best, divideReduce } from "../utils/JS";
 import { Adj, atPos, COO, GR, InShotRan, midPoint } from "../utils/Pos";
 import { SA } from "../utils/visual";
 
 /**used to jam the opponent's construction site*/
 export const jamer: Role = new Role("jamer", jamerJob);
-export function jamerJob(cre: Cre) {
+export function jamerJob(cre: Cre_move) {
   SA(cre, "I'm jamer " + (cre.role === jamer));
   const use_oldJamer = true;
   if (use_oldJamer) {
@@ -34,7 +26,7 @@ export function jamerJob(cre: Cre) {
     return;
   }
   const leader = friends.find(
-    i => i.getBodiesNum(ATTACK) >= 9 || i.getBodiesNum(RANGED_ATTACK) >= 5
+    i => i.getBodyPartsNum(ATTACK) >= 9 || i.getBodyPartsNum(RANGED_ATTACK) >= 5
   );
   if (leader) {
     if (
@@ -42,7 +34,7 @@ export function jamerJob(cre: Cre) {
       !Adj(cre, leader)
     ) {
       if (enemies.filter(i => hasThreat(i) && InShotRan(i, cre)).length > 0) {
-        fleeWeakComplex(cre);
+        cre.flee(6, 12);
       } else {
         cre.stop();
       }
@@ -50,14 +42,14 @@ export function jamerJob(cre: Cre) {
       if (leader.upgrade.isPush === true) {
         cre.MTJ(leader);
       } else {
-        cre.moveAndBePulled(leader);
+        moveAndBePulled(cre, leader);
       }
     }
   } else {
     jamerOldJob(cre);
   }
 }
-export function jamerOldJob(cre: Cre) {
+export function jamerOldJob(cre: Cre_move) {
   SA(cre, "I'm jamer");
   if (inOppoRampart(cre)) {
     SA(cre, "inOppoRampart");
@@ -69,40 +61,28 @@ export function jamerOldJob(cre: Cre) {
         return;
       }
       givePositionToImpartantFriend(cre);
-      const enemyCSsHasEnemyBuilderAround = oppoConstructionSites.filter(
+      const enemyCSsHasEnemyBuilderAround = oppoCSs.filter(
         i =>
-          hasEnemyAround_lamb(j => j.getBodyPartsNum(WORK) > 0, i, 3) &&
-          !(blocked(i) && !atPos(i, cre))
+          enemies.find(j => j.getBodyPartsNum(WORK) > 0 && GR(i, j) <= 3) !==
+            undefined && !(blocked(i) && !atPos(i, cre))
       );
-      const enemyCSComparers: {
-        target: ConstructionSite | undefined;
-        worth: number;
-      }[] = enemyCSsHasEnemyBuilderAround.map(cs => {
-        const progressRate = getProgressRate(cs);
+      const target = best(enemyCSsHasEnemyBuilderAround, cs => {
+        const progressRate = cs.progressRate;
         const range = GR(cre, cs);
-        const worth = progressRate * divideReduce(range, 10);
-        return { target: cs, worth: worth };
+        return progressRate * divideReduce(range, 10);
       });
-      const target = enemyCSComparers.reduce(
-        (a, b) => (a.worth > b.worth ? a : b),
-        {
-          target: undefined,
-          worth: -Infinity,
-        }
-      ).target;
-      // const target=findClosestByRange(cre,enemyCSsHasEnemyBuilderAround)
       SA(cre, "target=" + COO(target));
       if (target) {
-        cre.MTJ_stopAtPos(target);
+        cre.MTJ(target);
       } else if (tick <= 75) {
         cre.MTJ(midPoint);
       } else {
-        const enBuilders = enemies.filter(i => i.getBodiesNum(WORK) > 0);
+        const enBuilders = enemies.filter(i => i.getBodyPartsNum(WORK) > 0);
         const enBuilder = findClosestByRange(cre, enBuilders);
         if (enBuilder) {
-          cre.MTJ_stopAtPos(enBuilder);
+          cre.MTJ(enBuilder);
         } else {
-          cre.MTJ_stopAtPos(midPoint);
+          cre.MTJ(midPoint);
         }
       }
     }

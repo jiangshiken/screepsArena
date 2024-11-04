@@ -46,7 +46,7 @@ export type Type_OwnedStructure =
   | StructureRampart;
 export type Type_OwnedStru = Spa | Ext | Tow | Ram;
 export type Harvable = Con | Res;
-export type Producer = Cre | Ext | Spa;
+export type Producer = Con | Cre | Ext | Spa;
 export type Unit = Cre | OwnedStru;
 export type HasEnergy = Res | HasStore;
 export type GO = Cre | Stru | CS | Res;

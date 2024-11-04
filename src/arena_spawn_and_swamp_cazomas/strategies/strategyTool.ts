@@ -1,13 +1,12 @@
 import { CARRY, MOVE } from "game/constants";
 
-import { friends } from "../gameObjects/Cre";
-import { displayPos } from "../gameObjects/HasHits";
+import { friends } from "../gameObjects/GameObjectInitialize";
 import { spawn, spawnCleared, spawnCreep } from "../gameObjects/spawn";
 import { harvester } from "../roles/harvester";
 import { TB } from "../utils/autoBodys";
 import { tick } from "../utils/game";
 import { sum } from "../utils/JS";
-import { SA } from "../utils/visual";
+import { displayPos, SA } from "../utils/visual";
 
 /**spawn the start harvester of every strategy*/
 export function spawnStartHarvester(
@@ -16,9 +15,9 @@ export function spawnStartHarvester(
 ) {
   if (tick <= 300 && spawnCleared(spawn)) {
     const tarHarvesters = friends.filter(
-      i => i.role === harvester && i.getHealthyBodiesNum(MOVE) > 0
+      i => i.role === harvester && i.getHealthyBodyPartsNum(MOVE) > 0
     );
-    const carryNum = sum(tarHarvesters, i => i.getHealthyBodiesNum(CARRY));
+    const carryNum = sum(tarHarvesters, i => i.getHealthyBodyPartsNum(CARRY));
     SA(displayPos(), "spawnStartHarvester carryNum=" + carryNum);
     if (carryNum < needCarryNum) {
       SA(displayPos(), "supply harvester");

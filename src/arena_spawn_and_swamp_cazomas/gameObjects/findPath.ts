@@ -36,8 +36,8 @@ export function searchPathByCreCost(
     plainCost = 1;
     swampCost = 2;
   } else {
-    plainCost = getMoveTimeByTerrain([cre], false);
-    swampCost = getMoveTimeByTerrain([cre], true);
+    plainCost = getMoveTimeByTerrain([cre], 0, true);
+    swampCost = getMoveTimeByTerrain([cre], 0, false, true);
   }
   return searchPath_noArea(cre, tar, undefined, plainCost, swampCost);
 }
@@ -46,7 +46,9 @@ export function searchPathByCreCost(
  */
 export function getMoveAndFatigueNum(
   pullList: Cre[],
-  extraEnergy: number = 0
+  extraEnergy: number = 0,
+  purePlain: boolean = false,
+  pureSwamp: boolean = false
 ): {
   moveNum: number;
   bodyNum: number;
@@ -72,9 +74,9 @@ export function getMoveAndFatigueNum(
         moveNum += tarMoveNum;
         const heavyBodyNum = tarBodyNum + notEmptyCarryNum;
         bodyNum += heavyBodyNum;
-        if (isTerrainSwamp(tar)) {
+        if (isTerrainSwamp(tar) || pureSwamp) {
           fatigueNum += 10 * heavyBodyNum;
-        } else if (isTerrainRoad(tar)) {
+        } else if (isTerrainRoad(tar) && !purePlain) {
           fatigueNum += 1 * heavyBodyNum;
         } else {
           fatigueNum += 2 * heavyBodyNum;
@@ -94,48 +96,35 @@ export function getMoveAndFatigueNum(
 }
 export function getMoveTimeByTerrain(
   pullList: Cre[],
-  isSwamp: boolean,
-  isRoad: boolean = false,
-  extraEnergy: number = 0
+  extraEnergy: number = 0,
+  purePlain: boolean = false,
+  pureSwamp: boolean = false
 ): number {
-  const mb = getMoveAndFatigueNum(pullList, extraEnergy);
+  const mb = getMoveAndFatigueNum(pullList, extraEnergy, purePlain, pureSwamp);
   const moveNum = mb.moveNum;
-  const bodyNum = mb.bodyNum;
-  let fatigueMax: number;
-  if (isRoad) fatigueMax = bodyNum;
-  else if (isSwamp) fatigueMax = bodyNum * 10;
-  else fatigueMax = bodyNum * 2;
+  const fatiugeNum = mb.fatigueNum;
   const time = Math.max(
     1,
-    Math.ceil(divide0(fatigueMax, 2 * moveNum, Infinity))
+    Math.ceil(divide0(fatiugeNum, 2 * moveNum, Infinity))
   );
   return time;
 }
-export function getMoveTime(
-  pos: Pos,
-  pullList: Cre[],
-  extraEnergy: number = 0
-): number {
-  return getMoveTimeByTerrain(
-    pullList,
-    isTerrainSwamp(pos),
-    isTerrainRoad(pos),
-    extraEnergy
-  );
+export function getMoveTime(pullList: Cre[], extraEnergy: number = 0): number {
+  return getMoveTimeByTerrain(pullList, extraEnergy);
 }
 export function getMoveTime_general(pullList: Cre[]): number {
-  const timeOnTerrain = getMoveTimeByTerrain(pullList, false);
-  const timeOnSawmp = getMoveTimeByTerrain(pullList, true);
+  const timeOnTerrain = getMoveTimeByTerrain(pullList);
+  const timeOnSawmp = getMoveTimeByTerrain(pullList);
   return 0.5 * timeOnTerrain + 0.5 * timeOnSawmp;
 }
-export function getSpeed(pos: Pos, pullList: Cre[]): number {
-  return 1 / getMoveTime(pos, pullList);
+export function getSpeed(pullList: Cre[]): number {
+  return 1 / getMoveTime(pullList);
 }
 export function getSpeed_general(pullList: Cre[]): number {
   return 1 / getMoveTime_general(pullList);
 }
-export function isFullSpeed(pos: Pos, pullList: Cre[]): boolean {
-  return getMoveTime(pos, pullList) === 1;
+export function isFullSpeed(pullList: Cre[]): boolean {
+  return getMoveTime(pullList) === 1;
 }
 export const def_plainCost = 1;
 export const def_swampCost = 3;
@@ -276,6 +265,6 @@ export function getNewTarByArea(cre: Pos, tar: Pos): Pos {
   drawLineComplex(cre, newTar, 0.25, "#222222");
   return newTar;
 }
-export function getMoveStepDef(cre: Cre, pullList: Cre[]): number {
-  return 10 * getMoveTime(cre, pullList);
+export function getMoveStepDef(pullList: Cre[]): number {
+  return 10 * getMoveTime(pullList);
 }
