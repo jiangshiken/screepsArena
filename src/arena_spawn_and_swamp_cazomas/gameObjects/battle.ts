@@ -7,13 +7,7 @@ import {
   TOUGH,
   WORK,
 } from "game/constants";
-import {
-  Structure,
-  StructureExtension,
-  StructureRampart,
-  StructureSpawn,
-  StructureTower,
-} from "game/prototypes";
+import { StructureRampart } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 import { Event, Event_Number } from "../utils/Event";
 import { StNumber } from "../utils/game";
@@ -33,7 +27,7 @@ import { oppoUnits, Unit } from "./GameObjectInitialize";
 import { damagedRate, HasHits, healthRate } from "./HasHits";
 import { findGO } from "./overallMap";
 import { spawn } from "./spawn";
-import { Ram } from "./Stru";
+import { Ext, Ram, Spa, Stru, Tow } from "./Stru";
 import { getEnergy, inRampart } from "./UnitTool";
 
 export class TauntEvent extends Event {
@@ -100,17 +94,16 @@ export function sumForceByArr(
 export function isUnit(a: HasHits): boolean {
   return (
     a instanceof Cre ||
-    a instanceof StructureSpawn ||
-    a instanceof StructureExtension ||
-    a instanceof StructureTower ||
-    a instanceof StructureRampart
+    a instanceof Spa ||
+    a instanceof Ext ||
+    a instanceof Tow ||
+    a instanceof Ram
   );
 }
 export function getTauntShot(cre: Cre, tar: HasHits): StNumber {
   const RANum = cre.getHealthyBodyParts(RANGED_ATTACK).length;
   const taunt = isUnit(tar) ? getTaunt(<Unit>tar) : 0;
-  const oppoTaunt =
-    tar instanceof Cre || tar instanceof Structure ? taunt : 0.2;
+  const oppoTaunt = tar instanceof Cre || tar instanceof Stru ? taunt : 0.2;
   const dmg = 10 * RANum;
   return 0.1 * dmg * oppoTaunt;
 }
@@ -343,9 +336,9 @@ export function getDps(
           4 * carryNum +
           0.1 * toughNum;
       }
-    } else if (cre instanceof StructureRampart) {
+    } else if (cre instanceof Ram) {
       rtn = 0.5;
-    } else if (cre instanceof StructureSpawn) {
+    } else if (cre instanceof Spa) {
       let totalForce;
       if (cre.my) {
         totalForce = sumForceByArr(getFriendArmies());
@@ -353,7 +346,7 @@ export function getDps(
         totalForce = sumForceByArr(getEnemyArmies());
       }
       rtn = spawnDps * (1 + 0.5 * totalForce);
-    } else if (cre instanceof StructureExtension) {
+    } else if (cre instanceof Ext) {
       const enBonus = 1 + (2 * getEnergy(cre)) / 100;
       rtn = 13 * enBonus;
     } else {

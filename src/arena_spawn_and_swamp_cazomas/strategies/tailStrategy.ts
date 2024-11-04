@@ -1,5 +1,4 @@
 import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
-import { StructureExtension, StructureSpawn } from "game/prototypes";
 import { getTicks } from "game/utils";
 import {
   enemySpawn,
@@ -24,6 +23,7 @@ import { damagedRate } from "../gameObjects/HasHits";
 import { MoveTask } from "../gameObjects/MoveTask";
 import { Dooms, getGuessPlayer, Kerob, Tigga } from "../gameObjects/player";
 import { PullTarsTask } from "../gameObjects/pull";
+import { Ext, Spa } from "../gameObjects/Stru";
 import { inRampart } from "../gameObjects/UnitTool";
 import { spawnStealer } from "../roles/spawnStealer";
 import { toughDefender } from "../roles/toughDefender";
@@ -188,10 +188,7 @@ function tailMeleeJob(cre: Cre_battle) {
   SA(cre, "tailMeleeJob");
   cre.fight();
   const targets = oppoUnits.filter(
-    i =>
-      i instanceof Cre ||
-      i instanceof StructureExtension ||
-      i instanceof StructureSpawn
+    i => i instanceof Cre || i instanceof Ext || i instanceof Spa
   );
   SA(displayPos(), "oppoUnits.len" + oppoUnits.length);
   SA(displayPos(), "targets.len" + targets.length);
@@ -216,7 +213,7 @@ function tailMeleeJob(cre: Cre_battle) {
       } else {
         typeBonus = 0.01;
       }
-    } else if (tar instanceof StructureExtension) {
+    } else if (tar instanceof Ext) {
       if (getGuessPlayer() === Tigga) {
         typeBonus = 1;
       } else if (getGuessPlayer() === Dooms) {
@@ -225,7 +222,7 @@ function tailMeleeJob(cre: Cre_battle) {
         typeBonus = 0.15;
       }
       // typeExtra = 0.15
-    } else if (tar instanceof StructureSpawn) {
+    } else if (tar instanceof Spa) {
       if (getGuessPlayer() === Tigga) {
         typeBonus = 10;
       } else if (getGuessPlayer() === Dooms) {
@@ -502,10 +499,7 @@ function fleeAction(
 function tailShoterJob(cre: Cre) {
   SA(cre, "tailShoterJob");
   const targets = oppoUnits.filter(
-    i =>
-      i instanceof Cre ||
-      i instanceof StructureExtension ||
-      i instanceof StructureSpawn
+    i => i instanceof Cre || i instanceof Ext || i instanceof Spa
   );
   const target = best(targets, i => {
     return -GR(i, cre);

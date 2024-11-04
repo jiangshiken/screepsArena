@@ -2,11 +2,7 @@ import { ATTACK, HEAL, RANGED_ATTACK, WORK } from "game/constants";
 import { CostMatrix, searchPath } from "game/path-finder";
 import { findClosestByRange } from "game/utils";
 
-import {
-  StructureExtension,
-  StructureRampart,
-  StructureSpawn,
-} from "game/prototypes";
+import { StructureRampart, StructureSpawn } from "game/prototypes";
 
 import { enemyRampartIsHealthy } from "../gameObjects/ramparts";
 import {
@@ -51,6 +47,7 @@ import {
   oppoUnits,
 } from "../gameObjects/GameObjectInitialize";
 import { damaged, damagedRate } from "../gameObjects/HasHits";
+import { Ext, Spa } from "../gameObjects/Stru";
 import { getEnergy, getFreeEnergy, inRampart } from "../gameObjects/UnitTool";
 import { calculateForce, getTaunt, sumForceByArr } from "../gameObjects/battle";
 import { getMoveTime, searchPathByCreCost } from "../gameObjects/findPath";
@@ -813,8 +810,8 @@ function command() {
         i =>
           i.oppo &&
           ((i instanceof Cre && (isArmy(i) || i.getBodyPartsNum(WORK) > 0)) ||
-            (i instanceof StructureExtension && !inRampart(i)) ||
-            i instanceof StructureSpawn)
+            (i instanceof Ext && !inRampart(i)) ||
+            i instanceof Spa)
       );
       const threats = enemies.filter(i => {
         if (getGuessPlayer() === Kerob && Adj(i, enemySpawn)) {
@@ -851,7 +848,7 @@ function command() {
                     typeBonus = 3;
                   }
                 }
-              } else if (i instanceof StructureExtension) {
+              } else if (i instanceof Ext) {
                 if (getGuessPlayer() === Tigga) {
                   typeBonus = 0.015;
                 } else if (getGuessPlayer() === Dooms) {

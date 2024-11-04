@@ -17,7 +17,7 @@ import {
   topY,
 } from "../utils/game";
 import { divide0 } from "../utils/JS";
-import { Pos, atPos } from "../utils/Pos";
+import { Pos, Pos_C, atPos } from "../utils/Pos";
 import { P, drawLineComplex, drawPolyLight } from "../utils/visual";
 import { Cre } from "./Cre";
 import { isTerrainRoad } from "./CreCommands";
@@ -135,8 +135,9 @@ export function searchPath_area(
   plainCost: number = def_plainCost,
   swampCost: number = def_swampCost
 ): FindPathResult {
-  let newTar: Pos;
-  newTar = getNewTarByArea(ori, tar);
+  // drawLineComplex(ori, tar, 1, "#22ffff", dashed);
+  const newTar: Pos = getNewTarByArea(ori, tar);
+  // drawLineComplex(ori, newTar, 1, "#ff22ff");
   let SR1 = searchPath_noArea(ori, newTar, costMatrix, plainCost, swampCost);
   let SR2: FindPathResult | undefined;
   let SR3: FindPathResult | undefined;
@@ -236,32 +237,35 @@ export function getNewTarByArea(cre: Pos, tar: Pos): Pos {
   let newTar = tar;
   const creArea = getArea(cre, leftBorder1, rightBorder2, midBorder);
   const tarArea = getArea(tar, leftBorder1, rightBorder2, midBorder);
-  //
+
+  // SA(cre, "creArea=" + creArea); //
+  // SA(cre, "tarArea=" + tarArea); //
   const yAxis_top = topY;
   const yAxis_bottom = bottomY;
   if (creArea === area_left && tarArea === area_right) {
     //go left top
-    if (startGateUp) newTar = { x: leftBorder2, y: yAxis_top };
-    else newTar = { x: leftBorder2, y: yAxis_bottom };
+    if (startGateUp) newTar = new Pos_C(leftBorder2, yAxis_top);
+    else newTar = new Pos_C(leftBorder2, yAxis_bottom);
   } else if (creArea === area_right && tarArea === area_left) {
     //go right bottom
-    if (startGateUp) newTar = { x: rightBorder1, y: yAxis_top };
-    else newTar = { x: rightBorder1, y: yAxis_bottom };
-  } else if (area_right && tarArea === area_top)
-    newTar = { x: leftBorder2, y: yAxis_top };
-  else if (area_top && area_left) newTar = { x: leftBorder1, y: yAxis_top };
+    if (startGateUp) newTar = new Pos_C(rightBorder1, yAxis_top);
+    else newTar = new Pos_C(rightBorder1, yAxis_bottom);
+  } else if (creArea === area_right && tarArea === area_top)
+    newTar = new Pos_C(leftBorder2, yAxis_top);
+  else if (creArea === area_top && tarArea === area_left)
+    newTar = new Pos_C(leftBorder1, yAxis_top);
   else if (creArea === area_left && tarArea === area_bottom)
-    newTar = { x: leftBorder2, y: yAxis_bottom };
+    newTar = new Pos_C(leftBorder2, yAxis_bottom);
   else if (creArea === area_bottom && tarArea === area_left)
-    newTar = { x: leftBorder1, y: yAxis_bottom };
+    newTar = new Pos_C(leftBorder1, yAxis_bottom);
   else if (creArea === area_right && tarArea === area_bottom)
-    newTar = { x: rightBorder1, y: yAxis_bottom };
+    newTar = new Pos_C(rightBorder1, yAxis_bottom);
   else if (creArea === area_bottom && tarArea === area_right)
-    newTar = { x: rightBorder2, y: yAxis_bottom };
+    newTar = new Pos_C(rightBorder2, yAxis_bottom);
   else if (creArea === area_right && tarArea === area_top)
-    newTar = { x: rightBorder1, y: yAxis_top };
+    newTar = new Pos_C(rightBorder1, yAxis_top);
   else if (creArea === area_top && tarArea === area_right)
-    newTar = { x: rightBorder2, y: yAxis_top };
+    newTar = new Pos_C(rightBorder2, yAxis_top);
   drawLineComplex(cre, newTar, 0.25, "#222222");
   return newTar;
 }

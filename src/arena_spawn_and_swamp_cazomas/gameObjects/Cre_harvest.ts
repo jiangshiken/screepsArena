@@ -1,11 +1,5 @@
 import { OK, RESOURCE_ENERGY, WORK } from "game/constants";
-import {
-  Resource,
-  Structure,
-  StructureContainer,
-  StructureExtension,
-  StructureSpawn,
-} from "game/prototypes";
+import { Resource, StructureContainer } from "game/prototypes";
 import { findClosestByRange, getRange } from "game/utils";
 import { Event_Pos } from "../utils/Event";
 import { S } from "../utils/export";
@@ -32,7 +26,7 @@ import {
 } from "./GameObjectInitialize";
 import { findGO, overallMap } from "./overallMap";
 import { spawn } from "./spawn";
-import { Ext, Res } from "./Stru";
+import { Ext, Res, Spa, Stru } from "./Stru";
 import {
   getCapacity,
   getEnergy,
@@ -98,10 +92,10 @@ export class Cre_harvest extends Cre_move {
   }
   /**withdraw normal*/
   withdrawNormal(con: HasEnergy): boolean {
-    if (con instanceof Resource) {
-      return this.master.pickup(con) === OK;
-    } else if (con instanceof Structure)
-      return this.master.withdraw(con, RESOURCE_ENERGY) === OK;
+    if (con instanceof Res) {
+      return this.master.pickup(con.master) === OK;
+    } else if (con instanceof Stru)
+      return this.master.withdraw(con.master, RESOURCE_ENERGY) === OK;
     else if (con instanceof Cre)
       return con.master.transfer(this.master, RESOURCE_ENERGY) === OK;
     else return false;
@@ -275,9 +269,9 @@ export class Cre_harvest extends Cre_move {
       let typeRate: number;
       if (producer instanceof Cre) {
         typeRate = 0.12;
-      } else if (producer instanceof StructureSpawn) {
+      } else if (producer instanceof Spa) {
         typeRate = 1;
-      } else if (producer instanceof StructureExtension) {
+      } else if (producer instanceof Ext) {
         if (GR(producer, spawn) <= 7) {
           typeRate = 0.75;
         } else {
@@ -372,8 +366,8 @@ export function isFullProducer(go: Unit) {
 export function isProducer(unit: Unit): boolean {
   return (
     unit.my &&
-    (unit instanceof StructureSpawn ||
-      unit instanceof StructureExtension ||
+    (unit instanceof Spa ||
+      unit instanceof Ext ||
       (unit instanceof Cre &&
         unit.getBodyPartsNum(WORK) > 0 &&
         getFreeEnergy(unit) > 0))
@@ -382,8 +376,8 @@ export function isProducer(unit: Unit): boolean {
 export function isEnemyProducer(unit: Unit): boolean {
   return (
     unit.oppo &&
-    (unit instanceof StructureSpawn ||
-      unit instanceof StructureExtension ||
+    (unit instanceof Spa ||
+      unit instanceof Ext ||
       (unit instanceof Cre && unit.getBodyPartsNum(WORK) > 0))
   );
 }

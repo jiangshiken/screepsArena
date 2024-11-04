@@ -67,7 +67,7 @@ import {
   append_largeSizeText,
   displayPos,
   drawText,
-  firstInit_visual,
+  // firstInit_visual,
   loopEnd_visual,
   loopStart_visual,
   P,
@@ -135,6 +135,10 @@ export function loopStart() {
   setGameObjectsThisTick(<Pos[]>getGOs());
   setSpawn(mySpawns[0]);
   setEnemySpawn(oppoSpawns[0]);
+  if (getTicks() === 1) {
+    set_left(spawn.x < 50);
+    setStartGate();
+  }
   setOverallMap();
   //
   append_largeSizeText("Status:");
@@ -189,17 +193,12 @@ export function setWorthForContainer(cont: Con): void {
     cont.worth = worth;
   }
 }
-/**
- * should be called at first tick
- */
-export function firstInit() {
-  if (getTicks() === 1) {
-    PL("startGame");
-    firstInit_visual();
-    set_left(spawn.x < 50);
-    setStartGate();
-  }
-}
+// /**
+//  * should be called at first tick
+//  */
+// export function firstInit() {
+
+// }
 // function setTopAndBottomY(): void {
 function getCostMatrixHalf(up: boolean): CostMatrix {
   let rtn = new CostMatrix();

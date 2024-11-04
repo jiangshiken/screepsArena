@@ -7,7 +7,7 @@ import {
   Tigga,
 } from "./gameObjects/player";
 import { showHealthBars } from "./gameObjects/visual_Cre";
-import { firstInit, loopEnd, loopStart } from "./loop";
+import { loopEnd, loopStart } from "./loop";
 import { set_harvesterNotFleeAtStart } from "./roles/harvester";
 import {
   set_snakePartsTotalNum,
@@ -33,7 +33,7 @@ const tailStrategy: string = "tailStrategy";
 export function loop(): void {
   console.log("loop start !!");
   //first init
-  firstInit();
+  // firstInit();
   //loop start
   const st0 = ct();
   loopStart();

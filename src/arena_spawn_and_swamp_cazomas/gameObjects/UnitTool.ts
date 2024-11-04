@@ -1,30 +1,25 @@
 import { CARRY, RESOURCE_ENERGY } from "game/constants";
-import {
-  Resource,
-  StructureContainer,
-  StructureExtension,
-  StructureSpawn,
-  StructureTower,
-} from "game/prototypes";
+import { Resource } from "game/prototypes";
 import { inResourceArea, isTerrainWall } from "../utils/game";
 import { getRangePoss, GR, Pos } from "../utils/Pos";
 import { Cre } from "./Cre";
+import { GameObj } from "./GameObj";
 import { containers, GO, HasStore } from "./GameObjectInitialize";
 import { findGO, overallMap } from "./overallMap";
 import { enemySpawn, spawn } from "./spawn";
-import { Con, Ram, Roa, Stru } from "./Stru";
+import { Con, Ext, Ram, Res, Roa, Spa, Stru, Tow } from "./Stru";
 
 export type CanBeAttacked = Stru | Cre;
-export function getEnergy(a: GO): number {
-  if (a instanceof Resource) {
-    return a.amount;
+export function getEnergy(a: GameObj): number {
+  if (a instanceof Res) {
+    return a.master.amount;
   } else if (a instanceof Cre && a.getBodyPartsNum(CARRY) > 0) {
     return a.master.store[RESOURCE_ENERGY];
   } else if (
-    a.master instanceof StructureSpawn ||
-    a.master instanceof StructureContainer ||
-    a.master instanceof StructureExtension ||
-    a.master instanceof StructureTower
+    a instanceof Spa ||
+    a instanceof Con ||
+    a instanceof Ext ||
+    a instanceof Tow
   ) {
     return a.master.store[RESOURCE_ENERGY];
   } else {
@@ -93,10 +88,10 @@ export function isOutsideContainer(con: Con) {
   return inResourceArea(con);
 }
 export function isMyBaseContainer(con: Con) {
-  return con instanceof StructureContainer && GR(con, spawn) <= 7;
+  return GR(con, spawn) <= 7;
 }
 export function isOppoBaseContainer(con: Con) {
-  return con instanceof StructureContainer && GR(con, enemySpawn) <= 7;
+  return GR(con, enemySpawn) <= 7;
 }
 export function getSpawnAroundFreeContainers() {
   return containers.filter(i => GR(i, spawn) <= 1 && getFreeEnergy(i) > 0);

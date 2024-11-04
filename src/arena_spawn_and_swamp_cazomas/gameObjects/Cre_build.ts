@@ -124,7 +124,6 @@ export function isWorkingBuilder(cre: Cre_build): boolean {
  * and can be build when its multi-rampart*/
 export function canBeBuildByCre(cs: CS, cre: Cre): boolean {
   // SA(cre, "cs.structure=" + S(cs.structure))
-  // SA(cre, "INS=" + cs.structure instanceof StructureRampart)
   // SA(cre, "isBlockGameObject(cs.structure)=" + isBlockGameObject(cs.structure))
   if (hasEnemyAround(cs, 0)) {
     return false;

@@ -156,7 +156,9 @@ export function harvesterJob(cre: Cre_harvest) {
     } else if (!findTask(cre, HarvestTask) || isMyTick(cre, 20)) {
       SA(cre, "scan fit harvable and producer");
       const targetHarvable = cre.findFitHarvable();
+      SA(cre, "targetHarvable " + targetHarvable);
       const targetProducer = cre.findFitProducer();
+      SA(cre, "targetProducer " + targetProducer);
       findTask(cre, HarvestTask)?.end();
       if (targetHarvable && targetProducer) {
         SA(cre, " new HarvestTask");

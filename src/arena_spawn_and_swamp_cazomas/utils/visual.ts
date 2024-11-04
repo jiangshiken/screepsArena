@@ -11,15 +11,15 @@ import { PL } from "./print";
 /**
  * the list of SAVis
  */
-export let SAVisList: SAVis[];
+export let SAVisList: SAVis[] = [];
 export let visual_layer10: Visual;
 export let visual_layer9: Visual;
-/**
- * should be call at first tick
- */
-export function firstInit_visual() {
-  SAVisList = [];
-}
+// /**
+//  * should be call at first tick
+//  */
+// export function firstInit_visual() {
+//   SAVisList = [];
+// }
 /**
  *  represent a Visual of SA text
  */

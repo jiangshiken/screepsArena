@@ -61,10 +61,10 @@ export function getArea(
   rightBorder: number,
   midBorder: number
 ): Area {
-  if (pos.x <= leftBorder) return "area_left";
-  else if (pos.x >= rightBorder) return "area_right";
-  else if (pos.y < midBorder) return "area_top";
-  else return "area_bottom";
+  if (pos.x <= leftBorder) return area_left;
+  else if (pos.x >= rightBorder) return area_right;
+  else if (pos.y < midBorder) return area_top;
+  else return area_bottom;
 }
 
 /**tick inside strategy to make sure every strategy worked even if time out */
