@@ -61,7 +61,7 @@ export class Spa extends OwnedStru {
     this.master = master;
   }
   get spawningCreep(): Creep {
-    return this.master.spawning.creep;
+    return this.master.spawning?.creep;
   }
 }
 export class Ext extends OwnedStru {

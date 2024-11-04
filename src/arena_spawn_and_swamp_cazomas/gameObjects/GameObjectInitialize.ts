@@ -15,15 +15,9 @@ import {
 import { getObjectsByPrototype } from "game/utils";
 
 import { PL } from "arena_spawn_and_swamp_cazomas/utils/print";
-import { ATTACK, CARRY, HEAL, MOVE, RANGED_ATTACK, WORK } from "game/constants";
 import { S } from "../utils/export";
-import { creepBodyPartNum } from "../utils/game";
 import { P } from "../utils/visual";
-import { Cre, Task_Role } from "./Cre";
-import { Cre_battle } from "./Cre_battle";
-import { Cre_build } from "./Cre_build";
-import { Cre_harvest } from "./Cre_harvest";
-import { Cre_move } from "./Cre_move";
+import { Cre } from "./Cre";
 import { CS } from "./CS";
 import { isMyGO, isOppoGO, neutral } from "./HasMy";
 import {
@@ -61,6 +55,9 @@ export let constructionSites: ConstructionSite[] = [];
 export let resources: Resource[] = [];
 //Cre
 export let cres: Cre[] = [];
+export function set_cres(c: Cre[]) {
+  cres = c;
+}
 export let friends: Cre[] = [];
 export let enemies: Cre[] = [];
 export let myUnits: Unit[] = [];
@@ -105,31 +102,6 @@ export function getPrototype(type: any) {
 export function getGOs(): GO[] {
   return (<GO[]>cres).concat(strus, CSs, ress);
 }
-export function initCre(creep: Creep): Cre {
-  let cre: Cre;
-  if (creepBodyPartNum(creep, WORK) > 0) {
-    cre = new Cre_build(creep);
-  } else if (
-    creepBodyPartNum(creep, ATTACK) > 0 ||
-    creepBodyPartNum(creep, RANGED_ATTACK) > 0 ||
-    creepBodyPartNum(creep, HEAL) > 0
-  ) {
-    cre = new Cre_battle(creep);
-  } else if (creepBodyPartNum(creep, CARRY) > 0) {
-    cre = new Cre_harvest(creep);
-  } else if (creepBodyPartNum(creep, MOVE) > 0) {
-    cre = new Cre_move(creep);
-  } else {
-    cre = new Cre(creep);
-  }
-  const si = (<any>creep).spawnInfo;
-  if (si) {
-    cre.spawnInfo = si;
-    new Task_Role(cre, si.role);
-  }
-  cres.push(cre);
-  return cre;
-}
 export function initStru(structure: Structure): Stru {
   let stru: Stru;
   if (structure instanceof StructureSpawn) {
@@ -162,20 +134,6 @@ export function initRes(resource: Resource): Res {
   const res: Res = new Res(resource);
   ress.push(res);
   return res;
-}
-export function initialCresAtLoopStart() {
-  PL("initialCresAtLoopStart");
-  //remove dead Cre
-  cres = cres.filter(i => i.master.exists);
-  //add new Cre
-  for (let creep of creeps) {
-    const condition1 = !creep.spawning;
-    const condition2 = cres.find(i => i.master === creep) === undefined;
-    if (condition1 && condition2) {
-      P("initCre=" + S(creep));
-      initCre(creep);
-    }
-  }
 }
 export function initialStrusAtLoopStart() {
   PL("initialStrusAtLoopStart");

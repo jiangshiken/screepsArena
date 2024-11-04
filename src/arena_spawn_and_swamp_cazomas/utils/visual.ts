@@ -167,12 +167,18 @@ export function drawText(
  * return a SAVis of a specific layer
  */
 export function getSAVis(pos: Pos, layer: number): SAVis {
-  const oList = overallMap.get(pos);
-  const vis = <SAVis | undefined>(
-    oList.find(i => i instanceof SAVis && i.layer === layer)
-  );
-  if (vis) return vis;
-  else return new SAVis(pos, layer);
+  try {
+    const oList = overallMap.get(pos);
+    const vis = <SAVis | undefined>(
+      oList.find(i => i instanceof SAVis && i.layer === layer)
+    );
+    if (vis) return vis;
+    else return new SAVis(pos, layer);
+  } catch (e) {
+    PL(e);
+    PL(pos.x + " " + pos.y);
+    return new SAVis(pos00, 10);
+  }
 }
 /**
  * print a text on a position of the game map ,the same position will be print at one line
@@ -185,7 +191,7 @@ export let consoleNum = 0;
 export function P(s: any) {
   PL(s);
   if (getTicks() >= 2) {
-    const pos00 = { x: consoleNum % 5, y: consoleNum / 5 };
+    const pos00 = { x: consoleNum % 5, y: Math.floor(consoleNum / 5) };
     consoleNum++;
     SA(pos00, "" + s);
   }

@@ -160,7 +160,7 @@ export function getSpawnAndBaseContainerEnergy(): number {
   return getEnergy(spawn) + (baseCon ? getEnergy(baseCon) : 0);
 }
 function remainingTime(theSpawn: Spa) {
-  return theSpawn.master.spawning.remainingTime;
+  return theSpawn.master.spawning?.remainingTime;
 }
 /** check if can spawn */
 export function checkSpawn(theSpawn: Spa) {

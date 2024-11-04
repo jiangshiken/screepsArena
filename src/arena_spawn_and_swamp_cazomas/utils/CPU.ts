@@ -2,6 +2,7 @@ import { arenaInfo } from "game";
 import { getCpuTime } from "game/utils";
 import { Event_Number } from "./Event";
 import { KNumber } from "./JS";
+import { PL } from "./print";
 import { P } from "./visual";
 /**cpu rate history that get an average cpu rate of previous ticks */
 export let cpuRateHistory = 0;
@@ -23,6 +24,13 @@ export function et(t: number) {
 export function pt(s: string, t: number) {
   const printedTime = et(t);
   P(s + " " + KNumber(printedTime) + " cpu");
+}
+/**
+ * used to print the CPU time
+ */
+export function ptL(s: string, t: number) {
+  const printedTime = et(t);
+  PL(s + " " + KNumber(printedTime) + " cpu");
 }
 /**
  * used to print the CPU time

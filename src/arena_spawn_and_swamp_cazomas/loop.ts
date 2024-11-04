@@ -7,13 +7,24 @@ import {
   getTicks,
 } from "game/utils";
 
-import { getEnemyProducers, getMyProducers } from "./gameObjects/Cre_harvest";
+import { ATTACK, CARRY, HEAL, MOVE, RANGED_ATTACK, WORK } from "game/constants";
+import { Creep } from "game/prototypes";
+import { Cre, Task_Role } from "./gameObjects/Cre";
+import { Cre_battle } from "./gameObjects/Cre_battle";
+import { Cre_build } from "./gameObjects/Cre_build";
+import {
+  Cre_harvest,
+  getEnemyProducers,
+  getMyProducers,
+} from "./gameObjects/Cre_harvest";
+import { Cre_move } from "./gameObjects/Cre_move";
 import { controlCreeps, isMyTick } from "./gameObjects/CreTool";
 import { searchPath_area } from "./gameObjects/findPath";
 import {
   containers,
+  creeps,
+  cres,
   getGOs,
-  initialCresAtLoopStart,
   initialCSsAtLoopStart,
   initialGameObjectsAtLoopStart_advance,
   initialGameObjectsAtLoopStart_basic,
@@ -21,6 +32,7 @@ import {
   initialStrusAtLoopStart,
   mySpawns,
   oppoSpawns,
+  set_cres,
 } from "./gameObjects/GameObjectInitialize";
 import {} from "./gameObjects/HasHits";
 import {
@@ -39,8 +51,10 @@ import { Con } from "./gameObjects/Stru";
 import { getEnergy } from "./gameObjects/UnitTool";
 import { showEnemies, showHits } from "./gameObjects/visual_Cre";
 import { sum_snakePart0 } from "./strategies/snakeRush";
-import { ct, getCPUPercent, pt, ptSum } from "./utils/CPU";
+import { ct, getCPUPercent, pt, ptL, ptSum } from "./utils/CPU";
+import { S } from "./utils/export";
 import {
+  creepBodyPartNum,
   inResourceArea,
   set_left,
   set_startGateUp,
@@ -102,10 +116,10 @@ export function loopStart() {
   overallMapInit();
   const st1 = ct();
   loopStart_visual();
-  pt("loopStart_visual", st1);
+  ptL("loopStart_visual", st1);
   const st2 = ct();
   initialGameObjectsAtLoopStart_basic();
-  pt("initialGameObjects", st2);
+  ptL("initialGameObjects", st2);
   const st3 = ct();
   initialCresAtLoopStart();
   initialStrusAtLoopStart();
@@ -230,4 +244,43 @@ export function printCPU() {
 }
 function displayRoleCPU() {
   ptSum("sum_snakePart0", sum_snakePart0);
+}
+export function initCre(creep: Creep): Cre {
+  let cre: Cre;
+  if (creepBodyPartNum(creep, WORK) > 0) {
+    cre = new Cre_build(creep);
+  } else if (
+    creepBodyPartNum(creep, ATTACK) > 0 ||
+    creepBodyPartNum(creep, RANGED_ATTACK) > 0 ||
+    creepBodyPartNum(creep, HEAL) > 0
+  ) {
+    cre = new Cre_battle(creep);
+  } else if (creepBodyPartNum(creep, CARRY) > 0) {
+    cre = new Cre_harvest(creep);
+  } else if (creepBodyPartNum(creep, MOVE) > 0) {
+    cre = new Cre_move(creep);
+  } else {
+    cre = new Cre(creep);
+  }
+  const si = (<any>creep).spawnInfo;
+  if (si) {
+    cre.spawnInfo = si;
+    new Task_Role(cre, si.role);
+  }
+  cres.push(cre);
+  return cre;
+}
+export function initialCresAtLoopStart() {
+  PL("initialCresAtLoopStart");
+  //remove dead Cre
+  set_cres(cres.filter(i => i.master.exists));
+  //add new Cre
+  for (let creep of creeps) {
+    const condition1 = !creep.spawning;
+    const condition2 = cres.find(i => i.master === creep) === undefined;
+    if (condition1 && condition2) {
+      PL("initCre=" + S(creep));
+      initCre(creep);
+    }
+  }
 }

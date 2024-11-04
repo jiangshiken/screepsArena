@@ -7,7 +7,9 @@ import { Pos } from "../utils/Pos";
 export const overallMap: MyMap<Pos[]> = new MyMap<Pos[]>(
   100,
   100,
-  () => [],
+  () => {
+    return [];
+  },
   []
 );
 export function overallMapInit() {
