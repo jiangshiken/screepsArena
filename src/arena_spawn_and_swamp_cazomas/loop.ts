@@ -7,8 +7,8 @@ import {
   getTicks,
 } from "game/utils";
 
-import { controlCreeps, isMyTick } from "./gameObjects/Cre";
 import { getEnemyProducers, getMyProducers } from "./gameObjects/Cre_harvest";
+import { controlCreeps, isMyTick } from "./gameObjects/CreTool";
 import { searchPath_area } from "./gameObjects/findPath";
 import {
   containers,
@@ -42,13 +42,13 @@ import { sum_snakePart0 } from "./strategies/snakeRush";
 import { ct, getCPUPercent, pt, ptSum } from "./utils/CPU";
 import {
   inResourceArea,
-  PL,
   set_left,
   set_startGateUp,
   setTick,
 } from "./utils/game";
 import { divideReduce } from "./utils/JS";
 import { GR, Pos, Pos_C } from "./utils/Pos";
+import { PL } from "./utils/print";
 import {
   append_largeSizeText,
   displayPos,

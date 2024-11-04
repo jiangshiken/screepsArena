@@ -20,7 +20,7 @@ import { divide0 } from "../utils/JS";
 import { Pos, atPos } from "../utils/Pos";
 import { P, drawLineComplex, drawPolyLight } from "../utils/visual";
 import { Cre } from "./Cre";
-import { isTerrainRoad } from "./CreTool";
+import { isTerrainRoad } from "./CreCommands";
 import { getCapacity, getEnergy } from "./UnitTool";
 
 /** search the closest path of multiple targets ,like findPath but will

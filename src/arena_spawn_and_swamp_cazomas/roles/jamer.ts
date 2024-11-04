@@ -1,13 +1,13 @@
 import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
 import { findClosestByRange } from "game/utils";
 
-import { hasThreat, Role } from "../gameObjects/Cre";
 import { Cre_move } from "../gameObjects/Cre_move";
 import {
   cpuBreakJudge,
   fleeWeakComplex,
   givePositionToImpartantFriend,
-} from "../gameObjects/CreTool";
+} from "../gameObjects/CreCommands";
+import { hasThreat, Role } from "../gameObjects/CreTool";
 import { enemies, friends, oppoCSs } from "../gameObjects/GameObjectInitialize";
 import { moveAndBePulled } from "../gameObjects/pull";
 import { blocked, inOppoRampart } from "../gameObjects/UnitTool";

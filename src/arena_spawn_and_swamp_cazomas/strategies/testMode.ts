@@ -9,8 +9,9 @@ import { TOUGH } from "game/constants";
 import { CostMatrix, searchPath } from "game/path-finder";
 import { StructureExtension } from "game/prototypes";
 
-import { Cre, id, Role } from "../gameObjects/Cre";
+import { Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
 import { Cre_move } from "../gameObjects/Cre_move";
+import { id, Role } from "../gameObjects/CreTool";
 import { createCS } from "../gameObjects/CS";
 import { friends } from "../gameObjects/GameObjectInitialize";
 import { moveTo_basic } from "../gameObjects/MoveTask";

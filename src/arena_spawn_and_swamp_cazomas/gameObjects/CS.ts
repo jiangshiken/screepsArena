@@ -8,8 +8,8 @@ import { best, divide0, invalid } from "../utils/JS";
 import { atPos, COO, HasPos, Pos } from "../utils/Pos";
 import { drawLineComplex, SA } from "../utils/visual";
 import { GameObj } from "./GameObj";
-import { CSs, isMyGO, isOppoGO, myCSs } from "./GameObjectInitialize";
-import { HasMy } from "./HasMy";
+import { CSs, myCSs } from "./GameObjectInitialize";
+import { HasMy, isMyGO, isOppoGO } from "./HasMy";
 import { findGO } from "./overallMap";
 import { inMyRampart } from "./ramparts";
 

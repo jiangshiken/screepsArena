@@ -14,10 +14,10 @@ import { Event_Number } from "../utils/Event";
 import { HasPos } from "../utils/Pos";
 import { ExtraTauntEvent } from "./battle";
 import { GameObj } from "./GameObj";
-import { isMyGO, isOppoGO, Type_OwnedStructure } from "./GameObjectInitialize";
+import { Type_OwnedStructure } from "./GameObjectInitialize";
 import { HasBattleStats } from "./HasBattleStats";
 import { HasHits } from "./HasHits";
-import { HasMy } from "./HasMy";
+import { HasMy, isMyGO, isOppoGO } from "./HasMy";
 
 export class Stru extends GameObj implements HasPos {
   readonly master: Structure;

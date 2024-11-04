@@ -1,6 +1,6 @@
-import { ERR } from "./game";
 import { inRange_int } from "./JS";
 import { Pos, pos00, Pos_C } from "./Pos";
+import { ERR } from "./print";
 
 /**
  * a map that represent the map tiles

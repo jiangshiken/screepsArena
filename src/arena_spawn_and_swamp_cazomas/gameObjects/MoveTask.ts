@@ -5,7 +5,8 @@ import { last } from "../utils/JS";
 import { GR, Pos } from "../utils/Pos";
 import { cancelOldTask } from "../utils/Task";
 import { drawLineComplex, drawLineLight, SA } from "../utils/visual";
-import { calEventNumberCPUTime, Cre, isMyTick, Task_Cre } from "./Cre";
+import { Cre, Task_Cre } from "./Cre";
+import { calEventNumberCPUTime, isMyTick } from "./CreTool";
 import {
   def_plainCost,
   def_swampCost,

@@ -1,4 +1,5 @@
-import { Cre, id, isMyTick, Role, Task_Cre } from "../gameObjects/Cre";
+import { Cre, Task_Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
+import { id, isMyTick, Role } from "../gameObjects/CreTool";
 import {
   containers,
   Harvable,

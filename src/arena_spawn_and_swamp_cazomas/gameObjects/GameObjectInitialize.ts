@@ -14,10 +14,10 @@ import {
 } from "game/prototypes";
 import { getObjectsByPrototype } from "game/utils";
 
+import { PL } from "arena_spawn_and_swamp_cazomas/utils/print";
 import { ATTACK, CARRY, HEAL, MOVE, RANGED_ATTACK, WORK } from "game/constants";
 import { S } from "../utils/export";
-import { creepBodyPartNum, PL } from "../utils/game";
-import { invalid, valid } from "../utils/JS";
+import { creepBodyPartNum } from "../utils/game";
 import { P } from "../utils/visual";
 import { Cre, Task_Role } from "./Cre";
 import { Cre_battle } from "./Cre_battle";
@@ -25,6 +25,7 @@ import { Cre_build } from "./Cre_build";
 import { Cre_harvest } from "./Cre_harvest";
 import { Cre_move } from "./Cre_move";
 import { CS } from "./CS";
+import { isMyGO, isOppoGO, neutral } from "./HasMy";
 import {
   Con,
   Ext,
@@ -250,14 +251,4 @@ export function initialGameObjectsAtLoopStart_advance() {
   myUnits = (<Unit[]>friends).concat(myOwnedStrus);
   oppoUnits = (<Unit[]>enemies).concat(oppoOwnedStrus);
   units = myUnits.concat(oppoUnits);
-}
-
-export function neutral(g: GameObject): boolean {
-  return invalid((<any>g).my);
-}
-export function isMyGO(g: GameObject): boolean {
-  return valid((<any>g).my) && (<any>g).my;
-}
-export function isOppoGO(g: GameObject): boolean {
-  return valid((<any>g).my) && !(<any>g).my;
 }

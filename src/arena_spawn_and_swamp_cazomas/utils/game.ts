@@ -1,8 +1,9 @@
 import { BodyPartConstant, TERRAIN_SWAMP, TERRAIN_WALL } from "game/constants";
 import { Creep } from "game/prototypes";
-import { findClosestByRange, getTerrainAt } from "game/utils";
+import { getTerrainAt } from "game/utils";
 import { inRange_int } from "./JS";
 import { Pos, Vec } from "./Pos";
+import { PL } from "./print";
 export type StNumber = number;
 /** the startGate top or bottom ,true is top,will decide the area search*/
 export let startGateUp: boolean = false;
@@ -65,17 +66,7 @@ export function getArea(
   else if (pos.y < midBorder) return "area_top";
   else return "area_bottom";
 }
-export function closest<E extends Pos>(pos: Pos, arr: E[]): E | undefined {
-  if (arr.length === 0) {
-    return undefined;
-  } else {
-    return findClosestByRange(pos, arr);
-  }
-}
-export function printError<E>(o: E): E {
-  PL(new Error().stack);
-  return o;
-}
+
 /**tick inside strategy to make sure every strategy worked even if time out */
 export let strategyTick: number = 0;
 export function setStrategyTick(n: number): void {
@@ -90,16 +81,4 @@ export function addStrategyTick(): number {
 export let tick: number;
 export function setTick(t: number) {
   tick = t;
-}
-/**
- * print to the log
- */
-export function PL(s: any) {
-  console.log(s);
-}
-/**
- * print a series of error message
- */
-export function ERR(s: string) {
-  PL(new Error(s));
 }

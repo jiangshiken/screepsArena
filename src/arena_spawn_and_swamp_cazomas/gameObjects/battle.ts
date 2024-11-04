@@ -19,15 +19,15 @@ import { Event, Event_Number } from "../utils/Event";
 import { StNumber } from "../utils/game";
 import { removeIf } from "../utils/JS";
 import { GR, X_axisDistance } from "../utils/Pos";
+import { Cre } from "./Cre";
 import {
-  Cre,
   getEnemyArmies,
   getEnemyThreats,
   getFriendArmies,
   getSurfaceBody,
   spawnDps,
   spawnExtraTaunt,
-} from "./Cre";
+} from "./CreTool";
 import { getSpeed_general } from "./findPath";
 import { oppoUnits, Unit } from "./GameObjectInitialize";
 import { damagedRate, HasHits, healthRate } from "./HasHits";

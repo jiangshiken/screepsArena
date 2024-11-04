@@ -24,9 +24,11 @@ import {
 import { jamer } from "../roles/jamer";
 import { toughDefender } from "../roles/toughDefender";
 
+import { Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
+import { closest } from "arena_spawn_and_swamp_cazomas/utils/Pos";
 import { supplyCS } from "../gameObjects/CS";
+import { defendInArea } from "../gameObjects/CreCommands";
 import {
-  Cre,
   Role,
   enemyAWeight,
   getEnemyArmies,
@@ -36,8 +38,7 @@ import {
   isArmy,
   isHealer,
   setEnRamAroundCost,
-} from "../gameObjects/Cre";
-import { defendInArea } from "../gameObjects/CreTool";
+} from "../gameObjects/CreTool";
 import { Cre_build } from "../gameObjects/Cre_build";
 import { Cre_move } from "../gameObjects/Cre_move";
 import {
@@ -83,13 +84,7 @@ import {
 import { findTask } from "../utils/Task";
 import { TB } from "../utils/autoBodys";
 import { SOA } from "../utils/export";
-import {
-  addStrategyTick,
-  closest,
-  leftVector,
-  strategyTick,
-  tick,
-} from "../utils/game";
+import { addStrategyTick, leftVector, strategyTick, tick } from "../utils/game";
 import {
   P,
   SA,

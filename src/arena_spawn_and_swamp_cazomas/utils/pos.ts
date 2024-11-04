@@ -8,11 +8,11 @@ import {
   TOP,
   TOP_RIGHT,
 } from "game/constants";
-import { getDirection, getRange } from "game/utils";
+import { findClosestByRange, getDirection, getRange } from "game/utils";
 
 import { GameObject } from "game/prototypes";
-import { printError } from "./game";
 import { inRange_int, isWhole, valid } from "./JS";
+import { printError } from "./print";
 
 /**
  * represent a position type
@@ -264,3 +264,10 @@ export function rightRotateDirection(
   return ((dir + 7) % 8) as DirectionConstant;
 }
 export const allDirections: DirectionConstant[] = [1, 2, 3, 4, 5, 6, 7, 8];
+export function closest<E extends Pos>(pos: Pos, arr: E[]): E | undefined {
+  if (arr.length === 0) {
+    return undefined;
+  } else {
+    return findClosestByRange(pos, arr);
+  }
+}

@@ -5,8 +5,8 @@ import { StNumber } from "../utils/game";
 import { divide0, divideReduce, goInRange, relu, sum } from "../utils/JS";
 import { GR, Pos, X_axisDistance } from "../utils/Pos";
 import { sumForceByArr } from "./battle";
-import { enemyAttackNum, hasThreat, is5MA } from "./Cre";
 import { getHarvables } from "./Cre_harvest";
+import { enemyAttackNum, hasThreat, is5MA } from "./CreTool";
 import { enemies, friends } from "./GameObjectInitialize";
 import {
   spawn,

@@ -22,7 +22,8 @@ import {
   X_axisDistance,
 } from "../utils/Pos";
 import { P, SA, SAN } from "../utils/visual";
-import { Cre, hasThreat, Role } from "./Cre";
+import { Cre } from "./Cre";
+import { hasThreat, Role } from "./CreTool";
 import {
   containers,
   cres,

@@ -3,9 +3,10 @@ import { Visual } from "game/visual";
 
 import { overallMap } from "../gameObjects/overallMap";
 import { Event, Event_Number } from "./Event";
-import { leftRate, PL } from "./game";
+import { leftRate } from "./game";
 import { d2 } from "./JS";
 import { HasPos, Pos, pos00, Pos_C } from "./Pos";
+import { PL } from "./print";
 
 /**
  * the list of SAVis

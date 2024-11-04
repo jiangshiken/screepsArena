@@ -1,4 +1,4 @@
-import { Role } from "../gameObjects/Cre";
+import { Role } from "../gameObjects/CreTool";
 import { Cre_battle } from "../gameObjects/Cre_battle";
 import { enemySpawn } from "../gameObjects/spawn";
 import { SA } from "../utils/visual";

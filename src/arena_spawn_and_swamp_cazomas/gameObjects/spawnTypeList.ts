@@ -3,7 +3,8 @@ import { BodyPartConstant } from "game/constants";
 import { S } from "../utils/export";
 import { d2, repeat } from "../utils/JS";
 import { P, SA } from "../utils/visual";
-import { Cre, Role } from "./Cre";
+import { Cre } from "./Cre";
+import { Role } from "./CreTool";
 import { friends } from "./GameObjectInitialize";
 import {
   enoughEnergy,

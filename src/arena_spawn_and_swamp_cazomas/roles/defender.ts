@@ -1,13 +1,13 @@
 import { ConstructionSite } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
-import { getEnemyThreats, Role } from "../gameObjects/Cre";
 import { Cre_battle } from "../gameObjects/Cre_battle";
 import {
   attackWeakRampart,
   cpuBreakJudge,
   defendTheRampart,
-} from "../gameObjects/CreTool";
+} from "../gameObjects/CreCommands";
+import { getEnemyThreats, Role } from "../gameObjects/CreTool";
 import { enemies } from "../gameObjects/GameObjectInitialize";
 import { findGO } from "../gameObjects/overallMap";
 import { spawn } from "../gameObjects/spawn";

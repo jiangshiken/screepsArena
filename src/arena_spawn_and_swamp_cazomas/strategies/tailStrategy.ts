@@ -9,10 +9,11 @@ import {
 } from "../gameObjects/spawn";
 import { jamer } from "../roles/jamer";
 
+import { Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
 import { getTaunt } from "../gameObjects/battle";
-import { Cre, hasThreat, Role } from "../gameObjects/Cre";
 import { Cre_battle } from "../gameObjects/Cre_battle";
 import { Cre_move } from "../gameObjects/Cre_move";
+import { hasThreat, Role } from "../gameObjects/CreTool";
 import {
   enemies,
   friends,

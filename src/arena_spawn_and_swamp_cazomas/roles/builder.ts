@@ -2,21 +2,21 @@ import { ATTACK, WORK } from "game/constants";
 import { StructureExtension, StructureRampart } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
+import { Cre, Task_Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
+import { closest } from "arena_spawn_and_swamp_cazomas/utils/Pos";
 import { protectSelfExtraTaunt } from "../gameObjects/battle";
-import {
-  Cre,
-  getEnemyThreats,
-  hasEnemyArmyAround,
-  hasEnemyThreatAround,
-  Role,
-  Task_Cre,
-} from "../gameObjects/Cre";
 import { canBeBuildByCre, Cre_build } from "../gameObjects/Cre_build";
 import { calAroundEnergy, getHarvables } from "../gameObjects/Cre_harvest";
 import {
   cpuBreakJudge,
   defendTheRampart,
   gotoTargetRampart,
+} from "../gameObjects/CreCommands";
+import {
+  getEnemyThreats,
+  hasEnemyArmyAround,
+  hasEnemyThreatAround,
+  Role,
 } from "../gameObjects/CreTool";
 import {
   createCS,
@@ -56,7 +56,7 @@ import {
   getSpawnAroundLiveContainers,
 } from "../gameObjects/UnitTool";
 import { S } from "../utils/export";
-import { closest, tick } from "../utils/game";
+import { tick } from "../utils/game";
 import { d2, getClassName, invalid } from "../utils/JS";
 import { atPos, COO, getRangePoss, GR, midPoint, Pos } from "../utils/Pos";
 import { findTask } from "../utils/Task";

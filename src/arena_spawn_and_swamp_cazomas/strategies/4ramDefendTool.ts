@@ -12,7 +12,7 @@ import { spawnStartHarvester } from "./strategyTool";
 
 import { CARRY } from "game/constants";
 import { StructureRampart } from "game/prototypes";
-import { enemyAWeight } from "../gameObjects/Cre";
+import { enemyAWeight } from "../gameObjects/CreTool";
 import { friends } from "../gameObjects/GameObjectInitialize";
 import { baseLoseRampart } from "../gameObjects/ramparts";
 import { defender_rampart } from "../roles/defender";

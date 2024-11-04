@@ -5,8 +5,9 @@ import { tick } from "../utils/game";
 import { arrayEquals, best } from "../utils/JS";
 import { GR } from "../utils/Pos";
 import { displayPos, SA } from "../utils/visual";
-import { getBodyArrayOfCreep } from "./Cre";
-import { creeps, enemies, isOppoGO } from "./GameObjectInitialize";
+import { getBodyArrayOfCreep } from "./CreTool";
+import { creeps, enemies } from "./GameObjectInitialize";
+import { isOppoGO } from "./HasMy";
 import { enemySpawn } from "./spawn";
 import { getEnergy } from "./UnitTool";
 

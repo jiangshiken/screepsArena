@@ -3,7 +3,8 @@ import { Event_Pos } from "../utils/Event";
 import { COO, GR, Pos, atPos } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA, drawLineLight } from "../utils/visual";
-import { Cre, getRoundEmptyPos, hasThreat } from "./Cre";
+import { Cre } from "./Cre";
+import { getRoundEmptyPos, hasThreat } from "./CreTool";
 import {
   def_plainCost,
   def_swampCost,
