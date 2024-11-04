@@ -29,9 +29,12 @@ export class Cre_build extends Cre_battle {
     const bt = <BuildingTask | undefined>findTask(this, BuildingTask);
     if (bt) {
       bt.isWorking = b;
+    } else {
+      const nt = new BuildingTask(this);
+      nt.isWorking = b;
     }
   }
-  getIsBuilding() {
+  getIsBuilding(): boolean {
     const bt = <BuildingTask | undefined>findTask(this, BuildingTask);
     return bt !== undefined && bt.isBuilding;
   }
@@ -40,6 +43,9 @@ export class Cre_build extends Cre_battle {
     const bt = <BuildingTask | undefined>findTask(this, BuildingTask);
     if (bt) {
       bt.isBuilding = b;
+    } else {
+      const nt = new BuildingTask(this);
+      nt.isBuilding = b;
     }
   } /** move and build target */
   directBuild(tar: CS): boolean {

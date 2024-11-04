@@ -46,6 +46,7 @@ import {
   setEnemySpawn,
   setSpawn,
   spawn,
+  spawnList,
 } from "./gameObjects/spawn";
 import { Con } from "./gameObjects/Stru";
 import { getEnergy } from "./gameObjects/UnitTool";
@@ -78,6 +79,7 @@ import {
 export function loopEnd() {
   const st0 = ct();
   drawText(new Pos_C(50, 56), "F");
+  SA(displayPos(), "spawnList.length=" + spawnList.length);
   controlCreeps();
   displayRoleCPU();
   pt("controlCreeps", st0);

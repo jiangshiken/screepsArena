@@ -29,8 +29,8 @@ export class Pos_C implements HasPos {
   readonly data_x: number;
   readonly data_y: number;
   constructor(x: number, y: number) {
-    this.data_x = validAxis(x) ? x : printError(0);
-    this.data_y = validAxis(y) ? y : printError(0);
+    this.data_x = validAxis(x) ? x : printError(0, "Pos");
+    this.data_y = validAxis(y) ? y : printError(0, "Pos");
   }
   get x(): number {
     return this.data_x;
@@ -46,8 +46,8 @@ export class Vec {
   readonly vec_x: number;
   readonly vec_y: number;
   constructor(x: number, y: number) {
-    this.vec_x = validNum(x) ? x : printError(0);
-    this.vec_y = validNum(y) ? y : printError(0);
+    this.vec_x = validNum(x) ? x : printError(0, "Vec");
+    this.vec_y = validNum(y) ? y : printError(0, "Vec");
   }
 }
 export function validNum(num: number): boolean {

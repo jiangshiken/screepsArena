@@ -8,11 +8,11 @@ import { SA } from "../utils/visual";
 import { enemies, friends, myRamparts } from "./GameObjectInitialize";
 import { findGO } from "./overallMap";
 import { spawn } from "./spawn";
-import { OwnedStru } from "./Stru";
+import { OwnedStru, Ram } from "./Stru";
 import { blocked } from "./UnitTool";
 
-export function myRampartAt(pos: Pos): OwnedStru | undefined {
-  return <OwnedStru | undefined>findGO(pos, StructureRampart);
+export function myRampartAt(pos: Pos): Ram | undefined {
+  return <OwnedStru | undefined>findGO(pos, Ram);
 }
 export function myRoundRamparts(cre: Pos, range: number): OwnedStru[] {
   return myRamparts.filter(i => GR(i, cre) <= range);

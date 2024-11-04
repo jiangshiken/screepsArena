@@ -10,6 +10,7 @@ import {
   WORK,
 } from "game/constants";
 
+import { Event } from "../utils/Event";
 import { S } from "../utils/export";
 import { set_startGateUp, startGateUp } from "../utils/game";
 import { arrayEqual } from "../utils/JS";
@@ -43,7 +44,11 @@ import { blocked, getEnergy } from "./UnitTool";
 export let spawn: Spa;
 
 export function spawnCleared(s: Spa) {
-  return spawnList.length === 0 && s.spawningCreep === undefined;
+  return (
+    spawnList.length === 0 &&
+    s.spawningCreep === undefined &&
+    !s.spawnEvent?.validEvent()
+  );
 }
 export function setSpawn(s: Spa) {
   spawn = s;
@@ -148,9 +153,10 @@ export function spawnIt(theSpawn: Spa) {
     const spawnedCreep = spawnResult.object;
     if (spawnedCreep) {
       (<any>spawnedCreep).spawnInfo = spawnInfo;
-      SA(theSpawn, "theSpawn.isSpawning.role =" + S(spawnRole));
-      SA(theSpawn, "theSpawn.isSpawning.spawnInfo =" + S(spawnInfo));
+      SA(theSpawn, "role =" + spawnRole.roleName);
+      SA(theSpawn, "spawnInfo =" + S(spawnInfo));
       spawnList.shift();
+      theSpawn.spawnEvent = new Event();
       SA(theSpawn, "spawnListLength=" + spawnList.length);
     }
   }

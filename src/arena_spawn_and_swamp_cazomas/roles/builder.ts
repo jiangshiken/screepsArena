@@ -162,12 +162,12 @@ export function builderTurtleJob(cre: Cre_build) {
     } else {
       defendTheRampart(cre);
     }
-    if (
-      (tick > 600 &&
-        !spawnHasRam &&
-        getEnergy(cre) >= 5 * cre.getBodyPartsNum(WORK)) ||
-      cre.getIsBuilding()
-    ) {
+    const cond1 =
+      tick > 600 &&
+      !spawnHasRam &&
+      getEnergy(cre) >= 5 * cre.getBodyPartsNum(WORK);
+    const cond2 = cre.getIsBuilding();
+    if (cond1 || cond2) {
       SA(cre, "normalBuild");
       cre.normalBuild(cs);
     } else if (tick <= 300) {

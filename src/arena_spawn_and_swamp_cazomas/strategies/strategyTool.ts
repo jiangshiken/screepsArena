@@ -13,10 +13,12 @@ export function spawnStartHarvester(
   needCarryNum: number,
   is2C2M: boolean = false
 ) {
+  SA(displayPos(), "spawnCleared(spawn)" + spawnCleared(spawn));
   if (tick <= 300 && spawnCleared(spawn)) {
     const tarHarvesters = friends.filter(
       i => i.role === harvester && i.getHealthyBodyPartsNum(MOVE) > 0
     );
+    SA(displayPos(), "tarHarvesters.length" + tarHarvesters.length);
     const carryNum = sum(tarHarvesters, i => i.getHealthyBodyPartsNum(CARRY));
     SA(displayPos(), "spawnStartHarvester carryNum=" + carryNum);
     if (carryNum < needCarryNum) {
