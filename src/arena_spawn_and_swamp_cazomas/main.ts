@@ -6,7 +6,6 @@ import {
   startWaitTick,
   Tigga,
 } from "./gameObjects/player";
-import { spawnList } from "./gameObjects/spawn";
 import { showHealthBars } from "./gameObjects/visual_Cre";
 import { loopEnd, loopStart } from "./loop";
 import { set_harvesterNotFleeAtStart } from "./roles/harvester";
@@ -103,9 +102,7 @@ export function loop(): void {
   } else if (useMod === turtleStrategy) {
     // useTurtleStrategy();
   } else if (useMod === snakeRushStrategy) {
-    SA(displayPos(), "SLL_A=" + spawnList.length);
     useSnakeRushStrategy();
-    SA(displayPos(), "SLL_B=" + spawnList.length);
   } else if (useMod === armedBuilderStrategy) {
     // useArmedBuilderStrategy();
   } else if (useMod === tailStrategy) {

@@ -1,14 +1,10 @@
 import { ATTACK, HEAL, RANGED_ATTACK, WORK } from "game/constants";
-import { CostMatrix, searchPath } from "game/path-finder";
-import { findClosestByRange } from "game/utils";
 
-import { StructureRampart, StructureSpawn } from "game/prototypes";
+import { StructureRampart } from "game/prototypes";
 
-import { enemyRampartIsHealthy } from "../gameObjects/ramparts";
 import {
   enemySpawn,
   getBodiesCost,
-  inEnBaseRan,
   inMyBaseRan,
   resetStartGateAvoidFromEnemies,
   spawn,
@@ -29,8 +25,6 @@ import {
   enemyAWeight,
   getEnemyArmies,
   getEnemyThreats,
-  hasEnemyThreatAround,
-  hasThreat,
   isArmy,
   isHealer,
   setEnRamAroundCost,
@@ -39,7 +33,6 @@ import { Cre_build } from "../gameObjects/Cre_build";
 import { Cre_move } from "../gameObjects/Cre_move";
 import {
   constructionSites,
-  cres,
   enemies,
   friends,
   myUnits,
@@ -49,9 +42,8 @@ import {
 import { damaged, damagedRate } from "../gameObjects/HasHits";
 import { Ext, Spa } from "../gameObjects/Stru";
 import { getEnergy, getFreeEnergy, inRampart } from "../gameObjects/UnitTool";
-import { calculateForce, getTaunt, sumForceByArr } from "../gameObjects/battle";
-import { getMoveTime, searchPathByCreCost } from "../gameObjects/findPath";
-import { findGO } from "../gameObjects/overallMap";
+import { getTaunt, sumForceByArr } from "../gameObjects/battle";
+import { getMoveTime } from "../gameObjects/findPath";
 import {
   Dooms,
   Kerob,
@@ -62,7 +54,7 @@ import {
 } from "../gameObjects/player";
 import { PullTarsTask } from "../gameObjects/pull";
 import { Event } from "../utils/Event";
-import { best, invalid, maxWorth_lamb, sum } from "../utils/JS";
+import { best, invalid, sum } from "../utils/JS";
 import {
   Adj,
   COO,
@@ -136,7 +128,7 @@ function goLimitTick() {
   if (getGuessPlayer() === Tigga || getGuessPlayer() === Kerob) {
     return 500;
   } else {
-    return snakePartsTotalNum <= 7 ? 440 : 470;
+    return snakePartsTotalNum <= 7 ? 590 : 670;
   }
 }
 const restartGateTickLimit = 385;
@@ -264,13 +256,7 @@ export function snakePartJob(cre: Cre_build) {
     const roundEnemyForce: number = sumForceByArr(roundEnemies);
     //judge if split
     const roundEnemyForceBias = 25;
-    SA(cre, "MGR(leader,enemySpawn)=" + GR(leader, enemySpawn));
-    SA(
-      cre,
-      "verticalDistance(leader,enemySpawn)=" +
-        X_axisDistance(leader, enemySpawn)
-    );
-    SA(cre, "roundEnemyForce=" + roundEnemyForce);
+    SA(cre, "MGR=" + GR(leader, enemySpawn));
     const roundForce1 = sumForceByArr(
       getEnemyArmies().filter(i => GR(i, leader) <= 1)
     );
@@ -278,7 +264,7 @@ export function snakePartJob(cre: Cre_build) {
       getEnemyArmies().filter(i => GR(i, leader) <= 5)
     );
     const leaderDanger: number = roundForce1 + 0.4 * roundForce5;
-    SAN(leader, "leaderDanger", leaderDanger);
+    // SAN(leader, "leaderDanger", leaderDanger);
     if (allIn) {
       split = true;
       let pt = findTask(leader, PullTarsTask);
@@ -330,111 +316,113 @@ export function snakePartJob(cre: Cre_build) {
         } else if (currentGuessPlayer === Dooms) {
           snakeAgainstDooms(cre);
         } else {
-          //guess player is not Tigga
-          const nearFriends = friends.filter(
-            i => GR(i, cre) <= 1 && i.role === snakePart
-          );
-          const nearFriendNearSpawn = <Cre_move | undefined>(
-            nearFriends.find(i => GR(i, enemySpawn) === 1)
-          );
-          const tarRams = oppoRamparts.filter(i => GR(i, enemySpawn) === 1);
-          const tarRam = maxWorth_lamb(tarRams, i => {
-            const enemyInRam = <Cre | undefined>findGO(i, Cre);
-            if (enemyInRam) {
-              return -calculateForce(enemyInRam);
-            } else {
-              return 0;
-            }
-          })?.target;
-          const needDestroyRams = oppoRamparts.filter(
-            i =>
-              GR(i, enemySpawn) <= 7 &&
-              !atPos(i, enemySpawn) &&
-              !(hasEnemyThreatAround(i, 0) && enemyRampartIsHealthy(i))
-          );
-          const needDestroyRam = findClosestByRange(cre, needDestroyRams);
-          const avoidRams = oppoRamparts.filter(
-            i => GR(i, enemySpawn) <= 1 && hasEnemyThreatAround(i, 0)
-          );
-          SAN(cre, "tarRams.length", tarRams.length);
-          SA(cre, "tarRams=" + COO(tarRam));
-          if (tarRam) {
-            SAN(cre, "MGR(tarRam, cre)", GR(tarRam, cre));
-          }
-          if (
-            GR(cre, enemySpawn) === 2 &&
-            nearFriendNearSpawn &&
-            cre.getBodyPartsNum(ATTACK) >
-              nearFriendNearSpawn.getBodyPartsNum(ATTACK)
-          ) {
-            SA(cre, "exchange Pos");
-            cre.exchangePos_setAppointment(nearFriendNearSpawn);
-          } else if (GR(cre, enemySpawn) <= 1 && currentGuessPlayer !== Dooms) {
-            SA(cre, "stop at spawn");
-            cre.stop();
-          } else if (tarRams.length >= 2 && tarRam && GR(tarRam, cre) <= 1) {
-            SA(cre, "stop at ram");
-            cre.stop();
-          } else {
-            SA(cre, "continue");
-            //at 13 vertical
-            let target: Pos | undefined;
-            if (inEnBaseRan(cre)) {
-              let threatenEn = enemies.find(
-                i =>
-                  GR(i, cre) <= 4 &&
-                  (currentGuessPlayer !== Dooms
-                    ? i.getBodyPartsNum(ATTACK) > 0
-                    : hasThreat(i)) &&
-                  GR(i, enemySpawn) <= GR(cre, enemySpawn) + 3 &&
-                  !atPos(i, enemySpawn) &&
-                  !inRampart(i)
-              );
-              if (threatenEn) {
-                target = threatenEn;
-              } else if (needDestroyRam) {
-                target = needDestroyRam;
-              } else {
-                target = enemySpawn;
-              }
-            } else {
-              target = enemySpawn;
-            }
-            SA(cre, "target=" + COO(target));
-            //avoid block by friend at small road
-            if (GR(cre, enemySpawn) >= 4) {
-              SA(cre, "move careful");
-              const tempCM = new CostMatrix();
-              const creeps = cres;
-              for (let everyCre of creeps) {
-                tempCM.set(everyCre.x, everyCre.y, 30);
-              }
-              const tempTar = searchPath(cre, target, {
-                costMatrix: tempCM,
-                plainCost: 1,
-                swampCost: 3,
-              }).path[0];
-              drawLineComplex(cre, tempTar, 0.7, "#553477");
-              cre.MTJ(tempTar);
-            } else {
-              const sRtn = searchPathByCreCost(cre, target);
-              const tarPos = sRtn.path[0];
-              const enRam = enemies.find(
-                i =>
-                  GR(tarPos, i) <= 1 &&
-                  i.getBodyPartsNum(ATTACK) >= 3 &&
-                  inRampart(i) &&
-                  !atPos(i, enemySpawn)
-              );
-              if (enRam) {
-                SA(cre, "i m wrong");
-                cre.stop();
-              } else {
-                SA(cre, "i m right");
-                cre.MTJ(tarPos);
-              }
-            }
-          }
+          cre.MTJ_stop(enemySpawn);
+          // //guess player is not Tigga
+          // const nearFriends = friends.filter(
+          //   i => GR(i, cre) <= 1 && i.role === snakePart
+          // );
+          // const nearFriendNearSpawn = <Cre_move | undefined>(
+          //   nearFriends.find(i => GR(i, enemySpawn) === 1)
+          // );
+          // const tarRams = oppoRamparts.filter(i => GR(i, enemySpawn) === 1);
+          // const tarRam = maxWorth_lamb(tarRams, i => {
+          //   const enemyInRam = <Cre | undefined>findGO(i, Cre);
+          //   if (enemyInRam) {
+          //     return -calculateForce(enemyInRam);
+          //   } else {
+          //     return 0;
+          //   }
+          // })?.target;
+          // const needDestroyRams = oppoRamparts.filter(
+          //   i =>
+          //     GR(i, enemySpawn) <= 7 &&
+          //     !atPos(i, enemySpawn) &&
+          //     !(hasEnemyThreatAround(i, 0) && enemyRampartIsHealthy(i))
+          // );
+          // const needDestroyRam = findClosestByRange(cre, needDestroyRams);
+          // const avoidRams = oppoRamparts.filter(
+          //   i => GR(i, enemySpawn) <= 1 && hasEnemyThreatAround(i, 0)
+          // );
+          // SAN(cre, "tarRams.length", tarRams.length);
+          // SA(cre, "tarRams=" + COO(tarRam));
+          // if (tarRam) {
+          //   SAN(cre, "MGR(tarRam, cre)", GR(tarRam, cre));
+          // }
+          // if (
+          //   GR(cre, enemySpawn) === 2 &&
+          //   nearFriendNearSpawn &&
+          //   cre.getBodyPartsNum(ATTACK) >
+          //     nearFriendNearSpawn.getBodyPartsNum(ATTACK)
+          // ) {
+          //   SA(cre, "exchange Pos");
+          //   cre.exchangePos_setAppointment(nearFriendNearSpawn);
+          // } else if (GR(cre, enemySpawn) <= 1 && currentGuessPlayer !== Dooms) {
+          //   SA(cre, "stop at spawn");
+          //   cre.stop();
+          // } else if (tarRams.length >= 2 && tarRam && GR(tarRam, cre) <= 1) {
+          //   SA(cre, "stop at ram");
+          //   cre.stop();
+          // } else {
+          //   SA(cre, "continue");
+          //   //at 13 vertical
+          //   let target: Pos | undefined;
+          //   if (inEnBaseRan(cre)) {
+          //     let threatenEn = enemies.find(
+          //       i =>
+          //         GR(i, cre) <= 4 &&
+          //         (currentGuessPlayer !== Dooms
+          //           ? i.getBodyPartsNum(ATTACK) > 0
+          //           : hasThreat(i)) &&
+          //         GR(i, enemySpawn) <= GR(cre, enemySpawn) + 3 &&
+          //         !atPos(i, enemySpawn) &&
+          //         !inRampart(i)
+          //     );
+          //     if (threatenEn) {
+          //       target = threatenEn;
+          //     } else if (needDestroyRam) {
+          //       target = needDestroyRam;
+          //     } else {
+          //       target = enemySpawn;
+          //     }
+          //   } else {
+          //     target = enemySpawn;
+          //   }
+          //   SA(cre, "target=" + COO(target));
+          //   //avoid block by friend at small road
+          //   if (GR(cre, enemySpawn) >= 4) {
+          //     SA(cre, "move careful");
+          //     const tempCM = new CostMatrix();
+          //     const creeps = cres;
+          //     for (let everyCre of creeps) {
+          //       tempCM.set(everyCre.x, everyCre.y, 30);
+          //     }
+          //     const tempTar = searchPath(cre, target, {
+          //       costMatrix: tempCM,
+          //       plainCost: 1,
+          //       swampCost: 3,
+          //     }).path[0];
+          //     drawLineComplex(cre, tempTar, 0.7, "#553477");
+          //     cre.MTJ(tempTar);
+          //   } else {
+          //     const sRtn = searchPathByCreCost(cre, target);
+          //     const tarPos = sRtn.path[0];
+          //     const enRam = enemies.find(
+          //       i =>
+          //         GR(tarPos, i) <= 1 &&
+          //         i.getBodyPartsNum(ATTACK) >= 3 &&
+          //         inRampart(i) &&
+          //         !atPos(i, enemySpawn)
+          //     );
+          //     if (enRam) {
+          //       SA(cre, "i m wrong");
+          //       cre.stop();
+          //     } else {
+          //       SA(cre, "i m right");
+          //       if(GR(cre,enemySpawn)<=1)
+          //       cre.MTJ(tarPos);
+          //     }
+          //   }
+          // }
         }
       }
     } else {
@@ -679,7 +667,9 @@ function spInd(cre: Cre): number {
   return <number>cre.upgrade.spIndex;
 }
 function trySpawnPart(index: number): boolean {
+  SA(displayPos(), "trySpawnPart" + index);
   if (snakePartsTotalNum > index && !findSnakePart(index)) {
+    SA(displayPos(), "decideSpawnPart " + index);
     decideSpawnPart(index);
     return true;
   } else return false;
@@ -690,7 +680,6 @@ export function set_spawnJamer(b: boolean) {
 }
 export let suppliedBuilder = false;
 export function useSnakeRushStrategy() {
-  drawText(new Pos_C(50, 53), "D");
   sum_snakePart0 = 0;
   const st = strategyTick;
   SAN(spawn, "st", st);
@@ -857,7 +846,7 @@ function command() {
                   typeBonus = 0.15;
                 }
                 // typeExtra = 0.15
-              } else if (i instanceof StructureSpawn) {
+              } else if (i instanceof Spa) {
                 if (getGuessPlayer() === Tigga) {
                   typeBonus = 100;
                 } else if (getGuessPlayer() === Dooms) {

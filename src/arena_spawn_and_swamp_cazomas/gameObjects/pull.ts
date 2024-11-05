@@ -357,7 +357,7 @@ export class PullTarsTask extends Task_Cre {
     }
     if (allPulling) {
       //if all pulled
-      // SA(this.master, "allPulling");
+      SA(this.master, "allPulling");
       // SA(this.master, "tarCres[0]=" + COO(tarCres[0]));
       // SA(this.master, "this.tarPos=" + COO(this.tarPos));
       // SA(this.master, "this.nextStep=" + COO(this.nextStep));
@@ -370,8 +370,10 @@ export class PullTarsTask extends Task_Cre {
       );
     } else if (creIdle) {
       //this is idle,approach first
+      SA(this.master, "creIdle");
       moveTo_basic(this.master, tarCres[0]);
     } else {
+      SA(this.master, "not all pulling");
     }
   }
 }

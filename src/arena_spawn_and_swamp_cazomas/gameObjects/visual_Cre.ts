@@ -1,4 +1,3 @@
-import { Structure } from "game/prototypes";
 import { Visual } from "game/visual";
 import { valid } from "../utils/JS";
 import { drawRangeComplex, P } from "../utils/visual";
@@ -6,6 +5,7 @@ import { calculateForce } from "./battle";
 import { Cre } from "./Cre";
 import { cres, enemies, friends, units } from "./GameObjectInitialize";
 import { damaged } from "./HasHits";
+import { Stru } from "./Stru";
 
 const VISUAL_LAYER = 6;
 /**
@@ -37,8 +37,8 @@ export function showHits() {
  * @author UndefinedCpp
  * @version 1.0
  */
-export function showHealthBar(obj: Cre | Structure) {
-  if (valid(obj) && valid(obj.hits)) {
+export function showHealthBar(obj: Cre | Stru) {
+  if (valid(obj) && valid(obj.master.hits)) {
     const visbase = new Visual(VISUAL_LAYER, false);
     // 打底色
     visbase.line(
@@ -47,7 +47,7 @@ export function showHealthBar(obj: Cre | Structure) {
       { color: "#727272", opacity: 0.4 }
     );
     // 算比例
-    const ratio = obj.hits / obj.hitsMax;
+    const ratio = obj.master.hits / obj.master.hitsMax;
     // 撸颜色
     const colorScheme = {
       low: "#ff0000",

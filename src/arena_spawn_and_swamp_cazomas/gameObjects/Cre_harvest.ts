@@ -1,5 +1,5 @@
 import { OK, RESOURCE_ENERGY, WORK } from "game/constants";
-import { Resource, StructureContainer } from "game/prototypes";
+import { Resource } from "game/prototypes";
 import { findClosestByRange, getRange } from "game/utils";
 import { Event_Pos } from "../utils/Event";
 import { S } from "../utils/export";
@@ -26,7 +26,7 @@ import {
 } from "./GameObjectInitialize";
 import { findGO, overallMap } from "./overallMap";
 import { spawn } from "./spawn";
-import { Ext, Res, Spa, Stru } from "./Stru";
+import { Con, Ext, Res, Spa, Stru } from "./Stru";
 import {
   getCapacity,
   getEnergy,
@@ -127,7 +127,7 @@ export class Cre_harvest extends Cre_move {
   /**if a harvable will not disappear before you reach it*/
   reachableHarvable(harvable: Harvable): boolean {
     let td;
-    if (harvable instanceof StructureContainer) {
+    if (harvable instanceof Con) {
       td =
         harvable.ticksToDecay == undefined ? Infinity : harvable.ticksToDecay;
     } else {

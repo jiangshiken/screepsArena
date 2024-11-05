@@ -21,6 +21,7 @@ import { Cre_move } from "./gameObjects/Cre_move";
 import { controlCreeps, isMyTick } from "./gameObjects/CreTool";
 import { searchPath_area } from "./gameObjects/findPath";
 import {
+  BlockGO,
   containers,
   creeps,
   cres,
@@ -33,8 +34,10 @@ import {
   mySpawns,
   oppoSpawns,
   set_cres,
+  strus,
 } from "./gameObjects/GameObjectInitialize";
 import {} from "./gameObjects/HasHits";
+import { moveBlockCostMatrix_setBlock } from "./gameObjects/MoveTask";
 import {
   overallMapInit,
   setGameObjectsThisTick,
@@ -49,7 +52,12 @@ import {
   spawnList,
 } from "./gameObjects/spawn";
 import { Con } from "./gameObjects/Stru";
-import { getEnergy } from "./gameObjects/UnitTool";
+import {
+  blockCost,
+  getEnergy,
+  isBlockGO,
+  set_moveBlockCostMatrix,
+} from "./gameObjects/UnitTool";
 import { showEnemies, showHits } from "./gameObjects/visual_Cre";
 import { sum_snakePart0 } from "./strategies/snakeRush";
 import { ct, getCPUPercent, pt, ptL, ptSum } from "./utils/CPU";
@@ -146,7 +154,7 @@ export function loopStart() {
   append_largeSizeText("Status:");
 
   const st_predictOppos = ct();
-
+  setBlockCostMatrix();
   pt("predictOppos and setRamMoveMapValue", st_predictOppos);
   const st_checkSpawns = ct();
   checkSpawns();
@@ -155,6 +163,15 @@ export function loopStart() {
   setWorthForContainers();
   pt("setWorthForContainers", st5);
   P("loopStart end");
+}
+export function setBlockCostMatrix() {
+  set_moveBlockCostMatrix(new CostMatrix());
+  const blockGOs = (<BlockGO[]>cres).concat(strus);
+  blockGOs.forEach(i => {
+    if (isBlockGO(i)) {
+      moveBlockCostMatrix_setBlock(i);
+    }
+  });
 }
 export function setWorthForContainers() {
   const conts: Con[] = <Con[]>containers.filter(i => inResourceArea(i));
@@ -206,7 +223,7 @@ function getCostMatrixHalf(up: boolean): CostMatrix {
   let rtn = new CostMatrix();
   const wallY = up ? 70 : 30;
   for (let i = 0; i < 100; i++) {
-    rtn.set(i, wallY, 255);
+    rtn.set(i, wallY, blockCost);
   }
   return rtn;
 }

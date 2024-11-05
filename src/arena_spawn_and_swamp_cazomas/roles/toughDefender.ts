@@ -6,6 +6,7 @@ import { Role } from "../gameObjects/CreTool";
 import { enemies, friends } from "../gameObjects/GameObjectInitialize";
 import { getGuessPlayer, Tigga } from "../gameObjects/player";
 import { spawn } from "../gameObjects/spawn";
+import { blockCost } from "../gameObjects/UnitTool";
 import { leftVector } from "../utils/game";
 import {
   absRange,
@@ -64,7 +65,7 @@ export function toughDefenderJob(cre: Cre_battle) {
       } else if (GR(pos, spawn) === 1) {
         cm.set(pos.x, pos.y, 5);
       } else {
-        cm.set(pos.x, pos.y, 255);
+        cm.set(pos.x, pos.y, blockCost);
       }
     }
     const en = closest(spawn, enemies);

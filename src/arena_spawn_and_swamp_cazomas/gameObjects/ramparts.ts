@@ -1,6 +1,5 @@
 import { ATTACK, RANGED_ATTACK } from "game/constants";
 import { CostMatrix } from "game/path-finder";
-import { StructureRampart } from "game/prototypes";
 import { Event } from "../utils/Event";
 import { relu, sum } from "../utils/JS";
 import { Adj, getRangePoss, GR, Pos } from "../utils/Pos";
@@ -46,7 +45,7 @@ export function rampartIsHealthy(
   }
 }
 export function inMyRampart(pos: Pos): boolean {
-  const ram = <OwnedStru | undefined>findGO(pos, StructureRampart);
+  const ram = <Ram | undefined>findGO(pos, Ram);
   return ram !== undefined && ram.my;
 }
 export function baseLoseRampart(): boolean {
@@ -57,7 +56,7 @@ export function baseLoseRampartAround(): boolean {
   return roundPos.find(i => !inMyRampart(i)) !== undefined;
 }
 export function inMyHealthyRampart(pos: Pos) {
-  const ram = <OwnedStru | undefined>findGO(pos, StructureRampart);
+  const ram = <Ram | undefined>findGO(pos, Ram);
   return ram && ram.my && rampartIsHealthy(ram);
 }
 export let ramSaveCostMatrix_Event: Event = new Event();

@@ -7,7 +7,6 @@ import {
   TOUGH,
   WORK,
 } from "game/constants";
-import { StructureRampart } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 import { Event, Event_Number } from "../utils/Event";
 import { StNumber } from "../utils/game";
@@ -151,7 +150,7 @@ export function getHP(cre: Unit, includeRam: boolean = true): StNumber {
   let HP = cre.hits;
   //if in rampart plus rampart HP
   if (inRampart(cre) && includeRam) {
-    const ram = <StructureRampart>findGO(cre, StructureRampart);
+    const ram = <Ram>findGO(cre, Ram);
     if (ram) {
       const ramHP = ram.hits;
       HP += ramHP;

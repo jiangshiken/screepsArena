@@ -63,13 +63,6 @@ export function useStandardTurtling(st: number, strength: number = 0) {
   if (st >= startRebuildTick && st <= transRebuildTime) {
     reBuildBaseRampart();
   }
-  // if (st >= transRebuildTime) {
-  // 	let leftRate = sasVariables.leftRate();
-  // 	supplyCS({ x: spawn.x - leftRate, y: spawn.y + 1 }, StructureRampart, 9);
-  // 	supplyCS({ x: spawn.x - leftRate, y: spawn.y - 1 }, StructureRampart, 9);
-  // 	supplyCS({ x: spawn.x + leftRate, y: spawn.y + 1 }, StructureRampart, 8);
-  // 	supplyCS({ x: spawn.x + leftRate, y: spawn.y - 1 }, StructureRampart, 8);
-  // }
   if (st === 370) {
     //defender
     const AW = enemyAWeight();

@@ -1,6 +1,7 @@
 import { getTicks } from "game/utils";
 
-import { arrayCopy, remove } from "./JS";
+import { Event } from "./Event";
+import { remove } from "./JS";
 
 export function findTask<E extends Task>(
   ht: HasTasks,
@@ -14,13 +15,27 @@ export function findTask<E extends Task>(
 export interface HasTasks {
   tasks: Task[];
 }
+function taskLooped(task: Task) {
+  return task.looped !== undefined && task.looped.validEvent();
+}
 export function useTasks(hasTasks: HasTasks) {
   const tasks: Task[] = hasTasks.tasks;
-  const tasksNeedLoop = arrayCopy(tasks);
-  for (let i = 0; i < tasksNeedLoop.length; i++) {
-    const task: Task = tasksNeedLoop[i];
-    if (task.pause) continue;
-    task.loop_task();
+  const notAllLooped = tasks.find(i => !taskLooped(i)) !== undefined;
+  while (notAllLooped) {
+    const taskNeedLoop = tasks.find(i => !taskLooped(i));
+    if (taskNeedLoop !== undefined) {
+      if (!taskNeedLoop.pause) {
+        taskNeedLoop.loop_task();
+      }
+      taskNeedLoop.looped = new Event();
+    } else {
+      break;
+    }
+    // if (hasTasks instanceof GameObj) {
+    //   // Pos
+    //   SA(hasTasks, "useTasks " + tasks.length);
+    //   SA(hasTasks, "tasksNeedLoop " + tasksNeedLoop.length);
+    // }
   }
 }
 /**
@@ -31,6 +46,7 @@ export function useTasks(hasTasks: HasTasks) {
 export class Task {
   /** if task completed */
   complete: boolean = false;
+  looped: Event | undefined;
   /** master of task*/
   readonly master: HasTasks;
   /** the birth tick of task*/

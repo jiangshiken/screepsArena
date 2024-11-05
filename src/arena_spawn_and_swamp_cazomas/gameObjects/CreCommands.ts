@@ -21,7 +21,6 @@ import {
 } from "../utils/visual";
 
 import { closest } from "arena_spawn_and_swamp_cazomas/utils/Pos";
-import { StructureRoad } from "game/prototypes";
 import { tick } from "../utils/game";
 import { calculateForce, getForce_tradition, getTaunt } from "./battle";
 import { rangeReduce } from "./bonus";
@@ -63,6 +62,7 @@ import {
   refreshRampartSaveCostMatrix,
 } from "./ramparts";
 import { spawn } from "./spawn";
+import { Roa } from "./Stru";
 import { blocked, getEnergy, getMyBaseContainers } from "./UnitTool";
 export function myContainersEnergy() {
   const myContainers = getMyBaseContainers();
@@ -84,7 +84,7 @@ export function defendInArea(cre: Cre_move, pos: Pos, range: number): boolean {
   }
 }
 export function isTerrainRoad(pos: Pos): boolean {
-  return hasGO(pos, StructureRoad);
+  return hasGO(pos, Roa);
 }
 export let isTurtleContainer: boolean = false;
 export function setIsTurtleContainer(b: boolean) {
@@ -215,7 +215,7 @@ export function gotoTargetRampart(cre: Cre_move, targetRampart: Pos) {
 export function goinRampartAssign(cre: Cre_move, calBlocked: Pos[]) {
   SA(cre, "goinRampartAssign " + COO(cre));
   const aroundRams = getMyHealthyRamparts_around(cre);
-  const aroundEmptyRams = aroundRams.filter(i => !blocked(i, false));
+  const aroundEmptyRams = aroundRams.filter(i => !blocked(i, false, cre));
   const aroundEmptyRam = last(aroundEmptyRams);
   if (aroundRams.length > 0) {
     if (aroundEmptyRam) {

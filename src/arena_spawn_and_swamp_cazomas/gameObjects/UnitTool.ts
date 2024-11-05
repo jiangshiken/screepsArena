@@ -1,10 +1,12 @@
 import { CARRY, RESOURCE_ENERGY } from "game/constants";
+import { CostMatrix } from "game/path-finder";
 import { Resource } from "game/prototypes";
 import { inResourceArea, isTerrainWall } from "../utils/game";
 import { getRangePoss, GR, Pos } from "../utils/Pos";
+import { SA } from "../utils/visual";
 import { Cre } from "./Cre";
 import { GameObj } from "./GameObj";
-import { containers, GO, HasStore } from "./GameObjectInitialize";
+import { BlockGO, containers, GO, HasStore } from "./GameObjectInitialize";
 import { findGO, overallMap } from "./overallMap";
 import { enemySpawn, spawn } from "./spawn";
 import { Con, Ext, Ram, Res, Roa, Spa, Stru, Tow } from "./Stru";
@@ -26,23 +28,44 @@ export function getEnergy(a: GameObj): number {
     return 0;
   }
 }
+export let moveBlockCostMatrix: CostMatrix = new CostMatrix();
+export function set_moveBlockCostMatrix(c: CostMatrix) {
+  moveBlockCostMatrix = c;
+}
+export const blockCost = 255;
 /**
  * if position is blocked
  */
-export function blocked(pos: Pos, avoidFriendBlock: boolean = false): boolean {
+export function blocked(
+  pos: Pos,
+  avoidFriendBlock: boolean = false,
+  printPos: Pos | undefined = undefined
+): boolean {
   if (isTerrainWall(pos)) {
     return true;
   } else {
+    if (printPos) {
+      SA(printPos, "A");
+    }
     const posList = overallMap[pos.x][pos.y];
+    if (printPos) {
+      SA(printPos, "posList=" + posList.length);
+    }
     for (let go of posList) {
       if (go instanceof Cre || go instanceof Stru) {
-        isBlockGO(go, avoidFriendBlock);
+        if (printPos) {
+          SA(printPos, "isBlockGO=" + go.master);
+        }
+        const bgortn = isBlockGO(go, avoidFriendBlock);
+        if (bgortn) {
+          return true;
+        }
       }
     }
     return false;
   }
 }
-export function isBlockGO(go: Cre | Stru, avoidFriendBlock: boolean = false) {
+export function isBlockGO(go: BlockGO, avoidFriendBlock: boolean = false) {
   if (go instanceof Cre) {
     if (avoidFriendBlock && go.my) {
       return false;

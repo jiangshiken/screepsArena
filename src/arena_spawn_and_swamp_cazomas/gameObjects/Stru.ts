@@ -95,6 +95,7 @@ export class Wal extends Stru {
 }
 export class Con extends Stru {
   master: StructureContainer;
+  ticksToDecay: number | undefined;
   worth: number = 0;
   constructor(master: StructureContainer) {
     super(master);

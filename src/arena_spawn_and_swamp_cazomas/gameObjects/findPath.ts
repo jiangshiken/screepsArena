@@ -18,10 +18,10 @@ import {
 } from "../utils/game";
 import { divide0 } from "../utils/JS";
 import { Pos, Pos_C, atPos } from "../utils/Pos";
-import { P, drawLineComplex, drawPolyLight } from "../utils/visual";
+import { P, drawLineComplex, drawPoly, drawPolyLight } from "../utils/visual";
 import { Cre } from "./Cre";
 import { isTerrainRoad } from "./CreCommands";
-import { getCapacity, getEnergy } from "./UnitTool";
+import { getCapacity, getEnergy, moveBlockCostMatrix } from "./UnitTool";
 
 /** search the closest path of multiple targets ,like findPath but will
  * calculate terrain cost by this creep
@@ -131,7 +131,7 @@ export const def_swampCost = 3;
 export function searchPath_area(
   ori: Pos,
   tar: Pos,
-  costMatrix: CostMatrix | undefined = undefined,
+  costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
   plainCost: number = def_plainCost,
   swampCost: number = def_swampCost
 ): FindPathResult {
@@ -169,6 +169,7 @@ export function searchPath_area(
     newCost += SR3.cost;
     newIncomplete = newIncomplete && SR3.incomplete;
   }
+  drawPoly(newPath, 0.7, "#99ff99");
   return {
     path: newPath,
     ops: newOps,
@@ -184,7 +185,7 @@ export function searchPath_area(
 export function searchPath_noArea(
   ori: Pos,
   tar: Pos,
-  costMatrix: CostMatrix | undefined = undefined,
+  costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
   plainCost: number = def_plainCost,
   swampCost: number = def_swampCost
 ): FindPathResult {
@@ -201,7 +202,7 @@ export function searchPath_flee(
   ori: Pos,
   tars: Pos[],
   range: number,
-  costMatrix: CostMatrix | undefined = undefined,
+  costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
   plainCost: number = def_plainCost,
   swampCost: number = def_swampCost
 ): FindPathResult {

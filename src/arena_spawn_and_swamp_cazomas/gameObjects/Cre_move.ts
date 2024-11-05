@@ -13,6 +13,7 @@ import {
 } from "./findPath";
 import { enemies } from "./GameObjectInitialize";
 import { FindPathAndMoveTask, MoveTask, moveTo_basic } from "./MoveTask";
+import { moveBlockCostMatrix } from "./UnitTool";
 
 export class Cre_move extends Cre {
   appointmentMovement: Event_Pos | undefined;
@@ -36,7 +37,7 @@ export class Cre_move extends Cre {
     tar: Pos,
     pullList: Cre[] = [this],
     step: number = getMoveStepDef(pullList),
-    costMatrix: CostMatrix | undefined = undefined,
+    costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
     plainCost: number = def_plainCost,
     swampCost: number = def_swampCost
   ): void {
@@ -55,7 +56,7 @@ export class Cre_move extends Cre {
   flee(
     range: number = 4,
     FleeRange: number = 7,
-    costMatrix: CostMatrix | undefined = undefined,
+    costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
     plainCost: number = def_plainCost,
     swampCost: number = def_swampCost
   ): boolean {
@@ -107,7 +108,7 @@ export class Cre_move extends Cre {
     tar: Pos,
     pullList: Cre[] = [this],
     step: number = getMoveStepDef(pullList),
-    costMatrix: CostMatrix | undefined = undefined,
+    costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
     plainCost: number = def_plainCost,
     swampCost: number = def_swampCost
   ): void {

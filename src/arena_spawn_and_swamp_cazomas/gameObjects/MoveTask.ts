@@ -13,9 +13,8 @@ import {
   getMoveStepDef,
   searchPath_area,
 } from "./findPath";
-import { blocked } from "./UnitTool";
+import { blockCost, blocked, moveBlockCostMatrix } from "./UnitTool";
 
-export const moveBlockCostMatrix: CostMatrix = new CostMatrix();
 /**
  * a task used to move
  */
@@ -34,12 +33,14 @@ export class MoveTask extends Task_Cre {
   loop_task(): void {
     // SA(this.master, "MoveTask")
     drawLineLight(this.master, this.tar);
-    if (this.pause) return;
     if (this.path.length > 0) {
       let tempTar: Pos = this.path[0];
       drawLineComplex(this.master, tempTar, 0.75, "#777777");
-      moveTo_basic(this.master, tempTar);
-      //
+      if (GR(tempTar, this.master) <= 1) {
+        moveTo_direct(this.master, tempTar);
+      } else {
+        moveTo_basic(this.master, tempTar);
+      }
       if (GR(this.master, tempTar) <= 1) {
         this.path.shift();
       }
@@ -67,7 +68,7 @@ export class FindPathAndMoveTask extends MoveTask {
     tar: Pos,
     pullList: Cre[] = [master],
     step: number = getMoveStepDef(pullList),
-    costMatrix: CostMatrix | undefined = undefined,
+    costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
     plainCost: number = def_plainCost,
     swampCost: number = def_swampCost
   ) {
@@ -77,6 +78,7 @@ export class FindPathAndMoveTask extends MoveTask {
     this.costMatrix = costMatrix;
     this.plainCost = plainCost;
     this.swampCost = swampCost;
+    SA(master, "new FindPathAndMoveTask");
     //for initialize
     if (this.path.length > 0) {
       const lastPos = last(this.path);
@@ -129,11 +131,13 @@ export class FindPathAndMoveTask extends MoveTask {
 }
 /** normal moveTo,but will block to the tile it want to move next tick */
 export function moveTo_basic(cre: Cre, tar: Pos): void {
+  SA(cre, "moveTo_basic");
   moveBlockCostMatrix_setBlock(tar);
   cre.master.moveTo(tar);
 }
 //move to ,use move() that use direction,not find path
 export function moveTo_direct(cre: Cre, tar: Pos): void {
+  SA(cre, "DirMove");
   moveBlockCostMatrix_setBlock(tar);
   const dx = tar.x - cre.master.x;
   const dy = tar.y - cre.master.y;
@@ -141,5 +145,5 @@ export function moveTo_direct(cre: Cre, tar: Pos): void {
   cre.master.move(direc);
 }
 export function moveBlockCostMatrix_setBlock(pos: Pos) {
-  moveBlockCostMatrix.set(pos.x, pos.y, 255);
+  moveBlockCostMatrix.set(pos.x, pos.y, blockCost);
 }
