@@ -205,11 +205,11 @@ export function minusVector(v1: Vec, v2: Vec): Vec {
  * the same as {@link myGetRange}
  */
 export function GR(p1: Pos, p2: Pos): number {
-  return getRange(PosToRoomPosition(p1), PosToRoomPosition(p2));
+  return getRange(p1, p2); //PosToRoomPosition(p1), PosToRoomPosition(p2));
 }
-export function PosToRoomPosition(pos: Pos): { x: number; y: number } {
-  return { x: pos.x, y: pos.y };
-}
+// export function PosToRoomPosition(pos: Pos): { x: number; y: number } {
+//   return { x: pos.x, y: pos.y };
+// }
 export function Adj(p1: Pos, p2: Pos): boolean {
   return GR(p1, p2) <= 1;
 }

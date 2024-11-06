@@ -13,6 +13,7 @@ import {
   getMoveStepDef,
   searchPath_area,
 } from "./findPath";
+import { GameObj } from "./GameObj";
 import { blockCost, blocked, moveBlockCostMatrix } from "./UnitTool";
 
 /**
@@ -96,6 +97,8 @@ export class FindPathAndMoveTask extends MoveTask {
     if (!this.tar || !this.tempTar) {
       this.end();
     }
+    if (this.tar instanceof GameObj && !this.tar.exists) this.end();
+    if (this.tempTar instanceof GameObj && !this.tempTar.exists) this.end();
     if (
       isMyTick(this.master, this.findPathStep) ||
       GR(this.tempTar, this.master) <= 1 ||

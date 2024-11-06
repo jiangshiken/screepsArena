@@ -25,12 +25,6 @@ export class Stru extends GameObj implements HasPos {
     super(stru);
     this.master = stru;
   }
-  get x(): number {
-    return this.master.x;
-  }
-  get y(): number {
-    return this.master.y;
-  }
 }
 export class OwnedStru extends Stru implements HasHits, HasMy, HasBattleStats {
   master: Type_OwnedStructure;

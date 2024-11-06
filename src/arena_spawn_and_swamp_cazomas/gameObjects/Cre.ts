@@ -91,12 +91,6 @@ export class Cre
   get extraMessage(): any {
     return this.spawnInfo?.extraMessage;
   }
-  get x() {
-    return this.master.x;
-  }
-  get y() {
-    return this.master.y;
-  }
   get store() {
     return this.master.store;
   }
