@@ -361,13 +361,17 @@ export class PullTarsTask extends Task_Cre {
       // SA(this.master, "tarCres[0]=" + COO(tarCres[0]));
       // SA(this.master, "this.tarPos=" + COO(this.tarPos));
       // SA(this.master, "this.nextStep=" + COO(this.nextStep));
-      newPullTask(
-        this.master,
-        tarCres[0],
-        this.tarPos,
-        this.nextStep,
-        this.leaderStop
-      );
+      if (tarCres.length === 0) {
+        this.master.MTJ(this.tarPos);
+      } else {
+        newPullTask(
+          this.master,
+          tarCres[0],
+          this.tarPos,
+          this.nextStep,
+          this.leaderStop
+        );
+      }
     } else if (creIdle) {
       //this is idle,approach first
       SA(this.master, "creIdle");

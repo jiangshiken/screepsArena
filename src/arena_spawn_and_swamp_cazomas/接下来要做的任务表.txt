@@ -1,58 +1,26 @@
-dont attWeak ram if no builder around 
-dont attWeak ram if no energy to rebuild && after 1900 t 
-#Predict Sys
-	test predict pos
-	SDF short distance fight
-		use all to closest en as default case
-		multiple predict path(use trig)
-			do micro changes as a case cover the default case
-			the movement/attack of friend/enemy will trig other changes
-		judge if is the same case
-		enemyPosPredict(only cal melee)
-			enemyVelocity
-			enemy may adjacent to friend
-		every one step movement of friend
-		calculate the earning_damage of a case in a single tick
-e   e      l
-           l
-    e      l
-           l
-f   f f    l
-           l
+@current
+start harvester bug
+if fatiuge almost full,push->stop
+when stop,try clean fatigue,clean the one that has most fatigue
+become individual if worm broken
 
-
-
-protect rtn
-change 4 ram to 1 ram
-#下期投稿内容
-	earning公式的推导
-	战力计算和合并公式的推导
-	角色逻辑
-	距离衰减曲线的推导
-set move map to event_number
 #short distance fight
 	change to add to SDF list
 	use SDF action at after creep control
 	use every point next to creep but not a range 3 square
 	use avoid or focus on a enemy creep
 	use iterate decision
-snake rush timeout
 #snake rush
-    try short distance fight at enemy Spawn
+dont attWeak ram if no energy to rebuild && after 1900 t
     better battle sys:pre iterate move decision
     melee avoid creep appoint to die(cal enemy heal and my damage)
     go forward as a line shape,if face enemy,go back and exchange pos,until force to fight
 #set the position creep already try to move to not block
-#add tactic to multiple creeps
-#test {} speed
-	10000 time of empty and of {}
-	optimize set move map and overall map
-		MyMaps traverse
 #test turtle opti
+    try short distance fight at enemy Spawn
+	dont attWeak ram if no builder around
 	build wall and cancel ram after 1900 tick at range 1 of spawn and horizen 1 of spawn if less resource .
     Also cancel all the unbuild cs and stop supply range 2 ram until spawn range 1 filled
-#test LongProgress
-    create spawn/enemySpawn path cost map
 #turtle
 	supply not work
 	withdraw en from con to spawn
@@ -62,16 +30,6 @@ snake rush timeout
     build road
 	add tough stdAttacker
 	add 13M4A?
-#visual force compare graph
-turn stdAttacker extras to function
-#CPU!
-	console tab
-	cpu use in role
-#test MTJ has ops
-#ResourceDestroyer
-	drop container that has enemy builder around either
-#forcemap decrease cpu use
-	has bug!!
 #1M insert to avoid 1 range chase
 #test if pull avoid insert??
 #change maps value to event
@@ -89,39 +47,3 @@ turn stdAttacker extras to function
         the creep that is fighting has more cpu emergency
     cpu competitionRate
         decide by the amount of total gameobjects on the map.
-#目前通用本最大的问题/BUG
-	容易超时
-	攻击爬老是喜欢打对面的rampart
-	农民丢container和运能量到ext看情况实施
-	逃跑（flee）时经常会选择有敌人的路线
-	攻击爬攻击spawn时总是莫名其妙乱晃
-#opponent guess
-    tigga
-        builder stay at spawn x-3/+3 when tick71
-        rampart cs come with builder at same time
-        when spawn is full ,harvester will wait at base with CM body and full energy
-        builder is always 140 energy when building
-#force map sum force use combine decrease
-    a=a.force,b=b.force
-    when ab>0
-        rate=sqrt(1-(a*b)/(a+b)^2))
-        rtn=sqrt(a*a+a*b+b*b)
-    when ab<0
-        rtn=sqrt(signal(a-b)*(a*a-b*b))
-#expose spawn to no ram(trap)
-    add only build to limit,
-    add spawnExpose to defender_builder
-    cal spawn near dead=roundDamage+37>=hp
-#add spawnStealer for no ram enemySpawn
-#Jamer body=M
-	jam spawn,healer,carryer,builder
-	jam attacker when fight
-#optimize getObject
-#optimize spawning and timeRemain
-#set 4 corner point of getNewTarByArea
-#path-finding
-	Area,squareArea
-#change extraTaunt of friend threated to protect builder
-#judge force
-    creep spread force by path
-#确定分工

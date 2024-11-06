@@ -13,7 +13,9 @@ import { Con, Ext, Ram, Res, Roa, Spa, Stru, Tow } from "./Stru";
 
 export type CanBeAttacked = Stru | Cre;
 export function getEnergy(a: GameObj): number {
-  if (a instanceof Res) {
+  if (!a.exists) {
+    return 0;
+  } else if (a instanceof Res) {
     return a.master.amount;
   } else if (a instanceof Cre && a.getBodyPartsNum(CARRY) > 0) {
     return a.master.store[RESOURCE_ENERGY];

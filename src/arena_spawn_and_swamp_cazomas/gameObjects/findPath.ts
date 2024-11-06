@@ -41,6 +41,59 @@ export function searchPathByCreCost(
   }
   return searchPath_noArea(cre, tar, undefined, plainCost, swampCost);
 }
+export function getMoveAndFatigueNum_single(
+  cre: Cre,
+  extraEnergy: number = 0,
+  purePlain: boolean = false,
+  pureSwamp: boolean = false,
+  terrainPos: Pos | undefined = undefined
+): {
+  moveNum: number;
+  bodyNum: number;
+  fatigueNum: number;
+} {
+  const tarBody = cre.master.body;
+  if (tarBody) {
+    const moveNum = cre.getHealthyBodyParts(MOVE).length;
+    const tarBodyNum = tarBody.filter(
+      i => i.type !== MOVE && i.type !== CARRY
+    ).length;
+    const tarEnergy = Math.min(getEnergy(cre) + extraEnergy, getCapacity(cre));
+    const notEmptyCarryNum = Math.ceil(tarEnergy / 50);
+    const bodyNum = tarBodyNum + notEmptyCarryNum;
+    let fatigueNum;
+    if (pureSwamp) {
+      fatigueNum = 10 * bodyNum;
+    } else if (purePlain) {
+      fatigueNum = 2 * bodyNum;
+    } else {
+      let scanPos;
+      if (terrainPos !== undefined) {
+        scanPos = terrainPos;
+      } else {
+        scanPos = cre;
+      }
+      if (isTerrainSwamp(scanPos)) {
+        fatigueNum = 10 * bodyNum;
+      } else if (isTerrainRoad(scanPos)) {
+        fatigueNum = 1 * bodyNum;
+      } else {
+        fatigueNum = 2 * bodyNum;
+      }
+    }
+    return {
+      moveNum: moveNum,
+      bodyNum: bodyNum,
+      fatigueNum: fatigueNum,
+    };
+  } else {
+    return {
+      moveNum: 0,
+      bodyNum: 0,
+      fatigueNum: 0,
+    };
+  }
+}
 /** get move and fatigue number of a creep ,all pulling and bePulled will
  *  be calculate too
  */
@@ -60,28 +113,15 @@ export function getMoveAndFatigueNum(
     let fatigueNum = 0;
     let bodyNum = 0;
     for (let tar of pl) {
-      const tarBody = tar.master.body;
-      if (tarBody) {
-        const tarMoveNum = tar.getHealthyBodyParts(MOVE).length;
-        const tarBodyNum = tarBody.filter(
-          i => i.type !== MOVE && i.type !== CARRY
-        ).length;
-        const tarEnergy = Math.min(
-          getEnergy(tar) + extraEnergy,
-          getCapacity(tar)
-        );
-        const notEmptyCarryNum = Math.ceil(tarEnergy / 50);
-        moveNum += tarMoveNum;
-        const heavyBodyNum = tarBodyNum + notEmptyCarryNum;
-        bodyNum += heavyBodyNum;
-        if (isTerrainSwamp(tar) || pureSwamp) {
-          fatigueNum += 10 * heavyBodyNum;
-        } else if (isTerrainRoad(tar) && !purePlain) {
-          fatigueNum += 1 * heavyBodyNum;
-        } else {
-          fatigueNum += 2 * heavyBodyNum;
-        }
-      }
+      const mfRtn = getMoveAndFatigueNum_single(
+        tar,
+        extraEnergy,
+        purePlain,
+        pureSwamp
+      );
+      moveNum += mfRtn.moveNum;
+      bodyNum += mfRtn.bodyNum;
+      fatigueNum += mfRtn.fatigueNum;
     }
     const rtn = {
       moveNum: moveNum,

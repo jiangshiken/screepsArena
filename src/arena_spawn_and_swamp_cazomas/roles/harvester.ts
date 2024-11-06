@@ -68,7 +68,7 @@ export class HarvestTask extends Task_Cre {
     if (
       !this.targetHarvable ||
       !this.targetProducer ||
-      (this.targetHarvable && !energylive(this.targetHarvable))
+      (this.targetHarvable !== undefined && !energylive(this.targetHarvable))
     ) {
       SA(cre, "END HAVE TASK");
       this.end();

@@ -93,7 +93,7 @@ export class FindPathAndMoveTask extends MoveTask {
   }
   loop_task(): void {
     let st = ct();
-    if (!this.tar) {
+    if (!this.tar || !this.tempTar) {
       this.end();
     }
     if (
@@ -109,7 +109,7 @@ export class FindPathAndMoveTask extends MoveTask {
       calEventNumberCPUTime(this.master.role, et(st), false);
   }
   findPath_task(tar: Pos): Pos[] {
-    SA(this.master, "findPath_task");
+    // SA(this.master, "findPath_task");
     const sRtn: FindPathResult = searchPath_area(
       this.master,
       this.tar,
@@ -142,6 +142,7 @@ export function moveTo_direct(cre: Cre, tar: Pos): void {
   const dx = tar.x - cre.master.x;
   const dy = tar.y - cre.master.y;
   const direc = getDirection(dx, dy);
+  SA(cre, "" + direc);
   cre.master.move(direc);
 }
 export function moveBlockCostMatrix_setBlock(pos: Pos) {

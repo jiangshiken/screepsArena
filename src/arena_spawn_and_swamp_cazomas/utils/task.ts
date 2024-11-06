@@ -61,7 +61,7 @@ export class Task {
   /** will be call every tick*/
   loop_task(): void {}
   /** if you want to cancel the task or the task already finished ,call this function
-   * to remove it from {@link HasTasks.tasks} ,and set complete true
+   * to remove it from tasks ,and set complete true
    */
   end(): void {
     this.complete = true;
