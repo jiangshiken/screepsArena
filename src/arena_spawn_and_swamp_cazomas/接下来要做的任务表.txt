@@ -1,8 +1,7 @@
 @current
-start harvester bug
+swampCost=1?
 if fatiuge almost full,push->stop
 when stop,try clean fatigue,clean the one that has most fatigue
-become individual if worm broken
 
 #short distance fight
 	change to add to SDF list

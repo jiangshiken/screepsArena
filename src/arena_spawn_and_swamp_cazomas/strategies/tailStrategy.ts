@@ -12,7 +12,7 @@ import { Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
 import { getTaunt } from "../gameObjects/battle";
 import { Cre_battle } from "../gameObjects/Cre_battle";
 import { Cre_move } from "../gameObjects/Cre_move";
-import { hasThreat, Role } from "../gameObjects/CreTool";
+import { hasThreat, isArmy, Role } from "../gameObjects/CreTool";
 import { getMoveAndFatigueNum_single } from "../gameObjects/findPath";
 import {
   enemies,
@@ -20,7 +20,7 @@ import {
   oppoUnits,
   Unit,
 } from "../gameObjects/GameObjectInitialize";
-import { damageAmount, damagedRate } from "../gameObjects/HasHits";
+import { damageAmount, damaged, damagedRate } from "../gameObjects/HasHits";
 import { MoveTask, moveTo_basic, moveTo_direct } from "../gameObjects/MoveTask";
 import { Dooms, getGuessPlayer, Kerob, Tigga } from "../gameObjects/player";
 import { PullTarsTask } from "../gameObjects/pull";
@@ -33,6 +33,7 @@ import { best, first, goInRange, inRange, ranBool, sum } from "../utils/JS";
 import {
   Adj,
   atPos,
+  closest,
   getDirectionByPos,
   GR,
   Pos,
@@ -127,7 +128,7 @@ export function useTailStrategy() {
       // if(friends.filter(i=>i.role===jamer).length<=8){
       //     spawnCreep(TB('M'),jamer)
       // }else{
-      spawnCreep(TB("5MR"), spawnStealer);
+      spawnCreep(TB("3MA"), spawnStealer);
       // }
     }
   }
@@ -140,6 +141,25 @@ export const tailPart: Role = new Role("tailPart", tailPartJob);
 function tailHealerJob(cre: Cre_battle) {
   SA(cre, "tailHealerJob");
   cre.fight();
+  const myGroup = getGroup(tailGroup(cre));
+  const melee = myGroup.find(i => i.role === tailMelee);
+  const tail = best(myGroup, i => tailIndex(i));
+  if (tail && melee === undefined) {
+    myGroup.forEach(i => i.tasks.find(i => i instanceof PullTarsTask)?.end());
+    if (damaged(cre)) {
+      fleeAction(cre, myGroup, cre, tail, cre);
+    } else {
+      const targets = friends.filter(i => i.role === tailMelee);
+      const target = closest(cre, targets);
+      if (target) {
+        if (Adj(target, cre)) {
+          cre.stop();
+        } else {
+          pushAction(cre, target, myGroup, cre, tail, cre);
+        }
+      }
+    }
+  }
 }
 function getGroup(n: number): Cre_move[] {
   return <Cre_move[]>friends.filter(i => tailGroup(i) === n);
@@ -188,52 +208,29 @@ function enemySpawnDistance(pos: Pos): number {
 function tailMeleeJob(cre: Cre_battle) {
   SA(cre, "tailMeleeJob");
   cre.fight();
-  const targets = oppoUnits.filter(
-    i => i instanceof Cre || i instanceof Ext || i instanceof Spa
-  );
+  const targets = oppoUnits.filter(i => i instanceof Cre || i instanceof Spa);
   SA(displayPos(), "oppoUnits.len" + oppoUnits.length);
   SA(displayPos(), "targets.len" + targets.length);
-  const targetAndWorth: { unit: Unit; num: number }[] = targets.map(tar => {
+  const target = best(targets, tar => {
     // SA(cre,"C")
     let typeBonus: number = 0;
     if (tar instanceof Cre) {
-      if (tar.getBodyPartsNum(WORK) > 0) {
-        typeBonus = 0.2;
-      } else if (GR(tar, enemySpawn) <= 7 && tar.getBodyPartsNum(ATTACK) >= 2) {
-        typeBonus = 0.5;
-      } else if (
-        tar.getBodyPartsNum(ATTACK) + tar.getBodyPartsNum(RANGED_ATTACK) <=
-        1
-      ) {
-        typeBonus = 1.5;
-      } else if (
-        tar.getBodyPartsNum(ATTACK) + tar.getBodyPartsNum(RANGED_ATTACK) >
-        1
-      ) {
+      if (hasThreat(tar)) {
         typeBonus = 3;
-      } else {
-        typeBonus = 0.01;
-      }
-    } else if (tar instanceof Ext) {
-      if (getGuessPlayer() === Tigga) {
+      } else if (isArmy(tar)) {
         typeBonus = 1;
+      } else {
+        typeBonus = 0;
+      }
+    } else if (tar instanceof Spa) {
+      if (getGuessPlayer() === Tigga) {
+        typeBonus = 5;
       } else if (getGuessPlayer() === Dooms) {
         typeBonus = 2;
       } else {
-        typeBonus = 0.15;
-      }
-      // typeExtra = 0.15
-    } else if (tar instanceof Spa) {
-      if (getGuessPlayer() === Tigga) {
-        typeBonus = 10;
-      } else if (getGuessPlayer() === Dooms) {
-        typeBonus = 1;
-      } else {
         typeBonus = 1;
       }
-      // typeExtra = getTicks() <= 630 ? 100 : 0.5
     }
-
     const enSpawnBonus = 1 + goInRange(10 + ESDCompare(tar, cre), 0, 10);
     const damageRate = damagedRate(cre);
     const disBonus = 1 / (1 + (0.4 + 4 * damageRate) * GR(tar, cre));
@@ -246,21 +243,22 @@ function tailMeleeJob(cre: Cre_battle) {
       disBonus * sameBonus * linkBonus * typeBonus * tauntBonus * enSpawnBonus;
     SAN(tar, "T", final);
     SAN(tar, "ESB", enSpawnBonus);
-    // + " lkb="+d2(linkBonus)+" tyb="+d2(typeBonus)
-    //     +" disb="+d2(disBonus) +" ttb="+d2(tauntBonus)+' xb='+d2(enSpawnBonus))
-    return { unit: tar, num: final };
+    return final;
   });
-  const target = best(targetAndWorth, tar => tar.num)?.unit;
   if (target) {
     drawLineComplex(cre, target, 1, "#ee3333", "dashed");
     cre.upgrade.currentTarget = target;
     const myGroupNum = tailGroup(cre);
     const myGroup = getGroup(myGroupNum);
     SA(cre, "mg=" + myGroupNum + " mgl=" + myGroup.length);
-    const myTailParts = myGroup.filter(i => i.role === tailPart);
-    const tail = best(myGroup, i => tailIndex(i));
-    const second = myGroup.find(i => tailIndex(i) === 1);
     const head = best(myGroup, i => -tailIndex(i));
+    const tail = best(myGroup, i => tailIndex(i));
+    const second = best(
+      myGroup.filter(i => i !== head),
+      i => -tailIndex(i)
+    );
+    // const healer = myGroup.find(i => tailIndex(i) === 1);
+    const healer = myGroup.find(i => tailIndex(i) === 1);
     const scanRange = 25;
     const enemyThreats = enemies.filter(
       i => hasThreat(i) && GR(cre, i) <= scanRange
@@ -270,13 +268,11 @@ function tailMeleeJob(cre: Cre_battle) {
     );
     const closestThreat = best(enemyThreats, i => -GR(i, cre));
     const closestThreatDis = closestThreat ? GR(closestThreat, cre) : 50;
-    if (tail && head && second) {
+    if (tail && head) {
       //clear pull tars task
-      myGroup
-        .filter(i => i.role === tailPart)
-        .forEach(tp => tp.tasks.find(i => i instanceof PullTarsTask)?.end());
-      second.tasks.find(i => i instanceof PullTarsTask)?.end();
-      head.tasks.find(i => i instanceof PullTarsTask)?.end();
+      myGroup.forEach(tp =>
+        tp.tasks.find(i => i instanceof PullTarsTask)?.end()
+      );
       const tarDistance = target ? GR(head, target) : 1;
       const hasMelee =
         enemies.find(
@@ -288,7 +284,8 @@ function tailMeleeJob(cre: Cre_battle) {
           : head.upgrade.isPush === true
           ? 600
           : 0;
-      const sumDamage = sum([head, second], i => damageAmount(i));
+      const healerHead = healer ? [head, healer] : [head];
+      const sumDamage = sum(healerHead, i => damageAmount(i));
       const pureRangeExtra = hasMelee ? 0 : pureRangedBias;
       const damaged = sumDamage >= 36 * tarDistance + 200 + pureRangeExtra;
       const damaged_light = sumDamage >= 36 * tarDistance + 10 + pureRangeExtra;
@@ -297,7 +294,7 @@ function tailMeleeJob(cre: Cre_battle) {
       SA(cre, "tailHasThreat=" + tailHasThreat);
       const frontHasThreat =
         enemyMelees.find(i => Adj(i, head)) !== undefined ||
-        enemyMelees.find(i => Adj(i, second)) !== undefined;
+        (healer && enemyMelees.find(i => Adj(i, healer)) !== undefined);
       SA(cre, "ESD=" + enemySpawnDistance(cre));
       const XAxisThreatsArr = enemyThreats.filter(i => {
         SA(i, "ESD=" + enemySpawnDistance(i));
@@ -310,25 +307,25 @@ function tailMeleeJob(cre: Cre_battle) {
       drawRange(cre, scanRange, "#007777");
       SA(cre, "XAxisThreat=" + XAxisThreat);
       const headIsRange = head.getBodyPartsNum(RANGED_ATTACK) >= 3;
-      if (!Adj(second, head)) {
+      if (healer && !Adj(healer, head)) {
         SA(cre, "linkHead");
         head.tasks.find(i => i instanceof PullTarsTask)?.end();
-        const followers = myGroup.filter(i => i !== head && i !== second);
+        const followers = myGroup.filter(i => i !== head && i !== healer);
         const sortedFollowers = followers.sort(
           (a, b) => tailIndex(a) - tailIndex(b)
         );
-        new PullTarsTask(second, sortedFollowers, head);
+        new PullTarsTask(healer, sortedFollowers, head);
       } else if (tailHasThreat || frontHasThreat) {
-        fleeAction(cre, myGroup, head, tail, second);
+        fleeAction(cre, myGroup, head, tail, healer);
       } else if (XAxisThreat) {
         SA(cre, "XAxisTt");
-        fleeAction(cre, myGroup, head, tail, second);
+        fleeAction(cre, myGroup, head, tail, healer);
       } else if (damaged_light) {
         if (headIsRange) {
-          fleeAction(cre, myGroup, head, tail, second);
+          fleeAction(cre, myGroup, head, tail, healer);
         } else if (damaged) {
           //heavy damaged
-          fleeAction(cre, myGroup, head, tail, second);
+          fleeAction(cre, myGroup, head, tail, healer);
         } else {
           //light damaged
           stopAction(cre, head, myGroup);
@@ -368,32 +365,32 @@ function tailMeleeJob(cre: Cre_battle) {
           SA(cre, "closestThreatDis=" + closestThreatDis);
           if (closestThreatDis <= 2) {
             if (hasMeleeEnemy) {
-              fleeAction(cre, myGroup, head, tail, second);
+              fleeAction(cre, myGroup, head, tail, healer);
             } else {
               stopAction(cre, head, myGroup);
             }
           } else if (closestThreatDis === 3) {
             if (hasMeleeEnemy) {
               if (ranBool(hasAllyMelee ? 0.1 : 0.6)) {
-                fleeAction(cre, myGroup, head, tail, second);
+                fleeAction(cre, myGroup, head, tail, healer);
               } else {
                 stopAction(cre, head, myGroup);
               }
             } else {
-              pushAction(cre, target, myGroup, head, tail, second);
+              pushAction(cre, target, myGroup, head, tail, healer);
             }
           } else if (closestThreatDis === 4) {
             if (hasMeleeEnemy) {
               if (ranBool(hasAllyMelee ? 0.1 : 0.6)) {
                 stopAction(cre, head, myGroup);
               } else {
-                pushAction(cre, target, myGroup, head, tail, second);
+                pushAction(cre, target, myGroup, head, tail, healer);
               }
             } else {
-              pushAction(cre, target, myGroup, head, tail, second);
+              pushAction(cre, target, myGroup, head, tail, healer);
             }
           } else {
-            pushAction(cre, target, myGroup, head, tail, second);
+            pushAction(cre, target, myGroup, head, tail, healer);
           }
         } else {
           //melee push
@@ -402,7 +399,7 @@ function tailMeleeJob(cre: Cre_battle) {
           //     SA(cre,"Wait")
           //     stopAction(cre,head,myGroup)
           // }else{
-          pushAction(cre, target, myGroup, head, tail, second);
+          pushAction(cre, target, myGroup, head, tail, healer);
           // }
         }
       }
@@ -424,7 +421,7 @@ function pushAction(
   myGroup: Cre_move[],
   head: Cre_move,
   tail: Cre_move,
-  second: Cre_move
+  healer: Cre_move | undefined
 ) {
   SA(cre, "PUSH");
   const followers = myGroup.filter(i => i !== head);
@@ -432,14 +429,14 @@ function pushAction(
   tail.tasks.find(i => i instanceof PullTarsTask)?.end();
   new PullTarsTask(cre, sortedFollowers, target);
   const moveTask = cre.tasks.find(i => i instanceof MoveTask);
-  if (moveTask && moveTask instanceof MoveTask) {
+  if (healer && moveTask && moveTask instanceof MoveTask) {
     const tempTar = first(moveTask.path);
     if (tempTar) {
       drawLineComplex(cre, tempTar, 0.8, "#ff22ff");
       if (friends.find(i => atPos(i, tempTar)) !== undefined) {
         SA(cre, "CONFLICT");
         cre.tasks.find(i => i instanceof PullTarsTask)?.end();
-        fleeAction(cre, myGroup, head, tail, second);
+        fleeAction(cre, myGroup, head, tail, healer);
       }
     }
   }
@@ -453,24 +450,29 @@ function fleeAction(
   myGroup: Cre_move[],
   head: Cre_move,
   tail: Cre_move,
-  second: Cre_move
+  healer: Cre_move | undefined
 ) {
+  if (!healer) {
+    SA(cre, "RUSH");
+    pushAction(cre, enemySpawn, myGroup, head, tail, healer);
+  }
   SA(cre, "FLEE");
-  const third = getNextMember(myGroup, 2);
+  const oneAfterFirst = getNextMember(myGroup, 0);
+  const oneAfterSecond = getNextMember(myGroup, 1);
   const moveFatigueRtn_head = getMoveAndFatigueNum_single(
-    cre,
+    head,
     0,
     false,
     false,
-    second
+    oneAfterFirst
   );
-  const moveFatigueRtn_second = getMoveAndFatigueNum_single(
-    cre,
-    0,
-    false,
-    false,
-    third
-  );
+  const moveFatigueRtn_second = healer
+    ? getMoveAndFatigueNum_single(healer, 0, false, false, oneAfterSecond)
+    : {
+        moveNum: 0,
+        bodyNum: 0,
+        fatigueNum: 0,
+      };
   const allFatigue =
     moveFatigueRtn_head.fatigueNum + moveFatigueRtn_second.fatigueNum;
   const allMove = sum(myGroup, i => i.getHealthyBodyPartsNum(MOVE));
