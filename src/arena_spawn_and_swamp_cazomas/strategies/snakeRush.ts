@@ -536,7 +536,8 @@ export function decideSpawnPart(ind: number) {
         ? "10MH"
         : getGuessPlayer() === Dooms
         ? "M11AM"
-        : "MR6AM";
+        : //250+150+400+50
+          "5MR5AM";
     const tiggaHeadType = "8M2R3AM";
     //100+200+400+50
     const tiggaSecondType = "2M4C4WHM";
@@ -544,7 +545,7 @@ export function decideSpawnPart(ind: number) {
     const tiggaType = "7M";
     // const tigga1 = "5M3H"
     //900
-    const kerobType = "9M";
+    const kerobType = "8M";
     const tigga2 =
       getGuessPlayer() === Tigga
         ? tiggaSecondType
@@ -567,7 +568,7 @@ export function decideSpawnPart(ind: number) {
       getGuessPlayer() === Tigga
         ? tiggaType
         : getGuessPlayer() === Kerob
-        ? kerobType
+        ? "9MH"
         : "14MH";
     const tigga6 =
       getGuessPlayer() === Tigga
@@ -926,7 +927,7 @@ function command() {
           : 0;
       const damaged =
         sum(snakeParts, sp => sp.hitsMax - sp.hits) >=
-        36 * (tarDistance + 2) + (hasMelee ? 0 : pureRangedBias);
+        36 * tarDistance + 200 + (hasMelee ? 0 : pureRangedBias);
       if (getGuessPlayer() === Tigga) {
         drawText(new Pos_C(50, 51), "B");
         if (Adj(second, enemySpawn)) {

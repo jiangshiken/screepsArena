@@ -56,6 +56,9 @@ export function validNum(num: number): boolean {
 export function validAxis(num: number): boolean {
   return validNum(num) && isWhole(num) && inRange_int(num, 0, 100);
 }
+export function inBorder(x: number, y: number): boolean {
+  return inRange_int(x, 0, 100) && inRange_int(y, 0, 100);
+}
 export function PosToPos_C(p: Pos) {
   return new Pos_C(p.x, p.y);
 }
@@ -167,8 +170,10 @@ export function getRangePossByStep(
   let rtn: Pos[] = [];
   for (let i = cx - range; i <= cx + range; i += step) {
     for (let j = cy - range; j <= cy + range; j += step) {
-      const newPos = new Pos_C(i, j);
-      rtn.push(newPos);
+      if (inBorder(i, j)) {
+        const newPos = new Pos_C(i, j);
+        rtn.push(newPos);
+      }
     }
   }
   return rtn;
@@ -212,6 +217,9 @@ export function GR(p1: Pos, p2: Pos): number {
 // }
 export function Adj(p1: Pos, p2: Pos): boolean {
   return GR(p1, p2) <= 1;
+}
+export function InRan2(p1: Pos, p2: Pos): boolean {
+  return GR(p1, p2) <= 2;
 }
 export function InShotRan(p1: Pos, p2: Pos): boolean {
   return GR(p1, p2) <= 3;

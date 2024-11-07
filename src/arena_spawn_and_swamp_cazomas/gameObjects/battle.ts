@@ -12,6 +12,7 @@ import { Event, Event_Number } from "../utils/Event";
 import { StNumber } from "../utils/game";
 import { removeIf } from "../utils/JS";
 import { GR, X_axisDistance } from "../utils/Pos";
+import { SAN } from "../utils/visual";
 import { Cre } from "./Cre";
 import {
   getEnemyArmies,
@@ -173,8 +174,11 @@ export function calculateForce(
     //if is 10M6A HP=1600 dps=180
     //tradition=2.5+18=20.5
     //new=0.05*sqrt(1600*180)=0.05*40*13.5=0.05*540=27
+    //final=25*0.03=0.75
     const force_new = Math.sqrt(dps * HP);
-    return 0.8 * force_new + 0.2 * forceTradition;
+    const rtn = 0.8 * force_new + 0.2 * forceTradition;
+    SAN(uni, "calForce", rtn);
+    return rtn;
   } else {
     if (uni instanceof Ram) {
       return 2 * healthRate(uni);

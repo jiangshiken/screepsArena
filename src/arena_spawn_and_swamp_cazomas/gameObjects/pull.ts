@@ -1,5 +1,6 @@
 //functions
 
+import { CostMatrix } from "game/path-finder";
 import { SOA } from "../utils/export";
 import { arrayEqual, invalid, last, remove, valid } from "../utils/JS";
 import { GR, Pos, atPos } from "../utils/Pos";
@@ -9,8 +10,9 @@ import { Cre, Task_Cre } from "./Cre";
 import { Cre_move } from "./Cre_move";
 import { moveToRandomEmptyAround } from "./CreCommands";
 import { PullEvent } from "./CreTool";
-import { getSpeed } from "./findPath";
+import { def_plainCost, def_swampCost, getSpeed } from "./findPath";
 import { FindPathAndMoveTask, moveTo_basic, moveTo_direct } from "./MoveTask";
+import { moveBlockCostMatrix } from "./UnitTool";
 
 /**
  * new a {@link PullTarsTask}, will cancel if already have same task
@@ -45,7 +47,10 @@ export function newPullTask(
   tarCre: Cre,
   tarPos: Pos,
   nextStep?: Pos,
-  leaderStop: boolean = false
+  leaderStop: boolean = false,
+  costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
+  plainCost: number = def_plainCost,
+  swampCost: number = def_swampCost
 ) {
   let oldT = <PullTask>findTask(master, PullTask);
   let newTask: boolean;
@@ -77,12 +82,18 @@ export class PullTask extends Task_Cre {
   moveTask1: FindPathAndMoveTask | undefined = undefined;
   moveTask2: FindPathAndMoveTask | undefined = undefined;
   leaderStop: boolean;
+  costMatrix: CostMatrix | undefined;
+  plainCost: number;
+  swampCost: number;
   constructor(
     master: Cre_move,
     tarCre: Cre,
     tarPos: Pos,
     nextStep?: Pos,
-    leaderStop: boolean = false
+    leaderStop: boolean = false,
+    costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
+    plainCost: number = def_plainCost,
+    swampCost: number = def_swampCost
   ) {
     super(master);
     this.master = master;
@@ -90,6 +101,9 @@ export class PullTask extends Task_Cre {
     this.tarPos = tarPos;
     this.nextStep = nextStep;
     this.leaderStop = leaderStop;
+    this.costMatrix = costMatrix;
+    this.plainCost = plainCost;
+    this.swampCost = swampCost;
     //cancel old task
     var ot = this.master.tasks.find(
       task => task instanceof PullTask && task != this
@@ -99,7 +113,15 @@ export class PullTask extends Task_Cre {
       return this;
     }
     //
-    this.moveTask1 = new FindPathAndMoveTask(this.master, this.tarCre);
+    this.moveTask1 = new FindPathAndMoveTask(
+      this.master,
+      this.tarCre,
+      [this.master, tarCre],
+      1,
+      this.costMatrix,
+      this.plainCost,
+      this.swampCost
+    );
   }
   end() {
     super.end();
@@ -289,13 +311,19 @@ export class PullTarsTask extends Task_Cre {
   nextStep: Pos | undefined;
   useLeaderPull: boolean;
   leaderStop: boolean;
+  costMatrix: CostMatrix | undefined;
+  plainCost: number;
+  swampCost: number;
   constructor(
     master: Cre_move,
     tarCres: Cre[],
     tarPos: Pos,
     nextStep?: Pos,
     useLeaderPull: boolean = true,
-    leaderStop: boolean = false //for direct move of leader
+    leaderStop: boolean = false, //for direct move of leader
+    costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
+    plainCost: number = def_plainCost,
+    swampCost: number = def_swampCost
   ) {
     super(master);
     this.master = master;
@@ -305,6 +333,9 @@ export class PullTarsTask extends Task_Cre {
     this.nextStep = nextStep;
     this.useLeaderPull = useLeaderPull;
     this.leaderStop = leaderStop;
+    this.costMatrix = costMatrix;
+    this.plainCost = plainCost;
+    this.swampCost = swampCost;
     //cancel old task
     var ot = this.master.tasks.find(
       task => task instanceof PullTarsTask && task != this
@@ -369,7 +400,10 @@ export class PullTarsTask extends Task_Cre {
           tarCres[0],
           this.tarPos,
           this.nextStep,
-          this.leaderStop
+          this.leaderStop,
+          this.costMatrix,
+          this.plainCost,
+          this.swampCost
         );
       }
     } else if (creIdle) {

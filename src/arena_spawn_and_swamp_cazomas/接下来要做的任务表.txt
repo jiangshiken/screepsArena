@@ -1,7 +1,8 @@
 @current
-swampCost=1?
-if fatiuge almost full,push->stop
-when stop,try clean fatigue,clean the one that has most fatigue
+push by line
+adjust tail position
+use healer
+support tailPart
 
 #short distance fight
 	change to add to SDF list
