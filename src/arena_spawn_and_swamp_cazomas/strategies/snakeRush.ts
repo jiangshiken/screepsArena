@@ -29,6 +29,7 @@ import {
   isHealer,
   setEnRamAroundCost,
 } from "../gameObjects/CreTool";
+import { Cre_battle } from "../gameObjects/Cre_battle";
 import { Cre_build } from "../gameObjects/Cre_build";
 import { Cre_move } from "../gameObjects/Cre_move";
 import {
@@ -93,11 +94,11 @@ const bias0p6 = 0.6;
 const bias0p3 = 0.3;
 
 //variables
-export let snakeLeader: Cre_build | undefined = undefined;
+export let snakeLeader: Cre_move | undefined = undefined;
 export let allInEvent: Event | undefined;
 export let allIn: boolean = false;
 export let snakeGo: boolean = false;
-export let snakeParts: Cre_build[] = [];
+export let snakeParts: Cre_move[] = [];
 let startGateSeted = false;
 export let snakePartsTotalNum = 8;
 export function set_snakePartsTotalNum(num: number) {
@@ -179,14 +180,14 @@ export function snakePartJob(cre: Cre_build) {
   const index = cre.upgrade.spIndex;
   SA(cre, "index=" + index);
   if (cre.getBodyPartsNum(WORK) > 0) {
-  } else {
+  } else if (cre instanceof Cre_battle) {
     cre.fight();
   }
   const leader = snakeLeader;
   //snake wait to rush
   if (!snakeGo) {
     //if not go to attack enemy spawn
-    if (getGuessPlayer() === Tigga) {
+    if (getGuessPlayer() === Tigga || getGuessPlayer() === Kerob) {
       const tar = assemblePoint(cre);
       cre.MTJ(tar);
     } else if (tick >= assembleTick) {
@@ -535,28 +536,45 @@ export function decideSpawnPart(ind: number) {
         ? "10MH"
         : getGuessPlayer() === Dooms
         ? "M11AM"
-        : "MR9AM";
-    //50+900+50
-    // const tiggaHeadType="M6RM"
-    //150+800+50
-    // const tiggaHeadType="3M10AM"
-    // 400+300+240+50
+        : "MR6AM";
     const tiggaHeadType = "8M2R3AM";
     //100+200+400+50
     const tiggaSecondType = "2M4C4WHM";
-    //300+150+50+50+200+240
-    // const tiggaHeadType="6M3CMC2W3A"
-    //200+150+50+50+200+320
-    // const tiggaHeadType="4M3CMC2W4A"
     const tigga1 = getGuessPlayer() === Tigga ? tiggaHeadType : "5M3H";
     const tiggaType = "7M";
     // const tigga1 = "5M3H"
     //900
-    const tigga2 = getGuessPlayer() === Tigga ? tiggaSecondType : "14M";
-    const tigga3 = getGuessPlayer() === Tigga ? tiggaType : "14M";
-    const tigga4 = getGuessPlayer() === Tigga ? tiggaType : "14M";
-    const tigga5 = getGuessPlayer() === Tigga ? tiggaType : "14MH";
-    const tigga6 = getGuessPlayer() === Tigga ? "14M" : "14M";
+    const kerobType = "9M";
+    const tigga2 =
+      getGuessPlayer() === Tigga
+        ? tiggaSecondType
+        : getGuessPlayer() === Kerob
+        ? kerobType
+        : "14M";
+    const tigga3 =
+      getGuessPlayer() === Tigga
+        ? tiggaType
+        : getGuessPlayer() === Kerob
+        ? kerobType
+        : "14M";
+    const tigga4 =
+      getGuessPlayer() === Tigga
+        ? tiggaType
+        : getGuessPlayer() === Kerob
+        ? kerobType
+        : "14M";
+    const tigga5 =
+      getGuessPlayer() === Tigga
+        ? tiggaType
+        : getGuessPlayer() === Kerob
+        ? kerobType
+        : "14MH";
+    const tigga6 =
+      getGuessPlayer() === Tigga
+        ? "14M"
+        : getGuessPlayer() === Kerob
+        ? kerobType
+        : "14M";
     const tigga7 = "";
     //TIGGA
     //M=3+6+17*5=94
@@ -714,6 +732,8 @@ export function useSnakeRushStrategy() {
     if (snakeGo) {
       supplyToughDefender(1);
     }
+  } else if (getGuessPlayer() === Kerob) {
+    useStandardTurtling(st, 0);
   } else {
     useStandardTurtling(st, 1);
   }
@@ -927,7 +947,7 @@ function command() {
           if (second.getBodyPartsNum(RANGED_ATTACK) >= 4) {
             SA(second, "-1");
             second.master.rangedMassAttack();
-            second.melee();
+            if (second instanceof Cre_battle) second.melee();
           } else if (
             second.getBodyPartsNum(ATTACK) === 3 &&
             second.getHealthyBodyPartsNum(ATTACK) < 3
@@ -941,18 +961,20 @@ function command() {
           } else if (inRampart(second)) {
             SA(second, "1");
             drawText(second, "C");
-            second.melee();
-            second.shot();
+            if (second instanceof Cre_battle) {
+              second.melee();
+              second.shot();
+            }
           } else {
             SA(second, "2");
             drawText(second, "D");
-            second.fight();
+            if (second instanceof Cre_battle) second.fight();
           }
           if (third) {
             SA(third, "0");
             const ram = constructionSites.find(i => i.my && Adj(i, third));
             if (ram) {
-              third.buildStatic();
+              if (third instanceof Cre_build) third.buildStatic();
               SA(third, "1");
             } else {
               SA(third, "2");

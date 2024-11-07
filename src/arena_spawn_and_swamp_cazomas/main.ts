@@ -11,6 +11,7 @@ import { loopEnd, loopStart } from "./loop";
 import { set_harvesterNotFleeAtStart } from "./roles/harvester";
 import {
   set_snakePartsTotalNum,
+  set_spawnJamer,
   useSnakeRushStrategy,
 } from "./strategies/snakeRush";
 import { spawnStartHarvester } from "./strategies/strategyTool";
@@ -65,9 +66,11 @@ export function loop(): void {
       // useMod = snakeRushStrategy
       // set_spawnDps(300)
     } else if (gp === Kerob) {
+      set_harvesterNotFleeAtStart(true);
       set_snakePartsTotalNum(7);
+      set_spawnJamer(false);
       useMod = snakeRushStrategy;
-      // useMod = tailStrategy
+      // useMod = tailStrategy;
     } else if (gp === Dooms) {
       let antiDoomsMode = 2;
       // const antiDoomsMode=ran(3)

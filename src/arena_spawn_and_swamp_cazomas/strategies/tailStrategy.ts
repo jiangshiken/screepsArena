@@ -194,7 +194,7 @@ function tailGroup(cre: Cre): number {
   }
 }
 function ESDGreaterThan(en: Pos, fri: Pos) {
-  return ESDCompare(en, fri) >= 0;
+  return ESDCompare(en, fri) > 0;
 }
 function ESDCompare(en: Pos, fri: Pos): number {
   const ESD_en = enemySpawnDistance(en);
