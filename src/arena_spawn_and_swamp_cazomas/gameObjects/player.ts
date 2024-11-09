@@ -1,4 +1,4 @@
-import { CARRY } from "game/constants";
+import { CARRY, WORK } from "game/constants";
 
 import { TB } from "../utils/autoBodys";
 import { tick } from "../utils/game";
@@ -50,10 +50,14 @@ export function identifyOpponent() {
     const ens = enemies.filter(
       i =>
         GR(i, enemySpawn) <= 1 &&
-        i.getBodyPartsNum(CARRY) > 0 &&
+        arrayEquals(getBodyArrayOfCreep(i.master), TB("CM")) &&
         getEnergy(i) > 0
     );
-    if (ens.length >= 2) {
+    const cond1 =
+      enemies.filter(
+        i => i.getBodyPartsNum(CARRY) > 0 && i.getBodyPartsNum(WORK) === 0
+      ).length <= 3;
+    if (ens.length === 2 && cond1) {
       SA(displayPos(), "tigga1 triggered");
       addSupport(Tigga, "1", 0.5);
     }
