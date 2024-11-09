@@ -257,7 +257,7 @@ export function moveAndBePulled(cre: Cre, tar: Cre): boolean {
     moveTo_basic(cre, tar);
     return false;
   } else {
-    normalPull(tar, cre);
+    normalPull(tar, cre, true);
     return true;
   }
 }

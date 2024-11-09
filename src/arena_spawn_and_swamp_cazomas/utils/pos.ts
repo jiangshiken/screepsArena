@@ -246,7 +246,7 @@ export function COO(pos: Pos | undefined): string {
 /**
  *  same as {@link getRangePossByStep},but step is 1
  */
-export function getRangePoss(pos: Pos, range: number): Pos[] {
+export function getRangePoss(pos: Pos, range: number = 1): Pos[] {
   return getRangePossByStep(pos, range, 1);
 }
 /**获取反方向 */

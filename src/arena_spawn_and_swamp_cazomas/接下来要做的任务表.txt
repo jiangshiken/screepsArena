@@ -1,6 +1,7 @@
 @current
+resetStartGate
+assign body by range 2
 push by line
-adjust tail position
 use healer
 support tailPart
 

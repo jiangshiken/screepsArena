@@ -25,7 +25,7 @@ import { MoveTask, moveTo_direct } from "../gameObjects/MoveTask";
 import { Dooms, getGuessPlayer, Kerob, Tigga } from "../gameObjects/player";
 import { PullTarsTask } from "../gameObjects/pull";
 import { Ext, Spa } from "../gameObjects/Stru";
-import { inRampart } from "../gameObjects/UnitTool";
+import { blocked, inRampart } from "../gameObjects/UnitTool";
 import { spawnStealer } from "../roles/spawnStealer";
 import { toughDefender } from "../roles/toughDefender";
 import { TB } from "../utils/autoBodys";
@@ -43,7 +43,9 @@ import {
   atPos,
   closest,
   getDirectionByPos,
+  getRangePoss,
   GR,
+  InRan2,
   Pos,
   X_axisDistance,
   Y_axisDistance,
@@ -67,7 +69,7 @@ class TailInfo {
 }
 function drawFatigue() {
   friends.forEach(fri => {
-    SA(fri, "DrawFtg");
+    SA(fri, "DrawFtgLine");
     const length = 0.03 * fri.master.fatigue;
     const startPos = { x: fri.x - 0.5, y: fri.y + 0.5 };
     const endPos = { x: fri.x - 0.5, y: fri.y + 0.5 - length };
@@ -132,15 +134,14 @@ export function useTailStrategy() {
           spawnCreep(TB("3M"), tailPart, new TailInfo(g, 2 + tailLen + 1));
         } else {
           //DOOMS
-          if (g <= 1) spawnCreep(TB("3MR8AM"), tailMelee, new TailInfo(g, 0));
+          if (g === 0) spawnCreep(TB("3MR8AM"), tailMelee, new TailInfo(g, 0));
           else spawnCreep(TB("3M10AM"), tailMelee, new TailInfo(g, 0));
           spawnCreep(TB("4M2HM"), tailHealer, new TailInfo(g, 1));
           const tailLen = 6;
           for (let i = 0; i < tailLen; i++) {
             spawnCreep(TB("2M"), tailPart, new TailInfo(g, 2 + i));
           }
-          spawnCreep(TB("2M"), tailPart, new TailInfo(g, 2 + tailLen));
-          spawnCreep(TB("3M"), tailPart, new TailInfo(g, 2 + tailLen + 1));
+          spawnCreep(TB("3M"), tailPart, new TailInfo(g, 2 + tailLen));
         }
       }
     }
@@ -152,7 +153,8 @@ export function useTailStrategy() {
       //150+240+50
       spawnCreep(TB("15T3AM"), toughDefender);
     } else {
-      spawnCreep(TB("16T4AM"), toughDefender);
+      //150+240+50
+      spawnCreep(TB("15T4AM"), toughDefender);
     }
   }
   if (getTicks() > 50) {
@@ -241,9 +243,31 @@ function enemySpawnDistance(pos: Pos): number {
     return 50 + X_axisDistance(pos, enemySpawn);
   }
 }
+function refreshStartGate(cre: Cre_move, tail: Cre_move, myGroup: Cre_move[]) {
+  SA(cre, "refreshStartGate");
+  if (X_axisDistance(cre, enemySpawn) <= 8) {
+    SA(cre, "X");
+    let current_startGateUp;
+    if (cre.y > enemySpawn.y + 5) {
+      SA(cre, "A");
+      current_startGateUp = false;
+    } else if (cre.y < enemySpawn.y - 5) {
+      SA(cre, "B");
+      current_startGateUp = true;
+    } else {
+      SA(cre, "C " + (cre.y > tail.y));
+      current_startGateUp = cre.y > tail.y;
+    }
+    const setSGU = current_startGateUp;
+    myGroup.forEach(mem => {
+      mem.startGateUp = setSGU;
+    });
+  }
+}
 function tailMeleeJob(cre: Cre_battle) {
   SA(cre, "tailMeleeJob");
   cre.fight();
+
   const targets = oppoUnits.filter(i => i instanceof Cre || i instanceof Spa);
   SA(displayPos(), "oppoUnits.len" + oppoUnits.length);
   SA(displayPos(), "targets.len" + targets.length);
@@ -290,6 +314,7 @@ function tailMeleeJob(cre: Cre_battle) {
     const head = <Cre_battle>best(myGroup, i => -tailIndex(i));
     const headIsRange = head.getBodyPartsNum(RANGED_ATTACK) >= 3;
     const tail = best(myGroup, i => tailIndex(i));
+
     const second = best(
       myGroup.filter(i => i !== head),
       i => -tailIndex(i)
@@ -306,7 +331,8 @@ function tailMeleeJob(cre: Cre_battle) {
     const closestThreat = best(enemyThreats, i => -GR(i, cre));
     const closestThreatDis = closestThreat ? GR(closestThreat, cre) : 50;
     if (tail && head) {
-      //clear pull tars task
+      refreshStartGate(cre, tail, myGroup);
+      //clear pull tars task and move task
       myGroup.forEach(mem => {
         mem.stop();
         mem.tasks.find(i => i instanceof PullTarsTask)?.end();
@@ -377,7 +403,10 @@ function tailMeleeJob(cre: Cre_battle) {
         const enemyMeleesThreat = enemyMelees.filter(
           i => i.getHealthyBodyPartsNum(ATTACK) >= 2
         );
-        if (enemyMeleesThreat.find(i => GR(i, cre) <= 4) === undefined) {
+        const waitRange = headIsRange ? 4 : 2;
+        if (
+          enemyMeleesThreat.find(i => GR(i, cre) <= waitRange) === undefined
+        ) {
           SA(cre, "wait");
           stopAction(cre, head, myGroup);
         } else if (headIsRange) {
@@ -475,12 +504,15 @@ function pullAction(cre: Cre_move, followers: Cre[], tar: Pos) {
     false,
     undefined,
     1,
-    1.2
+    1.5
   );
 }
 function stopAction(cre: Cre_move, head: Cre, myGroup: Cre_move[]) {
   SA(cre, "STOP");
   if (arrangeTail(cre, myGroup)) {
+    return;
+  }
+  if (arrangeTail2(cre, myGroup)) {
     return;
   }
   cre.stop();
@@ -499,16 +531,69 @@ function cleanFatigue(myGroup: Cre_move[]) {
     new PullTarsTask(tar, tarBottom, tar, undefined, false, true);
   }
 }
+function arrangeTail2(cre: Cre, myGroup: Cre_move[]): boolean {
+  SA(cre, "arrange2");
+  let notAllPulling = false;
+  for (let i = 0; i < myGroup.length - 1; i++) {
+    const cre0 = myGroup[i];
+    const cre1 = myGroup[i + 1];
+    if (!Adj(cre0, cre1)) {
+      notAllPulling = true;
+    }
+  }
+  if (notAllPulling) return false;
+  const tail = best(myGroup, i => tailIndex(i));
+  for (let i = 0; i < myGroup.length - 3; i++) {
+    const cre0 = myGroup[i];
+    const creMid1 = myGroup[i + 1];
+    const creMid2 = myGroup[i + 2];
+    const cre1 = myGroup[i + 3];
+    if (InRan2(cre0, cre1) && creMid1.master.fatigue === 0) {
+      const poss = getRangePoss(cre0);
+      const tarPos = poss.find(
+        i =>
+          Adj(i, cre0) &&
+          Adj(i, creMid1) &&
+          Adj(i, creMid2) &&
+          Adj(i, cre1) &&
+          !blocked(i)
+      );
+      if (tarPos) {
+        drawLineComplex(cre0, cre1, 0.8, "#ff7700");
+        SA(cre0, "ARR2");
+        const followers = myGroup.filter(
+          i => tailIndex(i) >= tailIndex(creMid2)
+        );
+        const sortedFollowers = followers.sort(
+          (a, b) => tailIndex(b) - tailIndex(a)
+        );
+        moveTo_direct(creMid1, tarPos);
+        if (tail) pullAction(tail, sortedFollowers, spawn);
+        return true;
+      }
+    }
+  }
+  return false;
+}
 function arrangeTail(cre: Cre, myGroup: Cre_move[]): boolean {
   SA(cre, "arrange");
+  let notAllPulling = false;
+  for (let i = 0; i < myGroup.length - 1; i++) {
+    const cre0 = myGroup[i];
+    const cre1 = myGroup[i + 1];
+    if (!Adj(cre0, cre1)) {
+      notAllPulling = true;
+    }
+  }
+  if (notAllPulling) return false;
+  const tail = best(myGroup, i => tailIndex(i));
   for (let i = 0; i < myGroup.length - 2; i++) {
     const cre0 = myGroup[i];
     const creMid = myGroup[i + 1];
-    const tail = best(myGroup, i => tailIndex(i));
     const cre1 = myGroup[i + 2];
     if (Adj(cre0, cre1)) {
       drawLineComplex(cre0, cre1, 0.8, "#ff7700");
-      SA(cre0, "arrange");
+      SA(cre0, "ARR");
       const followers = myGroup.filter(i => tailIndex(i) >= tailIndex(creMid));
       const sortedFollowers = followers.sort(
         (a, b) => tailIndex(b) - tailIndex(a)
@@ -529,6 +614,9 @@ function pushAction(
 ) {
   SA(cre, "PUSH");
   if (arrangeTail(cre, myGroup)) {
+    return;
+  }
+  if (arrangeTail2(cre, myGroup)) {
     return;
   }
   if (tail.master.fatigue !== 0) {

@@ -1,6 +1,7 @@
 import { CARRY, MOVE } from "game/constants";
 import { CostMatrix, FindPathResult, searchPath } from "game/path-finder";
 import {
+  Area,
   area_bottom,
   area_left,
   area_right,
@@ -18,8 +19,15 @@ import {
 } from "../utils/game";
 import { divide0 } from "../utils/JS";
 import { Pos, Pos_C, atPos } from "../utils/Pos";
-import { P, drawLineComplex, drawPoly, drawPolyLight } from "../utils/visual";
+import {
+  P,
+  SA,
+  drawLineComplex,
+  drawPoly,
+  drawPolyLight,
+} from "../utils/visual";
 import { Cre } from "./Cre";
+import { Cre_move } from "./Cre_move";
 import { isTerrainRoad } from "./CreCommands";
 import { getCapacity, getEnergy, moveBlockCostMatrix } from "./UnitTool";
 
@@ -268,7 +276,9 @@ export function pathLen(ori: Pos, tar: Pos) {
     return p.path.length;
   } else return Infinity;
 }
-
+export function getArea_std(cre: Pos): Area {
+  return getArea(cre, leftBorder1, rightBorder2, midBorder);
+}
 /**
  * get the step target from cre to tar,if cre is your spawn and tar is enemy's spawn
  * that it will search path to the first gate ,then the next gate ,and then search to
@@ -276,20 +286,27 @@ export function pathLen(ori: Pos, tar: Pos) {
  */
 export function getNewTarByArea(cre: Pos, tar: Pos): Pos {
   let newTar = tar;
-  const creArea = getArea(cre, leftBorder1, rightBorder2, midBorder);
-  const tarArea = getArea(tar, leftBorder1, rightBorder2, midBorder);
-
+  const creArea = getArea_std(cre);
+  const tarArea = getArea_std(tar);
+  let current_startGateUp;
+  if (cre instanceof Cre_move && cre.startGateUp !== undefined) {
+    SA(cre, "SG1");
+    current_startGateUp = cre.startGateUp;
+  } else {
+    SA(cre, "SG2");
+    current_startGateUp = startGateUp;
+  }
   // SA(cre, "creArea=" + creArea); //
   // SA(cre, "tarArea=" + tarArea); //
   const yAxis_top = topY;
   const yAxis_bottom = bottomY;
   if (creArea === area_left && tarArea === area_right) {
     //go left top
-    if (startGateUp) newTar = new Pos_C(leftBorder2, yAxis_top);
+    if (current_startGateUp) newTar = new Pos_C(leftBorder2, yAxis_top);
     else newTar = new Pos_C(leftBorder2, yAxis_bottom);
   } else if (creArea === area_right && tarArea === area_left) {
     //go right bottom
-    if (startGateUp) newTar = new Pos_C(rightBorder1, yAxis_top);
+    if (current_startGateUp) newTar = new Pos_C(rightBorder1, yAxis_top);
     else newTar = new Pos_C(rightBorder1, yAxis_bottom);
   } else if (creArea === area_right && tarArea === area_top)
     newTar = new Pos_C(leftBorder2, yAxis_top);

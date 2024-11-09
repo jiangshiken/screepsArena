@@ -158,13 +158,13 @@ const MCB: string = "MCB";
 const SPF: string = "SPF";
 /**test if can pull a fatigue creep
  * testResult:the fatigue creep can move ,but the fatigue that ready has will not change or transfer.
- * the creep that has fatigue cannot move,so M body could only used as a one-time mover
+ * the creep that has fatigue cannot move by itself,so M body could only used as a one-time mover
  */
 const PFC: string = "PFC";
 /**test if can pull a fatigue creep
  */
 const PFC2: string = "PFC2";
-/** other test result ,move action will cover front move action at same tick on same creep*/
+//other test result ,move action will cover front move action at same tick on same creep
 /** speed of new an object */
 const NOS: string = "NOS";
 export function useTest() {
