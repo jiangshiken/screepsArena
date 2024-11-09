@@ -131,16 +131,18 @@ export function useTailStrategy() {
           if (g === 0) spawnCreep(TB("3MR8AM"), tailMelee, new TailInfo(g, 0));
           else spawnCreep(TB("3M10AM"), tailMelee, new TailInfo(g, 0));
           spawnCreep(TB("4M3HM"), tailHealer, new TailInfo(g, 1));
-          const tailLen = 2;
+          const tailLen = 3;
           for (let i = 0; i < tailLen; i++) {
             spawnCreep(TB("M"), tailPart, new TailInfo(g, 2 + i));
           }
-          const tailLen2 = 5;
+          const tailLen2 = 4;
           for (let i = 0; i < tailLen2; i++) {
             spawnCreep(TB("2M"), tailPart, new TailInfo(g, 2 + tailLen + i));
           }
           //EXT STEALER
-          spawnCreep(TB("3MA"), extStealer);
+          if (g === 1) {
+            spawnCreep(TB("3MA"), extStealer);
+          }
         } else {
           //DOOMS
           if (g === 0) spawnCreep(TB("3MR8AM"), tailMelee, new TailInfo(g, 0));

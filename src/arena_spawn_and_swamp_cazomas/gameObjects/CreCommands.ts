@@ -392,18 +392,6 @@ export function cpuBreakJudge(cre: Cre): boolean {
   }
   return false;
 }
-/**flee from every threated enemy*/
-export function fleeWeakComplex(cre: Cre_move) {
-  if (cre.flee(6)) {
-    SA(cre, "flee");
-    return true;
-  } else if (cre.flee(8)) {
-    SA(cre, "flee2");
-    return true;
-  } else {
-    return false;
-  }
-}
 /**find a fit target of damaged friend*/
 export function findFitDamagedFriend(cre: Cre_battle): {
   maxFitEn: Unit;

@@ -19,6 +19,7 @@ import { defender_rampart } from "../roles/defender";
 import { harvester } from "../roles/harvester";
 import { leftRate } from "../utils/game";
 import { sum } from "../utils/JS";
+import { getRangePoss } from "../utils/Pos";
 /**use a standard mode of turtling at base*/
 export function useStandardTurtling(st: number, strength: number = 0) {
   SA(displayPos(), "Citilize strength=" + strength);
@@ -88,6 +89,10 @@ export function useStandardTurtling(st: number, strength: number = 0) {
       spawnCreepInFront(TB("3a3rm"), defender_rampart);
       spawnCreepInFront(TB("2a4rm"), defender_rampart);
     }
+  }
+  if (st >= 550) {
+    const ranPoss = getRangePoss(spawn);
+    ranPoss.forEach(pos => supplyCS(pos, StructureRampart));
   }
 }
 /**use 4 ramparts to defend the base*/

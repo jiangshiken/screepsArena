@@ -59,6 +59,7 @@ import {
   set_moveBlockCostMatrix,
 } from "./gameObjects/UnitTool";
 import { showEnemies, showHits } from "./gameObjects/visual_Cre";
+import { initSpawnWallCostMatrix } from "./roles/extStealer";
 import { sum_snakePart0 } from "./strategies/snakeRush";
 import { ct, getCPUPercent, pt, ptL, ptSum } from "./utils/CPU";
 import { S } from "./utils/export";
@@ -147,6 +148,7 @@ export function loopStart() {
   if (getTicks() === 1) {
     set_spawn_left(spawn.x < 50);
     initGateCost();
+    initSpawnWallCostMatrix();
   }
   setOverallMap();
   //

@@ -106,7 +106,7 @@ export function getTauntShot(cre: Cre, tar: HasHits): StNumber {
   const dmg = 10 * RANum;
   return 0.1 * dmg * oppoTaunt;
 }
-export function getTauntMass(cre: Cre): StNumber {
+export function getTauntMass(cre: Cre): number {
   const RANum = cre.getHealthyBodyParts(RANGED_ATTACK).length;
   const oppos = oppoUnits.filter(i => GR(i, cre) <= 3);
   let rtn: number = 0;

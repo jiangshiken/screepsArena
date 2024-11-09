@@ -4,7 +4,6 @@ import { Cre } from "../gameObjects/Cre";
 import { Cre_move } from "../gameObjects/Cre_move";
 import {
   cpuBreakJudge,
-  fleeWeakComplex,
   givePositionToImpartantFriend,
 } from "../gameObjects/CreCommands";
 import { hasThreat, Role } from "../gameObjects/CreTool";
@@ -24,6 +23,7 @@ import {
   Y_axisDistance,
 } from "../utils/Pos";
 import { SA, SAB } from "../utils/visual";
+import { spawnWallCostMatrix } from "./extStealer";
 
 /**used to jam the opponent's construction site*/
 export const jamer: Role = new Role("jamer", jamerJob);
@@ -101,11 +101,22 @@ export function jamerOldJob(cre: Cre_move) {
       });
       SA(cre, "target=" + COO(target));
       if (target) {
-        cre.MTJ(target);
+        cre.MTJ(target, [cre], 5, undefined, 1, 1.5);
         cre.upgrade.target = target;
       } else {
         cre.MTJ(midPoint);
       }
     }
+  }
+} /**flee from every threated enemy*/
+export function fleeWeakComplex(cre: Cre_move) {
+  if (cre.flee(6, 12, spawnWallCostMatrix, 1, 1)) {
+    SA(cre, "flee");
+    return true;
+  } else if (cre.flee(8, 16, spawnWallCostMatrix, 1, 1)) {
+    SA(cre, "flee2");
+    return true;
+  } else {
+    return false;
   }
 }
