@@ -56,7 +56,7 @@ export class Cre_move extends Cre {
   }
   flee(
     range: number = 4,
-    FleeRange: number = 7,
+    FleeRange: number = range * 2,
     costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
     plainCost: number = def_plainCost,
     swampCost: number = def_swampCost

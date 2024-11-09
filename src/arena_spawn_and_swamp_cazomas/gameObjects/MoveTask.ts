@@ -74,12 +74,12 @@ export class FindPathAndMoveTask extends MoveTask {
     swampCost: number = def_swampCost
   ) {
     super(master, tar);
+    SA(master, "new FindPathAndMoveTask");
     this.pullList = pullList;
     this.path = this.findPath_task(tar);
     this.costMatrix = costMatrix;
     this.plainCost = plainCost;
     this.swampCost = swampCost;
-    SA(master, "new FindPathAndMoveTask");
     //for initialize
     if (this.path.length > 0) {
       const lastPos = last(this.path);

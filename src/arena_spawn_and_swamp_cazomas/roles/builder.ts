@@ -42,7 +42,6 @@ import {
   enemySpawn,
   getSpawnAndBaseContainerEnergy,
   inMyBaseRan,
-  resetStartGateAvoidFromEnemies,
   spawn,
 } from "../gameObjects/spawn";
 import {
@@ -311,7 +310,7 @@ export class BuilderStandardTask extends Task_Cre {
   constructor(master: Cre_build) {
     super(master);
     this.master = master;
-    resetStartGateAvoidFromEnemies();
+    // resetStartGateAvoidFromEnemies();
     if (master.getBodyPartsNum(ATTACK) > 0) {
       this.fleeRange = 12;
       this.fleeBias = 7;

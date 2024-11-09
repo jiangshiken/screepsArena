@@ -2,20 +2,19 @@ import { CARRY, MOVE } from "game/constants";
 import { CostMatrix, FindPathResult, searchPath } from "game/path-finder";
 import {
   Area,
+  Y_bottomGate,
+  Y_topGate,
   area_bottom,
   area_left,
   area_right,
   area_top,
-  bottomY,
+  border_L1,
+  border_L2,
+  border_R1,
+  border_R2,
+  border_mid,
   getArea,
   isTerrainSwamp,
-  leftBorder1,
-  leftBorder2,
-  midBorder,
-  rightBorder1,
-  rightBorder2,
-  startGateUp,
-  topY,
 } from "../utils/game";
 import { divide0 } from "../utils/JS";
 import { Pos, Pos_C, atPos } from "../utils/Pos";
@@ -277,7 +276,36 @@ export function pathLen(ori: Pos, tar: Pos) {
   } else return Infinity;
 }
 export function getArea_std(cre: Pos): Area {
-  return getArea(cre, leftBorder1, rightBorder2, midBorder);
+  return getArea(cre, border_L1, border_R2, border_mid);
+}
+export let costLT_RT: number;
+export let costLT_RB: number;
+export let costLB_RT: number;
+export let costLB_RB: number;
+export const gate_LT = new Pos_C(border_L1, Y_topGate);
+export const gate_LB = new Pos_C(border_L1, Y_bottomGate);
+export const gate_RT = new Pos_C(border_R1, Y_topGate);
+export const gate_RB = new Pos_C(border_R1, Y_bottomGate);
+export function initGateCost(): void {
+  costLT_RT = searchPath(gate_LT, gate_RT).cost;
+  costLT_RB = searchPath(gate_LT, gate_RB).cost;
+  costLB_RT = searchPath(gate_LB, gate_RT).cost;
+  costLB_RB = searchPath(gate_LB, gate_RB).cost;
+}
+export function getStartGate(left: boolean, ori: Pos, tar: Pos): boolean {
+  const costOri_T = searchPath(ori, left ? gate_LT : gate_RT).cost;
+  const costOri_B = searchPath(ori, left ? gate_LB : gate_RB).cost;
+  const costTar_T = searchPath(tar, left ? gate_RT : gate_LT).cost;
+  const costTar_B = searchPath(tar, left ? gate_RB : gate_LB).cost;
+  const startGate_T_line1 = costOri_T + costLT_RT + costTar_T;
+  const startGate_T_line2 =
+    costOri_T + (left ? costLT_RB : costLB_RT) + costTar_B;
+  const startGate_T = Math.min(startGate_T_line1, startGate_T_line2);
+  const startGate_B_line1 = costOri_B + costLB_RB + costTar_B;
+  const startGate_B_line2 =
+    costOri_B + (left ? costLB_RT : costLT_RB) + costTar_T;
+  const startGate_B = Math.min(startGate_B_line1, startGate_B_line2);
+  return startGate_T < startGate_B;
 }
 /**
  * get the step target from cre to tar,if cre is your spawn and tar is enemy's spawn
@@ -288,42 +316,56 @@ export function getNewTarByArea(cre: Pos, tar: Pos): Pos {
   let newTar = tar;
   const creArea = getArea_std(cre);
   const tarArea = getArea_std(tar);
-  let current_startGateUp;
+  let current_startGateUp = undefined;
   if (cre instanceof Cre_move && cre.startGateUp !== undefined) {
     SA(cre, "SG1");
     current_startGateUp = cre.startGateUp;
-  } else {
-    SA(cre, "SG2");
-    current_startGateUp = startGateUp;
   }
   // SA(cre, "creArea=" + creArea); //
   // SA(cre, "tarArea=" + tarArea); //
-  const yAxis_top = topY;
-  const yAxis_bottom = bottomY;
+  const yAxis_top = Y_topGate;
+  const yAxis_bottom = Y_bottomGate;
   if (creArea === area_left && tarArea === area_right) {
     //go left top
-    if (current_startGateUp) newTar = new Pos_C(leftBorder2, yAxis_top);
-    else newTar = new Pos_C(leftBorder2, yAxis_bottom);
+    SA(cre, "LR");
+    const gateUp = current_startGateUp
+      ? current_startGateUp
+      : getStartGate(true, cre, tar);
+    if (gateUp) newTar = new Pos_C(border_L2, yAxis_top);
+    else newTar = new Pos_C(border_L2, yAxis_bottom);
   } else if (creArea === area_right && tarArea === area_left) {
     //go right bottom
-    if (current_startGateUp) newTar = new Pos_C(rightBorder1, yAxis_top);
-    else newTar = new Pos_C(rightBorder1, yAxis_bottom);
-  } else if (creArea === area_right && tarArea === area_top)
-    newTar = new Pos_C(leftBorder2, yAxis_top);
-  else if (creArea === area_top && tarArea === area_left)
-    newTar = new Pos_C(leftBorder1, yAxis_top);
-  else if (creArea === area_left && tarArea === area_bottom)
-    newTar = new Pos_C(leftBorder2, yAxis_bottom);
-  else if (creArea === area_bottom && tarArea === area_left)
-    newTar = new Pos_C(leftBorder1, yAxis_bottom);
-  else if (creArea === area_right && tarArea === area_bottom)
-    newTar = new Pos_C(rightBorder1, yAxis_bottom);
-  else if (creArea === area_bottom && tarArea === area_right)
-    newTar = new Pos_C(rightBorder2, yAxis_bottom);
-  else if (creArea === area_right && tarArea === area_top)
-    newTar = new Pos_C(rightBorder1, yAxis_top);
-  else if (creArea === area_top && tarArea === area_right)
-    newTar = new Pos_C(rightBorder2, yAxis_top);
+    SA(cre, "RL");
+    const gateUp = current_startGateUp
+      ? current_startGateUp
+      : getStartGate(false, cre, tar);
+    if (gateUp) newTar = new Pos_C(border_R1, yAxis_top);
+    else newTar = new Pos_C(border_R1, yAxis_bottom);
+  } else if (creArea === area_right && tarArea === area_top) {
+    SA(cre, "RT");
+    newTar = new Pos_C(border_L2, yAxis_top);
+  } else if (creArea === area_top && tarArea === area_left) {
+    SA(cre, "TL");
+    newTar = new Pos_C(border_L1, yAxis_top);
+  } else if (creArea === area_left && tarArea === area_bottom) {
+    SA(cre, "LB");
+    newTar = new Pos_C(border_L2, yAxis_bottom);
+  } else if (creArea === area_bottom && tarArea === area_left) {
+    SA(cre, "BL");
+    newTar = new Pos_C(border_L1, yAxis_bottom);
+  } else if (creArea === area_right && tarArea === area_bottom) {
+    SA(cre, "RB");
+    newTar = new Pos_C(border_R1, yAxis_bottom);
+  } else if (creArea === area_bottom && tarArea === area_right) {
+    SA(cre, "BR");
+    newTar = new Pos_C(border_R2, yAxis_bottom);
+  } else if (creArea === area_right && tarArea === area_top) {
+    SA(cre, "RT");
+    newTar = new Pos_C(border_R1, yAxis_top);
+  } else if (creArea === area_top && tarArea === area_right) {
+    SA(cre, "TR");
+    newTar = new Pos_C(border_R2, yAxis_top);
+  }
   drawLineComplex(cre, newTar, 0.25, "#222222");
   return newTar;
 }

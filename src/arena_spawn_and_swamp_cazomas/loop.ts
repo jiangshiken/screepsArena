@@ -1,5 +1,5 @@
 import { arenaInfo } from "game";
-import { CostMatrix, searchPath } from "game/path-finder";
+import { CostMatrix } from "game/path-finder";
 import {
   findClosestByRange,
   getCpuTime,
@@ -19,7 +19,7 @@ import {
 } from "./gameObjects/Cre_harvest";
 import { Cre_move } from "./gameObjects/Cre_move";
 import { controlCreeps, isMyTick } from "./gameObjects/CreTool";
-import { searchPath_area } from "./gameObjects/findPath";
+import { initGateCost, searchPath_area } from "./gameObjects/findPath";
 import {
   BlockGO,
   containers,
@@ -65,8 +65,7 @@ import { S } from "./utils/export";
 import {
   creepBodyPartNum,
   inResourceArea,
-  set_left,
-  set_startGateUp,
+  set_spawn_left,
   setTick,
 } from "./utils/game";
 import { divideReduce } from "./utils/JS";
@@ -146,8 +145,8 @@ export function loopStart() {
   setSpawn(mySpawns[0]);
   setEnemySpawn(oppoSpawns[0]);
   if (getTicks() === 1) {
-    set_left(spawn.x < 50);
-    setStartGate();
+    set_spawn_left(spawn.x < 50);
+    initGateCost();
   }
   setOverallMap();
   //
@@ -226,21 +225,6 @@ function getCostMatrixHalf(up: boolean): CostMatrix {
     rtn.set(i, wallY, blockCost);
   }
   return rtn;
-}
-// }
-/** set startGate by cost of the path*/
-function setStartGate(): void {
-  let sRtnUp = searchPath(spawn, enemySpawn, {
-    costMatrix: getCostMatrixHalf(true),
-  });
-  let costUp = sRtnUp.cost;
-  let sRtnBo = searchPath(spawn, enemySpawn, {
-    costMatrix: getCostMatrixHalf(false),
-  });
-  let costBo = sRtnBo.cost;
-  set_startGateUp(costUp < costBo);
-  // set top and bottom Y
-  // let top
 }
 
 /**

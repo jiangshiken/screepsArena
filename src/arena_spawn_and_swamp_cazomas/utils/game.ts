@@ -6,27 +6,27 @@ import { Pos, Vec } from "./Pos";
 import { PL } from "./print";
 export type StNumber = number;
 /** the startGate top or bottom ,true is top,will decide the area search*/
-export let startGateUp: boolean = false;
-export function set_startGateUp(b: boolean) {
-  startGateUp = b;
-}
+// export let startGateUp: boolean = false;
+// export function set_startGateUp(b: boolean) {
+//   startGateUp = b;
+// }
 /** you are at the left or the right of the game map*/
-export let left: boolean;
-export function set_left(b: boolean) {
-  left = b;
+export let spawn_left: boolean;
+export function set_spawn_left(b: boolean) {
+  spawn_left = b;
 }
-export const topY: number = 10;
-export const bottomY: number = 89;
-export const leftBorder1 = 13;
-export const rightBorder1 = 85;
-export const leftBorder2 = 14;
-export const rightBorder2 = 86;
-export const midBorder = 50;
+export const Y_topGate: number = 10;
+export const Y_bottomGate: number = 89;
+export const border_L1 = 13;
+export const border_R1 = 85;
+export const border_L2 = 14;
+export const border_R2 = 86;
+export const border_mid = 50;
 export function leftRate(): number {
-  return left ? -1 : 1;
+  return spawn_left ? -1 : 1;
 }
 export function leftVector(): Vec {
-  if (left) {
+  if (spawn_left) {
     return new Vec(-1, 0);
   } else {
     return new Vec(1, 0);

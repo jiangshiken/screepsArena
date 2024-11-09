@@ -26,7 +26,7 @@ import { Dooms, getGuessPlayer, Kerob, Tigga } from "../gameObjects/player";
 import { PullTarsTask } from "../gameObjects/pull";
 import { Ext, Spa } from "../gameObjects/Stru";
 import { blocked, inRampart } from "../gameObjects/UnitTool";
-import { spawnStealer } from "../roles/spawnStealer";
+import { extStealer } from "../roles/extStealer";
 import { toughDefender } from "../roles/toughDefender";
 import { TB } from "../utils/autoBodys";
 import {
@@ -69,7 +69,7 @@ class TailInfo {
 }
 function drawFatigue() {
   friends.forEach(fri => {
-    SA(fri, "DrawFtgLine");
+    // SA(fri, "DrawFtgLine");
     const length = 0.03 * fri.master.fatigue;
     const startPos = { x: fri.x - 0.5, y: fri.y + 0.5 };
     const endPos = { x: fri.x - 0.5, y: fri.y + 0.5 - length };
@@ -85,7 +85,8 @@ export function useTailStrategy() {
     //400
     // spawnCreep(TB('5MCW'),builderStandard)
     // spawnCreep(TB('4CM'),harvester)
-    for (let i = 0; i < 5; i++) {
+    const jamerNum = getGuessPlayer() === Tigga ? 7 : 4;
+    for (let i = 0; i < jamerNum; i++) {
       spawnCreep(TB("M"), jamer);
     }
     for (let g = 0; g < 3; g++) {
@@ -162,7 +163,7 @@ export function useTailStrategy() {
       // if(friends.filter(i=>i.role===jamer).length<=8){
       //     spawnCreep(TB('M'),jamer)
       // }else{
-      spawnCreep(TB("3MA"), spawnStealer);
+      spawnCreep(TB("3MA"), extStealer);
       // }
     }
   }
@@ -302,7 +303,7 @@ function tailMeleeJob(cre: Cre_battle) {
     const final =
       disBonus * sameBonus * linkBonus * typeBonus * tauntBonus * enSpawnBonus;
     SAN(tar, "T", final);
-    SAN(tar, "ESB", enSpawnBonus);
+    // SAN(tar, "ESB", enSpawnBonus);
     return final;
   });
   if (target) {
@@ -367,15 +368,15 @@ function tailMeleeJob(cre: Cre_battle) {
       const headHasThreat = sumForce >= 0.6;
       const healerHasThreat =
         healer && enemyMelees.find(i => Adj(i, healer)) !== undefined;
-      SA(cre, "ESD=" + enemySpawnDistance(cre));
+      // SA(cre, "ESD=" + enemySpawnDistance(cre));
 
       const XAxisThreatsArr = enemyThreats.filter(i => {
-        SA(i, "ESD=" + enemySpawnDistance(i));
+        // SA(i, "ESD=" + enemySpawnDistance(i));
         return ESDGreaterThan(i, cre, headIsRange ? 2 : 0);
       });
       const XAxisThreat = XAxisThreatsArr.length > 0;
       XAxisThreatsArr.forEach(i =>
-        drawLineComplex(cre, i, 1, "#00ff00", dashed)
+        drawLineComplex(cre, i, 1, "#22ff00", dashed)
       );
       drawRange(cre, scanRange, "#007777");
       SA(cre, "HHT=" + headHasThreat);
@@ -499,6 +500,7 @@ function pullAction(cre: Cre_move, followers: Cre[], tar: Pos) {
     cre,
     followers,
     tar,
+    10,
     undefined,
     false,
     false,
@@ -521,14 +523,18 @@ function stopAction(cre: Cre_move, head: Cre, myGroup: Cre_move[]) {
 }
 function cleanFatigue(myGroup: Cre_move[]) {
   const tar = <Cre_move>best(myGroup, i => i.master.fatigue);
-  SA(tar, "cleanFatigue");
-  const tarTop = myGroup.filter(i => tailIndex(i) < tailIndex(tar));
-  const tarBottom = myGroup.filter(i => tailIndex(i) > tailIndex(tar));
-  if (tarTop.length > 0) {
-    new PullTarsTask(tar, tarTop, tar, undefined, false, true);
-  }
-  if (tarBottom.length > 0) {
-    new PullTarsTask(tar, tarBottom, tar, undefined, false, true);
+  if (tar.master.fatigue > 20) {
+    SA(tar, "cleanFatigue");
+    const tarTop = myGroup.filter(i => tailIndex(i) < tailIndex(tar));
+    const sortedTarTop = tarTop.sort((a, b) => tailIndex(b) - tailIndex(a));
+    const tarBottom = myGroup.filter(i => tailIndex(i) > tailIndex(tar));
+    const sortedTarBottom = tarTop.sort((a, b) => tailIndex(a) - tailIndex(b));
+    if (tarTop.length > 0) {
+      new PullTarsTask(tar, sortedTarTop, spawn, 10, undefined, false, true);
+    }
+    if (tarBottom.length > 0) {
+      new PullTarsTask(tar, sortedTarBottom, spawn, 10, undefined, false, true);
+    }
   }
 }
 function arrangeTail2(cre: Cre, myGroup: Cre_move[]): boolean {
@@ -542,6 +548,7 @@ function arrangeTail2(cre: Cre, myGroup: Cre_move[]): boolean {
     }
   }
   if (notAllPulling) return false;
+  SA(cre, "=>");
   const tail = best(myGroup, i => tailIndex(i));
   for (let i = 0; i < myGroup.length - 3; i++) {
     const cre0 = myGroup[i];
@@ -621,26 +628,30 @@ function pushAction(
   }
   if (tail.master.fatigue !== 0) {
     stopAction(cre, head, myGroup);
+    return;
   }
   const NofatLen = myGroup.filter(i => i.master.fatigue === 0).length;
   const totalFatigue = sum(myGroup, i => i.master.fatigue);
   if (NofatLen <= 3 || totalFatigue >= 150) {
     SA(cre, "FtqResst" + NofatLen + " " + totalFatigue);
     stopAction(cre, head, myGroup);
-  }
-  const followers = myGroup.filter(i => i !== head);
-  const sortedFollowers = followers.sort((a, b) => tailIndex(a) - tailIndex(b));
-  tail.tasks.find(i => i instanceof PullTarsTask)?.end();
-  pullAction(cre, sortedFollowers, target);
-  const moveTask = cre.tasks.find(i => i instanceof MoveTask);
-  if (healer && moveTask && moveTask instanceof MoveTask) {
-    const tempTar = first(moveTask.path);
-    if (tempTar) {
-      drawLineComplex(cre, tempTar, 0.8, "#ff22ff");
-      if (friends.find(i => atPos(i, tempTar)) !== undefined) {
-        SA(cre, "CONFLICT");
-        cre.tasks.find(i => i instanceof PullTarsTask)?.end();
-        fleeAction(cre, myGroup, head, tail, healer);
+  } else {
+    const followers = myGroup.filter(i => i !== head);
+    const sortedFollowers = followers.sort(
+      (a, b) => tailIndex(a) - tailIndex(b)
+    );
+    tail.tasks.find(i => i instanceof PullTarsTask)?.end();
+    pullAction(cre, sortedFollowers, target);
+    const moveTask = cre.tasks.find(i => i instanceof MoveTask);
+    if (healer && moveTask && moveTask instanceof MoveTask) {
+      const tempTar = first(moveTask.path);
+      if (tempTar) {
+        drawLineComplex(cre, tempTar, 0.8, "#ff22ff");
+        if (friends.find(i => atPos(i, tempTar)) !== undefined) {
+          SA(cre, "CONFLICT");
+          cre.tasks.find(i => i instanceof PullTarsTask)?.end();
+          fleeAction(cre, myGroup, head, tail, healer);
+        }
       }
     }
   }
@@ -717,6 +728,7 @@ function fleeAction(
             fatigueHolder,
             sortedFollowers,
             fatigueHolderNext,
+            10,
             undefined,
             true,
             true
@@ -773,8 +785,8 @@ function tailShoterJob(cre: Cre) {
   }
 }
 function tailPartJob(cre: Cre) {
-  SA(cre, "TP");
-  SA(cre, "group=" + tailGroup(cre));
-  SA(cre, "index=" + tailIndex(cre));
+  const groupNum = tailGroup(cre);
+  const tailInd = tailIndex(cre);
+  SA(cre, "TP G" + groupNum + "_" + tailInd);
 }
 function command() {}

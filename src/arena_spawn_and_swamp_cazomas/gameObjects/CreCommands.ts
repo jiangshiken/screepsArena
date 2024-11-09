@@ -383,7 +383,7 @@ export function exchangePositionWithImpartantFriend(cre: Cre): boolean {
 /**used on normal role ,judge if cpu over used.If it is ,return true*/
 export function cpuBreakJudge(cre: Cre): boolean {
   if (getCPUPercent() > 0.8) {
-    if (isMyTick(cre, 20)) {
+    if (isMyTick(cre, 5)) {
       SA(cre, "my turn");
     } else {
       SA(cre, "cpu break");
@@ -394,10 +394,10 @@ export function cpuBreakJudge(cre: Cre): boolean {
 }
 /**flee from every threated enemy*/
 export function fleeWeakComplex(cre: Cre_move) {
-  if (cre.flee(3, 8)) {
+  if (cre.flee(6)) {
     SA(cre, "flee");
     return true;
-  } else if (cre.flee(5, 13)) {
+  } else if (cre.flee(8)) {
     SA(cre, "flee2");
     return true;
   } else {

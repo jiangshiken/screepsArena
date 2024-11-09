@@ -1,6 +1,6 @@
 import { ATTACK, HEAL, RANGED_ATTACK } from "game/constants";
 import { Event_Number } from "../utils/Event";
-import { Adj, COO, GR } from "../utils/Pos";
+import { Adj, GR } from "../utils/Pos";
 import { SA } from "../utils/visual";
 import { findMaxTaunt, getTauntMass, getTauntShot } from "./battle";
 import { Cre } from "./Cre";
@@ -82,14 +82,14 @@ export class Cre_battle extends Cre_harvest {
   }
   /**ranged attack normal*/
   shotTarget(tar: CanBeAttacked): void {
-    SA(this.master, "shotTarget " + COO(tar));
+    // SA(this.master, "shotTarget " + COO(tar));
     if (GR(this.master, tar) <= 3) {
       this.master.rangedAttack(tar.master);
     }
   }
   /** shot round ,if range is 1 , mass attack */
   shotTargetJudgeIfMass(tar: CanBeAttacked) {
-    SA(this, "shotTargetJudgeIfMass");
+    // SA(this, "shotTargetJudgeIfMass");
     let tauntMass: number = getTauntMass(this);
     let tauntShot: number = getTauntShot(this, tar.master);
     if (GR(this, tar) <= 1 || tauntMass > tauntShot) {

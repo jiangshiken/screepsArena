@@ -12,7 +12,6 @@ import {
 
 import { Event } from "../utils/Event";
 import { S } from "../utils/export";
-import { set_startGateUp, startGateUp } from "../utils/game";
 import { arrayEqual } from "../utils/JS";
 import {
   getRangePoss,
@@ -24,11 +23,10 @@ import {
 } from "../utils/Pos";
 import { P, SA, SAN } from "../utils/visual";
 import { Cre } from "./Cre";
-import { hasThreat, Role } from "./CreTool";
+import { Role } from "./CreTool";
 import {
   containers,
   cres,
-  enemies,
   extensions,
   friends,
   gameObjects,
@@ -275,14 +273,4 @@ export function inEnBaseRan(cre: Pos): boolean {
 }
 export function inMyBaseRan(cre: Pos): boolean {
   return X_axisDistance(cre, spawn) <= 7;
-}
-/** set startGate by enemy num*/
-export function resetStartGateAvoidFromEnemies(avoid: boolean = true): void {
-  const spawnY = spawn.y;
-  const upEnemies = enemies.filter(i => i.y < spawnY && hasThreat(i));
-  const downEnemies = enemies.filter(i => i.y > spawnY && hasThreat(i));
-  const upNum = upEnemies.length;
-  const downNum = downEnemies.length;
-  set_startGateUp(avoid ? upNum < downNum : upNum > downNum);
-  P("startGateUp=" + startGateUp);
 }

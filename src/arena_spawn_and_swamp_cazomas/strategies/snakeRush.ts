@@ -6,7 +6,6 @@ import {
   enemySpawn,
   getBodiesCost,
   inMyBaseRan,
-  resetStartGateAvoidFromEnemies,
   spawn,
   spawnAndExtensionsEnergy,
   spawnCleared,
@@ -25,6 +24,7 @@ import {
   enemyAWeight,
   getEnemyArmies,
   getEnemyThreats,
+  hasThreat,
   isArmy,
   isHealer,
   setEnRamAroundCost,
@@ -245,7 +245,14 @@ export function snakePartJob(cre: Cre_build) {
         SA(cre, "leader=" + COO(leader));
         SA(cre, "followers=" + SOA(sortedFollowers));
         //new pull targets task
-        new PullTarsTask(leader, sortedFollowers, enemySpawn, undefined, false);
+        new PullTarsTask(
+          leader,
+          sortedFollowers,
+          enemySpawn,
+          10,
+          undefined,
+          false
+        );
       } else {
         allIn = true;
         SA(cre, "RBRallIn=" + allIn);
@@ -698,6 +705,17 @@ export function set_spawnJamer(b: boolean) {
   spawnJamer = b;
 }
 export let suppliedBuilder = false;
+/** set startGate by enemy num*/
+export function resetStartGateAvoidFromEnemies(avoid: boolean = true): void {
+  const spawnY = spawn.y;
+  const upEnemies = enemies.filter(i => i.y < spawnY && hasThreat(i));
+  const downEnemies = enemies.filter(i => i.y > spawnY && hasThreat(i));
+  const upNum = upEnemies.length;
+  const downNum = downEnemies.length;
+  const gateUp = avoid ? upNum < downNum : upNum > downNum;
+  snakeParts.forEach(i => (i.startGateUp = gateUp));
+  P("startGateUp=" + gateUp);
+}
 export function useSnakeRushStrategy() {
   sum_snakePart0 = 0;
   const st = strategyTick;
@@ -781,11 +799,8 @@ export function useSnakeRushStrategy() {
     (st === restartGateTickLimit || snakeParts.length >= snakePartsTotalNum)
   ) {
     startGateSeted = true;
-    if (currentGuessPlayer === Dooms) {
-      resetStartGateAvoidFromEnemies(false);
-    } else {
-      resetStartGateAvoidFromEnemies(true);
-    }
+
+    resetStartGateAvoidFromEnemies(true);
   }
   //after fight
   if (st >= 300 && snakeGo && spawnCleared(spawn)) {
@@ -1051,7 +1066,7 @@ function command() {
           tail.tasks.find(i => i instanceof PullTarsTask)?.end();
           const followers = snakeParts.filter(i => i !== head);
           const sortedFollowers = followers.sort((a, b) => spInd(a) - spInd(b));
-          new PullTarsTask(head, sortedFollowers, target, undefined, false);
+          new PullTarsTask(head, sortedFollowers, target, 5, undefined, false);
         } else {
           SA(head, "NO TARGET");
         }
@@ -1060,7 +1075,7 @@ function command() {
         head.tasks.find(i => i instanceof PullTarsTask)?.end();
         const followers = snakeParts.filter(i => i !== head && i !== second);
         const sortedFollowers = followers.sort((a, b) => spInd(a) - spInd(b));
-        new PullTarsTask(second, sortedFollowers, head, undefined, false);
+        new PullTarsTask(second, sortedFollowers, head, 5, undefined, false);
       } else if (hasThreated || damaged || ifRetreat) {
         SA(head, "BACK");
         head.upgrade.isPush = false;
@@ -1068,7 +1083,7 @@ function command() {
         head.tasks.find(i => i instanceof PullTarsTask)?.end();
         const followers = snakeParts.filter(i => i !== tail);
         const sortedFollowers = followers.sort((a, b) => spInd(b) - spInd(a));
-        new PullTarsTask(tail, sortedFollowers, spawn, undefined, false);
+        new PullTarsTask(tail, sortedFollowers, spawn, 5, undefined, false);
       } else if (target) {
         SA(head, "PUSH!");
         head.upgrade.isPush = true;
@@ -1090,7 +1105,14 @@ function command() {
             const sortedFollowers = followers.sort(
               (a, b) => spInd(a) - spInd(b)
             );
-            new PullTarsTask(head, sortedFollowers, target, undefined, false);
+            new PullTarsTask(
+              head,
+              sortedFollowers,
+              target,
+              5,
+              undefined,
+              false
+            );
           }
         } else {
           let ifChase: boolean;
@@ -1119,7 +1141,14 @@ function command() {
             const sortedFollowers = followers.sort(
               (a, b) => spInd(a) - spInd(b)
             );
-            new PullTarsTask(head, sortedFollowers, target, undefined, false);
+            new PullTarsTask(
+              head,
+              sortedFollowers,
+              target,
+              5,
+              undefined,
+              false
+            );
           }
         }
       } else {

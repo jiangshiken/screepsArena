@@ -1,6 +1,6 @@
 import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
-import { findClosestByRange } from "game/utils";
 
+import { Cre } from "../gameObjects/Cre";
 import { Cre_move } from "../gameObjects/Cre_move";
 import {
   cpuBreakJudge,
@@ -8,12 +8,21 @@ import {
   givePositionToImpartantFriend,
 } from "../gameObjects/CreCommands";
 import { hasThreat, Role } from "../gameObjects/CreTool";
+import { CS } from "../gameObjects/CS";
 import { enemies, friends, oppoCSs } from "../gameObjects/GameObjectInitialize";
 import { moveAndBePulled } from "../gameObjects/pull";
+import { enemySpawn, inEnBaseRan } from "../gameObjects/spawn";
 import { blocked, inOppoRampart } from "../gameObjects/UnitTool";
-import { tick } from "../utils/game";
 import { best, divideReduce } from "../utils/JS";
-import { Adj, atPos, COO, GR, InShotRan, midPoint } from "../utils/Pos";
+import {
+  Adj,
+  atPos,
+  COO,
+  GR,
+  InShotRan,
+  midPoint,
+  Y_axisDistance,
+} from "../utils/Pos";
 import { SA } from "../utils/visual";
 
 /**used to jam the opponent's construction site*/
@@ -60,30 +69,41 @@ export function jamerOldJob(cre: Cre_move) {
       if (cpuBreakJudge(cre)) {
         return;
       }
+      const jamers = friends.filter(i => i.role === jamer);
       givePositionToImpartantFriend(cre);
       const enemyCSsHasEnemyBuilderAround = oppoCSs.filter(
         i =>
           enemies.find(j => j.getBodyPartsNum(WORK) > 0 && GR(i, j) <= 3) !==
             undefined && !(blocked(i) && !atPos(i, cre))
       );
-      const target = best(enemyCSsHasEnemyBuilderAround, cs => {
-        const progressRate = cs.progressRate;
-        const range = GR(cre, cs);
-        return progressRate * divideReduce(range, 10);
+      const enBuilders = enemies.filter(
+        i =>
+          i.getBodyPartsNum(WORK) > 0 &&
+          !(inEnBaseRan(i) && Y_axisDistance(i, enemySpawn) <= 7)
+      );
+      const targets = (<(Cre | CS)[]>enBuilders).concat(
+        enemyCSsHasEnemyBuilderAround
+      );
+      const target = best(targets, tar => {
+        const typeBonus = tar instanceof CS ? 2 : 1;
+        const progressRateBonus = tar instanceof CS ? tar.progressRate : 1;
+        const dis = GR(cre, tar);
+        const disReduce = divideReduce(dis, 10);
+        const selfBonus = cre.upgrade.target === tar ? 1.5 : 1;
+        const friTargetNum = jamers.filter(
+          i => i.upgrade.target === tar
+        ).length;
+        const splitReduce = divideReduce(friTargetNum, 1);
+        return (
+          typeBonus * progressRateBonus * disReduce * selfBonus * splitReduce
+        );
       });
       SA(cre, "target=" + COO(target));
       if (target) {
         cre.MTJ(target);
-      } else if (tick <= 75) {
-        cre.MTJ(midPoint);
+        cre.upgrade.target = target;
       } else {
-        const enBuilders = enemies.filter(i => i.getBodyPartsNum(WORK) > 0);
-        const enBuilder = findClosestByRange(cre, enBuilders);
-        if (enBuilder) {
-          cre.MTJ(enBuilder);
-        } else {
-          cre.MTJ(midPoint);
-        }
+        cre.MTJ(midPoint);
       }
     }
   }

@@ -1,6 +1,5 @@
 @current
-resetStartGate
-assign body by range 2
+start gate logic
 push by line
 use healer
 support tailPart

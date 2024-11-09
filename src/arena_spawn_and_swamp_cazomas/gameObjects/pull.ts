@@ -3,14 +3,19 @@
 import { CostMatrix } from "game/path-finder";
 import { SOA } from "../utils/export";
 import { arrayEqual, invalid, last, remove, valid } from "../utils/JS";
-import { GR, Pos, atPos } from "../utils/Pos";
+import { Adj, COO, GR, Pos, atPos } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA, drawLineComplex } from "../utils/visual";
 import { Cre, Task_Cre } from "./Cre";
 import { Cre_move } from "./Cre_move";
 import { moveToRandomEmptyAround } from "./CreCommands";
 import { PullEvent } from "./CreTool";
-import { def_plainCost, def_swampCost, getSpeed } from "./findPath";
+import {
+  def_plainCost,
+  def_swampCost,
+  getMoveStepDef,
+  getSpeed,
+} from "./findPath";
 import { FindPathAndMoveTask, moveTo_basic, moveTo_direct } from "./MoveTask";
 import { moveBlockCostMatrix } from "./UnitTool";
 
@@ -21,6 +26,7 @@ export function newPullTarsTask(
   master: Cre_move,
   tarCres: Cre[],
   tarPos: Pos,
+  step: number = getMoveStepDef(tarCres.concat([master])),
   nextStep?: Pos
 ) {
   let oldT = <PullTarsTask>findTask(master, PullTarsTask);
@@ -36,7 +42,7 @@ export function newPullTarsTask(
     newTask = true;
   }
   if (newTask) {
-    new PullTarsTask(master, tarCres, tarPos, nextStep);
+    new PullTarsTask(master, tarCres, tarPos, step, nextStep);
   }
 }
 /**
@@ -46,6 +52,7 @@ export function newPullTask(
   master: Cre_move,
   tarCre: Cre,
   tarPos: Pos,
+  step: number = getMoveStepDef([master, tarCre]),
   nextStep?: Pos,
   leaderStop: boolean = false,
   costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
@@ -66,7 +73,7 @@ export function newPullTask(
     newTask = true;
   }
   if (newTask) {
-    new PullTask(master, tarCre, tarPos, nextStep, leaderStop);
+    new PullTask(master, tarCre, tarPos, step, nextStep, leaderStop);
   }
 }
 /**
@@ -78,6 +85,7 @@ export class PullTask extends Task_Cre {
   master: Cre_move;
   tarCre: Cre;
   tarPos: Pos;
+  step: number;
   nextStep: Pos | undefined;
   moveTask1: FindPathAndMoveTask | undefined = undefined;
   moveTask2: FindPathAndMoveTask | undefined = undefined;
@@ -89,6 +97,7 @@ export class PullTask extends Task_Cre {
     master: Cre_move,
     tarCre: Cre,
     tarPos: Pos,
+    step: number = getMoveStepDef([master, tarCre]),
     nextStep?: Pos,
     leaderStop: boolean = false,
     costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
@@ -99,6 +108,7 @@ export class PullTask extends Task_Cre {
     this.master = master;
     this.tarCre = tarCre;
     this.tarPos = tarPos;
+    this.step = step;
     this.nextStep = nextStep;
     this.leaderStop = leaderStop;
     this.costMatrix = costMatrix;
@@ -117,11 +127,14 @@ export class PullTask extends Task_Cre {
       this.master,
       this.tarCre,
       [this.master, tarCre],
-      1,
+      this.step,
       this.costMatrix,
       this.plainCost,
       this.swampCost
     );
+    if (Adj(this.master, this.tarCre)) {
+      this.moveTask1.end();
+    }
   }
   end() {
     super.end();
@@ -145,7 +158,7 @@ export class PullTask extends Task_Cre {
         // SA(this.master, "is pulling");
         if (!this.moveTask2) {
           if (this.leaderStop) {
-            // SA(this.master, "leaderStop");
+            SA(this.master, "leaderStop");
           } else {
             this.moveTask2 = new FindPathAndMoveTask(
               this.master,
@@ -218,7 +231,7 @@ export function directBePulled(cre: Cre, tar: Cre): boolean {
 export function normalPull(
   cre: Cre,
   tar: Cre,
-  direct: boolean = false
+  direct: boolean = true
 ): boolean {
   if (GR(cre, tar) <= 1) {
     //draw green line
@@ -257,7 +270,7 @@ export function moveAndBePulled(cre: Cre, tar: Cre): boolean {
     moveTo_basic(cre, tar);
     return false;
   } else {
-    normalPull(tar, cre, true);
+    normalPull(tar, cre);
     return true;
   }
 }
@@ -308,6 +321,7 @@ export class PullTarsTask extends Task_Cre {
   master: Cre_move;
   tarCres: Cre[];
   tarPos: Pos;
+  step: number;
   nextStep: Pos | undefined;
   useLeaderPull: boolean;
   leaderStop: boolean;
@@ -318,6 +332,7 @@ export class PullTarsTask extends Task_Cre {
     master: Cre_move,
     tarCres: Cre[],
     tarPos: Pos,
+    step: number = getMoveStepDef(tarCres.concat([master])),
     nextStep?: Pos,
     useLeaderPull: boolean = true,
     leaderStop: boolean = false, //for direct move of leader
@@ -330,6 +345,7 @@ export class PullTarsTask extends Task_Cre {
     SA(master, "new PullTarsTask");
     this.tarCres = tarCres;
     this.tarPos = tarPos;
+    this.step = step;
     this.nextStep = nextStep;
     this.useLeaderPull = useLeaderPull;
     this.leaderStop = leaderStop;
@@ -370,6 +386,7 @@ export class PullTarsTask extends Task_Cre {
       // let pulling=tar.pullTar(tarNext);
       let pulling = moveAndBePulled(tarNext, tar);
       if (!pulling) {
+        SA(this.master, "not pulling");
         allPulling = false;
         let tarSpeed = getSpeed([tarNext]);
         if (
@@ -395,10 +412,12 @@ export class PullTarsTask extends Task_Cre {
       if (tarCres.length === 0) {
         this.master.MTJ(this.tarPos);
       } else {
+        SA(this.master, "newPullTask" + COO(tarCres[0]));
         newPullTask(
           this.master,
           tarCres[0],
           this.tarPos,
+          this.step,
           this.nextStep,
           this.leaderStop,
           this.costMatrix,
