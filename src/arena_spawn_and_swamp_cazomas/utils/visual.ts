@@ -202,6 +202,9 @@ export function P(s: any) {
 export function SA(cre: Pos, str: string): void {
   return sayAppend(cre, " " + str + " ");
 }
+export function SAB(cre: Pos, str: string, b: boolean): void {
+  return SA(cre, str + "=" + b ? "T" : "F");
+}
 export function SAN(cre: Pos, str: string, n: number): void {
   return SA(cre, str + "=" + d2(n));
 }
@@ -278,7 +281,7 @@ function drawAllSAViss(): void {
       vis.sayText,
       tarPos, // above the creep
       {
-        color: "#eeeeee",
+        color: "#dddddd",
         font: "0.2",
         opacity: 1,
         // backgroundColor: "#808080"

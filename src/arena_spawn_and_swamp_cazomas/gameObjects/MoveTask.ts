@@ -74,7 +74,7 @@ export class FindPathAndMoveTask extends MoveTask {
     swampCost: number = def_swampCost
   ) {
     super(master, tar);
-    SA(master, "new FindPathAndMoveTask");
+    SA(master, "new FPAM Task");
     this.pullList = pullList;
     this.path = this.findPath_task(tar);
     this.costMatrix = costMatrix;
@@ -142,8 +142,8 @@ export function moveTo_basic(cre: Cre, tar: Pos): void {
 export function moveTo_direct(cre: Cre, tar: Pos): void {
   SA(cre, "DirMove");
   moveBlockCostMatrix_setBlock(tar);
-  const dx = tar.x - cre.master.x;
-  const dy = tar.y - cre.master.y;
+  const dx = tar.x - cre.x;
+  const dy = tar.y - cre.y;
   const direc = getDirection(dx, dy);
   SA(cre, "" + direc);
   cre.master.move(direc);

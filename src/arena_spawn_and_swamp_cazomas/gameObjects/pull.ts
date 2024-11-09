@@ -133,6 +133,7 @@ export class PullTask extends Task_Cre {
       this.swampCost
     );
     if (Adj(this.master, this.tarCre)) {
+      SA(this.master, "MT1END");
       this.moveTask1.end();
     }
   }
@@ -146,13 +147,17 @@ export class PullTask extends Task_Cre {
   }
   loop_task(): void {
     // SA(this.master, "do PullTask");
+    if (this.master === this.tarCre) {
+      this.end();
+      return;
+    }
     if (
       (this.moveTask1 && this.moveTask1.complete) ||
       GR(this.master, this.tarCre) <= 1
     ) {
       // SA(this.master, "this.moveTask1.complete");
       this.moveTask1?.end();
-      let ptRtn = normalPull(this.master, this.tarCre, true);
+      let ptRtn = normalPull(this.master, this.tarCre);
       if (ptRtn) {
         //if is pulling
         // SA(this.master, "is pulling");
@@ -160,6 +165,7 @@ export class PullTask extends Task_Cre {
           if (this.leaderStop) {
             SA(this.master, "leaderStop");
           } else {
+            SA(this.master, "NMT2");
             this.moveTask2 = new FindPathAndMoveTask(
               this.master,
               this.tarPos,
@@ -172,15 +178,14 @@ export class PullTask extends Task_Cre {
           }
         } else if (this.moveTask2.complete) {
           //master at pos
-          // SA(this.master, "this.moveTask2.complete end");
+          SA(this.master, "MT2C");
           if (this.nextStep) moveTo_basic(this.master, this.nextStep);
           else moveToRandomEmptyAround(this.master);
           this.end();
         } else if (atPos(this.tarCre, this.tarPos)) {
           //tar at pos
+          SA(this.master, "AP");
           this.end();
-        } else {
-          //wait moveTask2 complete
         }
       } else {
         this.end();
@@ -235,7 +240,7 @@ export function normalPull(
 ): boolean {
   if (GR(cre, tar) <= 1) {
     //draw green line
-    drawLineComplex(cre, tar, 0.5, "#00ff00");
+    drawLineComplex(cre, tar, 0.7, "#00ff22");
     //pull
     cre.master.pull(tar.master);
     //set Event
@@ -342,7 +347,7 @@ export class PullTarsTask extends Task_Cre {
   ) {
     super(master);
     this.master = master;
-    SA(master, "new PullTarsTask");
+    SA(master, "new PT Task");
     this.tarCres = tarCres;
     this.tarPos = tarPos;
     this.step = step;
@@ -369,6 +374,10 @@ export class PullTarsTask extends Task_Cre {
     // if have pull task
     SA(this.master, "PullTarsTask loop_task");
     let tarCres = this.tarCres;
+    if (tarCres.find(i => i === this.master)) {
+      SA(this.master, "PULL SELF");
+      this.end();
+    }
     let allPulling = true; //if all being pulled
     //remove unexist tar
     for (let tar of tarCres) {

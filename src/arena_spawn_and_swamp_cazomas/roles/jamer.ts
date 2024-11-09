@@ -23,12 +23,12 @@ import {
   midPoint,
   Y_axisDistance,
 } from "../utils/Pos";
-import { SA } from "../utils/visual";
+import { SA, SAB } from "../utils/visual";
 
 /**used to jam the opponent's construction site*/
 export const jamer: Role = new Role("jamer", jamerJob);
 export function jamerJob(cre: Cre_move) {
-  SA(cre, "I'm jamer " + (cre.role === jamer));
+  SA(cre, "jamer");
   const use_oldJamer = true;
   if (use_oldJamer) {
     jamerOldJob(cre);
@@ -59,12 +59,13 @@ export function jamerJob(cre: Cre_move) {
   }
 }
 export function jamerOldJob(cre: Cre_move) {
-  SA(cre, "I'm jamer");
+  SA(cre, "JO");
   if (inOppoRampart(cre)) {
     SA(cre, "inOppoRampart");
     cre.stop();
   } else {
     let fleeing: boolean = fleeWeakComplex(cre);
+    SAB(cre, "FL", fleeing);
     if (!fleeing) {
       if (cpuBreakJudge(cre)) {
         return;

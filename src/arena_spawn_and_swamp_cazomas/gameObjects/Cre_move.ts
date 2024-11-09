@@ -73,6 +73,7 @@ export class Cre_move extends Cre {
       );
       const tar = spf.path[0];
       if (tar) {
+        this.stop();
         moveTo_basic(this, tar);
       }
       return true;

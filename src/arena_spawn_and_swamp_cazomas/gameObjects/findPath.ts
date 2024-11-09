@@ -327,7 +327,7 @@ export function getNewTarByArea(cre: Pos, tar: Pos): Pos {
   const yAxis_bottom = Y_bottomGate;
   if (creArea === area_left && tarArea === area_right) {
     //go left top
-    SA(cre, "LR");
+    // SA(cre, "LR");
     const gateUp = current_startGateUp
       ? current_startGateUp
       : getStartGate(true, cre, tar);
@@ -335,35 +335,35 @@ export function getNewTarByArea(cre: Pos, tar: Pos): Pos {
     else newTar = new Pos_C(border_L2, yAxis_bottom);
   } else if (creArea === area_right && tarArea === area_left) {
     //go right bottom
-    SA(cre, "RL");
+    // SA(cre, "RL");
     const gateUp = current_startGateUp
       ? current_startGateUp
       : getStartGate(false, cre, tar);
     if (gateUp) newTar = new Pos_C(border_R1, yAxis_top);
     else newTar = new Pos_C(border_R1, yAxis_bottom);
   } else if (creArea === area_right && tarArea === area_top) {
-    SA(cre, "RT");
+    // SA(cre, "RT");
     newTar = new Pos_C(border_L2, yAxis_top);
   } else if (creArea === area_top && tarArea === area_left) {
-    SA(cre, "TL");
+    // SA(cre, "TL");
     newTar = new Pos_C(border_L1, yAxis_top);
   } else if (creArea === area_left && tarArea === area_bottom) {
-    SA(cre, "LB");
+    // SA(cre, "LB");
     newTar = new Pos_C(border_L2, yAxis_bottom);
   } else if (creArea === area_bottom && tarArea === area_left) {
-    SA(cre, "BL");
+    // SA(cre, "BL");
     newTar = new Pos_C(border_L1, yAxis_bottom);
   } else if (creArea === area_right && tarArea === area_bottom) {
-    SA(cre, "RB");
+    // SA(cre, "RB");
     newTar = new Pos_C(border_R1, yAxis_bottom);
   } else if (creArea === area_bottom && tarArea === area_right) {
-    SA(cre, "BR");
+    // SA(cre, "BR");
     newTar = new Pos_C(border_R2, yAxis_bottom);
   } else if (creArea === area_right && tarArea === area_top) {
-    SA(cre, "RT");
+    // SA(cre, "RT");
     newTar = new Pos_C(border_R1, yAxis_top);
   } else if (creArea === area_top && tarArea === area_right) {
-    SA(cre, "TR");
+    // SA(cre, "TR");
     newTar = new Pos_C(border_R2, yAxis_top);
   }
   drawLineComplex(cre, newTar, 0.25, "#222222");
