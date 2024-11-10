@@ -29,6 +29,7 @@ import { PullTarsTask } from "../gameObjects/pull";
 import { Ext, Spa } from "../gameObjects/Stru";
 import { blocked, inRampart } from "../gameObjects/UnitTool";
 import { extStealer } from "../roles/extStealer";
+import { set_energyStealMode } from "../roles/harvester";
 import { toughDefender } from "../roles/toughDefender";
 import { TB } from "../utils/autoBodys";
 import { border_L1, border_R1 } from "../utils/game";
@@ -85,6 +86,7 @@ function drawFatigue() {
   });
 }
 export function useTailStrategy() {
+  set_energyStealMode(true);
   // set_swampIgnore(true);
   // set_moveCostForceRate(0.001)
   // setMoveMapSetRate(0.0004);

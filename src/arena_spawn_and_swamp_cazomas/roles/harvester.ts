@@ -19,10 +19,11 @@ import {
   getWildCons,
 } from "../gameObjects/UnitTool";
 import { S } from "../utils/export";
-import { inResourceArea } from "../utils/game";
+import { inResourceArea, tick } from "../utils/game";
 import { COO, GR } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { drawPoly, SA } from "../utils/visual";
+import { energyStealerJob } from "./energyStealer";
 
 /**get the move time assume its capacity is full*/
 export function getTimeAfterFull(cre: Cre) {
@@ -131,10 +132,18 @@ export let harvesterNotFleeAtStart: boolean = false;
 export function set_harvesterNotFleeAtStart(b: boolean) {
   harvesterNotFleeAtStart = b;
 }
+export let energyStealMode = false;
+export function set_energyStealMode(b: boolean) {
+  energyStealMode = b;
+}
 /**job of harvester.It will flee from threat enemies,find the fit harvable
  * and producer,new a HarvestTask when it hasn't.
  */
 export function harvesterJob(cre: Cre_harvest) {
+  if (energyStealMode && tick >= 400) {
+    energyStealerJob(cre);
+    return;
+  }
   if (!harvesterNotFleeAtStart && cre.flee(5, 10)) {
     SA(cre, "flee");
     cre.dropEnergy();
