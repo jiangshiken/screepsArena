@@ -10,6 +10,7 @@ import {
 import { jamer } from "../roles/jamer";
 
 import { Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
+import { CostMatrix } from "game/path-finder";
 import { calculateForce, getTaunt } from "../gameObjects/battle";
 import { Cre_battle } from "../gameObjects/Cre_battle";
 import { Cre_move } from "../gameObjects/Cre_move";
@@ -30,6 +31,7 @@ import { blocked, inRampart } from "../gameObjects/UnitTool";
 import { extStealer } from "../roles/extStealer";
 import { toughDefender } from "../roles/toughDefender";
 import { TB } from "../utils/autoBodys";
+import { border_L1, border_R1 } from "../utils/game";
 import {
   best,
   divideReduce,
@@ -37,6 +39,7 @@ import {
   goInRange,
   inRange,
   ranBool,
+  relu,
   sum,
 } from "../utils/JS";
 import {
@@ -46,8 +49,10 @@ import {
   getDirectionByPos,
   getRangePoss,
   GR,
+  inBorder,
   InRan2,
   Pos,
+  Pos_C,
   X_axisDistance,
   Y_axisDistance,
 } from "../utils/Pos";
@@ -56,6 +61,7 @@ import {
   displayPos,
   drawLineComplex,
   drawRange,
+  drawText,
   SA,
   SAB,
   SAN,
@@ -104,11 +110,11 @@ export function useTailStrategy() {
           //600+320+50
           spawnCreep(TB("5R2AM"), tailMelee, new TailInfo(g, 0));
           spawnCreep(TB("5M2HM"), tailHealer, new TailInfo(g, 1));
-          const tailLen = 3;
+          const tailLen = 2;
           for (let i = 0; i < tailLen; i++) {
             spawnCreep(TB("M"), tailPart, new TailInfo(g, 2 + i));
           }
-          const tailLen2 = 7;
+          const tailLen2 = 8;
           for (let i = 0; i < tailLen2; i++) {
             spawnCreep(TB("2M"), tailPart, new TailInfo(g, 2 + tailLen + i));
           }
@@ -140,9 +146,9 @@ export function useTailStrategy() {
             spawnCreep(TB("2M"), tailPart, new TailInfo(g, 2 + tailLen + i));
           }
           //EXT STEALER
-          if (g === 1) {
-            spawnCreep(TB("3MA"), extStealer);
-          }
+          // if (g === 1) {
+          //   spawnCreep(TB("3MA"), extStealer);
+          // }
         } else {
           //DOOMS
           if (g === 0) spawnCreep(TB("3MR8AM"), tailMelee, new TailInfo(g, 0));
@@ -279,7 +285,7 @@ function refreshStartGate(cre: Cre_move, tail: Cre_move, myGroup: Cre_move[]) {
 function tailMeleeJob(cre: Cre_battle) {
   SA(cre, "tailMeleeJob");
   cre.fight();
-
+  const headIsRange = cre.getBodyPartsNum(RANGED_ATTACK) >= 3;
   const targets = oppoUnits.filter(i => i instanceof Cre || i instanceof Spa);
   SA(displayPos(), "oppoUnits.len" + oppoUnits.length);
   SA(displayPos(), "targets.len" + targets.length);
@@ -303,7 +309,9 @@ function tailMeleeJob(cre: Cre_battle) {
         typeBonus = 1;
       }
     }
-    const enSpawnBonus = 1 + 0.6 * goInRange(5 + ESDCompare(tar, cre), 0, 10);
+    const enSpawnBonus_rate = headIsRange ? 3 : 0.6;
+    const enSpawnBonus =
+      1 + enSpawnBonus_rate * goInRange(5 + ESDCompare(tar, cre), 0, 10);
     const disBonus = divideReduce(GR(tar, cre), 1.5);
     const sameBonus = cre.upgrade.currentTarget === tar ? 1.5 : 1;
     const otherLeaders = friends.filter(i => i.role === tailMelee && i !== cre);
@@ -311,6 +319,7 @@ function tailMeleeJob(cre: Cre_battle) {
       1 +
       1.5 * otherLeaders.filter(i => i.upgrade.currentTarget === tar).length;
     const tauntBonus = 1 + 0.02 * getTaunt(tar);
+    // const extraTauntBonus=calExtraTaunt()
     const final =
       disBonus * sameBonus * linkBonus * typeBonus * tauntBonus * enSpawnBonus;
     SAN(tar, "T", final);
@@ -324,7 +333,6 @@ function tailMeleeJob(cre: Cre_battle) {
     const myGroup = getGroup(myGroupNum);
     SA(cre, "mg=" + myGroupNum + " mgl=" + myGroup.length);
     const head = <Cre_battle>best(myGroup, i => -tailIndex(i));
-    const headIsRange = head.getBodyPartsNum(RANGED_ATTACK) >= 3;
     const tail = <Cre_move>best(myGroup, i => tailIndex(i));
 
     const second = best(
@@ -338,9 +346,7 @@ function tailMeleeJob(cre: Cre_battle) {
     const enemyThreats = enemies.filter(
       i => hasThreat(i) && (GR(tail, i) <= scanRange || GR(cre, i) <= scanRange)
     );
-    const enemyMelees = enemyThreats.filter(
-      i => i.getBodyPartsNum(ATTACK) >= 2
-    );
+    const enemyMelees = enemyThreats.filter(i => i.getBodyPartsNum(ATTACK) > 0);
     const closestThreat = best(enemyThreats, i => -GR(i, cre));
     const closestThreatDis = closestThreat ? GR(closestThreat, cre) : 50;
     if (tail && head) {
@@ -355,28 +361,26 @@ function tailMeleeJob(cre: Cre_battle) {
         enemies.find(
           i => i.getBodyPartsNum(ATTACK) >= 3 && GR(i, head) <= 5
         ) !== undefined;
-      const pureRangedBias =
-        getGuessPlayer() === Tigga
-          ? 500
-          : head.upgrade.isPush === true
-          ? 600
-          : 0;
       const healerHead = myGroup.filter(i => tailIndex(i) <= 4);
       const sumDamage = sum(healerHead, i => damageAmount(i));
-      const pureRangeExtra = hasMelee ? 0 : pureRangedBias;
       const closestThreat = closest(cre, enemyThreats);
       const closestThreatDis = closestThreat
         ? GR(cre, closestThreat)
         : Infinity;
       const healPerTick = healer ? healer.getHealthyBodyPartsNum(HEAL) : 0;
       const disExtra = healPerTick * Math.min(tarDistance, closestThreatDis);
-      const damaged = sumDamage >= disExtra + 200 + pureRangeExtra;
-      const damaged_light = sumDamage >= disExtra + 10 + pureRangeExtra;
+      const ranEns = enemyMelees.filter(i => InRan2(i, head));
+      const sumForce = sum(ranEns, i => {
+        const force = calculateForce(i);
+        const dis = GR(i, cre);
+        return dis <= 1 ? force : 0.5 * force;
+      });
+      SAN(cre, "sumFo", sumForce);
+      const damaged = sumDamage > disExtra + (800 - 200 * sumForce);
+      const damaged_light = sumDamage > relu(disExtra + 400 - 100 * sumForce);
       const tailHasThreat =
         enemyThreats.find(i => GR(i, tail) < myGroup.length - 3) !== undefined;
-      const ranEns = enemyMelees.filter(i => Adj(i, head));
-      const sumForce = sum(ranEns, i => calculateForce(i));
-      const headHasThreat = sumForce >= 0.6;
+
       const healerHasThreat =
         healer && enemyMelees.find(i => Adj(i, healer)) !== undefined;
       // SA(cre, "ESD=" + enemySpawnDistance(cre));
@@ -391,7 +395,6 @@ function tailMeleeJob(cre: Cre_battle) {
       );
       drawRange(cre, scanRange, "#007777");
       drawRange(tail, scanRange, "#007777");
-      SAB(cre, "HHT", headHasThreat);
       SAB(cre, "THT", tailHasThreat);
       SAB(cre, "XAT", XAxisThreat);
       if (healer && !Adj(healer, head)) {
@@ -402,9 +405,6 @@ function tailMeleeJob(cre: Cre_battle) {
           (a, b) => tailIndex(a) - tailIndex(b)
         );
         pullAction(healer, sortedFollowers, head);
-      } else if (headHasThreat) {
-        SA(cre, "HeaTt");
-        fleeAction(cre, myGroup, head, tail, healer);
       } else if (tailHasThreat || healerHasThreat) {
         SA(cre, "BttTt");
         fleeAction(cre, myGroup, head, tail, healer);
@@ -507,7 +507,27 @@ function tailMeleeJob(cre: Cre_battle) {
     SA(cre, "NO TARGET");
   }
 }
-function pullAction(cre: Cre_move, followers: Cre[], tar: Pos) {
+function pullAction(
+  cre: Cre_move,
+  followers: Cre[],
+  tar: Pos,
+  goSide: boolean = false
+) {
+  let costMat = undefined;
+  if (goSide) {
+    costMat = new CostMatrix();
+    if (inRange(tar.x, border_L1, border_R1)) {
+      const range = 25;
+      for (let i = 0; i < range * 2; i++) {
+        const setValue = 10;
+        const setY = tar.y + i - range;
+        if (inBorder(tar.x, setY)) {
+          costMat.set(tar.x, setY, setValue);
+          drawText(new Pos_C(tar.x, setY), "B");
+        }
+      }
+    }
+  }
   new PullTarsTask(
     cre,
     followers,
@@ -516,9 +536,9 @@ function pullAction(cre: Cre_move, followers: Cre[], tar: Pos) {
     undefined,
     false,
     false,
-    undefined,
+    costMat,
     1,
-    1.5
+    2
   );
 }
 function stopAction(cre: Cre_move, head: Cre, myGroup: Cre_move[]) {
@@ -548,6 +568,7 @@ function cleanFatigue(myGroup: Cre_move[]) {
       if (tarTop.length > 0) {
         const sortedTarTop = tarTop.sort((a, b) => tailIndex(b) - tailIndex(a));
         new PullTarsTask(tar, sortedTarTop, spawn, 10, undefined, false, true);
+        if (tarBottom.length >= 2) cleanFatigue(tarBottom);
       }
     } else {
       if (tarBottom.length > 0) {
@@ -563,6 +584,7 @@ function cleanFatigue(myGroup: Cre_move[]) {
           false,
           true
         );
+        if (tarTop.length >= 2) cleanFatigue(tarTop);
       }
     }
   }
@@ -682,7 +704,7 @@ function pushAction(
       (a, b) => tailIndex(a) - tailIndex(b)
     );
     tail.tasks.find(i => i instanceof PullTarsTask)?.end();
-    pullAction(cre, sortedFollowers, target);
+    pullAction(cre, sortedFollowers, target, true);
     const moveTask = cre.tasks.find(i => i instanceof MoveTask);
     if (healer && moveTask && moveTask instanceof MoveTask) {
       const tempTar = first(moveTask.path);
@@ -739,7 +761,6 @@ function fleeAction(
     const sortedFollowers2 = followers2.sort(
       (a, b) => tailIndex(b) - tailIndex(a)
     );
-
     pullAction(tail, sortedFollowers2, spawn);
   } else {
     SA(cre, "Norm");

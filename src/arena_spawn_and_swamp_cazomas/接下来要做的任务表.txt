@@ -1,8 +1,7 @@
 @current
-start gate logic
-push by line
+side defence
 use healer
-support tailPart
+use builder and support tailPart
 
 #short distance fight
 	change to add to SDF list

@@ -39,11 +39,11 @@ export class TauntEvent extends Event {
   }
 }
 export class ExtraTauntEvent extends Event_Number {
-  name: string;
+  lastTick: number;
   from: Unit | undefined;
-  constructor(num: number, name: string = "noname", from?: Unit) {
+  constructor(num: number, lastTick: number = 5, from?: Unit) {
     super(num);
-    this.name = name;
+    this.lastTick = lastTick;
     this.from = from;
   }
 }
@@ -167,7 +167,7 @@ export function calculateForce(
   includeRam: boolean = true
 ): StNumber {
   if (uni instanceof Cre) {
-    const forceTradition = 0.1 * getForce_tradition(<Cre>uni);
+    // const forceTradition = 0.1 * getForce_tradition(<Cre>uni);
     const HP: number = getHP(uni, includeRam);
     const dps = getDps(uni, false, true);
     //if is 10M6A HP=1600 dps=180
@@ -175,8 +175,9 @@ export function calculateForce(
     //new=0.05*sqrt(1600*180)=0.05*40*13.5=0.05*540=27
     //final=25*0.03=0.75
     const force_new = Math.sqrt(dps * HP);
-    const rtn = 0.8 * force_new + 0.2 * forceTradition;
-    // SAN(uni, "calForce", rtn);
+    // const rtn = 0.8 * force_new + 0.2 * forceTradition;
+    const rtn = force_new;
+    // SAN(uni, "Fo", rtn);
     return rtn;
   } else {
     if (uni instanceof Ram) {
@@ -244,35 +245,29 @@ export function calExtraTaunt(cre: Unit, taunt: number): number {
   if (cre instanceof Cre) {
     const creCre = <Cre>cre;
     const et = creCre.extraTauntList;
-    const eLimit0 = 0;
-    const eLimit5 = 5;
     let etSum = 0;
     for (let ne of et) {
-      if (ne.validEvent(eLimit0)) {
+      if (ne.validEvent(ne.lastTick)) {
         etSum += ne.num;
-      } else if (ne.validEvent(eLimit5)) {
-        etSum += 0.1 * ne.num;
       }
-      // SAN(cre,"exT",ne.num)
-      // SAN(cre,"tick",ne.tick)
     }
     // SAN(cre, "etSum", etSum)
     taunt *= 1 + etSum;
-    removeIf(et, ne => !ne.validEvent(eLimit5));
+    removeIf(et, ne => !ne.validEvent(ne.lastTick));
   }
   return taunt;
 }
 export function protectSelfExtraTaunt(cre: Cre, rate: number = 0.1) {
   const closestEnemyArmy = findClosestByRange(cre, getEnemyThreats());
-  addTauntBonus(closestEnemyArmy, rate, "protectSelf", cre);
+  addTauntBonus(closestEnemyArmy, rate, 1, cre);
 }
 export function addTauntBonus(
   tar: Unit,
   taunt: number,
-  name: string = "no name",
+  lastTick: number = 5,
   from?: Unit
 ): void {
-  tar.extraTauntList.push(new ExtraTauntEvent(taunt, name, from));
+  tar.extraTauntList.push(new ExtraTauntEvent(taunt, lastTick, from));
 }
 
 /**
@@ -355,5 +350,5 @@ export function getDps(
       rtn = 1;
     }
   } else rtn = 0;
-  return 0.03 * rtn;
+  return 0.01 * rtn;
 }
