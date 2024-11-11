@@ -146,7 +146,7 @@ export class PullTask extends Task_Cre {
     return <Cre>this.master;
   }
   loop_task(): void {
-    // SA(this.master, "do PullTask");
+    SA(this.master, "PullTask_loop");
     if (this.master === this.tarCre) {
       this.end();
       return;
@@ -248,7 +248,7 @@ export function normalPull(
     tar.bePulledEvent = new PullEvent(cre, tar);
     //tar move this
     if (direct) {
-      // tar.moveToDirect(this);
+      SA(tar, "PMTD " + COO(cre));
       moveTo_direct(tar, cre);
     } else {
       moveTo_basic(tar, cre);

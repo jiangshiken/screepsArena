@@ -32,7 +32,7 @@ import { extStealer } from "../roles/extStealer";
 import { set_energyStealMode } from "../roles/harvester";
 import { toughDefender } from "../roles/toughDefender";
 import { TB } from "../utils/autoBodys";
-import { border_L1, border_R1 } from "../utils/game";
+import { border_L1, border_R1, spawn_left } from "../utils/game";
 import {
   best,
   divideReduce,
@@ -155,8 +155,9 @@ export function useTailStrategy() {
           //DOOMS
           if (g === 0) spawnCreep(TB("3MR8AM"), tailMelee, new TailInfo(g, 0));
           else spawnCreep(TB("3M10AM"), tailMelee, new TailInfo(g, 0));
-          spawnCreep(TB("4M2HM"), tailHealer, new TailInfo(g, 1));
-          const tailLen = 6;
+          if (g === 0) spawnCreep(TB("4M3HM"), tailHealer, new TailInfo(g, 1));
+          else spawnCreep(TB("4M2HM"), tailHealer, new TailInfo(g, 1));
+          const tailLen = g === 0 ? 7 : 5;
           for (let i = 0; i < tailLen; i++) {
             spawnCreep(TB("2M"), tailPart, new TailInfo(g, 2 + i));
           }
@@ -375,11 +376,11 @@ function tailMeleeJob(cre: Cre_battle) {
       const sumForce = sum(ranEns, i => {
         const force = calculateForce(i);
         const dis = GR(i, cre);
-        return dis <= 1 ? force : 0.5 * force;
+        return dis <= 1 ? force : 0.75 * force;
       });
       SAN(cre, "sumFo", sumForce);
-      const damaged = sumDamage > disExtra + (800 - 200 * sumForce);
-      const damaged_light = sumDamage > relu(disExtra + 400 - 100 * sumForce);
+      const damaged = sumDamage > disExtra + (800 - 300 * sumForce);
+      const damaged_light = sumDamage > relu(disExtra + 400 - 150 * sumForce);
       const tailHasThreat =
         enemyThreats.find(i => GR(i, tail) < myGroup.length - 3) !== undefined;
 
@@ -524,8 +525,17 @@ function pullAction(
         const setValue = 10;
         const setY = tar.y + i - range;
         if (inBorder(tar.x, setY)) {
-          costMat.set(tar.x, setY, setValue);
-          drawText(new Pos_C(tar.x, setY), "B");
+          const absRan = Math.abs(setY - tar.y);
+          const setValue_final = Math.floor(2 + (setValue * absRan) / range);
+          costMat.set(tar.x, setY, setValue_final);
+          if (spawn_left) {
+            costMat.set(tar.x + 1, setY, setValue_final);
+            costMat.set(tar.x + 2, setY, setValue_final);
+          } else {
+            costMat.set(tar.x - 1, setY, setValue_final);
+            costMat.set(tar.x - 2, setY, setValue_final);
+          }
+          drawText(new Pos_C(tar.x, setY), "" + setValue_final);
         }
       }
     }
@@ -548,8 +558,8 @@ function stopAction(cre: Cre_move, head: Cre, myGroup: Cre_move[]) {
   if (arrangeTail_all(cre, myGroup)) {
     return;
   }
-  cre.stop();
   myGroup.forEach(mem => mem.tasks.find(i => i instanceof PullTarsTask)?.end());
+  myGroup.forEach(mem => mem.stop());
   SA(cre, "cleanFatigue");
   cleanFatigue(myGroup);
 }
@@ -557,7 +567,7 @@ function cleanFatigue(myGroup: Cre_move[]) {
   const tar = <Cre_move>best(myGroup, i => i.master.fatigue);
   if (tar.master.fatigue > 20) {
     SA(tar, "cleanFatigue");
-    drawRange(tar, 0.6, "#00aaaa");
+    drawRange(tar, 0.7, "#00aaaa");
     const tarTop = myGroup.filter(i => tailIndex(i) < tailIndex(tar));
     const tarBottom = myGroup.filter(i => tailIndex(i) > tailIndex(tar));
     const topMoves = sum(tarTop, i =>
@@ -570,7 +580,10 @@ function cleanFatigue(myGroup: Cre_move[]) {
       if (tarTop.length > 0) {
         const sortedTarTop = tarTop.sort((a, b) => tailIndex(b) - tailIndex(a));
         new PullTarsTask(tar, sortedTarTop, spawn, 10, undefined, false, true);
-        if (tarBottom.length >= 2) cleanFatigue(tarBottom);
+        if (tarBottom.length >= 2) {
+          SA(tar, "bottom");
+          cleanFatigue(tarBottom);
+        }
       }
     } else {
       if (tarBottom.length > 0) {
@@ -586,7 +599,10 @@ function cleanFatigue(myGroup: Cre_move[]) {
           false,
           true
         );
-        if (tarTop.length >= 2) cleanFatigue(tarTop);
+        if (tarTop.length >= 2) {
+          SA(tar, "top");
+          cleanFatigue(tarTop);
+        }
       }
     }
   }
@@ -755,9 +771,12 @@ function fleeAction(
       };
   const allFatigue =
     moveFatigueRtn_head.fatigueNum + moveFatigueRtn_second.fatigueNum;
-  const allMove = sum(myGroup, i => i.getHealthyBodyPartsNum(MOVE));
+  const allMove = sum(
+    myGroup.filter(i => i.master.fatigue === 0),
+    i => i.getHealthyBodyPartsNum(MOVE)
+  );
   const candecreaseAllFatigue = allFatigue <= allMove * 2;
-  if (candecreaseAllFatigue) {
+  if (candecreaseAllFatigue || tail.master.fatigue > 0) {
     SA(cre, "CanD");
     const followers2 = myGroup.filter(i => i !== tail);
     const sortedFollowers2 = followers2.sort(
@@ -786,6 +805,7 @@ function fleeAction(
         SA(fatigueHolderNext, "fatigueHolderNext");
         SA(fatigueHolder, "SFL=" + sortedFollowers.length);
         if (sortedFollowers.length === 0) {
+          SA(fatigueHolder, "MD");
           moveTo_direct(fatigueHolder, fatigueHolderNext);
         } else {
           new PullTarsTask(

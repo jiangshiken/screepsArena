@@ -38,6 +38,7 @@ export class MoveTask extends Task_Cre {
       let tempTar: Pos = this.path[0];
       drawLineComplex(this.master, tempTar, 0.75, "#777777");
       if (GR(tempTar, this.master) <= 1) {
+        SA(this.master, "MTMD");
         moveTo_direct(this.master, tempTar);
       } else {
         moveTo_basic(this.master, tempTar);
@@ -76,10 +77,10 @@ export class FindPathAndMoveTask extends MoveTask {
     super(master, tar);
     SA(master, "new FPAM Task");
     this.pullList = pullList;
-    this.path = this.findPath_task(tar);
     this.costMatrix = costMatrix;
     this.plainCost = plainCost;
     this.swampCost = swampCost;
+    this.path = this.findPath_task(tar);
     //for initialize
     if (this.path.length > 0) {
       const lastPos = last(this.path);
@@ -93,6 +94,7 @@ export class FindPathAndMoveTask extends MoveTask {
     this.findPathStep = step;
   }
   loop_task(): void {
+    SA(this.master, "FPAM_loop");
     let st = ct();
     if (!this.tar || !this.tempTar) {
       this.end();
