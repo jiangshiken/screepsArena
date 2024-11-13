@@ -184,17 +184,13 @@ export function searchPath_area(
 ): FindPathResult {
   // drawLineComplex(ori, tar, 1, "#22ffff", dashed);
   const newTar: Pos = getNewTarByArea(ori, tar);
-  // drawLineComplex(ori, newTar, 1, "#ff22ff");
   let SR1 = searchPath_noArea(ori, newTar, costMatrix, plainCost, swampCost);
   let SR2: FindPathResult | undefined;
   let SR3: FindPathResult | undefined;
-  // SA(ori,"area0")
   if (!atPos(newTar, tar)) {
-    // SA(ori,"area1")
     const newTar2 = getNewTarByArea(newTar, tar);
     SR2 = searchPath_noArea(newTar, newTar2, costMatrix, plainCost, swampCost);
     if (!atPos(newTar2, tar)) {
-      // SA(ori,"area2")
       SR3 = searchPath_noArea(newTar2, tar, costMatrix, plainCost, swampCost);
     }
   }
@@ -321,8 +317,6 @@ export function getNewTarByArea(cre: Pos, tar: Pos): Pos {
     SA(cre, "SG1");
     current_startGateUp = cre.startGateUp;
   }
-  // SA(cre, "creArea=" + creArea); //
-  // SA(cre, "tarArea=" + tarArea); //
   const yAxis_top = Y_topGate;
   const yAxis_bottom = Y_bottomGate;
   if (creArea === area_left && tarArea === area_right) {

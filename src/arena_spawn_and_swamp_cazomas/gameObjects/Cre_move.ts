@@ -1,6 +1,6 @@
 import { CostMatrix } from "game/path-finder";
 import { Event_Pos } from "../utils/Event";
-import { COO, GR, Pos, atPos } from "../utils/Pos";
+import { Adj, COO, GR, Pos, atPos } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA, drawLineLight } from "../utils/visual";
 import { Cre } from "./Cre";
@@ -12,7 +12,12 @@ import {
   searchPath_flee,
 } from "./findPath";
 import { enemies } from "./GameObjectInitialize";
-import { FindPathAndMoveTask, MoveTask, moveTo_basic } from "./MoveTask";
+import {
+  FindPathAndMoveTask,
+  MoveTask,
+  moveTo_basic,
+  moveTo_direct,
+} from "./MoveTask";
 import { moveBlockCostMatrix } from "./UnitTool";
 
 export class Cre_move extends Cre {
@@ -42,7 +47,7 @@ export class Cre_move extends Cre {
     plainCost: number = def_plainCost,
     swampCost: number = def_swampCost
   ): void {
-    if (GR(this, tar) <= 1) {
+    if (Adj(this, tar)) {
       this.stop();
     } else {
       this.MTJ(tar, pullList, step, costMatrix, plainCost, swampCost);
@@ -51,7 +56,7 @@ export class Cre_move extends Cre {
   randomMove() {
     const pos: Pos | undefined = getRoundEmptyPos(this);
     if (pos) {
-      this.MTJ(pos);
+      moveTo_direct(this, pos);
     }
   }
   flee(
@@ -71,12 +76,13 @@ export class Cre_move extends Cre {
         plainCost,
         swampCost
       );
-      const tar = spf.path[0];
-      if (tar) {
-        this.stop();
-        moveTo_basic(this, tar);
+      if (spf.path.length > 0) {
+        const tar = spf.path[0];
+        moveTo_direct(this, tar);
+        return true;
+      } else {
+        return false;
       }
-      return true;
     } else {
       return false;
     }
@@ -116,12 +122,10 @@ export class Cre_move extends Cre {
   ): void {
     // SA(this,"moveTo1="+coordinate(tar));
     drawLineLight(this.master, tar);
+    //cancel old task
     let theSame: boolean = true;
     const currentMoveTask: MoveTask | undefined = findTask(this, MoveTask);
-    // SA(this,"currentMoveTask="+S(currentMoveTask));
     if (currentMoveTask && currentMoveTask instanceof FindPathAndMoveTask) {
-      // SA(this,"currentMoveTask.tar="+COO(currentMoveTask.tar));
-      // SA(this,"tar="+COO(tar));
       //if is not the same pos
       if (!atPos(currentMoveTask.tar, tar)) {
         theSame = false;
@@ -136,7 +140,6 @@ export class Cre_move extends Cre {
     // SA(this,"theSame="+theSame)
     if (!theSame) {
       //add new move task
-      // SA(this,"FindPathAndMoveTask");
       new FindPathAndMoveTask(
         this,
         tar,

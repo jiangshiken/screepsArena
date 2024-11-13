@@ -10,7 +10,7 @@ export function PL(s: any) {
 export function ERR(s: string) {
   PL(new Error(s));
 }
-export function printError<E>(o: E, s: string): E {
+export function ERR_rtn<E>(o: E, s: string): E {
   PL(new Error(s));
   return o;
 }

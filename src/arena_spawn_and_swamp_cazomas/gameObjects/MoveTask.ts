@@ -1,8 +1,10 @@
 import { CostMatrix, FindPathResult } from "game/path-finder";
 import { getDirection } from "game/utils";
 import { ct, et } from "../utils/CPU";
+import { tick } from "../utils/game";
 import { last } from "../utils/JS";
-import { GR, Pos } from "../utils/Pos";
+import { Adj, atPos, GR, Pos } from "../utils/Pos";
+import { ERR } from "../utils/print";
 import { cancelOldTask } from "../utils/Task";
 import { drawLineComplex, drawLineLight, SA } from "../utils/visual";
 import { Cre, Task_Cre } from "./Cre";
@@ -20,31 +22,25 @@ import { blockCost, blocked, moveBlockCostMatrix } from "./UnitTool";
  * a task used to move
  */
 export class MoveTask extends Task_Cre {
-  /** target position */
-  tar: Pos;
   /** memoryed path*/
   path: Pos[];
-  constructor(master: Cre, tar: Pos, path: Pos[] = []) {
+  constructor(master: Cre, path: Pos[]) {
     super(master);
-    this.tar = tar;
     this.path = path;
     //cancel old task
     cancelOldTask(this, MoveTask);
   }
   loop_task(): void {
-    // SA(this.master, "MoveTask")
-    drawLineLight(this.master, this.tar);
     if (this.path.length > 0) {
-      let tempTar: Pos = this.path[0];
-      drawLineComplex(this.master, tempTar, 0.75, "#777777");
-      if (GR(tempTar, this.master) <= 1) {
+      const firstStep: Pos = this.path[0];
+      drawLineComplex(this.master, firstStep, 0.8, "#444444");
+      if (Adj(firstStep, this.master)) {
         SA(this.master, "MTMD");
-        moveTo_direct(this.master, tempTar);
-      } else {
-        moveTo_basic(this.master, tempTar);
-      }
-      if (GR(this.master, tempTar) <= 1) {
+        moveTo_direct(this.master, firstStep);
         this.path.shift();
+      } else {
+        SA(this.master, "MTB");
+        moveTo_basic(this.master, firstStep);
       }
     } else {
       this.end();
@@ -57,9 +53,9 @@ export class MoveTask extends Task_Cre {
 
 /** move to a position ,will findPath every `findPathStep` ticks*/
 export class FindPathAndMoveTask extends MoveTask {
+  /** target position */
+  tar: Pos;
   findPathStep: number;
-  /** the temparary target ,it will reFindPath if close to it*/
-  tempTar: Pos;
   pullList: Cre[];
   costMatrix: CostMatrix | undefined;
   plainCost: number;
@@ -74,34 +70,40 @@ export class FindPathAndMoveTask extends MoveTask {
     plainCost: number = def_plainCost,
     swampCost: number = def_swampCost
   ) {
-    super(master, tar);
+    super(master, []);
     SA(master, "new FPAM Task");
+    this.tar = tar;
     this.pullList = pullList;
     this.costMatrix = costMatrix;
     this.plainCost = plainCost;
     this.swampCost = swampCost;
-    this.path = this.findPath_task(tar);
-    //for initialize
+    this.findPathStep = step;
+  }
+  /** the temparary target ,it will reFindPath if close to it*/
+  get tempTar(): Pos {
     if (this.path.length > 0) {
       const lastPos = last(this.path);
       if (lastPos) {
-        this.tempTar = lastPos;
+        return lastPos;
       } else {
-        this.tempTar = tar;
+        return this.tar;
       }
-    } else this.tempTar = tar;
-    //
-    this.findPathStep = step;
+    } else return this.tar;
   }
   loop_task(): void {
     SA(this.master, "FPAM_loop");
+    drawLineLight(this.master, this.tar);
     let st = ct();
-    if (!this.tar || !this.tempTar) {
+    //cancel if reach destination
+    if (
+      !this.tar ||
+      !this.tempTar ||
+      (this.tar instanceof GameObj && !this.tar.exists)
+    ) {
       this.end();
     }
-    if (this.tar instanceof GameObj && !this.tar.exists) this.end();
-    if (this.tempTar instanceof GameObj && !this.tempTar.exists) this.end();
     if (
+      tick === this.invokeTick ||
       isMyTick(this.master, this.findPathStep) ||
       GR(this.tempTar, this.master) <= 1 ||
       GR(this.tar, this.master) <= 1 ||
@@ -123,14 +125,6 @@ export class FindPathAndMoveTask extends MoveTask {
       this.swampCost
     );
     const path: Pos[] = sRtn.path;
-    if (path.length > 0) {
-      const lp = last(path);
-      if (lp) {
-        this.tempTar = lp;
-      } else {
-        this.tempTar = tar;
-      }
-    } else this.tempTar = tar;
     return path;
   }
 }
@@ -143,12 +137,18 @@ export function moveTo_basic(cre: Cre, tar: Pos): void {
 //move to ,use move() that use direction,not find path
 export function moveTo_direct(cre: Cre, tar: Pos): void {
   SA(cre, "DirMove");
-  moveBlockCostMatrix_setBlock(tar);
-  const dx = tar.x - cre.x;
-  const dy = tar.y - cre.y;
-  const direc = getDirection(dx, dy);
-  SA(cre, "" + direc);
-  cre.master.move(direc);
+  if (atPos(cre, tar)) {
+    ERR("ERR dirMove atPos");
+  } else if (Adj(cre, tar)) {
+    moveBlockCostMatrix_setBlock(tar);
+    const dx = tar.x - cre.x;
+    const dy = tar.y - cre.y;
+    const direc = getDirection(dx, dy);
+    SA(cre, "" + direc);
+    cre.master.move(direc);
+  } else {
+    ERR("ERR dirMove");
+  }
 }
 export function moveBlockCostMatrix_setBlock(pos: Pos) {
   moveBlockCostMatrix.set(pos.x, pos.y, blockCost);

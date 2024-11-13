@@ -12,7 +12,7 @@ import { findClosestByRange, getDirection, getRange } from "game/utils";
 
 import { GameObject } from "game/prototypes";
 import { inRange_int, isWhole, valid } from "./JS";
-import { printError } from "./print";
+import { ERR_rtn } from "./print";
 
 /**
  * represent a position type
@@ -27,8 +27,8 @@ export class Pos_free_C implements HasPos {
   readonly data_x: number;
   readonly data_y: number;
   constructor(x: number, y: number) {
-    this.data_x = validNum(x) ? x : printError(0, "PosFreeX" + x);
-    this.data_y = validNum(y) ? y : printError(0, "PosFreeY" + y);
+    this.data_x = validNum(x) ? x : ERR_rtn(0, "PosFreeX" + x);
+    this.data_y = validNum(y) ? y : ERR_rtn(0, "PosFreeY" + y);
   }
   get x(): number {
     return this.data_x;
@@ -44,8 +44,8 @@ export class Pos_C implements HasPos {
   readonly data_x: number;
   readonly data_y: number;
   constructor(x: number, y: number) {
-    this.data_x = validAxis(x) ? x : printError(0, "PosX" + x);
-    this.data_y = validAxis(y) ? y : printError(0, "PosY" + y);
+    this.data_x = validAxis(x) ? x : ERR_rtn(0, "PosX" + x);
+    this.data_y = validAxis(y) ? y : ERR_rtn(0, "PosY" + y);
   }
   get x(): number {
     return this.data_x;
@@ -61,8 +61,8 @@ export class Vec {
   readonly vec_x: number;
   readonly vec_y: number;
   constructor(x: number, y: number) {
-    this.vec_x = validNum(x) ? x : printError(0, "VecX" + x);
-    this.vec_y = validNum(y) ? y : printError(0, "VecY" + y);
+    this.vec_x = validNum(x) ? x : ERR_rtn(0, "VecX" + x);
+    this.vec_y = validNum(y) ? y : ERR_rtn(0, "VecY" + y);
   }
 }
 export function validNum(num: number): boolean {

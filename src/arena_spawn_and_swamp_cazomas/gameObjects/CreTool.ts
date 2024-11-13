@@ -95,7 +95,7 @@ export function hasEnemyAround(pos: Pos, range: number): boolean {
   return enemies.find(i => GR(pos, i) <= range) !== undefined;
 }
 export function getRoundEmptyPos(cre: Pos): Pos | undefined {
-  const roundPoss = getRangePoss(cre, 1);
+  const roundPoss = getRangePoss(cre);
   return roundPoss.find(i => !blocked(i));
 }
 export function getFriendArmies() {

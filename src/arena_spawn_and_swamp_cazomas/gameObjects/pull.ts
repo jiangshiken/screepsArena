@@ -3,7 +3,7 @@
 import { CostMatrix } from "game/path-finder";
 import { arrayEqual, invalid, last, remove, valid } from "../utils/JS";
 import { Adj, COO, GR, Pos, atPos } from "../utils/Pos";
-import { findTask } from "../utils/Task";
+import { cancelOldTask, findTask } from "../utils/Task";
 import { SA, drawLineComplex } from "../utils/visual";
 import { Cre, Task_Cre } from "./Cre";
 import { Cre_move } from "./Cre_move";
@@ -86,10 +86,8 @@ export class PullTask extends Task_Cre {
   tarCre: Cre;
   tarPos: Pos;
   step: number;
-  nextStep: Pos | undefined;
   moveTask1: FindPathAndMoveTask | undefined = undefined;
   moveTask2: FindPathAndMoveTask | undefined = undefined;
-  leaderStop: boolean;
   costMatrix: CostMatrix | undefined;
   plainCost: number;
   swampCost: number;
@@ -98,8 +96,6 @@ export class PullTask extends Task_Cre {
     tarCre: Cre,
     tarPos: Pos,
     step: number = getMoveStepDef([master, tarCre]),
-    nextStep?: Pos,
-    leaderStop: boolean = false,
     costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
     plainCost: number = def_plainCost,
     swampCost: number = def_swampCost
@@ -109,11 +105,10 @@ export class PullTask extends Task_Cre {
     this.tarCre = tarCre;
     this.tarPos = tarPos;
     this.step = step;
-    this.nextStep = nextStep;
-    this.leaderStop = leaderStop;
     this.costMatrix = costMatrix;
     this.plainCost = plainCost;
     this.swampCost = swampCost;
+    cancelOldTask();
     //cancel old task
     var ot = this.master.tasks.find(
       task => task instanceof PullTask && task != this
