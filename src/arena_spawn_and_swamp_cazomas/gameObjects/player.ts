@@ -16,9 +16,7 @@ export class Player {
   readonly name: String;
   /** the support evidences that show its this player*/
   supportList: {
-    [key: string]: {
-      worth: number;
-    };
+    [key: string]: number;
   };
   constructor(name: String) {
     this.name = name;
@@ -28,8 +26,7 @@ export class Player {
   getWorth(): number {
     let rtn = 0;
     for (let evidenceIndex in this.supportList) {
-      const worth: number = this.supportList[evidenceIndex].worth;
-      rtn += worth;
+      rtn += this.supportList[evidenceIndex];
     }
     return rtn;
   }
@@ -102,7 +99,7 @@ export function identifyOpponent() {
   SA(displayPos(), "guessPlayer=" + getGuessPlayer().name);
 }
 function addSupport(player: Player, evidenceIndex: string, worth: number) {
-  player.supportList[evidenceIndex] = { worth: worth };
+  player.supportList[evidenceIndex] = worth;
 }
 export function getGuessPlayer(): Player {
   const rtn = <Player>best(playerList, i => i.getWorth());

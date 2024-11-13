@@ -450,7 +450,7 @@ export class BuilderStandardTask extends Task_Cre {
       cs.progressRate < 0.8
     ) {
       this.step = build_extensions;
-      (<CS>cs).wt = 5;
+      (<CS>cs).worth = 5;
     }
     //build ram
     let sumEn = calAroundEnergy(cre);
@@ -479,7 +479,7 @@ export class BuilderStandardTask extends Task_Cre {
       GR(cre, closestEnemy) - fleeRange <= (cs.progressTotal - cs.progress) / 5
     ) {
       this.step = build_rampart;
-      (<CS>cs).wt = 12;
+      (<CS>cs).worth = 12;
     }
     let sumEn: number = calAroundEnergy(cre);
     sumEn += getEnergy(cre);

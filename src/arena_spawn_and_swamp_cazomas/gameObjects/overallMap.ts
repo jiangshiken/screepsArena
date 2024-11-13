@@ -26,6 +26,12 @@ export let gameObjectsThisTick: Pos[];
 export function setGameObjectsThisTick(g: Pos[]) {
   gameObjectsThisTick = g;
 }
+export function findGO_lambda(
+  pos: Pos,
+  l: (p: Pos) => boolean
+): Pos | undefined {
+  return overallMap.get(pos).find(l);
+}
 export function findGO(pos: Pos, goType: any): Pos | undefined {
   return overallMap.get(pos).find(i => i instanceof goType);
 }

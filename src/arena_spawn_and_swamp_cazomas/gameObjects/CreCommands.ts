@@ -1,5 +1,4 @@
 import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
-import { getRange } from "game/utils";
 
 import { getCPUPercent } from "../utils/CPU";
 import {
@@ -11,7 +10,7 @@ import {
   ranGet,
   sum,
 } from "../utils/JS";
-import { atPos, COO, getRangePoss, GR, Pos } from "../utils/Pos";
+import { Adj, atPos, COO, getRangePoss, GR, Pos } from "../utils/Pos";
 import {
   dotted,
   drawLineComplex,
@@ -63,7 +62,12 @@ import {
 } from "./ramparts";
 import { spawn } from "./spawn";
 import { Roa } from "./Stru";
-import { blocked, getEnergy, getMyBaseContainers } from "./UnitTool";
+import {
+  blocked,
+  energylive,
+  getEnergy,
+  getMyBaseContainers,
+} from "./UnitTool";
 export function myContainersEnergy() {
   const myContainers = getMyBaseContainers();
   let sum = 0;
@@ -215,7 +219,7 @@ export function gotoTargetRampart(cre: Cre_move, targetRampart: Pos) {
 export function goinRampartAssign(cre: Cre_move, calBlocked: Pos[]) {
   SA(cre, "goinRampartAssign " + COO(cre));
   const aroundRams = getMyHealthyRamparts_around(cre);
-  const aroundEmptyRams = aroundRams.filter(i => !blocked(i, false, cre));
+  const aroundEmptyRams = aroundRams.filter(i => !blocked(i));
   const aroundEmptyRam = last(aroundEmptyRams);
   if (aroundRams.length > 0) {
     if (aroundEmptyRam) {
@@ -311,12 +315,6 @@ export function getForceTarAndPosRate(cre: Cre, target: Cre) {
   const forceAtPos = getForce_tradition(cre);
   const forceAtTarget = getForce_tradition(target);
   SA(cre, "target=" + COO(target));
-  //force of this cre
-  // const forceCre = calculateForce(cre);
-  // SAN(cre, "forceCre", forceCre);
-  //if force is too high that this number is high too
-  // const forceRateAtPos = forceAtPos / forceCre; //20,5 = 1;
-  // const forceRateAtTarget = forceAtTarget / forceCre; //20,5 = 1;
   const range = GR(cre, target);
   const targetRate = 2 * divideReduce(range, 10);
   const posRate = 1;
@@ -332,7 +330,7 @@ export function getForceTarAndPosRate(cre: Cre, target: Cre) {
 export function moveToNoResourcePlace(cre: Cre_move, needCloseArr: Pos[]) {
   //find pos have no resource
   let rangePos = getRangePoss(cre, 1);
-  if (getEnergy(cre) > 0) {
+  if (energylive(cre)) {
     rangePos = rangePos.filter(i => !atPos(i, cre));
   }
   let possHaveNotResource = rangePos.filter(pos => {
@@ -346,7 +344,7 @@ export function moveToNoResourcePlace(cre: Cre_move, needCloseArr: Pos[]) {
   });
   let closeToNeedClosePos = possHaveNotResource.filter(i => {
     for (let cPos of needCloseArr) {
-      if (getRange(cPos, i) <= 1) {
+      if (Adj(cPos, i)) {
         return true;
       }
     }

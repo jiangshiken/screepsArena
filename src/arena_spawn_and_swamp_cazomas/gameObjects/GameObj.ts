@@ -16,4 +16,7 @@ export class GameObj implements HasPos {
   get exists() {
     return this.master.exists;
   }
+  get id(): number {
+    return parseInt(this.master.id);
+  }
 }

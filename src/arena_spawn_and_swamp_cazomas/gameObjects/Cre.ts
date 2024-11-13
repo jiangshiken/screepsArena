@@ -100,9 +100,6 @@ export class Cre
   get hitsMax() {
     return this.master.hitsMax;
   }
-  get id() {
-    return this.master.id;
-  }
   get body(): BodyCre[] {
     return this.master.body;
   }

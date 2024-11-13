@@ -3,14 +3,14 @@ import { ConstructionSite, StructureRampart } from "game/prototypes";
 import { getTicks } from "game/utils";
 
 import { Event } from "../utils/Event";
-import { best, divide0, invalid } from "../utils/JS";
-import { atPos, COO, HasPos, Pos } from "../utils/Pos";
-import { drawLineComplex, SA } from "../utils/visual";
+import { best, divide0 } from "../utils/JS";
+import { atPos, HasPos, Pos } from "../utils/Pos";
+import { SA } from "../utils/visual";
 import { S } from "./export";
 import { GameObj } from "./GameObj";
 import { CSs, myCSs } from "./GameObjectInitialize";
 import { HasMy, isMyGO, isOppoGO } from "./HasMy";
-import { findGO } from "./overallMap";
+import { findGO_lambda } from "./overallMap";
 import { inMyRampart } from "./ramparts";
 
 // export let CSs: CS[] = []
@@ -19,10 +19,12 @@ export class CS extends GameObj implements HasPos, HasMy {
   readonly master: ConstructionSite;
   decayEvent: Event | undefined;
   useDecay: boolean = false;
-  wt: number = 0;
+  worth: number = 0;
   constructor(cons: ConstructionSite) {
     super(cons);
     this.master = cons;
+    this.useDecay = (<any>cons).useDecay;
+    this.worth = (<any>cons).worth;
   }
   get my() {
     return isMyGO(this.master);
@@ -86,53 +88,22 @@ export function hasConstructionSite_notRampart(pos: Pos): boolean {
 export function hasConstructionSite(pos: Pos): boolean {
   return CSs.find(i => atPos(i, pos)) !== undefined;
 }
-/**init an action Sequence*/
-export function initActionSequence(...actions: (() => void)[]): {
-  complete: boolean;
-  action: () => void;
-}[] {
-  return actions.map(i => {
-    return { complete: false, action: i };
-  });
-}
-/**create CS by action Sequence.If you call it every tick,
- * it will trigger the action(almost createCS()) one by one.
- * Every action will only trigger once.If your constructionSites
- * is over 8 ,the action will be pass.
- */
-export function createCSInSequence(
-  actionTasks: {
-    complete: boolean;
-    action: () => void;
-  }[]
-) {
-  for (let actionTask of actionTasks) {
-    if (!actionTask.complete) {
-      if (myCSs.length <= 8) {
-        actionTask.action();
-        actionTask.complete = true;
-        break;
-      }
-    }
-  }
-}
 /** same as createCS ,but wait CS num<9*/
 export function supplyCS(
   pos: Pos,
   type: any,
   worth: number = 1,
   useDecay: boolean = false,
-  allowMultiRampart: boolean = false,
-  print: boolean = false
+  allowMultiRampart: boolean = false
 ): boolean {
-  if (print) {
-    SA(pos, "supplyCS " + type);
-  }
-  if (!findGO(pos, type) || (allowMultiRampart && type === StructureRampart)) {
-    if (print) {
-      SA(pos, "createCS_wait");
-    }
-    return createCS_wait(pos, type, worth, useDecay, allowMultiRampart, print);
+  if (
+    !findGO_lambda(
+      pos,
+      i => i instanceof GameObj && i.master instanceof type
+    ) ||
+    (allowMultiRampart && type === StructureRampart)
+  ) {
+    return createCS_wait(pos, type, worth, useDecay, allowMultiRampart);
   } else {
     return false;
   }
@@ -144,13 +115,9 @@ export function createCS_wait(
   type: any,
   worth: number = 1,
   useDecay: boolean = false,
-  allowMultiRampart: boolean = false,
-  print: boolean = false
+  allowMultiRampart: boolean = false
 ): boolean {
   if (myCSs.length < csLimitBias) {
-    if (print) {
-      SA(pos, "createCS");
-    }
     return createCS(pos, type, worth, useDecay, allowMultiRampart);
   } else {
     return false;
@@ -172,59 +139,41 @@ export function createCS(
 ): boolean {
   //if can create CS
   SA(pos, "createCS:" + S(type));
-  let b: boolean;
+  let ifCreate: boolean;
   if (type === StructureRampart) {
     if (inMyRampart(pos)) {
-      b = false;
+      ifCreate = false;
     } else {
       if (allowMultiRampart) {
-        b = true;
+        ifCreate = true;
       } else {
-        b = !hasConstructionSite_rampart(pos);
+        ifCreate = !hasConstructionSite_rampart(pos);
       }
     }
   } else {
-    b = !hasConstructionSite_notRampart(pos);
+    ifCreate = !hasConstructionSite_notRampart(pos);
   }
-  if (b) {
+  if (ifCreate) {
     if (myCSs.length >= csLimitBias) {
       //cancel other ,find the min worth of cs on the map and remove it
-      let minWorth = Infinity;
-      let minCS: CS = <CS>myCSs[0];
-      for (let cs of myCSs) {
-        const myCS = <CS>cs;
-        let csw: number;
-        if (invalid(myCS)) csw = 0;
-        else csw = myCS.wt;
-        //progressRate bonus
-        const pr = myCS.progressRate; //0~1
-        const prBonus = 1 + 2 * pr;
-        csw *= prBonus;
-        //decay reduce
-        if (myCS.useDecay) {
-          let dr = getCSDecayReduce(myCS);
-          csw *= dr;
-        }
-        if (csw < minWorth) {
-          minWorth = csw;
-          minCS = myCS;
-        }
-      }
-      if (minCS) {
-        drawLineComplex(pos, minCS, 0.8, "#aabbff");
-        SA(minCS, "remove min worth CS by action " + COO(pos) + " " + type);
-        minCS.master.remove();
+      const minWorthCS = best(myCSs, myCS => {
+        const basicBonus = myCS.worth;
+        const progressRateBonus = 1 + 2 * myCS.progressRate;
+        const decayReduce = myCS.useDecay ? getCSDecayReduce(myCS) : 1;
+        return basicBonus * progressRateBonus * decayReduce;
+      });
+      if (minWorthCS) {
+        minWorthCS.master.remove();
       }
     }
     SA(pos, "create cons");
-    let rtn = createConstructionSite(pos.x, pos.y, type);
+    const rtn = createConstructionSite(pos.x, pos.y, type);
     SA(pos, "rtnErr=" + rtn.error);
     SA(pos, "rtnObj=" + S(rtn.object));
-    let rtnObj: CS = <CS>(<any>rtn.object);
+    const rtnObj = rtn.object;
     if (rtn && rtnObj) {
-      rtnObj.decayEvent = new Event();
-      rtnObj.useDecay = useDecay;
-      rtnObj.wt = worth;
+      (<any>rtnObj).useDecay = useDecay;
+      (<any>rtnObj).worth = worth;
       return true;
     }
   }
@@ -234,20 +183,18 @@ export function createCS(
  * if not build {@link CS} a mount of time ,it will get decay of `worth`
  */
 export function getCSDecayReduce(cs: CS) {
-  let e = cs.decayEvent;
-  let rtn;
-  if (e === undefined) {
+  const decay_event = cs.decayEvent;
+  if (decay_event === undefined) {
     SA(cs, "ERR decayEvent undefined");
-    rtn = 1 / 10;
+    return 1 / 10;
   } else {
-    let passTime: number = getTicks() - e.invokeTick;
-    rtn = 1 / (1 + 0.01 * passTime);
+    const passTime: number = getTicks() - decay_event.invokeTick;
+    return 1 / (1 + 0.01 * passTime);
   }
-  return rtn;
 }
 /**
  * get the {@link CS} that is the max `worth`
  */
 export function getMaxWorthCSS(css: CS[]): CS | undefined {
-  return best(css, i => i.wt);
+  return best(css, i => i.worth);
 }

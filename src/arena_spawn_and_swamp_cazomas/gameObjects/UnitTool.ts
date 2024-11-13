@@ -5,7 +5,7 @@ import { inResourceArea, isTerrainWall } from "../utils/game";
 import { getRangePoss, GR, Pos } from "../utils/Pos";
 import { Cre } from "./Cre";
 import { GameObj } from "./GameObj";
-import { BlockGO, containers, GO, HasStore } from "./GameObjectInitialize";
+import { BlockGO, containers, HasStore } from "./GameObjectInitialize";
 import { findGO, overallMap } from "./overallMap";
 import { enemySpawn, spawn } from "./spawn";
 import { Con, Ext, Ram, Res, Roa, Spa, Stru, Tow } from "./Stru";
@@ -68,7 +68,7 @@ export function isBlockGO(go: BlockGO, avoidFriendBlock: boolean = false) {
     return true;
   }
 }
-export function energylive(go: GO) {
+export function energylive(go: GameObj) {
   return getEnergy(go) > 0;
 }
 export function getEmptyCapacity(cre: HasStore): number {

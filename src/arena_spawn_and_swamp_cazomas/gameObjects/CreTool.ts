@@ -8,17 +8,18 @@ import {
   RANGED_ATTACK,
   WORK,
 } from "game/constants";
-import { Creep, Resource } from "game/prototypes";
+import { Creep } from "game/prototypes";
 import { getTicks } from "game/utils";
 import { ct, et, ptSum } from "../utils/CPU";
 import { Event, Event_Number } from "../utils/Event";
 import { StNumber } from "../utils/game";
-import { divide0, pow2, ranGet } from "../utils/JS";
+import { divide0, pow2, ranGet, sum } from "../utils/JS";
 import { GR, Pos, getRangePoss } from "../utils/Pos";
 import { useTasks } from "../utils/Task";
 import { P, SA } from "../utils/visual";
 import { Cre } from "./Cre";
-import { GO, cres, enemies, friends } from "./GameObjectInitialize";
+import { GameObj } from "./GameObj";
+import { cres, enemies, friends } from "./GameObjectInitialize";
 import { findGO } from "./overallMap";
 import { blocked } from "./UnitTool";
 
@@ -154,12 +155,10 @@ export let enRamAroundCost: number = 30;
 export function setEnRamAroundCost(n: number) {
   enRamAroundCost = n;
 }
-
 export let spawnExtraTaunt: number = 4;
 export function set_spawnExtraTaunt(se: number) {
   spawnExtraTaunt = se;
 }
-
 export function getHealthyBodies_total(cre: Cre) {
   return cre.body.filter(i => i.hits > 0);
 }
@@ -176,9 +175,6 @@ export function controlCreeps() {
   const listNeedUseTask = [...friends];
   listNeedUseTask.sort((a, b) => b.taskPriority - a.taskPriority);
   for (let cre of listNeedUseTask) {
-    if (cre.master.spawning) {
-      continue;
-    }
     const st = ct();
     try {
       useTasks(cre);
@@ -257,20 +253,8 @@ export function getEarning_value(
 export function getArmies() {
   return cres.filter(i => isArmy(i));
 }
-export function id(o: GO): number {
-  if (o) {
-    if (o instanceof Resource) {
-      return parseInt(o.id);
-    } else {
-      return parseInt(o.master.id);
-    }
-  } else {
-    return -1;
-  }
-}
-
-export function isMyTick(cre: GO, n: number) {
-  return getTicks() % n === id(cre) % n;
+export function isMyTick(cre: GameObj, n: number) {
+  return getTicks() % n === cre.id % n;
 }
 
 /**
@@ -278,25 +262,15 @@ export function isMyTick(cre: GO, n: number) {
  * 0 is no `ATTACK`,1 is all `ATTACK`
  */
 export function enemyAWeight(): number {
-  let a = enemyAttackNum();
-  let ra = enemyRangedAttackNum();
+  const a = enemyAttackNum();
+  const ra = enemyRangedAttackNum();
   return divide0(a, a + ra, 1);
 }
 export function enemyRangedAttackNum(): number {
-  let sum = 0;
-  for (let en of enemies) {
-    let enemyAttackNum = en.getBodyParts(RANGED_ATTACK).length;
-    sum += enemyAttackNum;
-  }
-  return sum;
+  return sum(enemies, en => en.getBodyPartsNum(RANGED_ATTACK));
 }
 export function enemyAttackNum(): number {
-  let sum = 0;
-  for (let en of enemies) {
-    let enemyAttackNum = en.getBodyParts(ATTACK).length;
-    sum += enemyAttackNum;
-  }
-  return sum;
+  return sum(enemies, en => en.getBodyPartsNum(ATTACK));
 }
 export function getBodyArrayOfCreep(creep: Creep): BodyPartConstant[] {
   let rtn: BodyPartConstant[] = [];
