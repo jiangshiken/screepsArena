@@ -3,7 +3,6 @@ import { CostMatrix } from "game/path-finder";
 import { Resource } from "game/prototypes";
 import { inResourceArea, isTerrainWall } from "../utils/game";
 import { getRangePoss, GR, Pos } from "../utils/Pos";
-import { SA } from "../utils/visual";
 import { Cre } from "./Cre";
 import { GameObj } from "./GameObj";
 import { BlockGO, containers, GO, HasStore } from "./GameObjectInitialize";
@@ -38,28 +37,15 @@ export const blockCost = 255;
 /**
  * if position is blocked
  */
-export function blocked(
-  pos: Pos,
-  avoidFriendBlock: boolean = false,
-  printPos: Pos | undefined = undefined
-): boolean {
+export function blocked(pos: Pos, avoidFriendBlock: boolean = false): boolean {
   if (isTerrainWall(pos)) {
     return true;
   } else {
-    if (printPos) {
-      SA(printPos, "A");
-    }
     const posList = overallMap[pos.x][pos.y];
-    if (printPos) {
-      SA(printPos, "posList=" + posList.length);
-    }
     for (let go of posList) {
       if (go instanceof Cre || go instanceof Stru) {
-        if (printPos) {
-          SA(printPos, "isBlockGO=" + go.master);
-        }
-        const bgortn = isBlockGO(go, avoidFriendBlock);
-        if (bgortn) {
+        const bgo_rtn = isBlockGO(go, avoidFriendBlock);
+        if (bgo_rtn) {
           return true;
         }
       }
@@ -150,6 +136,5 @@ export function hasResourceOnGround(pos: Pos, amount: number) {
   return res && res.amount >= amount;
 }
 export function aroundBlock(pos: Pos) {
-  //if has no empty around
   return getRangePoss(pos, 1).find(i => !blocked(i)) === undefined;
 }

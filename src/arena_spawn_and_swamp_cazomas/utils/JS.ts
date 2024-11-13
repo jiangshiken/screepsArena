@@ -4,6 +4,9 @@ export function arrayEquals<E>(a: E[], b: E[]) {
 export function pow2(a: number): number {
   return a * a;
 }
+export function objLen(o: object): number {
+  return Object.keys(o).length;
+}
 export function sum<E>(arr: E[], sumLambda: (arr: E) => number): number {
   return arr.map(i => sumLambda(i)).reduce((a, b) => a + b, 0);
 }

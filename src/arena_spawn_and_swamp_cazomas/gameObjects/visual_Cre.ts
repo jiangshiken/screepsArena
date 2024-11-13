@@ -32,23 +32,20 @@ export function showHits() {
 }
 
 /**
- * 在creep头上显示一个血条，长度为一格，支持不同根据血量切换颜色
- * @param {import("game/prototypes").Creep} obj
- * @author UndefinedCpp
- * @version 1.0
+ * show a 1 tile long HP bar with changing color
  */
 export function showHealthBar(obj: Cre | Stru) {
   if (valid(obj) && valid(obj.master.hits)) {
     const visbase = new Visual(VISUAL_LAYER, false);
-    // 打底色
+    //base color
     visbase.line(
       { x: obj.x - 0.5, y: obj.y - 0.5 },
       { x: obj.x + 0.5, y: obj.y - 0.5 },
       { color: "#727272", opacity: 0.4 }
     );
-    // 算比例
+    //ratio
     const ratio = obj.master.hits / obj.master.hitsMax;
-    // 撸颜色
+    //color
     const colorScheme = {
       low: "#ff0000",
       mid: "#ffff00",
@@ -60,7 +57,7 @@ export function showHealthBar(obj: Cre | Stru) {
         : ratio >= 0.3
         ? colorScheme.mid
         : colorScheme.low;
-    // 打颜色
+    //display color
     const vis = new Visual(VISUAL_LAYER + 1, false);
     vis.line(
       { x: obj.x - 0.5, y: obj.y - 0.5 },

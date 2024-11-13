@@ -15,10 +15,10 @@ import {
 import { getObjectsByPrototype } from "game/utils";
 
 import { PL } from "arena_spawn_and_swamp_cazomas/utils/print";
-import { S } from "../utils/export";
 import { P } from "../utils/visual";
 import { Cre } from "./Cre";
 import { CS } from "./CS";
+import { S } from "./export";
 import { isMyGO, isOppoGO, neutral } from "./HasMy";
 import {
   Con,

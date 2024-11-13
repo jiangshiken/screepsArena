@@ -7,7 +7,6 @@ import {
 } from "game/constants";
 import { StructureRampart } from "game/prototypes";
 import { Event } from "../utils/Event";
-import { S } from "../utils/export";
 import { GR, atPos } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA, drawLineLight } from "../utils/visual";
@@ -15,6 +14,7 @@ import { Cre, Task_Cre } from "./Cre";
 import { Cre_battle } from "./Cre_battle";
 import { hasEnemyAround } from "./CreTool";
 import { CS, getMaxWorthCSS } from "./CS";
+import { S } from "./export";
 import { myCSs } from "./GameObjectInitialize";
 import { overallMap } from "./overallMap";
 import { getEnergy, getFreeEnergy, inRampart } from "./UnitTool";

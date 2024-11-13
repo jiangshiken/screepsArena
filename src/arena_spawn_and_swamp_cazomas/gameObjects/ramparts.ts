@@ -27,10 +27,10 @@ export function rampartIsHealthy(
   bias: number = 0
 ) {
   //has enemy around
-  let around1Enemies = isMy
+  const around1Enemies = isMy
     ? enemies.filter(i => GR(i, ram) <= 1)
     : friends.filter(i => GR(i, ram) <= 1);
-  let around3Enemies = isMy
+  const around3Enemies = isMy
     ? enemies.filter(i => GR(i, ram) <= 3)
     : friends.filter(i => GR(i, ram) <= 3);
   const RANum = sum(around3Enemies, i =>

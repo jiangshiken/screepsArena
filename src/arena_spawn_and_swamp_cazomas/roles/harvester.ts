@@ -8,6 +8,7 @@ import {
 } from "../gameObjects/GameObjectInitialize";
 
 import { Cre_harvest, validRes } from "../gameObjects/Cre_harvest";
+import { S } from "../gameObjects/export";
 import { getMoveTime, searchPathByCreCost } from "../gameObjects/findPath";
 import { inMyBaseRan, spawn } from "../gameObjects/spawn";
 import { Con } from "../gameObjects/Stru";
@@ -18,7 +19,6 @@ import {
   getFreeEnergy,
   getWildCons,
 } from "../gameObjects/UnitTool";
-import { S } from "../utils/export";
 import { inResourceArea, tick } from "../utils/game";
 import { COO, GR } from "../utils/Pos";
 import { findTask } from "../utils/Task";

@@ -1,7 +1,6 @@
 //functions
 
 import { CostMatrix } from "game/path-finder";
-import { SOA } from "../utils/export";
 import { arrayEqual, invalid, last, remove, valid } from "../utils/JS";
 import { Adj, COO, GR, Pos, atPos } from "../utils/Pos";
 import { findTask } from "../utils/Task";
@@ -10,6 +9,7 @@ import { Cre, Task_Cre } from "./Cre";
 import { Cre_move } from "./Cre_move";
 import { moveToRandomEmptyAround } from "./CreCommands";
 import { PullEvent } from "./CreTool";
+import { SOA } from "./export";
 import {
   def_plainCost,
   def_swampCost,
@@ -155,8 +155,8 @@ export class PullTask extends Task_Cre {
       (this.moveTask1 && this.moveTask1.complete) ||
       GR(this.master, this.tarCre) <= 1
     ) {
-      // SA(this.master, "this.moveTask1.complete");
       this.moveTask1?.end();
+      SA(this.tarCre, "normalPull " + COO(this.master));
       let ptRtn = normalPull(this.master, this.tarCre);
       if (ptRtn) {
         //if is pulling

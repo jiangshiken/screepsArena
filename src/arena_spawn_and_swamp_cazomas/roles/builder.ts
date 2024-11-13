@@ -24,6 +24,7 @@ import {
   getMaxWorthCSS,
   hasConstructionSite,
 } from "../gameObjects/CS";
+import { S } from "../gameObjects/export";
 import {
   friends,
   HasEnergy,
@@ -54,7 +55,6 @@ import {
   getSpawnAroundFreeContainers,
   getSpawnAroundLiveContainers,
 } from "../gameObjects/UnitTool";
-import { S } from "../utils/export";
 import { tick } from "../utils/game";
 import { d2, getClassName, invalid } from "../utils/JS";
 import { atPos, COO, getRangePoss, GR, midPoint, Pos } from "../utils/Pos";

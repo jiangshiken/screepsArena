@@ -3,10 +3,10 @@ import { ConstructionSite, StructureRampart } from "game/prototypes";
 import { getTicks } from "game/utils";
 
 import { Event } from "../utils/Event";
-import { S } from "../utils/export";
 import { best, divide0, invalid } from "../utils/JS";
 import { atPos, COO, HasPos, Pos } from "../utils/Pos";
 import { drawLineComplex, SA } from "../utils/visual";
+import { S } from "./export";
 import { GameObj } from "./GameObj";
 import { CSs, myCSs } from "./GameObjectInitialize";
 import { HasMy, isMyGO, isOppoGO } from "./HasMy";

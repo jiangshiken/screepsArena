@@ -5,11 +5,6 @@ import { inRange_int } from "./JS";
 import { Pos, Vec } from "./Pos";
 import { PL } from "./print";
 export type StNumber = number;
-/** the startGate top or bottom ,true is top,will decide the area search*/
-// export let startGateUp: boolean = false;
-// export function set_startGateUp(b: boolean) {
-//   startGateUp = b;
-// }
 /** you are at the left or the right of the game map*/
 export let spawn_left: boolean;
 export function set_spawn_left(b: boolean) {

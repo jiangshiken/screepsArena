@@ -1,10 +1,10 @@
 import { BodyPartConstant } from "game/constants";
 
-import { S } from "../utils/export";
-import { d2, repeat } from "../utils/JS";
+import { best, d2, divide0, repeat } from "../utils/JS";
 import { P, SA } from "../utils/visual";
 import { Cre } from "./Cre";
 import { Role } from "./CreTool";
+import { S } from "./export";
 import { friends } from "./GameObjectInitialize";
 import {
   enoughEnergy,
@@ -14,27 +14,22 @@ import {
 } from "./spawn";
 
 export function spawnBySpawnTypeList(spl: SpawnType[]) {
-  let maxNeedRate = 0;
-  let maxNeedSpawnType: SpawnType | undefined;
-  for (let s of spl) {
+  const maxNeedSpawnType = best(spl, s => {
     //every spawnType
     if (s.onlyEnoughEnergy) {
       //if it is 'only enough energy'
-      // P("check only Enough Energy")
       if (!enoughEnergy(spawn, s.body)) {
-        // P("pass")
         //if not enough ,pass
-        continue;
+        return 0;
       }
     }
     //getCreeps_includeSpawning
     const currentNum: number = s.filterObj(friends);
-    const needRate = s.need / (currentNum + 0.5);
-    //
+    const needRate = divide0(s.need, currentNum + 0.5);
+    //print the need
     const s1 = "needRate of " + s.role.roleName + "(" + s.body.length + ")=";
     const repeatNum = Math.min(Math.ceil(needRate * 3), 100);
     const tableNum = 5 - Math.floor((s1.length + 1) / 8);
-    //print the need
     P(
       s1 +
         repeat("\t", tableNum) +
@@ -42,12 +37,8 @@ export function spawnBySpawnTypeList(spl: SpawnType[]) {
         "\t " +
         repeat("#", repeatNum)
     );
-    //
-    if (needRate > maxNeedRate) {
-      maxNeedRate = needRate;
-      maxNeedSpawnType = s;
-    }
-  }
+    return needRate;
+  });
   //spawn maxNeedSpawnType
   if (
     spawnAndSpawnListEmpty(spawn) &&
@@ -56,9 +47,6 @@ export function spawnBySpawnTypeList(spl: SpawnType[]) {
   ) {
     SA(spawn, "decide spawn " + S(maxNeedSpawnType));
     spawnCreep(maxNeedSpawnType.body, maxNeedSpawnType.role);
-  } else {
-    // SA(spawn, "currentList" + S(spawnList));
-    // SAN(spawn, "spawnList.length", spawnList.length);
   }
 }
 /**
@@ -68,13 +56,13 @@ export function spawnBySpawnTypeList(spl: SpawnType[]) {
  *  it may be spawn by another method
  */
 export class SpawnType {
-  role: Role;
+  readonly role: Role;
   /** represent how much you need this type of creep */
   need: number;
   /** the body of the creep that will be spawn*/
-  body: BodyPartConstant[];
+  readonly body: BodyPartConstant[];
   /** used to calculate the number of creeps of this type on the map in this tick*/
-  filterObj: (c: Cre[]) => number;
+  readonly filterObj: (c: Cre[]) => number;
   /** if this is true ,it will only valid when your spawn has the energy to born this body*/
   onlyEnoughEnergy: boolean;
   constructor(

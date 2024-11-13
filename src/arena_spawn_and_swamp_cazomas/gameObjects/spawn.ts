@@ -10,8 +10,8 @@ import {
   WORK,
 } from "game/constants";
 
+import { Creep } from "game/prototypes";
 import { Event } from "../utils/Event";
-import { S } from "../utils/export";
 import { arrayEqual } from "../utils/JS";
 import {
   getRangePoss,
@@ -24,9 +24,9 @@ import {
 import { P, SA, SAN } from "../utils/visual";
 import { Cre } from "./Cre";
 import { Role } from "./CreTool";
+import { S } from "./export";
 import {
   containers,
-  cres,
   extensions,
   friends,
   gameObjects,
@@ -40,16 +40,15 @@ import { blocked, getEnergy } from "./UnitTool";
 
 /** your first StructureSpawn*/
 export let spawn: Spa;
-
+export function setSpawn(s: Spa) {
+  spawn = s;
+}
 export function spawnCleared(s: Spa) {
   return (
     spawnList.length === 0 &&
     s.spawningCreep === undefined &&
     !s.spawnEvent?.validEvent()
   );
-}
-export function setSpawn(s: Spa) {
-  spawn = s;
 }
 /** the first StructureSpawn of your opponent*/
 export let enemySpawn: Spa;
@@ -125,16 +124,12 @@ export function fromSpawnPos(x: number, y: number) {
 }
 export function getExistListAndSpawningFriendsNum(
   lamb: (i: Cre) => boolean,
+  lambCreep: (i: Creep | undefined) => boolean,
   lambSpawnInfo: (i: SpawnInfo) => boolean
 ): number {
   const existFri = friends.filter(lamb).length;
-  P("existFri=" + existFri);
-  const spawningCreep = spawn.spawningCreep;
-  const spawningCre = cres.find(i => i.master === spawningCreep);
-  const isSpawningNum = spawningCre ? (lamb(spawningCre) ? 1 : 0) : 0;
-  P("isSpawningNum=" + isSpawningNum);
+  const isSpawningNum = lambCreep(spawn.spawningCreep) ? 1 : 0;
   const inListHarvesterNum = spawnList.filter(i => lambSpawnInfo(i)).length;
-  P("inListHarvesterNum=" + inListHarvesterNum);
   return existFri + isSpawningNum + inListHarvesterNum;
 }
 /** try spawn a creep of the first of spawnList*/

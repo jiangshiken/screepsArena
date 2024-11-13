@@ -5,7 +5,7 @@ import { overallMap } from "../gameObjects/overallMap";
 import { Event, Event_Number } from "./Event";
 import { leftRate } from "./game";
 import { d2 } from "./JS";
-import { HasPos, Pos, pos00, Pos_C } from "./Pos";
+import { HasPos, Pos, pos00, Pos_C, Pos_free, Pos_free_C } from "./Pos";
 import { PL } from "./print";
 
 /**
@@ -13,13 +13,7 @@ import { PL } from "./print";
  */
 export let SAVisList: SAVis[] = [];
 export let visual_layer10: Visual;
-export let visual_layer9: Visual;
-// /**
-//  * should be call at first tick
-//  */
-// export function firstInit_visual() {
-//   SAVisList = [];
-// }
+
 /**
  *  represent a Visual of SA text
  */
@@ -65,7 +59,6 @@ export function loopStart_visual() {
   consoleNum = 0;
   largeSizeText = "";
   visual_layer10 = new Visual(10, false);
-  visual_layer9 = new Visual(9, false);
 }
 /**
  * should be call every end of the tick
@@ -91,7 +84,7 @@ function getSATextPos(pos: Pos): Pos {
  * fill a circle
  */
 export function fillCircle(
-  pos: Pos,
+  pos: Pos_free,
   color: string,
   radius: number,
   opacity: number
@@ -105,7 +98,10 @@ export function fillCircle(
 /**
  * draw a light line
  */
-export function drawLineLight(pos1: Pos, pos2: Pos): Visual | undefined {
+export function drawLineLight(
+  pos1: Pos_free,
+  pos2: Pos_free
+): Visual | undefined {
   return drawLineComplex(pos1, pos2, 0.25, "#ffffff");
 }
 export const dashed = "dashed";
@@ -116,8 +112,8 @@ export type type_dotted = "dotted";
  * draw a line
  */
 export function drawLineComplex(
-  pos1: Pos,
-  pos2: Pos,
+  pos1: Pos_free,
+  pos2: Pos_free,
   opacity: number,
   color: string,
   lineStyle?: type_dashed | type_dotted | undefined
@@ -131,12 +127,7 @@ export function drawLineComplex(
     });
   } catch (ex) {
     P(ex);
-    return visual_layer10.line(pos00, pos00, {
-      width: 0.1,
-      color: "#ffffff",
-      opacity: 1,
-      lineStyle: undefined,
-    });
+    return new Visual();
   }
 }
 
@@ -150,17 +141,17 @@ export function SAE(pos: Pos, ex: Error): void {
  * draw a text
  */
 export function drawText(
-  pos: Pos,
+  pos: Pos_free,
   s: string,
   size: number = 0.5,
-  color: string = "#ffffff"
+  color: string = "#ffffff",
+  backgroundColor: string | undefined = undefined
 ): Visual | undefined {
   return visual_layer10.text(s, pos, {
     font: size,
     opacity: 1,
     color: color,
-    // backgroundColor: "#808000",
-    // backgroundPadding: 0.1,
+    backgroundColor: backgroundColor,
   });
 }
 /**
@@ -211,20 +202,20 @@ export function SAN(cre: Pos, str: string, n: number): void {
 /**
  * draw a solid line
  */
-export function drawLine(pos1: Pos, pos2: Pos): Visual | undefined {
+export function drawLine(pos1: Pos_free, pos2: Pos_free): Visual | undefined {
   return drawLineComplex(pos1, pos2, 1, "#ffffff");
 }
 /**
  * draw a light poly line
  */
-export function drawPolyLight(path: Pos[]): Visual | undefined {
+export function drawPolyLight(path: Pos_free[]): Visual | undefined {
   return drawPoly(path, 0.25, "#ffffff");
 }
 /**
  * draw a poly line
  */
 export function drawPoly(
-  path: Pos[],
+  path: Pos_free[],
   opacity: number,
   color: string
 ): Visual | undefined {
@@ -242,7 +233,7 @@ export function drawPoly(
  * draw 4 line that represent a range
  */
 export function drawRange(
-  cre: Pos,
+  cre: Pos_free,
   rad: number,
   color: string = "#ffffff"
 ): (Visual | undefined)[] {
@@ -252,17 +243,17 @@ export function drawRange(
  * draw 4 line that represent a range,but have more args
  */
 export function drawRangeComplex(
-  cre: Pos,
+  cre: Pos_free,
   rad: number,
   opacity: number,
   color: string
 ): (Visual | undefined)[] {
   const cx = cre.x;
   const cy = cre.y;
-  const leftTop = { x: cx - rad, y: cy - rad };
-  const rightTop = { x: cx + rad, y: cy - rad };
-  const leftBottom = { x: cx - rad, y: cy + rad };
-  const rightBottom = { x: cx + rad, y: cy + rad };
+  const leftTop = new Pos_free_C(cx - rad, cy - rad);
+  const rightTop = new Pos_free_C(cx + rad, cy - rad);
+  const leftBottom = new Pos_free_C(cx - rad, cy + rad);
+  const rightBottom = new Pos_free_C(cx + rad, cy + rad);
   const rtn: (Visual | undefined)[] = [];
   const op = opacity;
   rtn.push(drawLineComplex(leftTop, rightTop, op, color));
@@ -277,17 +268,11 @@ export function drawRangeComplex(
 function drawAllSAViss(): void {
   for (let vis of SAVisList) {
     const tarPos = vis.textPos;
-    vis.clear().text(
-      vis.sayText,
-      tarPos, // above the creep
-      {
-        color: "#dddddd",
-        font: "0.2",
-        opacity: 1,
-        // backgroundColor: "#808080"
-        // backgroundPadding: 0.0,
-      }
-    );
+    vis.clear().text(vis.sayText, tarPos, {
+      color: "#ffdddd",
+      font: "0.2",
+      opacity: 1,
+    });
   }
 }
 /**
@@ -305,9 +290,8 @@ export function drawRect(
     opacity: opacity,
   });
 }
-// export let displayPos: Pos = pos00
 let displayAccumulate: Event_Number = new Event_Number(0);
-export function displayPos(): Pos {
+export function displayPos(): Pos_free {
   if (!displayAccumulate.validEvent()) {
     displayAccumulate = new Event_Number(0);
   }
@@ -315,5 +299,5 @@ export function displayPos(): Pos {
   const acc = displayAccumulate.num;
   const xBias = Math.floor((50 + leftRate() * 40) / 5) * 5;
   const yBias = 50;
-  return { x: xBias + (acc % 5), y: yBias + Math.floor(acc / 5) };
+  return new Pos_free_C(xBias + (acc % 5), yBias + Math.floor(acc / 5));
 }

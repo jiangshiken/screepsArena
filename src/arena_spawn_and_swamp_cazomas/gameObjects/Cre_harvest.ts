@@ -2,7 +2,6 @@ import { OK, RESOURCE_ENERGY, WORK } from "game/constants";
 import { Resource } from "game/prototypes";
 import { findClosestByRange, getRange } from "game/utils";
 import { Event_Pos } from "../utils/Event";
-import { S } from "../utils/export";
 import { tick } from "../utils/game";
 import { divideReduce, valid } from "../utils/JS";
 import { COO, GR, Pos, X_axisDistance, getRangePoss } from "../utils/Pos";
@@ -10,6 +9,7 @@ import { SA, drawLineComplex, drawLineLight } from "../utils/visual";
 import { Cre } from "./Cre";
 import { Cre_move } from "./Cre_move";
 import { isTurtleContainer } from "./CreCommands";
+import { S } from "./export";
 import { searchPathByCreCost } from "./findPath";
 import {
   Harvable,

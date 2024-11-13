@@ -19,6 +19,7 @@ import {
 } from "./gameObjects/Cre_harvest";
 import { Cre_move } from "./gameObjects/Cre_move";
 import { controlCreeps, isMyTick } from "./gameObjects/CreTool";
+import { S } from "./gameObjects/export";
 import { initGateCost, searchPath_area } from "./gameObjects/findPath";
 import {
   BlockGO,
@@ -62,7 +63,6 @@ import { showEnemies, showHits } from "./gameObjects/visual_Cre";
 import { initSpawnWallCostMatrix } from "./roles/extStealer";
 import { sum_snakePart0 } from "./strategies/snakeRush";
 import { ct, getCPUPercent, pt, ptL, ptSum } from "./utils/CPU";
-import { S } from "./utils/export";
 import {
   creepBodyPartNum,
   inResourceArea,

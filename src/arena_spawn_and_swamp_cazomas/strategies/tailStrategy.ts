@@ -200,6 +200,7 @@ function tailHealerJob(cre: Cre_battle) {
   const melee = myGroup.find(i => i.role === tailMelee);
   const tail = best(myGroup, i => tailIndex(i));
   if (tail && melee === undefined) {
+    SA(cre, "GO");
     myGroup.forEach(i => i.tasks.find(i => i instanceof PullTarsTask)?.end());
     if (damaged(cre)) {
       fleeAction(cre, myGroup, cre, tail, cre);
@@ -288,8 +289,16 @@ function refreshStartGate(cre: Cre_move, tail: Cre_move, myGroup: Cre_move[]) {
 function tailMeleeJob(cre: Cre_battle) {
   SA(cre, "tailMeleeJob");
   cre.fight();
+  const myGroupNum = tailGroup(cre);
+  const myGroup = getGroup(myGroupNum);
+  const myGroupLen = myGroup.length;
+  SA(cre, "mg=" + myGroupNum + " mgl=" + myGroup.length);
   const headIsRange = cre.getBodyPartsNum(RANGED_ATTACK) >= 3;
-  const targets = oppoUnits.filter(i => i instanceof Cre || i instanceof Spa);
+  const scanRange_target = 5 + myGroupLen + (headIsRange ? 7 : 0);
+  const targets = oppoUnits.filter(
+    i =>
+      (i instanceof Cre && GR(i, cre) <= scanRange_target) || i instanceof Spa
+  );
   SA(displayPos(), "oppoUnits.len" + oppoUnits.length);
   SA(displayPos(), "targets.len" + targets.length);
   const target = best(targets, tar => {
@@ -332,9 +341,6 @@ function tailMeleeJob(cre: Cre_battle) {
   if (target) {
     drawLineComplex(cre, target, 1, "#ee3333", "dashed");
     cre.upgrade.currentTarget = target;
-    const myGroupNum = tailGroup(cre);
-    const myGroup = getGroup(myGroupNum);
-    SA(cre, "mg=" + myGroupNum + " mgl=" + myGroup.length);
     const head = <Cre_battle>best(myGroup, i => -tailIndex(i));
     const tail = <Cre_move>best(myGroup, i => tailIndex(i));
 
@@ -344,10 +350,11 @@ function tailMeleeJob(cre: Cre_battle) {
     );
     // const healer = myGroup.find(i => tailIndex(i) === 1);
     const healer = myGroup.find(i => tailIndex(i) === 1);
-    const myGroupLen = myGroup.length;
-    const scanRange = 5 + myGroupLen + (headIsRange ? 7 : 0);
+    const scanRange_threat = 5 + myGroupLen + (headIsRange ? 7 : 0);
     const enemyThreats = enemies.filter(
-      i => hasThreat(i) && (GR(tail, i) <= scanRange || GR(cre, i) <= scanRange)
+      i =>
+        hasThreat(i) &&
+        (GR(tail, i) <= scanRange_threat || GR(cre, i) <= scanRange_threat)
     );
     const enemyMelees = enemyThreats.filter(i => i.getBodyPartsNum(ATTACK) > 0);
     const closestThreat = best(enemyThreats, i => -GR(i, cre));
@@ -396,8 +403,8 @@ function tailMeleeJob(cre: Cre_battle) {
       XAxisThreatsArr.forEach(i =>
         drawLineComplex(cre, i, 1, "#22ff00", dashed)
       );
-      drawRange(cre, scanRange, "#007777");
-      drawRange(tail, scanRange, "#007777");
+      drawRange(cre, scanRange_threat, "#007777");
+      drawRange(tail, scanRange_threat, "#007777");
       SAB(cre, "THT", tailHasThreat);
       SAB(cre, "XAT", XAxisThreat);
       if (healer && !Adj(healer, head)) {
@@ -713,7 +720,7 @@ function pushAction(
   }
   const NofatLen = myGroup.filter(i => i.master.fatigue === 0).length;
   const totalFatigue = sum(myGroup, i => i.master.fatigue);
-  if (NofatLen <= 3 || totalFatigue >= 150) {
+  if (NofatLen <= 0.5 * myGroup.length || totalFatigue >= 150) {
     SA(cre, "FtqResst" + NofatLen + " " + totalFatigue);
     stopAction(cre, head, myGroup);
   } else {

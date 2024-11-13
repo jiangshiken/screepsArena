@@ -21,7 +21,22 @@ export interface HasPos {
   readonly x: number;
   readonly y: number;
 }
+export type Pos_free = Pos | Pos_free_C;
 export type Pos = HasPos | GameObject;
+export class Pos_free_C implements HasPos {
+  readonly data_x: number;
+  readonly data_y: number;
+  constructor(x: number, y: number) {
+    this.data_x = validNum(x) ? x : printError(0, "PosFreeX" + x);
+    this.data_y = validNum(y) ? y : printError(0, "PosFreeY" + y);
+  }
+  get x(): number {
+    return this.data_x;
+  }
+  get y(): number {
+    return this.data_y;
+  }
+}
 /**
  * represent a position of the map
  */
@@ -249,23 +264,15 @@ export function COO(pos: Pos | undefined): string {
 export function getRangePoss(pos: Pos, range: number = 1): Pos[] {
   return getRangePossByStep(pos, range, 1);
 }
-/**获取反方向 */
+/**get reverse direction */
 export function getReverseDirection(dir: DirectionConstant): DirectionConstant {
   return ((dir + 4) % 8) as DirectionConstant;
 }
-/**
- * 方向顺时针转45°
- * @param dir
- * @returns
- */
+/** same as clock */
 export function leftRotateDirection(dir: DirectionConstant): DirectionConstant {
   return ((dir + 1) % 8) as DirectionConstant;
 }
-/**
- * 方向逆时针转45°
- * @param dir
- * @returns
- */
+/** reverse as clock */
 export function rightRotateDirection(
   dir: DirectionConstant
 ): DirectionConstant {
@@ -273,9 +280,6 @@ export function rightRotateDirection(
 }
 export const allDirections: DirectionConstant[] = [1, 2, 3, 4, 5, 6, 7, 8];
 export function closest<E extends Pos>(pos: Pos, arr: E[]): E | undefined {
-  if (arr.length === 0) {
-    return undefined;
-  } else {
-    return findClosestByRange(pos, arr);
-  }
+  if (arr.length === 0) return undefined;
+  else return findClosestByRange(pos, arr);
 }

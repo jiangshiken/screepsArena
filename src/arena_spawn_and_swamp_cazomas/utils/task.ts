@@ -31,11 +31,6 @@ export function useTasks(hasTasks: HasTasks) {
     } else {
       break;
     }
-    // if (hasTasks instanceof GameObj) {
-    //   // Pos
-    //   SA(hasTasks, "useTasks " + tasks.length);
-    //   SA(hasTasks, "tasksNeedLoop " + tasksNeedLoop.length);
-    // }
   }
 }
 /**

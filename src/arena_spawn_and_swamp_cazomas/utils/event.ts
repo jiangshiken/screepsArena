@@ -2,7 +2,6 @@ import { getTicks } from "game/utils";
 
 import { HasPos, Pos } from "./Pos";
 
-//classes
 /**
  *  initial the tick by the current game tick
  */

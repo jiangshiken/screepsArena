@@ -1,20 +1,17 @@
-import { GameObject } from "game/prototypes";
-import { d2, invalid, valid } from "./JS";
-import { COO, Pos_C } from "./Pos";
+import { d2, invalid, objLen, valid } from "../utils/JS";
+import { COO, Pos_C } from "../utils/Pos";
+import { GameObj } from "./GameObj";
 
 /** get print string not print attribute */
 export function toString_simple(o: any): string {
-  if (invalid(o)) return o;
-  else if (typeof o === "object") {
-    if (o instanceof Pos_C || o instanceof GameObject) {
-      return COO(o);
-    } else if (o.length) {
-      return "obj(len=" + o.length + ")";
-    } else if (o.toString) {
-      return o.toString();
-    } else {
-      return "object";
-    }
+  if (invalid(o)) {
+    return o;
+  } else if (o instanceof GameObj) {
+    return COO(o) + "id=" + o.master.id;
+  } else if (o instanceof Pos_C) {
+    return COO(o);
+  } else if (o.length) {
+    return "obj(len=" + o.length + ")";
   } else if (typeof o === "number") {
     return "" + d2(o);
   } else if (typeof o === "string") {
@@ -22,30 +19,19 @@ export function toString_simple(o: any): string {
   } else if (typeof o === "function") {
     return "function";
   } else {
-    return o;
+    return "" + o;
   }
 }
 /** get print string print 1 layer of attribute */
-export function toString_object(o: any): string {
-  if (invalid(o)) return o;
-  if (typeof o === "string") {
-    return o;
-  } else if (o.length > 10) {
-    return "arr(len=" + o.length + ")";
+export function toString_object(o: object): string {
+  if (objLen(o) > 10) {
+    return "obj(len=" + objLen(o) + ")";
   }
   let rtn = "{";
-  let w: number = 10;
   for (let i in o) {
-    w--;
-    if (w <= 0) {
-      rtn += "......";
-      break;
-    }
-    let d = o[i];
-    if (valid(d)) {
-      d = toString_simple(d);
-    }
-    rtn += i + ":" + d + ",";
+    const data = (<any>o)[i];
+    const data_str = toString_simple(data);
+    rtn += i + ":" + data_str + ",";
   }
   rtn += "}";
   return rtn;
