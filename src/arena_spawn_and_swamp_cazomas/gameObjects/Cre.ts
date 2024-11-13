@@ -14,7 +14,7 @@ import { SpawnInfo } from "./spawn";
 /** the Task of Creep*/
 
 export class Task_Cre extends Task {
-  master: Cre;
+  readonly master: Cre;
   constructor(master: Cre) {
     super(master);
     this.master = master;
@@ -22,7 +22,7 @@ export class Task_Cre extends Task {
 }
 /** a Task of the Role Function of Creep */
 export class Task_Role extends Task_Cre {
-  role: Role;
+  readonly role: Role;
   constructor(master: Cre, role: Role) {
     super(master);
     this.role = role;

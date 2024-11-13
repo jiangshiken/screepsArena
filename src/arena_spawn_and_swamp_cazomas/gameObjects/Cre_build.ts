@@ -17,7 +17,7 @@ import { CS, getMaxWorthCSS } from "./CS";
 import { S } from "./export";
 import { myCSs } from "./GameObjectInitialize";
 import { overallMap } from "./overallMap";
-import { getEnergy, getFreeEnergy, inRampart } from "./UnitTool";
+import { energyFull, energylive, inRampart } from "./UnitTool";
 
 export class Cre_build extends Cre_battle {
   isProducer: boolean = false;
@@ -153,7 +153,7 @@ export function canBeBuild(cs: CS, limitProgress: number): boolean {
       if (cs.progress < limitProgress) {
         return true;
       } else {
-        let findRtn = overallMap
+        const findRtn = overallMap
           .get(cs)
           .find(
             i =>
@@ -179,10 +179,10 @@ export class BuildingTask extends Task_Cre {
   }
   loop_task() {
     let cc = this.master;
-    if (this.isBuilding && getEnergy(cc) === 0) {
+    if (this.isBuilding && !energylive(cc)) {
       this.isBuilding = false;
     }
-    if (!this.isBuilding && getFreeEnergy(cc) === 0) {
+    if (!this.isBuilding && energyFull(cc)) {
       this.isBuilding = true;
     }
   }

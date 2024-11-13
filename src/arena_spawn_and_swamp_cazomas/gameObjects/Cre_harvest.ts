@@ -1,10 +1,9 @@
 import { OK, RESOURCE_ENERGY, WORK } from "game/constants";
 import { Resource } from "game/prototypes";
-import { findClosestByRange, getRange } from "game/utils";
 import { Event_Pos } from "../utils/Event";
 import { tick } from "../utils/game";
-import { divideReduce, valid } from "../utils/JS";
-import { COO, GR, Pos, X_axisDistance, getRangePoss } from "../utils/Pos";
+import { best, divideReduce } from "../utils/JS";
+import { Adj, COO, GR, Pos, X_axisDistance, getRangePoss } from "../utils/Pos";
 import { SA, drawLineComplex, drawLineLight } from "../utils/visual";
 import { Cre } from "./Cre";
 import { Cre_move } from "./Cre_move";
@@ -21,13 +20,14 @@ import {
   myExtensions,
   myUnits,
   oppoUnits,
-  resources,
   ress,
 } from "./GameObjectInitialize";
 import { findGO, overallMap } from "./overallMap";
 import { spawn } from "./spawn";
 import { Con, Ext, Res, Spa, Stru } from "./Stru";
 import {
+  energyFull,
+  energylive,
   getCapacity,
   getEnergy,
   getFreeEnergy,
@@ -36,20 +36,18 @@ import {
 
 export class Cre_harvest extends Cre_move {
   /** withdraw by amount */
-  withdrawRealAmount(tar: HasStore, amount: number) {
+  withdrawByAmount(tar: HasStore, amount: number) {
     if (getEnergy(tar) < amount) {
       amount = getEnergy(tar);
     }
     return this.master.withdraw(<any>tar, RESOURCE_ENERGY, amount);
   }
   /** transfer by amount */
-  transferAmount(tar: HasStore, amount: number) {
-    if (valid(this.master) && valid(tar)) {
-      if (getEnergy(this) < amount) {
-        amount = getEnergy(this);
-      }
-      return this.master.transfer(tar.master, RESOURCE_ENERGY, amount);
-    } else return null;
+  transferByAmount(tar: HasStore, amount: number) {
+    if (getEnergy(this) < amount) {
+      amount = getEnergy(this);
+    }
+    return this.master.transfer(tar.master, RESOURCE_ENERGY, amount);
   }
 
   /**drop energy by amount.It will drop all if not enough*/
@@ -63,18 +61,9 @@ export class Cre_harvest extends Cre_move {
   dropEnergy(): void {
     this.master.drop(RESOURCE_ENERGY);
   }
-  /**pick up resources*/
-  pickUpResources() {
-    const target = findClosestByRange(this.master, resources);
-    if (target) {
-      this.directPickUp(target);
-      return true;
-    }
-    return false;
-  }
   /** withdraw static*/
   withDrawStatic(): boolean {
-    let har = getHarvables().find(i => GR(i, this.master) <= 1);
+    const har = getHarvables().find(i => Adj(i, this.master));
     if (har) {
       return this.withdrawNormal(har);
     } else return false;
@@ -83,11 +72,7 @@ export class Cre_harvest extends Cre_move {
   directWithdraw(con: HasEnergy): boolean {
     //TODO back to base
     drawLineLight(this.master, con);
-    if (GR(con, this.master) > 1) {
-      this.MTJ(con);
-    } else {
-      this.stop();
-    }
+    this.MTJ_stop(con);
     return this.withdrawNormal(con);
   }
   /**withdraw normal*/
@@ -102,22 +87,22 @@ export class Cre_harvest extends Cre_move {
   }
   /**withdraw target*/
   withDrawTarget(tar: HasEnergy): boolean {
-    if (GR(this.master, tar) <= 1) {
+    if (Adj(this.master, tar)) {
       return this.withdrawNormal(tar);
     } else return false;
   }
   /** move and withdraw then drop */
   directWithdrawAndDrop(con: HasStore): void {
-    if (getEnergy(this) === 0) {
-      this.directWithdraw(con);
-    } else {
+    if (energylive(this)) {
       this.dropEnergy();
+    } else {
+      this.directWithdraw(con);
     }
   }
   /** move and transfer*/
   directTransfer(tar: HasStore): boolean {
     SA(this.master, "directTransfer" + COO(tar));
-    if (GR(this.master, tar) <= 1) {
+    if (Adj(this.master, tar)) {
       return this.transferNormal(tar);
     } else {
       this.MTJ(tar);
@@ -126,59 +111,49 @@ export class Cre_harvest extends Cre_move {
   }
   /**if a harvable will not disappear before you reach it*/
   reachableHarvable(harvable: Harvable): boolean {
-    let td;
+    let ticksToDecay;
     if (harvable instanceof Con) {
-      td =
+      ticksToDecay =
         harvable.ticksToDecay == undefined ? Infinity : harvable.ticksToDecay;
     } else {
       //is Resource
-      td = getEnergy(harvable);
+      ticksToDecay = getEnergy(harvable);
     }
-    return td > GR(this.master, harvable);
+    return ticksToDecay > GR(this.master, harvable);
   }
   /**find a fit harvable*/
   findFitHarvable(): Harvable | undefined {
-    let needTransHarvable: Harvable[] = getHarvables().filter(
+    const needTransHarvable: Harvable[] = getHarvables().filter(
       i =>
         !(i instanceof Resource && hasFullProducerAround(i)) &&
         this.reachableHarvable(i) &&
         !(i instanceof Resource && !validRes(<Res>i))
     );
-    let harvableWorths: {
+    const harvableWorths: {
       harvable: Harvable | undefined;
       worth: number;
     }[] = needTransHarvable.map(harvable => {
-      let range = GR(this.master, harvable);
-      let baseRangeBonus =
+      const range = GR(this.master, harvable);
+      const baseRangeBonus =
         1 + 3 * divideReduce(X_axisDistance(harvable, spawn), 10);
-      let volumn = getCapacity(this);
-      let energy = Math.min(getEnergy(harvable), volumn);
-      let worth = (baseRangeBonus * energy) / (range + 4);
+      const volumn = getCapacity(this);
+      const energy = Math.min(getEnergy(harvable), volumn);
+      const worth = (baseRangeBonus * energy) / (range + 4);
       drawLineComplex(this.master, harvable, 0.1 * worth, "#22bb22");
       return { harvable: harvable, worth: worth };
     });
-    let rtn: Harvable | undefined = harvableWorths.reduce(
+    const rtn: Harvable | undefined = harvableWorths.reduce(
       (a, b) => (a.worth > b.worth ? a : b),
       { harvable: undefined, worth: 0 }
     ).harvable;
     return rtn;
   }
-  /** find harvestable and withdraw */
-  findHarvestableAndWithdraw() {
-    let harvestables = getHarvables();
-    let cs = this.master.findClosestByRange(harvestables);
-    if (cs) {
-      this.directWithdraw(cs);
-    }
-  }
   /**move and drop energy*/
   directDrop(tar: Pos): boolean {
-    if (GR(this.master, tar) <= 1) {
-      SA(this.master, "dropEnergy");
+    if (Adj(this.master, tar)) {
       this.dropEnergy();
       return true;
     } else {
-      SA(this.master, "MTJ");
       this.MTJ(tar);
       return false;
     }
@@ -188,18 +163,11 @@ export class Cre_harvest extends Cre_move {
   directHarve(har: Harvable | null) {
     //TODO back to base
     if (har === null) return null;
-    if (getFreeEnergy(this) === 0) {
+    if (energyFull(this)) {
       return this.transToProducers();
     } else {
       return this.directWithdraw(har);
     }
-  }
-  /** find harvestable and harve */
-  harve(ifOutSide: boolean = false) {
-    let harvestables = getHarvables();
-    let liveHarvable = harvestables.filter(i => getEnergy(i) > 0);
-    let harvestable = findClosestByRange(this.master, liveHarvable);
-    return this.directHarve(harvestable);
   }
   /** transport to producer ,free producer will be transfered prior */
   transToProducers(): boolean {
@@ -207,7 +175,7 @@ export class Cre_harvest extends Cre_move {
     const tar = this.findFitProducer();
     if (tar) {
       drawLineLight(this.master, tar);
-      if (getFreeEnergy(tar) === 0) {
+      if (energyFull(tar)) {
         //if producer is full
         this.directDrop(tar); //drop at producer
       } else {
@@ -221,9 +189,9 @@ export class Cre_harvest extends Cre_move {
   transToTargetProducer(tar: Producer): boolean {
     SA(this.master, "transToTargetProducer " + S(tar));
     drawLineComplex(this.master, tar, 0.25, "#22ee22");
-    if (GR(this.master, tar) <= 1) {
+    if (Adj(this.master, tar)) {
       //if producer is full,drop at producer
-      if (getFreeEnergy(tar) === 0) {
+      if (energyFull(tar)) {
         if (tick <= notDropLimitTick) {
           SA(this.master, "stop" + S(tar));
           this.stop();
@@ -246,7 +214,7 @@ export class Cre_harvest extends Cre_move {
   /**transfer energy to target*/
   transferTarget(tar: HasStore): boolean {
     SA(this.master, "transferTarget " + S(tar));
-    if (GR(this.master, tar) <= 1) {
+    if (Adj(this.master, tar)) {
       return this.transferNormal(tar);
     } else {
       return false;
@@ -261,9 +229,7 @@ export class Cre_harvest extends Cre_move {
   findFitProducer(): Producer | undefined {
     // calculate worth of free producer
     const myProducers: Producer[] = getMyProducers();
-    let maxWorth: number = -Infinity;
-    let maxWorthTarget: Producer | undefined;
-    for (let producer of myProducers) {
+    const target = best(myProducers, producer => {
       const sRtnFree = searchPathByCreCost(this, producer);
       const costFree = sRtnFree.cost;
       let typeRate: number;
@@ -282,17 +248,14 @@ export class Cre_harvest extends Cre_move {
       }
       const fullRate: number = getFreeEnergy(producer) > 0 ? 8 : 1;
       const worth = (typeRate * fullRate) / (1 + costFree);
-      if (worth > maxWorth) {
-        maxWorth = worth;
-        maxWorthTarget = producer;
-      }
-    }
-    return maxWorthTarget;
+      return worth;
+    });
+    return target;
   }
   /** fill extension static*/
   fillExtension(): boolean {
     const ext = <Ext | undefined>(
-      myExtensions.find(i => GR(i, this) <= 1 && getFreeEnergy(i) > 0)
+      myExtensions.find(i => Adj(i, this) && !energyFull(i))
     );
     if (ext) {
       this.transferNormal(ext);
@@ -311,12 +274,9 @@ export function getHarvables(): Harvable[] {
     containers.filter(
       i =>
         i.master.exists &&
-        getEnergy(i) > 0 &&
+        energylive(i) &&
         !isOppoBaseContainer(i) &&
-        !(
-          GR(i, spawn) <= 1 &&
-          (getFreeEnergy(spawn) === 0 || isTurtleContainer)
-        )
+        !(Adj(i, spawn) && (energyFull(spawn) || isTurtleContainer))
     )
   );
 }
@@ -328,7 +288,7 @@ export function getHarvablesIncludeDrop(): Harvable[] {
   //resouce and outside/my not empty containers
   return (<Harvable[]>ress).concat(
     containers.filter(
-      i => i.master.exists && getEnergy(i) > 0 && !isOppoBaseContainer(i)
+      i => i.master.exists && energylive(i) && !isOppoBaseContainer(i)
     )
   );
 }
@@ -338,14 +298,14 @@ export function getHarvablesIncludeDrop(): Harvable[] {
  */
 export function getHarvestableAroundNum(pos: Pos): number {
   const hvs = getHarvables();
-  const hvas = hvs.filter(i => getRange(pos, i) <= 1);
+  const hvas = hvs.filter(i => Adj(pos, i));
   return hvas.length;
 }
 /**
  * has full producer around,that means we can not put energy into it anymore
  */
 export function hasFullProducerAround(pos: Pos) {
-  const rangePoss = getRangePoss(pos, 1);
+  const rangePoss = getRangePoss(pos);
   for (let pos of rangePoss) {
     const goList = overallMap.get(pos);
     for (let go of goList) {
@@ -357,7 +317,7 @@ export function hasFullProducerAround(pos: Pos) {
   return false;
 }
 export function isFullProducer(go: Unit) {
-  return isProducer(go) && getFreeEnergy(<HasStore>go) === 0;
+  return isProducer(go) && energyFull(<HasStore>go);
 }
 /**
  * any thing use energy will be regard as a producer
@@ -370,7 +330,7 @@ export function isProducer(unit: Unit): boolean {
       unit instanceof Ext ||
       (unit instanceof Cre &&
         unit.getBodyPartsNum(WORK) > 0 &&
-        getFreeEnergy(unit) > 0))
+        !energyFull(unit)))
   );
 }
 export function isEnemyProducer(unit: Unit): boolean {

@@ -1,6 +1,6 @@
 import { ATTACK, HEAL, RANGED_ATTACK } from "game/constants";
 import { Event_Number } from "../utils/Event";
-import { Adj, GR } from "../utils/Pos";
+import { Adj, GR, InShotRan } from "../utils/Pos";
 import { SA } from "../utils/visual";
 import { findMaxTaunt, getTauntMass, getTauntShot } from "./battle";
 import { Cre } from "./Cre";
@@ -23,31 +23,24 @@ export class Cre_battle extends Cre_harvest {
   fight(): boolean {
     SA(this, "fight");
     if (
-      oppoUnits.find(i => GR(this, i) <= 1) !== undefined ||
-      (getGuessPlayer() === Kerob &&
-        walls.find(i => Adj(i, this.master)) !== undefined)
+      oppoUnits.find(i => Adj(this, i)) !== undefined ||
+      walls.find(i => Adj(i, this.master)) !== undefined
     ) {
       //if can attack
-      if (this.getHealthyBodyParts(ATTACK).length > 0) {
-        let tars1 = oppoUnits.filter(i => GR(this.master, i) <= 1);
-        let ANum = this.getHealthyBodyParts(ATTACK).length;
+      if (this.getHealthyBodyPartsNum(ATTACK) > 0) {
+        const tarsAround = oppoUnits.filter(i => Adj(this.master, i));
+        const ANum = this.getHealthyBodyParts(ATTACK).length;
         //find max taunt
-        let tauntA = 30 * ANum * findMaxTaunt(tars1).taunt;
+        const tauntA = 30 * ANum * findMaxTaunt(tarsAround).taunt;
         //targets in range 3
-        // let tars3 = oppoUnits.filter(i => GR(this.master, i) <= 3);
-        // let RANum = this.master.getHealthyBodies(RANGED_ATTACK).length;
-        // //taunt of rangedAttack
-        // let tauntR = 10 * RANum * findMaxTaunt(tars3).taunt;
         //
-        let tarFriends = friends.filter(i => GR(this.master, i) <= 3);
-        let HNum = this.getHealthyBodyParts(HEAL).length;
+        const tarFriends = friends.filter(i => InShotRan(this.master, i));
+        const HNum = this.getHealthyBodyParts(HEAL).length;
         //taunt of heal
-        let tauntH = 12 * HNum * findMaxTaunt(tarFriends, true, this).taunt;
+        const tauntH = 12 * HNum * findMaxTaunt(tarFriends, true, this).taunt;
         if (tauntA >= tauntH) {
-          // if (tauntA + tauntR >= tauntR + tauntH) {
-          // SA(this.master, "melee and shot");
-          let successMelee = this.melee();
-          let successShot = this.shot();
+          const successMelee = this.melee();
+          const successShot = this.shot();
           return successMelee || successShot;
         } else {
           // SA(this.master, "sr1");
@@ -65,17 +58,17 @@ export class Cre_battle extends Cre_harvest {
   /**attack wall*/
   attackWall() {
     if (this.getHealthyBodyParts(ATTACK).length > 0) {
-      const w = walls.find(i => GR(i, this.master) <= 1);
+      const w = walls.find(i => Adj(i, this.master));
       if (w) this.attackNormal(w);
     }
     if (this.getHealthyBodyParts(RANGED_ATTACK).length > 0) {
-      const w = walls.find(i => GR(i, this.master) <= 3);
+      const w = walls.find(i => InShotRan(i, this.master));
       if (w) this.shotTarget(w);
     }
   }
   /**attack normal*/
   attackNormal(tar: CanBeAttacked): boolean {
-    if (GR(this.master, tar) <= 1) {
+    if (Adj(this.master, tar)) {
       this.master.attack(tar.master);
       return true;
     } else return false;
@@ -83,7 +76,7 @@ export class Cre_battle extends Cre_harvest {
   /**ranged attack normal*/
   shotTarget(tar: CanBeAttacked): void {
     // SA(this.master, "shotTarget " + COO(tar));
-    if (GR(this.master, tar) <= 3) {
+    if (InShotRan(this.master, tar)) {
       this.master.rangedAttack(tar.master);
     }
   }
@@ -92,7 +85,7 @@ export class Cre_battle extends Cre_harvest {
     // SA(this, "shotTargetJudgeIfMass");
     let tauntMass: number = getTauntMass(this);
     let tauntShot: number = getTauntShot(this, tar.master);
-    if (GR(this, tar) <= 1 || tauntMass > tauntShot) {
+    if (Adj(this, tar) || tauntMass > tauntShot) {
       this.master.rangedMassAttack();
     } else {
       this.shotTarget(tar);
@@ -103,7 +96,7 @@ export class Cre_battle extends Cre_harvest {
     // SA(this,"melee 1")
     if (this.getBodyParts(ATTACK).length > 0) {
       // SA(this,"melee 2")
-      let tars = oppoUnits.filter(i => GR(this.master, i) <= 1);
+      let tars = oppoUnits.filter(i => Adj(this.master, i));
 
       let tar = findMaxTaunt(tars).unit;
       if (tar != undefined && tar.master.exists) {
@@ -123,7 +116,7 @@ export class Cre_battle extends Cre_harvest {
   /** heal static */
   restore() {
     if (this.getBodyPartsNum(HEAL) > 0) {
-      let tars = friends.filter(i => GR(this.master, i) <= 3);
+      let tars = friends.filter(i => InShotRan(this.master, i));
       let tar = findMaxTaunt(tars, true, this).unit;
       if (tar != undefined && tar.master.exists) {
         this.healTar(tar);
@@ -134,7 +127,7 @@ export class Cre_battle extends Cre_harvest {
   healTar(tar: Cre): boolean {
     SA(this.master, "healTar");
     if (tar.exists) {
-      let range = GR(this.master, tar);
+      const range = GR(this.master, tar);
       if (range > 1 && range <= 3) {
         //if range 2 or 3,
         this.master.rangedHeal(tar.master);
@@ -149,15 +142,15 @@ export class Cre_battle extends Cre_harvest {
   }
   shotAndRestore(): boolean {
     // SA(this.master, "shotAndRestore");
-    let tars = oppoUnits.filter(i => GR(this.master, i) <= 3);
-    let tarFriends = friends.filter(i => GR(this.master, i) <= 3);
+    let tars = oppoUnits.filter(i => InShotRan(this.master, i));
+    let tarFriends = friends.filter(i => InShotRan(this.master, i));
     let UTShot = findMaxTaunt(tars);
     let UTHeal = findMaxTaunt(tarFriends, true, this);
     let RANum = this.getHealthyBodyParts(RANGED_ATTACK).length;
     let HNum = this.getHealthyBodyParts(HEAL).length;
     let tarShot = UTShot.unit;
     let tarHeal = UTHeal.unit;
-    if (tarHeal && tarShot && GR(this.master, tarHeal) >= 2) {
+    if (tarHeal && tarShot && !Adj(this.master, tarHeal)) {
       //will conflict
       let useShot: boolean =
         10 * RANum * UTShot.taunt > 12 * HNum * UTHeal.taunt;
@@ -193,7 +186,7 @@ export class Cre_battle extends Cre_harvest {
   /** ranged attack static, will find fit enemy  */
   shot(): boolean {
     if (this.getBodyPartsNum(RANGED_ATTACK) > 0) {
-      let tars = oppoUnits.filter(i => GR(this.master, i) <= 3);
+      let tars = oppoUnits.filter(i => InShotRan(this.master, i));
       let tar = findMaxTaunt(tars).unit;
       if (tar != undefined && tar.exists) {
         this.shotTargetJudgeIfMass(tar);

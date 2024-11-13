@@ -78,6 +78,9 @@ export function getCapacity(cre: HasStore): number {
   const rtn = cre.master.store.getCapacity(RESOURCE_ENERGY);
   return rtn ? rtn : 0;
 }
+export function energyFull(cre: HasStore): boolean {
+  return getFreeEnergy(cre) === 0;
+}
 export function getFreeEnergy(cre: HasStore): number {
   const rtn = cre.master.store.getFreeCapacity(RESOURCE_ENERGY);
   return rtn ? rtn : 0;
