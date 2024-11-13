@@ -263,7 +263,7 @@ export function goinRampartAssign(cre: Cre_move, calBlocked: Pos[]) {
 }
 //functions
 export function moveToRandomEmptyAround(cre: Cre_move): void {
-  SA(cre, "moveToRandomEmptyAround");
+  SA(cre, "MTREA");
   const poss = getRangePoss(cre, 1);
   const empPoss = poss.filter(i => !blocked(i));
   const pos = ranGet(empPoss);

@@ -2,7 +2,7 @@ import { BodyPartConstant, CARRY, MOVE } from "game/constants";
 import { Creep } from "game/prototypes";
 import { Event, Event_Number } from "../utils/Event";
 import { Pos } from "../utils/Pos";
-import { cancelOldTask, HasTasks, Task } from "../utils/Task";
+import { HasTasks, Task } from "../utils/Task";
 import { ExtraTauntEvent } from "./battle";
 import { PullEvent, Role } from "./CreTool";
 import { GameObj } from "./GameObj";
@@ -26,7 +26,7 @@ export class Task_Role extends Task_Cre {
   constructor(master: Cre, role: Role) {
     super(master);
     this.role = role;
-    cancelOldTask(this, Task_Role);
+    this.cancelOldTask(Task_Role);
   }
   loop_task(): void {
     // SA(this.master,"Task_Role_loop")

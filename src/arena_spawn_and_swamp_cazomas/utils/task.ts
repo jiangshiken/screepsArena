@@ -62,8 +62,10 @@ export class Task {
     this.complete = true;
     remove(this.master.tasks, this);
   }
-}
-export function cancelOldTask(task: Task, type: any): void {
-  const oldTask = task.master.tasks.find(t => t instanceof type && t !== task);
-  if (oldTask) oldTask.end();
+  cancelOldTask(type: any): void {
+    const oldTask = this.master.tasks.find(
+      t => t instanceof type && t !== this
+    );
+    if (oldTask) oldTask.end();
+  }
 }

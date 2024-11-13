@@ -5,7 +5,6 @@ import { tick } from "../utils/game";
 import { last } from "../utils/JS";
 import { Adj, atPos, GR, Pos } from "../utils/Pos";
 import { ERR } from "../utils/print";
-import { cancelOldTask } from "../utils/Task";
 import { drawLineComplex, drawLineLight, SA } from "../utils/visual";
 import { Cre, Task_Cre } from "./Cre";
 import { calEventNumberCPUTime, isMyTick } from "./CreTool";
@@ -28,7 +27,7 @@ export class MoveTask extends Task_Cre {
     super(master);
     this.path = path;
     //cancel old task
-    cancelOldTask(this, MoveTask);
+    this.cancelOldTask(MoveTask);
   }
   loop_task(): void {
     if (this.path.length > 0) {
@@ -102,11 +101,12 @@ export class FindPathAndMoveTask extends MoveTask {
     ) {
       this.end();
     }
+    const closeScanRange = 3;
     if (
       tick === this.invokeTick ||
       isMyTick(this.master, this.findPathStep) ||
-      GR(this.tempTar, this.master) <= 1 ||
-      GR(this.tar, this.master) <= 1 ||
+      GR(this.tempTar, this.master) <= closeScanRange ||
+      GR(this.tar, this.master) <= closeScanRange ||
       (this.path.length > 0 && blocked(this.path[0]))
     ) {
       this.path = this.findPath_task(this.tar);

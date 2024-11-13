@@ -123,22 +123,21 @@ export class Cre_move extends Cre {
     // SA(this,"moveTo1="+coordinate(tar));
     drawLineLight(this.master, tar);
     //cancel old task
-    let theSame: boolean = true;
-    const currentMoveTask: MoveTask | undefined = findTask(this, MoveTask);
-    if (currentMoveTask && currentMoveTask instanceof FindPathAndMoveTask) {
+    let ifNewTask: boolean = false;
+    const oldTask: MoveTask | undefined = findTask(this, MoveTask);
+    if (oldTask && oldTask instanceof FindPathAndMoveTask) {
       //if is not the same pos
-      if (!atPos(currentMoveTask.tar, tar)) {
-        theSame = false;
-      } else if (currentMoveTask.plainCost !== plainCost) {
-        theSame = false;
-      } else if (currentMoveTask.swampCost !== swampCost) {
-        theSame = false;
-      } else if (currentMoveTask.costMatrix !== costMatrix) {
-        theSame = false;
+      if (!atPos(oldTask.tar, tar)) {
+        ifNewTask = true;
+      } else if (oldTask.plainCost !== plainCost) {
+        ifNewTask = true;
+      } else if (oldTask.swampCost !== swampCost) {
+        ifNewTask = true;
+      } else if (oldTask.costMatrix !== costMatrix) {
+        ifNewTask = true;
       }
-    } else theSame = false;
-    // SA(this,"theSame="+theSame)
-    if (!theSame) {
+    } else ifNewTask = true;
+    if (ifNewTask) {
       //add new move task
       new FindPathAndMoveTask(
         this,
@@ -149,8 +148,6 @@ export class Cre_move extends Cre {
         plainCost,
         swampCost
       );
-    } else if (currentMoveTask) {
-      currentMoveTask.pause = false;
     }
   }
 }
