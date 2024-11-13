@@ -1,7 +1,7 @@
 //functions
 
 import { CostMatrix } from "game/path-finder";
-import { arrayEqual, last, remove, valid } from "../utils/JS";
+import { arrayEqual, last } from "../utils/JS";
 import { Adj, COO, Pos, atPos } from "../utils/Pos";
 import { ERR } from "../utils/print";
 import { findTask } from "../utils/Task";
@@ -10,13 +10,8 @@ import { Cre, Task_Cre } from "./Cre";
 import { Cre_move } from "./Cre_move";
 import { moveToRandomEmptyAround } from "./CreCommands";
 import { PullEvent } from "./CreTool";
-import {
-  def_plainCost,
-  def_swampCost,
-  getMoveStepDef,
-  getSpeed,
-} from "./findPath";
-import { FindPathAndMoveTask, moveTo_basic, moveTo_direct } from "./MoveTask";
+import { def_plainCost, def_swampCost, getMoveStepDef } from "./findPath";
+import { FindPathAndMoveTask, MoveTask, moveTo_direct } from "./MoveTask";
 import { moveBlockCostMatrix } from "./UnitTool";
 
 /**
@@ -71,16 +66,17 @@ export function newPullTask(
  *  if is undefined the creep will move random at last position of path
  */
 export class PullTask extends Task_Cre {
-  master: Cre_move;
-  tarCre: Cre;
-  tarPos: Pos;
-  step: number;
+  readonly master: Cre_move;
+  readonly tarCre: Cre;
+  readonly tarPos: Pos;
+  readonly step: number;
+  moveTaskTar: FindPathAndMoveTask | undefined = undefined;
   moveTask1: FindPathAndMoveTask | undefined = undefined;
   moveTask2: FindPathAndMoveTask | undefined = undefined;
-  costMatrix: CostMatrix | undefined;
-  plainCost: number;
-  swampCost: number;
-  randomMoveAtEnd: boolean;
+  readonly costMatrix: CostMatrix | undefined;
+  readonly plainCost: number;
+  readonly swampCost: number;
+  readonly randomMoveAtEnd: boolean;
   constructor(
     master: Cre_move,
     tarCre: Cre,
@@ -104,6 +100,15 @@ export class PullTask extends Task_Cre {
     if (Adj(this.master, this.tarCre)) {
       SA(this.master, "MT1END");
     } else {
+      this.moveTaskTar = new FindPathAndMoveTask(
+        this.tarCre,
+        this.master,
+        [this.tarCre],
+        this.step,
+        this.costMatrix,
+        this.plainCost,
+        this.swampCost
+      );
       this.moveTask1 = new FindPathAndMoveTask(
         this.master,
         this.tarCre,
@@ -127,6 +132,7 @@ export class PullTask extends Task_Cre {
     SA(this.master, "PullTask_loop");
     if (Adj(this.master, this.tarCre)) {
       this.moveTask1?.end();
+      this.moveTaskTar?.end();
       SA(this.tarCre, "normalPull " + COO(this.master));
       normalPull(this.master, this.tarCre);
       if (!this.moveTask2) {
@@ -167,6 +173,7 @@ export function directBePulled(cre: Cre_move, tar: Cre): boolean {
     return true;
   } else {
     cre.MTJ(tar);
+    return false;
   }
 }
 /** pull  */
@@ -238,48 +245,52 @@ export function getAllPullTargetList(cre: Cre): Cre[] {
  */
 export function newPullTarsTask(
   master: Cre_move,
-  tarCres: Cre[],
+  tarCres: Cre_move[],
   tarPos: Pos,
-  step: number = getMoveStepDef(tarCres.concat([master]))
+  step: number = getMoveStepDef(tarCres.concat([master])),
+  costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
+  plainCost: number = def_plainCost,
+  swampCost: number = def_swampCost
 ) {
-  let oldT = <PullTarsTask>findTask(master, PullTarsTask);
-  let newTask: boolean;
-  if (valid(oldT)) {
-    if (arrayEqual(oldT.tarCres, tarCres) && oldT.tarPos == tarPos) {
-      // SA(master, "samePullTask");
-      newTask = false;
-    } else {
-      newTask = true;
+  if (tarCres.find(i => i === master)) {
+    ERR("new pullTarsTask master in tarCres");
+    return;
+  }
+  const oldTask = <PullTarsTask | undefined>findTask(master, PullTarsTask);
+  let ifNewTask: boolean = false;
+  if (oldTask) {
+    if (!arrayEqual(oldTask.tarCres, tarCres) || oldTask.tarPos !== tarPos) {
+      ifNewTask = true;
+    } else if (oldTask.plainCost !== plainCost) {
+      ifNewTask = true;
+    } else if (oldTask.swampCost !== swampCost) {
+      ifNewTask = true;
+    } else if (oldTask.costMatrix !== costMatrix) {
+      ifNewTask = true;
     }
   } else {
-    newTask = true;
+    ifNewTask = true;
   }
-  if (newTask) {
-    new PullTarsTask(master, tarCres, tarPos, step, nextStep);
+  if (ifNewTask) {
+    new PullTarsTask(master, tarCres, tarPos, step);
   }
 }
 /**
  * pull a group of creep to a position
  */
 export class PullTarsTask extends Task_Cre {
-  master: Cre_move;
-  tarCres: Cre[];
-  tarPos: Pos;
-  step: number;
-  nextStep: Pos | undefined;
-  useLeaderPull: boolean;
-  leaderStop: boolean;
-  costMatrix: CostMatrix | undefined;
-  plainCost: number;
-  swampCost: number;
+  readonly master: Cre_move;
+  tarCres: Cre_move[];
+  readonly tarPos: Pos;
+  readonly step: number;
+  readonly costMatrix: CostMatrix | undefined;
+  readonly plainCost: number;
+  readonly swampCost: number;
   constructor(
     master: Cre_move,
-    tarCres: Cre[],
+    tarCres: Cre_move[],
     tarPos: Pos,
     step: number = getMoveStepDef(tarCres.concat([master])),
-    nextStep?: Pos,
-    useLeaderPull: boolean = true,
-    leaderStop: boolean = false, //for direct move of leader
     costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
     plainCost: number = def_plainCost,
     swampCost: number = def_swampCost
@@ -290,86 +301,47 @@ export class PullTarsTask extends Task_Cre {
     this.tarCres = tarCres;
     this.tarPos = tarPos;
     this.step = step;
-    this.nextStep = nextStep;
-    this.useLeaderPull = useLeaderPull;
-    this.leaderStop = leaderStop;
     this.costMatrix = costMatrix;
     this.plainCost = plainCost;
     this.swampCost = swampCost;
     //cancel old task
-    var ot = this.master.tasks.find(
-      task => task instanceof PullTarsTask && task != this
-    );
-    if (ot) {
-      ot.end();
-      return this;
-    }
+    this.cancelOldTask(PullTarsTask);
   }
   end(): void {
     super.end();
-    this.master.tasks.find(i => i instanceof PullTask)?.end();
+    findTask(this.master, MoveTask)?.end();
+    this.tarCres.forEach(i => findTask(i, MoveTask)?.end());
   }
   loop_task(): void {
     // if have pull task
-    SA(this.master, "PullTarsTask loop_task");
-    let tarCres = this.tarCres;
-    if (tarCres.find(i => i === this.master)) {
-      SA(this.master, "PULL SELF");
+    SA(this.master, "PTTask loop");
+    //remove unexist tar
+    this.tarCres = this.tarCres.filter(i => i.exists);
+    if (atPos(this.master, this.tarPos)) {
       this.end();
     }
-    let allPulling = true; //if all being pulled
-    //remove unexist tar
-    for (let tar of tarCres) {
-      if (!tar.master.exists) {
-        remove(tarCres, tar);
-      }
+    if (this.tarCres.length === 0) {
+      this.end();
     }
     //let tar be linked
-    let creIdle = true;
-    for (let i = 0; i < tarCres.length - 1; i++) {
-      let tar = tarCres[i];
-      let tarNext = tarCres[i + 1];
-      let pulling = moveAndBePulled(tarNext, tar);
-      if (!pulling) {
-        SA(this.master, "not pulling");
+    let allPulling = true; //if all being pulled
+    for (let i = 0; i < this.tarCres.length; i++) {
+      const tar = this.tarCres[i];
+      const tar_target = i === 0 ? this.master : this.tarCres[i - 1];
+      if (!Adj(tar, tar_target)) {
+        SA(tar, "try connect");
         allPulling = false;
-        let tarSpeed = getSpeed([tarNext]);
-        if (
-          this.useLeaderPull &&
-          creIdle &&
-          (tarSpeed < 1 || !tar.hasMoveBodyPart())
-        ) {
-          //go pull this tar
-          newPullTask(this.master, tarNext, tar);
-          creIdle = false;
-        }
+        tar.MTJ(tar_target);
+      } else {
+        normalPull(tar_target, tar);
       }
     }
-    if (allPulling) {
-      //if all pulled
-      SA(this.master, "allPulling");
-      if (tarCres.length === 0) {
-        this.master.MTJ(this.tarPos);
-      } else {
-        SA(this.master, "newPullTask" + COO(tarCres[0]));
-        newPullTask(
-          this.master,
-          tarCres[0],
-          this.tarPos,
-          this.step,
-          this.nextStep,
-          this.leaderStop,
-          this.costMatrix,
-          this.plainCost,
-          this.swampCost
-        );
-      }
-    } else if (creIdle) {
-      //this is idle,approach first
-      SA(this.master, "creIdle");
-      moveTo_basic(this.master, tarCres[0]);
+    if (!allPulling) {
+      SA(this.master, "find tarCres");
+      this.master.MTJ(this.tarCres[0]);
     } else {
-      SA(this.master, "not all pulling");
+      SA(this.master, "all pulling");
+      this.master.MTJ(this.tarPos);
     }
   }
 }

@@ -53,12 +53,12 @@ export class MoveTask extends Task_Cre {
 /** move to a position ,will findPath every `findPathStep` ticks*/
 export class FindPathAndMoveTask extends MoveTask {
   /** target position */
-  tar: Pos;
-  findPathStep: number;
-  pullList: Cre[];
-  costMatrix: CostMatrix | undefined;
-  plainCost: number;
-  swampCost: number;
+  readonly tar: Pos;
+  readonly findPathStep: number;
+  readonly pullList: Cre[];
+  readonly costMatrix: CostMatrix | undefined;
+  readonly plainCost: number;
+  readonly swampCost: number;
   /** default `findPathStep` */
   constructor(
     master: Cre,
