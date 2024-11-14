@@ -39,7 +39,7 @@ export class Cre_move extends Cre {
     this.moveTo_setAppointment(tar);
     tar.moveTo_setAppointment(this);
   }
-  MTJ_stop(
+  MT_stop(
     tar: Pos,
     pullList: Cre[] = [this],
     step: number = getMoveStepDef(pullList),
@@ -50,7 +50,7 @@ export class Cre_move extends Cre {
     if (Adj(this, tar)) {
       this.stop();
     } else {
-      this.MTJ(tar, pullList, step, costMatrix, plainCost, swampCost);
+      this.MT(tar, pullList, step, costMatrix, plainCost, swampCost);
     }
   }
   randomMove() {
@@ -90,7 +90,7 @@ export class Cre_move extends Cre {
   useAppointMovement(validTick: number = 0): boolean {
     const app = this.appointmentMovement;
     if (app && app.validEvent(validTick)) {
-      this.MTJ(app);
+      this.MT(app);
       return true;
     } else {
       return false;
@@ -112,7 +112,7 @@ export class Cre_move extends Cre {
     if (t) t.pause = false;
   }
   /**move to judge most general move action */
-  MTJ(
+  MT(
     tar: Pos,
     pullList: Cre[] = [this],
     step: number = getMoveStepDef(pullList),
@@ -122,6 +122,10 @@ export class Cre_move extends Cre {
   ): void {
     // SA(this,"moveTo1="+coordinate(tar));
     drawLineLight(this.master, tar);
+    if (Adj(this, tar) && !atPos(this, tar)) {
+      moveTo_direct(this, tar);
+      return;
+    }
     //cancel old task
     let ifNewTask: boolean = false;
     const oldTask: MoveTask | undefined = findTask(this, MoveTask);

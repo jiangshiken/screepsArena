@@ -59,7 +59,7 @@ export class Cre_build extends Cre_battle {
     }
     const buildRtn = this.normalBuild(tar);
     if (buildRtn === ERR_NOT_IN_RANGE) {
-      this.MTJ(tar);
+      this.MT(tar);
       return true;
     } else if (buildRtn === OK) {
       this.stop();
@@ -89,7 +89,7 @@ export class Cre_build extends Cre_battle {
     const cs = getMaxWorthCSS(css);
     this.buildStatic();
     if (cs && !InShotRan(cs, this.master)) {
-      this.MTJ(cs);
+      this.MT(cs);
     } else {
       this.stop();
     }

@@ -23,10 +23,10 @@ import {
 import { damageAmount, damaged } from "../gameObjects/HasHits";
 import { MoveTask, moveTo_direct } from "../gameObjects/MoveTask";
 import { Dooms, getGuessPlayer, Kerob, Tigga } from "../gameObjects/player";
-import { PullTarsTask } from "../gameObjects/pull";
-import { Ext, Spa } from "../gameObjects/Stru";
+import { newPullTarsTask, PullTarsTask } from "../gameObjects/pull";
+import { Spa } from "../gameObjects/Stru";
 import { blocked, inRampart } from "../gameObjects/UnitTool";
-import { extStealer } from "../roles/extStealer";
+import { extStealer, initSpawnWallCostMatrix } from "../roles/extStealer";
 import { set_energyStealMode } from "../roles/harvester";
 import { toughDefender } from "../roles/toughDefender";
 import { TB } from "../utils/autoBodys";
@@ -37,6 +37,7 @@ import {
   first,
   goInRange,
   inRange,
+  last,
   ranBool,
   relu,
   sum,
@@ -85,6 +86,7 @@ function drawFatigue() {
 }
 export function useTailStrategy() {
   set_energyStealMode(true);
+  initSpawnWallCostMatrix();
   // set_swampIgnore(true);
   // set_moveCostForceRate(0.001)
   // setMoveMapSetRate(0.0004);
@@ -188,7 +190,7 @@ export function useTailStrategy() {
   command();
 }
 export const tailHealer: Role = new Role("tailHealer", tailHealerJob);
-export const tailShoter: Role = new Role("tailShoter", tailShoterJob);
+// export const tailShoter: Role = new Role("tailShoter", tailShoterJob);
 export const tailMelee: Role = new Role("tailMelee", tailMeleeJob);
 export const tailPart: Role = new Role("tailPart", tailPartJob);
 function tailHealerJob(cre: Cre_battle) {
@@ -196,8 +198,8 @@ function tailHealerJob(cre: Cre_battle) {
   cre.fight();
   const myGroup = getGroup(tailGroup(cre));
   const melee = myGroup.find(i => i.role === tailMelee);
-  const tail = best(myGroup, i => tailIndex(i));
-  if (tail && melee === undefined) {
+  const tail = <Cre_move>best(myGroup, i => tailIndex(i));
+  if (melee === undefined) {
     SA(cre, "GO");
     myGroup.forEach(i => i.tasks.find(i => i instanceof PullTarsTask)?.end());
     if (damaged(cre)) {
@@ -213,10 +215,29 @@ function tailHealerJob(cre: Cre_battle) {
         }
       }
     }
+  } else {
+    if (!Adj(cre, melee)) {
+      SA(cre, "MTH");
+      cre.MT(melee);
+    }
   }
 }
+function getGroup_real(n: number): Cre_move[] {
+  const tailMembers = friends.filter(i => tailGroup(i) === n);
+  return <Cre_move[]>tailMembers;
+}
 function getGroup(n: number): Cre_move[] {
-  return <Cre_move[]>friends.filter(i => tailGroup(i) === n);
+  const tailMembers = friends.filter(i => tailGroup(i) === n);
+  const head = tailMembers[0];
+  const rtn = [head];
+  for (let i = 0; i < tailMembers.length - 1; i++) {
+    const mem = tailMembers[i + 1];
+    const mem_tar = tailMembers[i];
+    if (Adj(mem, mem_tar)) {
+      rtn.push(mem);
+    }
+  }
+  return <Cre_move[]>rtn;
 }
 function tailIndex(cre: Cre): number {
   const ie: any = cre.extraMessage;
@@ -360,7 +381,7 @@ function tailMeleeJob(cre: Cre_battle) {
     if (tail && head) {
       refreshStartGate(cre, tail, myGroup);
       //clear pull tars task and move task
-      myGroup.forEach(mem => {
+      getGroup_real(myGroupNum).forEach(mem => {
         mem.stop();
         mem.tasks.find(i => i instanceof PullTarsTask)?.end();
       });
@@ -545,7 +566,7 @@ function pullAction(
       }
     }
   }
-  new PullTarsTask(cre, followers, tar, 10, costMat, 1, 2);
+  newPullTarsTask(cre, followers, tar, 10, costMat, 1, 2);
 }
 function stopAction(cre: Cre_move, head: Cre, myGroup: Cre_move[]) {
   SA(cre, "STOP");
@@ -813,7 +834,7 @@ function fleeAction(
         );
         SA(tail, "Tail=" + sortedFollowers2.length);
         if (sortedFollowers2.length === 0) {
-          tail.MTJ(spawn);
+          tail.MT(spawn);
         } else {
           pullAction(tail, sortedFollowers2, spawn);
         }
@@ -830,30 +851,42 @@ function fleeAction(
     }
   }
 }
-function tailShoterJob(cre: Cre) {
-  SA(cre, "tailShoterJob");
-  const targets = oppoUnits.filter(
-    i => i instanceof Cre || i instanceof Ext || i instanceof Spa
-  );
-  const target = best(targets, i => {
-    return -GR(i, cre);
-  });
-  if (target) {
-    const dis = GR(target, cre);
-    if (dis <= 2) {
-      SA(cre, "FLEE");
-    } else if (dis === 3) {
-      if (ranBool(0.9)) {
-        SA(cre, "STOP");
-        //TODO
-      }
-    }
-    //TODO
-  }
-}
-function tailPartJob(cre: Cre) {
+// function tailShoterJob(cre: Cre) {
+//   SA(cre, "tailShoterJob");
+//   const targets = oppoUnits.filter(
+//     i => i instanceof Cre || i instanceof Ext || i instanceof Spa
+//   );
+//   const target = best(targets, i => {
+//     return -GR(i, cre);
+//   });
+//   if (target) {
+//     const dis = GR(target, cre);
+//     if (dis <= 2) {
+//       SA(cre, "FLEE");
+//     } else if (dis === 3) {
+//       if (ranBool(0.9)) {
+//         SA(cre, "STOP");
+//         //TODO
+//       }
+//     }
+//     //TODO
+//   }
+// }
+function tailPartJob(cre: Cre_move) {
   const groupNum = tailGroup(cre);
   const tailInd = tailIndex(cre);
   SA(cre, "TP G" + groupNum + "_" + tailInd);
+  const myGroup = getGroup(groupNum);
+  const head = myGroup.find(i => i.role === tailMelee || i.role === tailHealer);
+  const tail = last(myGroup);
+  if (head) {
+    if (tail && !myGroup.find(i => i === cre)) {
+      if (!Adj(cre, tail)) {
+        SA(cre, "MTH");
+        cre.MT(tail, [cre], 5, undefined, 1, 1);
+      }
+    }
+  } else {
+  }
 }
 function command() {}

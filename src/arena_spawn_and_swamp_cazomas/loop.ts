@@ -61,7 +61,6 @@ import {
   showHealthBars,
   showHits,
 } from "./gameObjects/visual_Cre";
-import { initSpawnWallCostMatrix } from "./roles/extStealer";
 import { ct, getCPUPercent, pt, ptL } from "./utils/CPU";
 import {
   creepBodyPartNum,
@@ -148,7 +147,6 @@ export function loopStart() {
   if (getTicks() === 1) {
     set_spawn_left(spawn.x < 50);
     initGateCost();
-    initSpawnWallCostMatrix();
   }
   setOverallMap();
   //

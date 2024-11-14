@@ -22,10 +22,10 @@ import {
   spawnExtraTaunt,
 } from "./CreTool";
 import { oppoUnits, spawn, Unit } from "./GameObjectInitialize";
-import { damagedRate, HasHits, healthRate } from "./HasHits";
+import { damagedRate, healthRate } from "./HasHits";
 import { findGO } from "./overallMap";
 import { Ext, Ram, Spa, Tow } from "./Stru";
-import { getEnergy, inRampart } from "./UnitTool";
+import { CanBeAttacked, getEnergy, inRampart } from "./UnitTool";
 
 export class TauntEvent extends Event {
   readonly from: Cre;
@@ -65,7 +65,7 @@ export function sumForceByArr(
 ): StNumber {
   return sum(arr, i => calculateForce(i, includeRam));
 }
-export function isUnit(a: HasHits): boolean {
+export function isUnit(a: CanBeAttacked): boolean {
   return (
     a instanceof Cre ||
     a instanceof Spa ||
@@ -74,7 +74,7 @@ export function isUnit(a: HasHits): boolean {
     a instanceof Ram
   );
 }
-export function getTauntShot(cre: Cre, tar: HasHits): StNumber {
+export function getTauntShot(cre: Cre, tar: CanBeAttacked): StNumber {
   const RANum = cre.getHealthyBodyPartsNum(RANGED_ATTACK);
   const taunt = isUnit(tar) ? getTaunt(<Unit>tar) : 0;
   const dmg = rangeDmg * RANum;

@@ -172,7 +172,7 @@ export function directBePulled(cre: Cre_move, tar: Cre): boolean {
     normalPull(lastOne, cre);
     return true;
   } else {
-    cre.MTJ(tar);
+    cre.MT(tar);
     return false;
   }
 }
@@ -198,7 +198,7 @@ export function moveAndBePulled(cre: Cre_move, tar: Cre): boolean {
     normalPull(tar, cre);
     return true;
   } else {
-    cre.MTJ(tar);
+    cre.MT(tar);
     return false;
   }
 }
@@ -331,17 +331,21 @@ export class PullTarsTask extends Task_Cre {
       if (!Adj(tar, tar_target)) {
         SA(tar, "try connect");
         allPulling = false;
-        tar.MTJ(tar_target);
+        tar.MT(tar_target);
       } else {
         normalPull(tar_target, tar);
       }
     }
     if (!allPulling) {
       SA(this.master, "find tarCres");
-      this.master.MTJ(this.tarCres[0]);
+      if (Adj(this.master, this.tarCres[0])) {
+        this.master.MT(this.tarPos);
+      } else {
+        this.master.MT(this.tarCres[0]);
+      }
     } else {
       SA(this.master, "all pulling");
-      this.master.MTJ(this.tarPos);
+      this.master.MT(this.tarPos);
     }
   }
 }

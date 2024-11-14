@@ -28,7 +28,7 @@ export function energyStealerJob(cre: Cre_harvest) {
     const targets = oppoExtensions.filter(i => !inRampart(i) && energylive(i));
     const target = closest(cre, targets);
     if (target) {
-      cre.MTJ_stop(target);
+      cre.MT_stop(target);
       cre.directWithdrawAndDrop(target);
     }
   }

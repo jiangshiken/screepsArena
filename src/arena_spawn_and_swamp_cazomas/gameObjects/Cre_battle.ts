@@ -1,7 +1,7 @@
 import { ATTACK, HEAL, RANGED_ATTACK } from "game/constants";
 import { Event_Number } from "../utils/Event";
 import { Adj, GR, InShotRan } from "../utils/Pos";
-import { SA } from "../utils/visual";
+import { SA, SAN } from "../utils/visual";
 import {
   attackDmg,
   findMaxTaunt,
@@ -106,9 +106,11 @@ export class Cre_battle extends Cre_harvest {
   }
   /** shot round ,if range is 1 , mass attack */
   shotTargetJudgeIfMass(tar: CanBeAttacked) {
-    // SA(this, "shotTargetJudgeIfMass");
+    SA(this, "STJIM");
     const tauntMass: number = getTauntMass(this);
-    const tauntShot: number = getTauntShot(this, tar.master);
+    const tauntShot: number = getTauntShot(this, tar);
+    SAN(this, "TM", tauntMass);
+    SAN(this, "TS", tauntShot);
     if (Adj(this, tar) || tauntMass > tauntShot) {
       this.master.rangedMassAttack();
     } else {
@@ -213,7 +215,7 @@ export class Cre_battle extends Cre_harvest {
     if (this.getBodyPartsNum(RANGED_ATTACK) > 0) {
       const tars = oppoUnits.filter(i => InShotRan(this.master, i));
       const tar = findMaxTaunt(tars)?.target;
-      if (tar != undefined && tar.exists) {
+      if (tar) {
         this.shotTargetJudgeIfMass(tar);
         return true;
       }

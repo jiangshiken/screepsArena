@@ -72,7 +72,7 @@ export class Cre_harvest extends Cre_move {
   directWithdraw(con: HasEnergy): boolean {
     //TODO back to base
     drawLineLight(this.master, con);
-    this.MTJ_stop(con);
+    this.MT_stop(con);
     return this.withdrawNormal(con);
   }
   /**withdraw normal*/
@@ -105,7 +105,7 @@ export class Cre_harvest extends Cre_move {
     if (Adj(this.master, tar)) {
       return this.transferNormal(tar);
     } else {
-      this.MTJ(tar);
+      this.MT(tar);
       return false;
     }
   }
@@ -154,7 +154,7 @@ export class Cre_harvest extends Cre_move {
       this.dropEnergy();
       return true;
     } else {
-      this.MTJ(tar);
+      this.MT(tar);
       return false;
     }
   }
@@ -223,7 +223,7 @@ export class Cre_harvest extends Cre_move {
   /**move and pick up resource*/
   directPickUp(resource: Resource) {
     this.master.pickup(resource);
-    this.MTJ(resource);
+    this.MT(resource);
   }
   /**find a fit producer*/
   findFitProducer(): Producer | undefined {

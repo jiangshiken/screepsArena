@@ -370,7 +370,7 @@ export class BuilderStandardTask extends Task_Cre {
       );
       const realFleeRange = this.fleeRange + workingExtra;
       if (ram) {
-        cre.MTJ(ram);
+        cre.MT(ram);
         doStep = false;
       } else if (cre.flee(realFleeRange, realFleeRange * 2)) {
         SA(cre, "flee");
@@ -387,7 +387,7 @@ export class BuilderStandardTask extends Task_Cre {
         getEnemyThreats().find(i => inMyBaseRan(cre)) !== undefined
       ) {
         SA(cre, "move to safe gate");
-        cre.MTJ(enemySpawn);
+        cre.MT(enemySpawn);
         doStep = false;
       } else {
         doStep = true;
@@ -430,14 +430,14 @@ export class BuilderStandardTask extends Task_Cre {
       });
       let har = closest(cre, harvestables);
       if (har) {
-        cre.MTJ(har);
+        cre.MT(har);
         cre.dropEnergy();
         if (GR(cre, har) <= 1) {
           cre.stop();
           this.step = drop_on_the_ground;
         }
       } else {
-        cre.MTJ(midPoint);
+        cre.MT(midPoint);
       }
     }
   }
@@ -573,7 +573,7 @@ export class ArmedBuilderTask extends BuilderStandardTask {
     if (tick >= 1700 || cre.upgrade.rush) {
       //rush enemySpawn
       cre.dropEnergy();
-      cre.MTJ(enemySpawn);
+      cre.MT(enemySpawn);
     } else {
       super.loop_task();
     }

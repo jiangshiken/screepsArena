@@ -79,10 +79,10 @@ export function defendInArea(cre: Cre_move, pos: Pos, range: number): boolean {
   const enInArea = enemies.filter(i => GR(pos, i) <= range);
   if (enInArea.length > 0) {
     const en = <Cre>closest(cre, enInArea);
-    cre.MTJ(en);
+    cre.MT(en);
     return true;
   } else {
-    cre.MTJ(pos);
+    cre.MT(pos);
     return false;
   }
 }
@@ -92,7 +92,7 @@ export function moveToAllEmptyRampart(cre: Cre_move) {
   const emptyRamparts = healthyRamparts.filter(i => !blocked(i));
   const rampart = closest(cre, emptyRamparts);
   if (rampart) {
-    cre.MTJ(rampart);
+    cre.MT(rampart);
   } else SA(cre, " can not find rampart ");
 }
 export function defendTheRampart(cre: Cre_move) {
@@ -197,7 +197,7 @@ export function gotoTargetRampart(cre: Cre_move, targetRampart: Pos) {
             cre.exchangePos_setAppointment(blockFri);
           }
         } else {
-          cre.MTJ(firstPos);
+          cre.MT(firstPos);
         }
       }
     } else {
@@ -251,7 +251,7 @@ export function goinRampartAssign(cre: Cre_move, calBlocked: Pos[]) {
     SA(cre, "MTJ ram");
     const ram = closest(cre, getMyHealthyRamparts());
     if (ram) {
-      cre.MTJ(ram);
+      cre.MT(ram);
     } else {
       SA(cre, "no ram");
     }
@@ -349,7 +349,7 @@ export function moveToNoResourcePlace(cre: Cre_move, needCloseArr: Pos[]) {
     tarPos = ranGet(possHaveNotResource);
   }
   if (tarPos) {
-    cre.MTJ(tarPos);
+    cre.MT(tarPos);
   }
 }
 /** give position to important firend*/

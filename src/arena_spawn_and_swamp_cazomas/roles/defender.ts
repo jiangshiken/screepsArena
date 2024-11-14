@@ -39,7 +39,7 @@ export function defender_RampartJob(cre: Cre_battle) {
     const tar = findClosestByRange(cre, EnemyAroundSpawn);
     if (GR(cre, tar) > 1) {
       SA(cre, "MTJ_follow");
-      cre.MTJ(tar);
+      cre.MT(tar);
     } else {
       SA(cre, "stop");
       cre.stop();

@@ -61,7 +61,7 @@ export class HarvestTask extends Task_Cre {
       }
     } else {
       SA(cre, "cre.MTJ(this.targetHarvable);");
-      cre.MTJ(this.targetHarvable);
+      cre.MT(this.targetHarvable);
     }
   }
   loop_task() {
@@ -113,7 +113,7 @@ export class HarvestTask extends Task_Cre {
         SA(cre, "moveTimeTooMuch");
         cre.dropEnergy(); //drop it on ground
         // overallMap.set(cre, new ResourceDropEvent(PosToPos_C(cre)));
-        cre.MTJ(transTarget);
+        cre.MT(transTarget);
       } else {
         SA(cre, "normal move to " + transTarget.id);
         const sRtn = searchPathByCreCost(cre, transTarget);
@@ -122,7 +122,7 @@ export class HarvestTask extends Task_Cre {
           SA(cre, "path " + S(sRtn.path));
           SA(cre, "incomplete " + sRtn.incomplete);
         }
-        cre.MTJ(transTarget);
+        cre.MT(transTarget);
       }
     }
   }
@@ -189,6 +189,6 @@ function dropCont(cre: Cre_harvest, cont: Con) {
     }
   } else {
     cre.dropEnergy();
-    cre.MTJ(cont);
+    cre.MT(cont);
   }
 }

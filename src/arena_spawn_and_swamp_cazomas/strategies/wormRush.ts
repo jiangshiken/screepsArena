@@ -90,7 +90,7 @@ function wormPartJob(cre: Cre_battle) {
     const assP = assemblePoint(creInd);
     if (tick >= assembleTick) {
       SA(cre, "AT");
-      cre.MTJ(assP);
+      cre.MT(assP);
     } else {
       SA(cre, "DS");
       //if tick<320
@@ -101,14 +101,14 @@ function wormPartJob(cre: Cre_battle) {
         );
         const tar = closest(cre, tars);
         if (tar) {
-          cre.MTJ(tar);
+          cre.MT(tar);
         } else {
-          cre.MTJ(assP);
+          cre.MT(assP);
         }
       } else {
         const isDefending = defendInArea(cre, spawn, 7);
         if (!isDefending) {
-          cre.MTJ(assP);
+          cre.MT(assP);
         }
       }
     }
@@ -139,10 +139,10 @@ function wormPartJob(cre: Cre_battle) {
         const assembleY = isUp
           ? enemySpawn.y - keepDis
           : enemySpawn.y + keepDis;
-        cre.MTJ(new Pos_C(assembleX, assembleY));
+        cre.MT(new Pos_C(assembleX, assembleY));
       } else {
         SA(cre, "AS");
-        cre.MTJ_stop(enemySpawn);
+        cre.MT_stop(enemySpawn);
       }
     }
   }

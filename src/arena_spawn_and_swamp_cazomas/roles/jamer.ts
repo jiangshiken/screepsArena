@@ -52,7 +52,7 @@ export function jamerJob(cre: Cre_move) {
       }
     } else {
       if (leader.upgrade.isPush === true) {
-        cre.MTJ(leader);
+        cre.MT(leader);
       } else {
         moveAndBePulled(cre, leader);
       }
@@ -106,10 +106,10 @@ export function jamerOldJob(cre: Cre_move) {
       });
       SA(cre, "target=" + COO(target));
       if (target) {
-        cre.MTJ(target, [cre], 5, undefined, 1, 1.5);
+        cre.MT(target, [cre], 5, undefined, 1, 1.5);
         cre.upgrade.target = target;
       } else {
-        cre.MTJ(midPoint);
+        cre.MT(midPoint);
       }
     }
   }

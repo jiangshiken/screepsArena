@@ -9,5 +9,5 @@ export const spawnRusher: Role = new Role("spawnRusher", spawnRusherControl);
 export function spawnRusherControl(cre: Cre_battle) {
   SA(cre, "i'm spawnRusher");
   cre.fight();
-  cre.MTJ_stop(enemySpawn);
+  cre.MT_stop(enemySpawn);
 }

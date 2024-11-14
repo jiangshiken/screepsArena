@@ -21,6 +21,6 @@ export function spawnStealerControl(cre: Cre_battle) {
   } else {
     SA(cre, "rush");
     cre.upgrade.isFighting = true;
-    cre.MTJ(enemySpawn);
+    cre.MT(enemySpawn);
   }
 }
