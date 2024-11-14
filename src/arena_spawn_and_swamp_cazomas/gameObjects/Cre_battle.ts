@@ -2,13 +2,30 @@ import { ATTACK, HEAL, RANGED_ATTACK } from "game/constants";
 import { Event_Number } from "../utils/Event";
 import { Adj, GR, InShotRan } from "../utils/Pos";
 import { SA } from "../utils/visual";
-import { findMaxTaunt, getTauntMass, getTauntShot } from "./battle";
+import {
+  findMaxTaunt,
+  findMaxTaunt_heal,
+  getTauntMass,
+  getTauntShot,
+  StRate_damage,
+} from "./battle";
 import { Cre } from "./Cre";
 import { Cre_harvest } from "./Cre_harvest";
 import { friends, oppoUnits, walls } from "./GameObjectInitialize";
-import { getGuessPlayer, Kerob } from "./player";
+import { enemySpawn } from "./spawn";
 import { CanBeAttacked } from "./UnitTool";
-
+export const attackDmg = 30;
+export const rangeDmg = 10;
+export const healAdjAmount = 12;
+export function healAmount(range: number): number {
+  if (range <= 1) {
+    return 12;
+  } else if (range <= 3) {
+    return 4;
+  } else {
+    return 0;
+  }
+}
 export class Cre_battle extends Cre_harvest {
   /**calculation*/
   cal_taunt_fight: Event_Number | undefined;
@@ -31,13 +48,20 @@ export class Cre_battle extends Cre_harvest {
         const tarsAround = oppoUnits.filter(i => Adj(this.master, i));
         const ANum = this.getHealthyBodyParts(ATTACK).length;
         //find max taunt
-        const tauntA = 30 * ANum * findMaxTaunt(tarsAround).taunt;
+        const maxTauntA = findMaxTaunt(tarsAround);
+        const tauntA =
+          StRate_damage * attackDmg * ANum * (maxTauntA ? maxTauntA.worth : 0);
         //targets in range 3
         //
         const tarFriends = friends.filter(i => InShotRan(this.master, i));
         const HNum = this.getHealthyBodyParts(HEAL).length;
         //taunt of heal
-        const tauntH = 12 * HNum * findMaxTaunt(tarFriends, true, this).taunt;
+        const maxTauntH = findMaxTaunt_heal(tarFriends, this);
+        const tauntH =
+          StRate_damage *
+          healAdjAmount *
+          HNum *
+          (maxTauntH ? maxTauntH.worth : 0);
         if (tauntA >= tauntH) {
           const successMelee = this.melee();
           const successShot = this.shot();
@@ -57,11 +81,11 @@ export class Cre_battle extends Cre_harvest {
   }
   /**attack wall*/
   attackWall() {
-    if (this.getHealthyBodyParts(ATTACK).length > 0) {
+    if (this.getHealthyBodyPartsNum(ATTACK) > 0) {
       const w = walls.find(i => Adj(i, this.master));
       if (w) this.attackNormal(w);
     }
-    if (this.getHealthyBodyParts(RANGED_ATTACK).length > 0) {
+    if (this.getHealthyBodyPartsNum(RANGED_ATTACK) > 0) {
       const w = walls.find(i => InShotRan(i, this.master));
       if (w) this.shotTarget(w);
     }
@@ -74,17 +98,18 @@ export class Cre_battle extends Cre_harvest {
     } else return false;
   }
   /**ranged attack normal*/
-  shotTarget(tar: CanBeAttacked): void {
+  shotTarget(tar: CanBeAttacked): boolean {
     // SA(this.master, "shotTarget " + COO(tar));
     if (InShotRan(this.master, tar)) {
       this.master.rangedAttack(tar.master);
-    }
+      return true;
+    } else return false;
   }
   /** shot round ,if range is 1 , mass attack */
   shotTargetJudgeIfMass(tar: CanBeAttacked) {
     // SA(this, "shotTargetJudgeIfMass");
-    let tauntMass: number = getTauntMass(this);
-    let tauntShot: number = getTauntShot(this, tar.master);
+    const tauntMass: number = getTauntMass(this);
+    const tauntShot: number = getTauntShot(this, tar.master);
     if (Adj(this, tar) || tauntMass > tauntShot) {
       this.master.rangedMassAttack();
     } else {
@@ -93,18 +118,16 @@ export class Cre_battle extends Cre_harvest {
   }
   /**melee attack if enemies in ranged 1*/
   melee(): boolean {
-    // SA(this,"melee 1")
-    if (this.getBodyParts(ATTACK).length > 0) {
-      // SA(this,"melee 2")
-      let tars = oppoUnits.filter(i => Adj(this.master, i));
-
-      let tar = findMaxTaunt(tars).unit;
-      if (tar != undefined && tar.master.exists) {
-        // SA(this,"melee 3")
+    if (this.getBodyPartsNum(ATTACK) > 0) {
+      const tars = oppoUnits.filter(i => Adj(this.master, i));
+      const tar = findMaxTaunt(tars)?.target;
+      if (tar) {
         this.attackNormal(tar);
         return true;
-      } else if (getGuessPlayer() === Kerob) {
-        const wallTar = walls.find(i => Adj(i, this.master));
+      } else {
+        const wallTar = walls.find(
+          i => Adj(i, this.master) && GR(i, enemySpawn) <= 7
+        );
         if (wallTar) {
           SA(this.master, "AW");
           this.attackNormal(wallTar);
@@ -114,14 +137,16 @@ export class Cre_battle extends Cre_harvest {
     return false;
   }
   /** heal static */
-  restore() {
+  restore(): boolean {
     if (this.getBodyPartsNum(HEAL) > 0) {
-      let tars = friends.filter(i => InShotRan(this.master, i));
-      let tar = findMaxTaunt(tars, true, this).unit;
-      if (tar != undefined && tar.master.exists) {
+      const tars = friends.filter(i => InShotRan(this.master, i));
+      const tar = findMaxTaunt_heal(tars, this)?.target;
+      if (tar) {
         this.healTar(tar);
+        return true;
       }
     }
+    return false;
   }
   /**  heal target static*/
   healTar(tar: Cre): boolean {
@@ -142,41 +167,42 @@ export class Cre_battle extends Cre_harvest {
   }
   shotAndRestore(): boolean {
     // SA(this.master, "shotAndRestore");
-    let tars = oppoUnits.filter(i => InShotRan(this.master, i));
-    let tarFriends = friends.filter(i => InShotRan(this.master, i));
-    let UTShot = findMaxTaunt(tars);
-    let UTHeal = findMaxTaunt(tarFriends, true, this);
-    let RANum = this.getHealthyBodyParts(RANGED_ATTACK).length;
-    let HNum = this.getHealthyBodyParts(HEAL).length;
-    let tarShot = UTShot.unit;
-    let tarHeal = UTHeal.unit;
+    const tars = oppoUnits.filter(i => InShotRan(this.master, i));
+    const tarFriends = friends.filter(i => InShotRan(this.master, i));
+    const UTShot = findMaxTaunt(tars);
+    const UTHeal = findMaxTaunt_heal(tarFriends, this);
+    const RANum = this.getHealthyBodyPartsNum(RANGED_ATTACK);
+    const HNum = this.getHealthyBodyPartsNum(HEAL);
+    const tarShot = UTShot?.target;
+    const maxTauntShot = UTShot ? UTShot.worth : 0;
+    const maxTauntHeal = UTHeal ? UTHeal.worth : 0;
+    const tarHeal = UTHeal?.target;
     if (tarHeal && tarShot && !Adj(this.master, tarHeal)) {
       //will conflict
-      let useShot: boolean =
-        10 * RANum * UTShot.taunt > 12 * HNum * UTHeal.taunt;
+      const worthShot = StRate_damage * rangeDmg * RANum * maxTauntShot;
+      const worthHeal = StRate_damage * healAdjAmount * HNum * maxTauntHeal;
+      const worthMass = getTauntMass(this);
+      const useShot: boolean = Math.max(worthShot, worthMass) >= worthHeal;
       if (useShot) {
-        //use shot
         // SA(this,"use shot")
-        if (tarShot != undefined && tarShot.exists) {
+        if (tarShot) {
           this.shotTargetJudgeIfMass(tarShot);
           return true;
         }
       } else {
-        //use heal
         // SA(this,"use heal")
-        if (tarHeal != undefined && tarHeal.exists) {
+        if (tarHeal) {
           this.healTar(tarHeal);
           return true;
         }
       }
     } else {
-      //use both
       // SA(this,"use both")
-      if (HNum > 0 && tarHeal != undefined && tarHeal.exists) {
+      if (HNum > 0 && tarHeal) {
         this.healTar(tarHeal);
         return true;
       }
-      if (RANum > 0 && tarShot != undefined && tarShot.exists) {
+      if (RANum > 0 && tarShot) {
         this.shotTargetJudgeIfMass(tarShot);
         return true;
       }
@@ -186,8 +212,8 @@ export class Cre_battle extends Cre_harvest {
   /** ranged attack static, will find fit enemy  */
   shot(): boolean {
     if (this.getBodyPartsNum(RANGED_ATTACK) > 0) {
-      let tars = oppoUnits.filter(i => InShotRan(this.master, i));
-      let tar = findMaxTaunt(tars).unit;
+      const tars = oppoUnits.filter(i => InShotRan(this.master, i));
+      const tar = findMaxTaunt(tars)?.target;
       if (tar != undefined && tar.exists) {
         this.shotTargetJudgeIfMass(tar);
         return true;

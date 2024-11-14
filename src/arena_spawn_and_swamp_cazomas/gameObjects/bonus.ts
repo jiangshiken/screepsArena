@@ -57,15 +57,6 @@ export function getSuperior(includeRam: boolean = false): StNumber {
   const ef = feRtn.enemyForceSum;
   return 10 * (ff - ef);
 }
-// export function enemyQuickAttackReduce(rate: number): StNumber {
-//   return 1 / enemyQuickAttackBonus(rate);
-// }
-// export function enemyQuickAttackBonus(rate: number): StNumber {
-//   const len = enemies.filter(
-//     i => i.getBodiesNum(ATTACK) > 0 && i.getSpeed_general() >= 0.5
-//   ).length;
-//   return goInRange(rate, 1, Infinity) * 0.5 * len;
-// }
 export function enemyAttackReduce(rate: number): StNumber {
   return 1 / enemyAttackBonus(rate);
 }
@@ -78,9 +69,6 @@ export function richBonus(rate: number): StNumber {
     return 0.5 + rate * (0.5 + 0.00125 * (en - 200));
   }
 }
-// export function enemyRAReduce(rate: number): StNumber {
-//   return 1 / enemyRABonus(rate);
-// }
 export function poorBonus(rate: number) {
   const en = spawnAndExtensionsEnergy(spawn);
   return 1 + relu(0.001 * (1000 - en));
@@ -93,37 +81,10 @@ export function totalInferiorityBonus(): StNumber {
     return 1;
   }
 }
-// export function enemyHealReduction(rate: number): StNumber {
-//   return 1 / enemyHealBonus(rate);
-// }
-// export function enemySlowShoterBonus(rate: number): StNumber {
-//   const slowShoters = enemies.filter(
-//     i =>
-//       i.getSpeed_general() < 1 &&
-//       i.getBodiesNum(RANGED_ATTACK) + i.getBodiesNum(HEAL) > 0 &&
-//       i.getBodiesNum(ATTACK) === 0
-//   );
-//   return goInRange(rate, 1, Infinity) * 0.5 * slowShoters.length;
-// }
-// export function enemyMoveSpeedReduce(rate: number): StNumber {
-//   return 1 / enemyMoveSpeedBonus(rate);
-// }
-// export function enemyMoveSpeedBonus(rate: number): StNumber {
-//   const moveSum = sum(enemies, i => i.getSpeed_general() * calculateForce(i));
-//   return goInRange(rate, 1, Infinity) * 0.25 * moveSum;
-// }
 export function enemy5MABonus(rate: number): StNumber {
   const sum = enemies.filter(i => is5MA(i)).length;
   return goInRange(rate, 1, Infinity) * 1 * sum;
 }
-// export function enemyHealBonus(rate: number): StNumber {
-//   let sum = 0;
-//   for (let en of enemies) {
-//     const healNum = en.getBodies(HEAL).length;
-//     sum += healNum;
-//   }
-//   return goInRange(rate, 1, Infinity) * 0.25 * sum;
-// }
 export function spawnEnergyBonus(): StNumber {
   return 1 + spawnAndExtensionsEnergy(spawn) / 1000;
 }
@@ -177,25 +138,6 @@ export function enemyAttackBonus(rate: number): StNumber {
   const sum: number = enemyAttackNum();
   return goInRange(rate, 1, Infinity) * 0.16 * sum;
 }
-// export function enemyRASlowBonus(rate: number): StNumber {
-//   let sum = 0;
-//   for (let en of enemies) {
-//     const enemyRangedAttackNum = en.getBodies(RANGED_ATTACK).length;
-//     const enemyMoveNum = en.getBodies(MOVE).length;
-//     if (enemyRangedAttackNum * 2 >= enemyMoveNum && enemyRangedAttackNum > 0) {
-//       sum += enemyRangedAttackNum;
-//     }
-//   }
-//   return goInRange(rate, 1, Infinity) * 0.35 * sum;
-// }
-// export function enemyRABonus(rate: number): StNumber {
-//   let sum = 0;
-//   for (let en of enemies) {
-//     const enemyRangedAttackNum = en.getBodies(RANGED_ATTACK).length;
-//     sum += enemyRangedAttackNum;
-//   }
-//   return goInRange(rate, 1, Infinity) * 0.25 * sum;
-// }
 export function getTickByBonus(
   min: number,
   max: number,
