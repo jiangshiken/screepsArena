@@ -31,11 +31,14 @@ function wormPartJob(cre: Cre_battle) {
   cre.fight();
   const creInd = wormIndex(cre);
   if (!wormGo) {
+    SA(cre, "NG");
     wormGo = ifGo();
     const assP = assemblePoint(creInd);
     if (tick >= assembleTick) {
+      SA(cre, "AT");
       cre.MTJ(assP);
     } else {
+      SA(cre, "DS");
       //if tick<320
       if (isHealer(cre)) {
         const scanRange = 10;
@@ -55,7 +58,9 @@ function wormPartJob(cre: Cre_battle) {
     }
   } else {
     //worm go
+    SA(cre, "WG");
     if (wormStartWait === undefined) {
+      SA(cre, "RUSH");
       const head = best(wormParts(), i => -wormIndex(i));
       if (head && head === cre) {
         const followers = wormParts().filter(i => i !== head);
@@ -69,11 +74,13 @@ function wormPartJob(cre: Cre_battle) {
     } else {
       //start wait
       if (wormStartWait.validEvent(6)) {
+        SA(cre, "WSW");
         const assembleX = enemySpawn.x + creInd - 3;
         const isUp = cre.y < enemySpawn.y;
         const assembleY = isUp ? enemySpawn.y - 4 : enemySpawn.y + 4;
         cre.MTJ(new Pos_C(assembleX, assembleY));
       } else {
+        SA(cre, "AS");
         cre.MTJ_stop(enemySpawn);
       }
     }
@@ -82,27 +89,31 @@ function wormPartJob(cre: Cre_battle) {
 function wormParts(): Cre_move[] {
   return <Cre_move[]>friends.filter(i => i.role === wormPart);
 }
-export function useWormRush(wpn: number) {
+export function useWormRush(wpn: number, tailSmall: boolean = true) {
   wormPartNum = wpn;
   if (strategyTick >= 0) {
     useStandardTurtling(strategyTick, 1);
   }
   if (strategyTick === 0) {
     if (wpn >= 5) {
-      spawnCreep(TB("10M6A"), wormPart, new WormInfo(0));
-      spawnCreep(TB("10M6A"), wormPart, new WormInfo(1));
-      spawnCreep(TB("10M6A"), wormPart, new WormInfo(2));
-      spawnCreep(TB("10M6A"), wormPart, new WormInfo(3));
-      spawnCreep(TB("10M6A"), wormPart, new WormInfo(4));
-    }
-    if (wpn >= 6) {
-      spawnCreep(TB("10M6A"), wormPart, new WormInfo(5));
+      //150+800+50
+      spawnCreep(TB("R10AM"), wormPart, new WormInfo(0));
+      //450+240+250+50
+      spawnCreep(TB("9M3AHM"), wormPart, new WormInfo(1));
+      spawnCreep(TB("9M6AM"), wormPart, new WormInfo(2));
+      spawnCreep(TB("9M6AM"), wormPart, new WormInfo(3));
+      spawnCreep(TB("9M6AM"), wormPart, new WormInfo(4));
+      spawnCreep(TB("9M6AM"), wormPart, new WormInfo(5));
     }
     if (wpn >= 7) {
-      spawnCreep(TB("10M6A"), wormPart, new WormInfo(6));
+      if (tailSmall && wpn === 7)
+        spawnCreep(TB("10M6A"), wormPart, new WormInfo(6));
+      else spawnCreep(TB("5M3A"), wormPart, new WormInfo(6));
     }
     if (wpn >= 8) {
-      spawnCreep(TB("10M6A"), wormPart, new WormInfo(7));
+      if (tailSmall && wpn === 8)
+        spawnCreep(TB("10M6A"), wormPart, new WormInfo(7));
+      else spawnCreep(TB("5M3A"), wormPart, new WormInfo(7));
     }
   }
   addStrategyTick();
@@ -131,12 +142,14 @@ function wormIndex(cre: Cre_move) {
     : ERR_rtn(-1, "wrong index");
 }
 function ifGo(): boolean {
-  const finalSnakePart = findWormPart(wormPartNum - 1);
-  if (finalSnakePart)
-    return (
-      tick >= assembleTick + 30 ||
-      (finalSnakePart !== undefined &&
-        atPos(finalSnakePart, assemblePoint(wormIndex(finalSnakePart))))
-    );
-  else return false;
+  if (tick >= assembleTick + 30) {
+    return true;
+  } else {
+    const finalSnakePart = findWormPart(wormPartNum - 1);
+    if (finalSnakePart) {
+      return atPos(finalSnakePart, assemblePoint(wormIndex(finalSnakePart)));
+    } else {
+      return false;
+    }
+  }
 }
