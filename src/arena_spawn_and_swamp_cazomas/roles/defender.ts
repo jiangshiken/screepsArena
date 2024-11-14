@@ -45,8 +45,6 @@ export function defender_RampartJob(cre: Cre_battle) {
       cre.stop();
     }
   } else {
-    // cre.MTJ_follow({ x: spawn.x - 4, y: spawn.y + 4 })
-    // cre.MTJ_follow({ x: spawn.x - 4, y: spawn.y - 4 })
     const hasEnemyAround = enemies.find(i => GR(i, cre) <= 4) !== undefined;
     if (!hasEnemyAround) {
       if (cpuBreakJudge(cre)) {

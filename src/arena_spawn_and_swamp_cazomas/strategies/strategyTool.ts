@@ -18,7 +18,7 @@ import {
 import { harvester } from "../roles/harvester";
 import { toughDefender } from "../roles/toughDefender";
 import { TB } from "../utils/autoBodys";
-import { leftVector, tick } from "../utils/game";
+import { leftRate, leftVector, tick } from "../utils/game";
 import { sum } from "../utils/JS";
 import {
   closest,
@@ -68,15 +68,16 @@ export function getStartGateAvoidFromEnemies(avoid: boolean = true): boolean {
 export function assemblePoint(ind: number): Pos {
   const leftOrRight = VecMultiplyConst(leftVector(), -3);
   let vecCre: Vec;
-  if (ind == 0) vecCre = new Vec(-1, 0);
-  else if (ind == 1) vecCre = new Vec(0, 0);
-  else if (ind == 2) vecCre = new Vec(1, 0);
-  else if (ind == 3) vecCre = new Vec(2, 0);
-  else if (ind == 4) vecCre = new Vec(2, 1);
-  else if (ind == 5) vecCre = new Vec(1, 1);
-  else if (ind == 6) vecCre = new Vec(0, 1);
-  else if (ind == 7) vecCre = new Vec(-1, 1);
-  else if (ind == 8) vecCre = new Vec(-2, 1);
+  const lr = leftRate();
+  if (ind == 0) vecCre = new Vec(1 * lr, 0);
+  else if (ind == 1) vecCre = new Vec(0 * lr, 0);
+  else if (ind == 2) vecCre = new Vec(-1 * lr, 0);
+  else if (ind == 3) vecCre = new Vec(-2 * lr, 0);
+  else if (ind == 4) vecCre = new Vec(-2 * lr, 1);
+  else if (ind == 5) vecCre = new Vec(-1 * lr, 1);
+  else if (ind == 6) vecCre = new Vec(0 * lr, 1);
+  else if (ind == 7) vecCre = new Vec(1 * lr, 1);
+  else if (ind == 8) vecCre = new Vec(2 * lr, 1);
   else vecCre = new Vec(-3, 1);
   return posPlusVec(spawn, vecPlusVec(vecCre, leftOrRight));
 }

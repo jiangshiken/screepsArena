@@ -69,7 +69,9 @@ export function jamerOldJob(cre: Cre_move) {
   } else {
     let fleeing: boolean = fleeWeakComplex(cre);
     SAB(cre, "FL", fleeing);
-    if (!fleeing) {
+    if (fleeing) {
+      cre.stop();
+    } else {
       if (cpuBreakJudge(cre)) {
         return;
       }

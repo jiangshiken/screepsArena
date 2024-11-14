@@ -127,7 +127,9 @@ export function builderTurtleJob(cre: Cre_build) {
   cre.fight();
   cre.taskPriority = 9;
   //
-  cre.useAppointMovement();
+  if (cre.useAppointMovement()) {
+    return;
+  }
   //
   const scanCSRange = 4;
   const css = myCSs.filter(
