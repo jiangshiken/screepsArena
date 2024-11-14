@@ -64,21 +64,21 @@ export function useStandardTurtling(st: number, strength: number = 0) {
     const AW = enemyAWeight();
     if (strength === 0) {
       if (AW < 0.2) {
-        spawnCreepInFront(TB("2rm"), defender_rampart);
+        spawnCreep(TB("2rm"), defender_rampart);
       } else {
-        spawnCreepInFront(TB("2arm"), defender_rampart);
+        spawnCreep(TB("2arm"), defender_rampart);
       }
     } else if (strength === 1) {
       if (AW < 0.2) {
         //450+50
-        spawnCreepInFront(TB("3rm"), defender_rampart);
+        spawnCreep(TB("3rm"), defender_rampart);
       } else {
-        spawnCreepInFront(TB("6am"), defender_rampart);
+        spawnCreep(TB("6am"), defender_rampart);
       }
     } else {
       //320+450+100
-      spawnCreepInFront(TB("3a3rm"), defender_rampart);
-      spawnCreepInFront(TB("2a4rm"), defender_rampart);
+      spawnCreep(TB("3a3rm"), defender_rampart);
+      spawnCreep(TB("2a4rm"), defender_rampart);
     }
   }
   if (st >= 550) {

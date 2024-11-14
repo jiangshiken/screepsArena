@@ -71,16 +71,19 @@ export function assemblePoint(ind: number): Pos {
   if (ind == 0) vecCre = new Vec(-1, 0);
   else if (ind == 1) vecCre = new Vec(0, 0);
   else if (ind == 2) vecCre = new Vec(1, 0);
-  else if (ind == 3) vecCre = new Vec(1, 1);
-  else if (ind == 4) vecCre = new Vec(0, 1);
-  else if (ind == 5) vecCre = new Vec(-1, 1);
-  else if (ind == 6) vecCre = new Vec(-1, 2);
-  else if (ind == 7) vecCre = new Vec(0, 2);
-  else if (ind == 8) vecCre = new Vec(1, 2);
-  else vecCre = new Vec(2, 2);
+  else if (ind == 3) vecCre = new Vec(2, 0);
+  else if (ind == 4) vecCre = new Vec(2, 1);
+  else if (ind == 5) vecCre = new Vec(1, 1);
+  else if (ind == 6) vecCre = new Vec(0, 1);
+  else if (ind == 7) vecCre = new Vec(-1, 1);
+  else if (ind == 8) vecCre = new Vec(-2, 1);
+  else vecCre = new Vec(-3, 1);
   return posPlusVec(spawn, vecPlusVec(vecCre, leftOrRight));
 }
-export function supplyToughDefender(defenderNum: number = 1) {
+export function supplyToughDefender(
+  defenderNum: number = 1,
+  useEmergentSpawn: boolean = true
+) {
   //first defender
   SA(displayPos(), "supplyToughDefender");
   if (
@@ -110,7 +113,7 @@ export function supplyToughDefender(defenderNum: number = 1) {
         Math.floor((myEnergy - restCost) / 10),
         20
       );
-      const TNumLimit = Math.floor(range / 3 + 6);
+      const TNumLimit = useEmergentSpawn ? Math.floor(range / 3 + 6) : Infinity;
       const TNum = Math.min(TNumLimit, TNum_beforeRange);
       SAN(displayPos(), "TNum", TNum);
       if (TNum >= 0) {

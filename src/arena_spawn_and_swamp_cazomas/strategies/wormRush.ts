@@ -8,7 +8,7 @@ import { defendInArea } from "../gameObjects/CreCommands";
 import { isHealer, Role } from "../gameObjects/CreTool";
 import { friends } from "../gameObjects/GameObjectInitialize";
 import { damaged } from "../gameObjects/HasHits";
-import { newPullTarsTask } from "../gameObjects/pull";
+import { newPullTarsTask, PullTarsTask } from "../gameObjects/pull";
 import { spawnCreep } from "../gameObjects/spawn";
 import { TB } from "../utils/autoBodys";
 import { Event } from "../utils/Event";
@@ -16,15 +16,55 @@ import { addStrategyTick, strategyTick, tick } from "../utils/game";
 import { best } from "../utils/JS";
 import { atPos, closest, GR, Pos_C } from "../utils/Pos";
 import { ERR_rtn } from "../utils/print";
+import { findTask } from "../utils/Task";
 import { SA } from "../utils/visual";
 import { useStandardTurtling } from "./4ramDefendTool";
-import { assemblePoint, getStartGateAvoidFromEnemies } from "./strategyTool";
+import {
+  assemblePoint,
+  getStartGateAvoidFromEnemies,
+  supplyToughDefender,
+} from "./strategyTool";
 
 let wormPartNum: number;
 const wormPart: Role = new Role("wormPart", wormPartJob);
 const assembleTick: number = 380;
 let wormGo: boolean = false;
 let wormStartWait: Event | undefined = undefined;
+export function useWormRush(wpn: number, tailSmall: boolean = true) {
+  wormPartNum = wpn;
+  if (strategyTick >= 0) {
+    if (wpn === 8) {
+      if (tick >= assembleTick || wormGo) {
+        supplyToughDefender(2, false);
+      }
+    } else {
+      useStandardTurtling(strategyTick, 1);
+    }
+  }
+  if (strategyTick === 0) {
+    if (wpn >= 6) {
+      //150+640+50
+      spawnCreep(TB("3MR8AM"), wormPart, new WormInfo(0));
+      //450+240+250+50
+      spawnCreep(TB("9M3AHM"), wormPart, new WormInfo(1));
+      spawnCreep(TB("9M6AM"), wormPart, new WormInfo(2));
+      spawnCreep(TB("9M6AM"), wormPart, new WormInfo(3));
+      spawnCreep(TB("9M6AM"), wormPart, new WormInfo(4));
+      spawnCreep(TB("9M6AM"), wormPart, new WormInfo(5));
+    }
+    if (wpn >= 7) {
+      if (tailSmall && wpn === 7)
+        spawnCreep(TB("5M3A"), wormPart, new WormInfo(6));
+      else spawnCreep(TB("10M6A"), wormPart, new WormInfo(6));
+    }
+    if (wpn >= 8) {
+      if (tailSmall && wpn === 8)
+        spawnCreep(TB("5M3A"), wormPart, new WormInfo(7));
+      else spawnCreep(TB("10M6A"), wormPart, new WormInfo(7));
+    }
+  }
+  addStrategyTick();
+}
 function wormPartJob(cre: Cre_battle) {
   SA(cre, "WPJ");
   cre.group_Index = getWormInfo(cre).index;
@@ -67,9 +107,11 @@ function wormPartJob(cre: Cre_battle) {
         const startGateUp = getStartGateAvoidFromEnemies();
         head.startGateUp = startGateUp;
         newPullTarsTask(head, followers, enemySpawn, 5);
-      }
-      if (GR(cre, enemySpawn) <= 5) {
-        wormStartWait = new Event();
+        const scanCloseDis = 6;
+        if (GR(cre, enemySpawn) <= scanCloseDis) {
+          wormStartWait = new Event();
+          findTask(head, PullTarsTask)?.end();
+        }
       }
     } else {
       //start wait
@@ -77,7 +119,10 @@ function wormPartJob(cre: Cre_battle) {
         SA(cre, "WSW");
         const assembleX = enemySpawn.x + creInd - 3;
         const isUp = cre.y < enemySpawn.y;
-        const assembleY = isUp ? enemySpawn.y - 4 : enemySpawn.y + 4;
+        const keepDis = 5;
+        const assembleY = isUp
+          ? enemySpawn.y - keepDis
+          : enemySpawn.y + keepDis;
         cre.MTJ(new Pos_C(assembleX, assembleY));
       } else {
         SA(cre, "AS");
@@ -89,35 +134,7 @@ function wormPartJob(cre: Cre_battle) {
 function wormParts(): Cre_move[] {
   return <Cre_move[]>friends.filter(i => i.role === wormPart);
 }
-export function useWormRush(wpn: number, tailSmall: boolean = true) {
-  wormPartNum = wpn;
-  if (strategyTick >= 0) {
-    useStandardTurtling(strategyTick, 1);
-  }
-  if (strategyTick === 0) {
-    if (wpn >= 5) {
-      //150+800+50
-      spawnCreep(TB("R10AM"), wormPart, new WormInfo(0));
-      //450+240+250+50
-      spawnCreep(TB("9M3AHM"), wormPart, new WormInfo(1));
-      spawnCreep(TB("9M6AM"), wormPart, new WormInfo(2));
-      spawnCreep(TB("9M6AM"), wormPart, new WormInfo(3));
-      spawnCreep(TB("9M6AM"), wormPart, new WormInfo(4));
-      spawnCreep(TB("9M6AM"), wormPart, new WormInfo(5));
-    }
-    if (wpn >= 7) {
-      if (tailSmall && wpn === 7)
-        spawnCreep(TB("10M6A"), wormPart, new WormInfo(6));
-      else spawnCreep(TB("5M3A"), wormPart, new WormInfo(6));
-    }
-    if (wpn >= 8) {
-      if (tailSmall && wpn === 8)
-        spawnCreep(TB("10M6A"), wormPart, new WormInfo(7));
-      else spawnCreep(TB("5M3A"), wormPart, new WormInfo(7));
-    }
-  }
-  addStrategyTick();
-}
+
 class WormInfo {
   index: number;
   constructor(index: number) {
