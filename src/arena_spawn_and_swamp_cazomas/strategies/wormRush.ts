@@ -30,7 +30,11 @@ const wormPart: Role = new Role("wormPart", wormPartJob);
 const assembleTick: number = 380;
 let wormGo: boolean = false;
 let wormStartWait: Event | undefined = undefined;
-export function useWormRush(wpn: number, tailSmall: boolean = true) {
+export function useWormRush(
+  wpn: number,
+  tailSize: number = 0,
+  turtleStrength: number = 1
+) {
   wormPartNum = wpn;
   if (strategyTick >= 0) {
     if (wpn === 8) {
@@ -38,29 +42,39 @@ export function useWormRush(wpn: number, tailSmall: boolean = true) {
         supplyToughDefender(2, false);
       }
     } else {
-      useStandardTurtling(strategyTick, 1);
+      useStandardTurtling(strategyTick, turtleStrength);
     }
   }
   if (strategyTick === 0) {
     if (wpn >= 6) {
       //150+640+50
       spawnCreep(TB("3MR8AM"), wormPart, new WormInfo(0));
-      //450+240+250+50
-      spawnCreep(TB("9M3AHM"), wormPart, new WormInfo(1));
+      //350+320+250+50
+      spawnCreep(TB("7M4AHM"), wormPart, new WormInfo(1));
       spawnCreep(TB("9M6AM"), wormPart, new WormInfo(2));
       spawnCreep(TB("9M6AM"), wormPart, new WormInfo(3));
       spawnCreep(TB("9M6AM"), wormPart, new WormInfo(4));
       spawnCreep(TB("9M6AM"), wormPart, new WormInfo(5));
     }
     if (wpn >= 7) {
-      if (tailSmall && wpn === 7)
-        spawnCreep(TB("5M3A"), wormPart, new WormInfo(6));
-      else spawnCreep(TB("10M6A"), wormPart, new WormInfo(6));
+      if (wpn === 7) {
+        if (tailSize === 0) {
+          spawnCreep(TB("4M4A"), wormPart, new WormInfo(6));
+        } else {
+          spawnCreep(TB("6M6A"), wormPart, new WormInfo(6));
+        }
+      } else {
+        spawnCreep(TB("10M6A"), wormPart, new WormInfo(6));
+      }
     }
     if (wpn >= 8) {
-      if (tailSmall && wpn === 8)
-        spawnCreep(TB("5M3A"), wormPart, new WormInfo(7));
-      else spawnCreep(TB("10M6A"), wormPart, new WormInfo(7));
+      if (tailSize === 0) {
+        spawnCreep(TB("4M4A"), wormPart, new WormInfo(7));
+      } else if (tailSize === 1) {
+        spawnCreep(TB("6M6A"), wormPart, new WormInfo(7));
+      } else {
+        spawnCreep(TB("8M7A"), wormPart, new WormInfo(7));
+      }
     }
   }
   addStrategyTick();
@@ -81,8 +95,10 @@ function wormPartJob(cre: Cre_battle) {
       SA(cre, "DS");
       //if tick<320
       if (isHealer(cre)) {
-        const scanRange = 10;
-        const tars = friends.filter(i => GR(cre, i) <= scanRange && damaged(i));
+        const scanRange = 8;
+        const tars = friends.filter(
+          i => i.role === wormPart && GR(cre, i) <= scanRange && damaged(i)
+        );
         const tar = closest(cre, tars);
         if (tar) {
           cre.MTJ(tar);

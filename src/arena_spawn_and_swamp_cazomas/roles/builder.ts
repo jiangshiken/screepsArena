@@ -8,7 +8,7 @@ import {
   enemySpawn,
   spawn,
 } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
-import { closest } from "arena_spawn_and_swamp_cazomas/utils/Pos";
+import { Adj, closest } from "arena_spawn_and_swamp_cazomas/utils/Pos";
 import { protectSelfExtraTaunt } from "../gameObjects/battle";
 import { canBeBuildByCre, Cre_build } from "../gameObjects/Cre_build";
 import { calAroundEnergy, getHarvables } from "../gameObjects/Cre_harvest";
@@ -49,10 +49,10 @@ import {
 } from "../gameObjects/spawn";
 import {
   blocked,
+  energyFull,
   energylive,
   getCapacity,
   getEnergy,
-  getFreeEnergy,
   getOutsideContainers,
   getSpawnAroundFreeContainers,
   getSpawnAroundLiveContainers,
@@ -62,7 +62,12 @@ import { d2, getClassName, invalid } from "../utils/JS";
 import { atPos, COO, getRangePoss, GR, midPoint, Pos } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA, SAN } from "../utils/visual";
-
+export class builderTurtleInfo {
+  returnEnergy: boolean;
+  constructor(returnEnergy: boolean) {
+    this.returnEnergy = returnEnergy;
+  }
+}
 /**Builder that used in trutling,will not go to wild resource.
  * Only stay at ramparts.
  */
@@ -189,7 +194,7 @@ export function builderTurtleJob(cre: Cre_build) {
   } else {
     cre.setIsWorking(false);
     //assign spawn energy to container
-    if (getFreeEnergy(spawn) === 0) {
+    if (energyFull(spawn)) {
       SA(cre, "withdraw spawn to container");
       if (getEnergy(cre) > 0) {
         SA(cre, "has en");
@@ -197,7 +202,7 @@ export function builderTurtleJob(cre: Cre_build) {
         const con = findClosestByRange(cre, cons);
         if (con) {
           SA(cre, "has container");
-          if (GR(con, cre) <= 1) {
+          if (Adj(con, cre)) {
             cre.transferNormal(con);
           } else {
             gotoTargetRampart(cre, con);
@@ -211,16 +216,24 @@ export function builderTurtleJob(cre: Cre_build) {
           gotoTargetRampart(cre, spawn);
         }
       }
-    } else if (getFreeEnergy(cre) !== 0 && canUseEnergy >= getCapacity(cre)) {
-      SA(cre, "withdraw backup energy");
-      builderTurtleWithdrawNormal(cre);
     } else {
-      SA(cre, "normal defend");
-      if (cre.appointMovementIsActived()) {
-        SA(cre, "appointMovementIsActived");
-        return;
+      const em = cre.extraMessage;
+      const returnMod =
+        em && em instanceof builderTurtleInfo && em.returnEnergy;
+      if (!returnMod && !energyFull(cre) && canUseEnergy >= getCapacity(cre)) {
+        SA(cre, "withdraw backup energy");
+        builderTurtleWithdrawNormal(cre);
+      } else {
+        if (returnMod && energylive(cre) && Adj(cre, spawn)) {
+          cre.transferNormal(spawn);
+        }
+        SA(cre, "normal defend");
+        if (cre.appointMovementIsActived()) {
+          SA(cre, "appointMovementIsActived");
+          return;
+        }
+        defendTheRampart(cre);
       }
-      defendTheRampart(cre);
     }
   }
 }

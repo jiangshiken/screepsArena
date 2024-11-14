@@ -39,7 +39,7 @@ export function loop(): void {
       useWormRush(8);
     } else if (gp === Dooms) {
       set_harvesterNotFleeAtStart(true);
-      useWormRush(7);
+      useWormRush(7, 1, 0);
     } else {
       useWormRush(7);
     }

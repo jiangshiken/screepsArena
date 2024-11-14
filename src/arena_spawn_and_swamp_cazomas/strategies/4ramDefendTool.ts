@@ -5,7 +5,11 @@ import {
   spawnCreep,
   spawnCreepInFront,
 } from "../gameObjects/spawn";
-import { builder4Ram, builderTurtle } from "../roles/builder";
+import {
+  builder4Ram,
+  builderTurtle,
+  builderTurtleInfo,
+} from "../roles/builder";
 import { TB } from "../utils/autoBodys";
 import { displayPos, SA } from "../utils/visual";
 import { spawnStartHarvester } from "./strategyTool";
@@ -24,12 +28,13 @@ import { getRangePoss, Pos_C } from "../utils/Pos";
 export function useStandardTurtling(st: number, strength: number = 0) {
   SA(displayPos(), "standardTurtling strength=" + strength);
   if (st === 0) {
+    const builderInfo = new builderTurtleInfo(true);
     if (strength === 0) {
-      spawnCreep(TB("AWCM"), builderTurtle); //200
+      spawnCreep(TB("AWCM"), builderTurtle, builderInfo); //200
     } else if (strength === 1) {
-      spawnCreep(TB("ARWCM"), builderTurtle); //200
+      spawnCreep(TB("ARWCM"), builderTurtle, builderInfo); //200
     } else {
-      spawnCreep(TB("3A2R2WCM"), builderTurtle); //200
+      spawnCreep(TB("3A2R2WCM"), builderTurtle, builderInfo); //200
     }
     if (strength >= 2) {
       createCS(spawn, StructureRampart, 10, false, true);
@@ -46,16 +51,6 @@ export function useStandardTurtling(st: number, strength: number = 0) {
   supplyHarvester(st);
   //
   const startRebuildTick = 200;
-  // let transRebuildTime: number;
-  // if (strength === 0) {
-  //   transRebuildTime = 600;
-  // } else if (strength === 1) {
-  //   transRebuildTime = 400;
-  // } else if (strength === 2) {
-  //   transRebuildTime = 200;
-  // } else {
-  //   transRebuildTime = 200;
-  // }
   if (st >= startRebuildTick) {
     reBuildBaseRampart();
   }
@@ -63,22 +58,35 @@ export function useStandardTurtling(st: number, strength: number = 0) {
     //defender
     const AW = enemyAWeight();
     if (strength === 0) {
-      if (AW < 0.2) {
-        spawnCreep(TB("2rm"), defender_rampart);
+      if (AW > 0.6) {
+        spawnCreep(TB("4AM"), defender_rampart);
+      } else if (AW > 0.2) {
+        spawnCreep(TB("R2AM"), defender_rampart);
       } else {
-        spawnCreep(TB("2arm"), defender_rampart);
+        spawnCreep(TB("2RM"), defender_rampart);
       }
     } else if (strength === 1) {
-      if (AW < 0.2) {
+      if (AW > 0.6) {
+        spawnCreep(TB("6AM"), defender_rampart);
+      } else if (AW > 0.3) {
         //450+50
-        spawnCreep(TB("3rm"), defender_rampart);
+        spawnCreep(TB("R4AM"), defender_rampart);
+      } else if (AW > 0.15) {
+        //450+50
+        spawnCreep(TB("2R2AM"), defender_rampart);
       } else {
-        spawnCreep(TB("6am"), defender_rampart);
+        //450+50
+        spawnCreep(TB("3RM"), defender_rampart);
       }
     } else {
-      //320+450+100
-      spawnCreep(TB("3a3rm"), defender_rampart);
-      spawnCreep(TB("2a4rm"), defender_rampart);
+      if (AW > 0.6) {
+        //320+450+100
+        spawnCreep(TB("R8AM"), defender_rampart);
+        spawnCreep(TB("R8AM"), defender_rampart);
+      } else {
+        spawnCreep(TB("3R4AM"), defender_rampart);
+        spawnCreep(TB("3R4AM"), defender_rampart);
+      }
     }
   }
   if (st >= 550) {
