@@ -15,11 +15,14 @@ import {
 import { getObjectsByPrototype } from "game/utils";
 
 import { PL } from "arena_spawn_and_swamp_cazomas/utils/print";
+import { Event } from "../utils/Event";
+import { divide0 } from "../utils/JS";
+import { HasPos } from "../utils/Pos";
 import { P } from "../utils/visual";
 import { Cre } from "./Cre";
-import { CS } from "./CS";
 import { S } from "./export";
-import { isMyGO, isOppoGO, neutral } from "./HasMy";
+import { GameObj } from "./GameObj";
+import { HasMy, isMyGO, isOppoGO, neutral } from "./HasMy";
 import {
   Con,
   Ext,
@@ -210,4 +213,63 @@ export function initialGameObjectsAtLoopStart_advance() {
   myUnits = (<Unit[]>friends).concat(myOwnedStrus);
   oppoUnits = (<Unit[]>enemies).concat(oppoOwnedStrus);
   units = myUnits.concat(oppoUnits);
+}
+// export let CSs: CS[] = []
+/** extend of ConstructionSite */
+
+export class CS extends GameObj implements HasPos, HasMy {
+  readonly master: ConstructionSite;
+  decayEvent: Event | undefined;
+  useDecay: boolean = false;
+  worth: number = 0;
+  constructor(cons: ConstructionSite) {
+    super(cons);
+    this.master = cons;
+    this.useDecay = (<any>cons).useDecay;
+    this.worth = (<any>cons).worth;
+  }
+  get my() {
+    return isMyGO(this.master);
+  }
+  get oppo() {
+    return isOppoGO(this.master);
+  }
+  get x(): number {
+    return this.master.x;
+  }
+  get y(): number {
+    return this.master.y;
+  }
+  /**the progress of a construction site*/
+  get progress(): number {
+    if (this.master.progress) {
+      return this.master.progress;
+    } else {
+      return 0;
+    }
+  }
+  /**the progress total of a construction site*/
+  get progressTotal(): number {
+    if (this.master.progressTotal) {
+      return this.master.progressTotal;
+    } else {
+      return 0;
+    }
+  }
+  /**
+   * get the progress rate of a `ConstructionSite`
+   */
+  get progressRate(): number {
+    return divide0(this.progress, this.progressTotal);
+  }
+}
+/** your first StructureSpawn*/
+
+export let spawn: Spa;
+export function setSpawn(s: Spa) {
+  spawn = s;
+} /** the first StructureSpawn of your opponent*/
+export let enemySpawn: Spa;
+export function setEnemySpawn(s: Spa) {
+  enemySpawn = s;
 }

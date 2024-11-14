@@ -3,6 +3,11 @@ import { StructureExtension, StructureRampart } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
 import { Cre, Task_Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
+import {
+  CS,
+  enemySpawn,
+  spawn,
+} from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { closest } from "arena_spawn_and_swamp_cazomas/utils/Pos";
 import { protectSelfExtraTaunt } from "../gameObjects/battle";
 import { canBeBuildByCre, Cre_build } from "../gameObjects/Cre_build";
@@ -20,7 +25,6 @@ import {
 } from "../gameObjects/CreTool";
 import {
   createCS,
-  CS,
   getMaxWorthCSS,
   hasConstructionSite,
 } from "../gameObjects/CS";
@@ -40,10 +44,8 @@ import {
   myRampartAt,
 } from "../gameObjects/ramparts";
 import {
-  enemySpawn,
   getSpawnAndBaseContainerEnergy,
   inMyBaseRan,
-  spawn,
 } from "../gameObjects/spawn";
 import {
   blocked,

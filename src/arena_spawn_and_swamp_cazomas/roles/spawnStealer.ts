@@ -1,6 +1,6 @@
+import { enemySpawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { Role } from "../gameObjects/CreTool";
 import { Cre_battle } from "../gameObjects/Cre_battle";
-import { enemySpawn } from "../gameObjects/spawn";
 import { SA } from "../utils/visual";
 
 /**tring to attack the enemy spawn when no one noticed*/

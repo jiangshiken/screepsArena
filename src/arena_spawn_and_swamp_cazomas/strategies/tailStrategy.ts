@@ -1,12 +1,10 @@
-import { ATTACK, HEAL, MOVE, RANGED_ATTACK, WORK } from "game/constants";
-import { getTicks } from "game/utils";
 import {
   enemySpawn,
-  inMyBaseRan,
   spawn,
-  spawnCleared,
-  spawnCreep,
-} from "../gameObjects/spawn";
+} from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
+import { ATTACK, HEAL, MOVE, RANGED_ATTACK, WORK } from "game/constants";
+import { getTicks } from "game/utils";
+import { inMyBaseRan, spawnCleared, spawnCreep } from "../gameObjects/spawn";
 import { jamer } from "../roles/jamer";
 
 import { Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";

@@ -1,10 +1,10 @@
 import { CostMatrix } from "game/path-finder";
 
+import { spawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { closest } from "arena_spawn_and_swamp_cazomas/utils/Pos";
 import { Cre_battle } from "../gameObjects/Cre_battle";
 import { Role } from "../gameObjects/CreTool";
 import { enemies } from "../gameObjects/GameObjectInitialize";
-import { spawn } from "../gameObjects/spawn";
 import { blockCost } from "../gameObjects/UnitTool";
 import { absRange, getRangePoss, GR } from "../utils/Pos";
 

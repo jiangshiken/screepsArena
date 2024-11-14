@@ -10,6 +10,10 @@ import { CostMatrix, searchPath } from "game/path-finder";
 import { StructureExtension } from "game/prototypes";
 
 import { Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
+import {
+  enemySpawn,
+  spawn,
+} from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { Cre_move } from "../gameObjects/Cre_move";
 import { Role } from "../gameObjects/CreTool";
 import { createCS } from "../gameObjects/CS";
@@ -17,7 +21,7 @@ import { S } from "../gameObjects/export";
 import { friends } from "../gameObjects/GameObjectInitialize";
 import { moveTo_basic } from "../gameObjects/MoveTask";
 import { normalPull } from "../gameObjects/pull";
-import { enemySpawn, spawn, spawnCreep } from "../gameObjects/spawn";
+import { spawnCreep } from "../gameObjects/spawn";
 import { builder4Ram } from "../roles/builder";
 import { harvester } from "../roles/harvester";
 import { TB } from "../utils/autoBodys";

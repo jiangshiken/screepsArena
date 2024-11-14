@@ -7,7 +7,6 @@ import { Adj, COO, GR, Pos, X_axisDistance, getRangePoss } from "../utils/Pos";
 import { SA, drawLineComplex, drawLineLight } from "../utils/visual";
 import { Cre } from "./Cre";
 import { Cre_move } from "./Cre_move";
-import { isTurtleContainer } from "./CreCommands";
 import { S } from "./export";
 import { searchPathByCreCost } from "./findPath";
 import {
@@ -21,9 +20,9 @@ import {
   myUnits,
   oppoUnits,
   ress,
+  spawn,
 } from "./GameObjectInitialize";
 import { findGO, overallMap } from "./overallMap";
-import { spawn } from "./spawn";
 import { Con, Ext, Res, Spa, Stru } from "./Stru";
 import {
   energyFull,
@@ -32,6 +31,7 @@ import {
   getEnergy,
   getFreeEnergy,
   isOppoBaseContainer,
+  isTurtleContainer,
 } from "./UnitTool";
 
 export class Cre_harvest extends Cre_move {

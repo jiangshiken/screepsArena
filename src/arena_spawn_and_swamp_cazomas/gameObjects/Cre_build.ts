@@ -13,9 +13,9 @@ import { SA, drawLineLight } from "../utils/visual";
 import { Cre, Task_Cre } from "./Cre";
 import { Cre_battle } from "./Cre_battle";
 import { hasEnemyAround } from "./CreTool";
-import { CS, getMaxWorthCSS } from "./CS";
+import { getMaxWorthCSS } from "./CS";
 import { S } from "./export";
-import { myCSs } from "./GameObjectInitialize";
+import { CS, myCSs } from "./GameObjectInitialize";
 import { overallMap } from "./overallMap";
 import { energyFull, energylive, inRampart } from "./UnitTool";
 

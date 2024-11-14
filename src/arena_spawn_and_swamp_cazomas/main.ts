@@ -33,15 +33,15 @@ export function loop(): void {
     const st = ct();
     const gp = getGuessPlayer();
     if (gp === Tigga) {
-      useWormRush();
+      useWormRush(8);
     } else if (gp === Kerob) {
       set_harvesterNotFleeAtStart(true);
-      useWormRush();
+      useWormRush(8);
     } else if (gp === Dooms) {
       set_harvesterNotFleeAtStart(true);
-      useWormRush();
+      useWormRush(8);
     } else {
-      useWormRush();
+      useWormRush(7);
     }
     pt("mainStrategy", st);
   }

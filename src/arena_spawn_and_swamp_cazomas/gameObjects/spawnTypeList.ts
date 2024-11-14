@@ -5,13 +5,8 @@ import { P, SA } from "../utils/visual";
 import { Cre } from "./Cre";
 import { Role } from "./CreTool";
 import { S } from "./export";
-import { friends } from "./GameObjectInitialize";
-import {
-  enoughEnergy,
-  spawn,
-  spawnAndSpawnListEmpty,
-  spawnCreep,
-} from "./spawn";
+import { friends, spawn } from "./GameObjectInitialize";
+import { enoughEnergy, spawnAndSpawnListEmpty, spawnCreep } from "./spawn";
 
 export function spawnBySpawnTypeList(spl: SpawnType[]) {
   const maxNeedSpawnType = best(spl, s => {

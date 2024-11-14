@@ -108,19 +108,7 @@
 // const restartGateTickLimit = 385;
 // const defenderTickLimit = 380;
 // /**if ready in rush mode(after spawned at base and ready to rush)*/
-// function ifGo(): boolean {
-//   drawText(new Pos_C(50, 52), "C");
-//   const finalSnakePart = findSnakePart(snakePartsTotalNum === 8 ? 7 : 1);
-//   return (
-//     tick >= goLimitTick() ||
-//     (finalSnakePart !== undefined &&
-//       atPos(finalSnakePart, assemblePoint(finalSnakePart)))
-//   );
-// }
-// /**find the snake apart by index*/
-// function findSnakePart(index: number): Cre | undefined {
-//   return snakeParts.find(i => i.upgrade.spIndex === index);
-// }
+
 // export let sum_snakePart0: number = 0;
 // /**
 //  * control a creep as a snake part.it will wait at base at <400 tick.

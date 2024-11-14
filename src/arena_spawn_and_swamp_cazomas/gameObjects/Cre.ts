@@ -66,8 +66,11 @@ export class Cre
   moveEvent: MoveEvent | undefined;
   /** tasks list */
   readonly tasks: Task[] = [];
+  startGateUp: boolean | undefined;
   /**task execute order */
   taskPriority: number = 10;
+  group_ID: number | undefined;
+  group_Index: number | undefined;
   /**extra infomation*/
   readonly upgrade: any = {};
   constructor(creep: Creep) {

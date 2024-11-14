@@ -22,7 +22,7 @@ import { moveBlockCostMatrix } from "./UnitTool";
 
 export class Cre_move extends Cre {
   appointmentMovement: Event_Pos | undefined;
-  startGateUp: boolean | undefined;
+
   /** if the target of current `MoveTask` is `tar` ,cancel it*/
   appointMovementIsActived(): boolean {
     return (

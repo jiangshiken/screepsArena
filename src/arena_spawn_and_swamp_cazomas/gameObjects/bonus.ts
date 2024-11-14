@@ -7,12 +7,8 @@ import { GR, Pos, X_axisDistance } from "../utils/Pos";
 import { sumForceByArr } from "./battle";
 import { getHarvables } from "./Cre_harvest";
 import { enemyAttackNum, hasThreat, is5MA } from "./CreTool";
-import { enemies, friends } from "./GameObjectInitialize";
-import {
-  spawn,
-  spawnAndExtensionsEnergy,
-  spawnNearBlockedAround,
-} from "./spawn";
+import { enemies, friends, spawn } from "./GameObjectInitialize";
+import { spawnAndExtensionsEnergy, spawnNearBlockedAround } from "./spawn";
 import { getEnergy } from "./UnitTool";
 
 export function rangeReduce(cre: Pos, tar: Pos, bias: number = 10): number {

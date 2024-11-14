@@ -21,7 +21,7 @@ import {
 
 import { closest } from "arena_spawn_and_swamp_cazomas/utils/Pos";
 import { tick } from "../utils/game";
-import { calculateForce, getForce_tradition, getTaunt } from "./battle";
+import { calculateForce, getTaunt } from "./battle";
 import { rangeReduce } from "./bonus";
 import { Cre } from "./Cre";
 import { Cre_battle } from "./Cre_battle";
@@ -46,11 +46,12 @@ import {
   myRamparts,
   oppoUnits,
   resources,
+  spawn,
   Unit,
 } from "./GameObjectInitialize";
 import { damaged, damagedRate } from "./HasHits";
 import { moveTo_basic } from "./MoveTask";
-import { findGO, hasGO } from "./overallMap";
+import { findGO } from "./overallMap";
 import { currentGuessPlayer, Dooms } from "./player";
 import {
   getMyHealthyRamparts,
@@ -60,8 +61,6 @@ import {
   ramSaveCostMatrix,
   refreshRampartSaveCostMatrix,
 } from "./ramparts";
-import { spawn } from "./spawn";
-import { Roa } from "./Stru";
 import {
   blocked,
   energylive,
@@ -86,13 +85,6 @@ export function defendInArea(cre: Cre_move, pos: Pos, range: number): boolean {
     cre.MTJ(pos);
     return false;
   }
-}
-export function isTerrainRoad(pos: Pos): boolean {
-  return hasGO(pos, Roa);
-}
-export let isTurtleContainer: boolean = false;
-export function setIsTurtleContainer(b: boolean) {
-  isTurtleContainer = b;
 }
 export function moveToAllEmptyRampart(cre: Cre_move) {
   SA(cre, " select all empty ");
@@ -312,8 +304,8 @@ export function getRoundFightAndAvoidNum(
 }
 /**get the rate if need to protect it self */
 export function getForceTarAndPosRate(cre: Cre, target: Cre) {
-  const forceAtPos = getForce_tradition(cre);
-  const forceAtTarget = getForce_tradition(target);
+  const forceAtPos = calculateForce(cre);
+  const forceAtTarget = calculateForce(target);
   SA(cre, "target=" + COO(target));
   const range = GR(cre, target);
   const targetRate = 2 * divideReduce(range, 10);

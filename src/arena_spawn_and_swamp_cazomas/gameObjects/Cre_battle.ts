@@ -3,20 +3,19 @@ import { Event_Number } from "../utils/Event";
 import { Adj, GR, InShotRan } from "../utils/Pos";
 import { SA } from "../utils/visual";
 import {
+  attackDmg,
   findMaxTaunt,
   findMaxTaunt_heal,
   getTauntMass,
   getTauntShot,
+  healAdjAmount,
+  rangeDmg,
   StRate_damage,
 } from "./battle";
 import { Cre } from "./Cre";
 import { Cre_harvest } from "./Cre_harvest";
-import { friends, oppoUnits, walls } from "./GameObjectInitialize";
-import { enemySpawn } from "./spawn";
+import { enemySpawn, friends, oppoUnits, walls } from "./GameObjectInitialize";
 import { CanBeAttacked } from "./UnitTool";
-export const attackDmg = 30;
-export const rangeDmg = 10;
-export const healAdjAmount = 12;
 export function healAmount(range: number): number {
   if (range <= 1) {
     return 12;

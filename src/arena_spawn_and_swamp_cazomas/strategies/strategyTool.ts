@@ -1,5 +1,6 @@
 import { CARRY, MOVE } from "game/constants";
 
+import { spawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import {
   enemyAWeight,
   getEnemyThreats,
@@ -9,7 +10,6 @@ import { enemies, friends } from "../gameObjects/GameObjectInitialize";
 import {
   getBodiesCost,
   inMyBaseRan,
-  spawn,
   spawnAndExtensionsEnergy,
   spawnCleared,
   spawnCreep,
@@ -30,7 +30,6 @@ import {
   vecPlusVec,
 } from "../utils/Pos";
 import { displayPos, SA, SAN } from "../utils/visual";
-
 /**spawn the start harvester of every strategy*/
 export function spawnStartHarvester(
   needCarryNum: number,

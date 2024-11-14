@@ -1,6 +1,7 @@
 import { ConstructionSite } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
+import { spawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { Cre_battle } from "../gameObjects/Cre_battle";
 import {
   attackWeakRampart,
@@ -10,7 +11,6 @@ import {
 import { getEnemyThreats, Role } from "../gameObjects/CreTool";
 import { enemies } from "../gameObjects/GameObjectInitialize";
 import { findGO } from "../gameObjects/overallMap";
-import { spawn } from "../gameObjects/spawn";
 import { tick } from "../utils/game";
 import { GR } from "../utils/Pos";
 import { P, SA } from "../utils/visual";

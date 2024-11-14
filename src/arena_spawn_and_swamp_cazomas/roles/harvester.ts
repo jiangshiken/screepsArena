@@ -7,10 +7,11 @@ import {
   ress,
 } from "../gameObjects/GameObjectInitialize";
 
+import { spawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { Cre_harvest, validRes } from "../gameObjects/Cre_harvest";
 import { S } from "../gameObjects/export";
 import { getMoveTime, searchPathByCreCost } from "../gameObjects/findPath";
-import { inMyBaseRan, spawn } from "../gameObjects/spawn";
+import { inMyBaseRan } from "../gameObjects/spawn";
 import { Con } from "../gameObjects/Stru";
 import {
   energylive,

@@ -13,7 +13,6 @@ import { StNumber } from "../utils/game";
 import { divide0, maxWorth_lamb, removeIf, sum } from "../utils/JS";
 import { Adj, GR, InShotRan, Pos, X_axisDistance } from "../utils/Pos";
 import { Cre } from "./Cre";
-import { rangeDmg } from "./Cre_battle";
 import {
   getEnemyArmies,
   getEnemyThreats,
@@ -22,10 +21,9 @@ import {
   spawnDps,
   spawnExtraTaunt,
 } from "./CreTool";
-import { oppoUnits, Unit } from "./GameObjectInitialize";
+import { oppoUnits, spawn, Unit } from "./GameObjectInitialize";
 import { damagedRate, HasHits, healthRate } from "./HasHits";
 import { findGO } from "./overallMap";
-import { spawn } from "./spawn";
 import { Ext, Ram, Spa, Tow } from "./Stru";
 import { getEnergy, inRampart } from "./UnitTool";
 
@@ -279,3 +277,6 @@ export function getDps(cre: Unit, valueMode: boolean = false): StNumber {
   } else rtn = 0;
   return 0.01 * rtn;
 }
+export const attackDmg = 30;
+export const rangeDmg = 10;
+export const healAdjAmount = 12;

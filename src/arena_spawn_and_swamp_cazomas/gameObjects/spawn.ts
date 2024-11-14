@@ -27,22 +27,19 @@ import { Role } from "./CreTool";
 import { S } from "./export";
 import {
   containers,
+  enemySpawn,
   extensions,
   friends,
   gameObjects,
   myExtensions,
   mySpawns,
   oppoExtensions,
+  spawn,
   structures,
 } from "./GameObjectInitialize";
 import { Spa } from "./Stru";
 import { blocked, getEnergy } from "./UnitTool";
 
-/** your first StructureSpawn*/
-export let spawn: Spa;
-export function setSpawn(s: Spa) {
-  spawn = s;
-}
 export function spawnCleared(s: Spa) {
   return (
     spawnList.length === 0 &&
@@ -50,12 +47,6 @@ export function spawnCleared(s: Spa) {
     !s.spawnEvent?.validEvent()
   );
 }
-/** the first StructureSpawn of your opponent*/
-export let enemySpawn: Spa;
-export function setEnemySpawn(s: Spa) {
-  enemySpawn = s;
-}
-
 export function spawnListContain(body: BodyPartConstant[], role: Role) {
   for (let info of spawnList) {
     if (arrayEqual(info.bodies, body) && info.role === role) {

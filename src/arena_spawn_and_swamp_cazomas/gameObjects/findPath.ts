@@ -26,9 +26,12 @@ import {
   drawPolyLight,
 } from "../utils/visual";
 import { Cre } from "./Cre";
-import { Cre_move } from "./Cre_move";
-import { isTerrainRoad } from "./CreCommands";
-import { getCapacity, getEnergy, moveBlockCostMatrix } from "./UnitTool";
+import {
+  getCapacity,
+  getEnergy,
+  isTerrainRoad,
+  moveBlockCostMatrix,
+} from "./UnitTool";
 
 /** search the closest path of multiple targets ,like findPath but will
  * calculate terrain cost by this creep
@@ -313,7 +316,7 @@ export function getNewTarByArea(cre: Pos, tar: Pos): Pos {
   const creArea = getArea_std(cre);
   const tarArea = getArea_std(tar);
   let current_startGateUp = undefined;
-  if (cre instanceof Cre_move && cre.startGateUp !== undefined) {
+  if (cre instanceof Cre && cre.startGateUp !== undefined) {
     SA(cre, "SG1");
     current_startGateUp = cre.startGateUp;
   }

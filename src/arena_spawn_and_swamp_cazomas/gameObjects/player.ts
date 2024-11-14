@@ -6,9 +6,8 @@ import { arrayEquals, best } from "../utils/JS";
 import { GR } from "../utils/Pos";
 import { displayPos, SA } from "../utils/visual";
 import { getBodyArrayOfCreep } from "./CreTool";
-import { creeps, enemies } from "./GameObjectInitialize";
+import { creeps, enemies, enemySpawn } from "./GameObjectInitialize";
 import { isOppoGO } from "./HasMy";
-import { enemySpawn } from "./spawn";
 import { getEnergy } from "./UnitTool";
 
 //class
@@ -41,6 +40,9 @@ export const Kerob: Player = new Player("Kerob");
 export const Other: Player = new Player("Other");
 export const startWaitTick = 44;
 export let currentGuessPlayer = Other;
+export function strategyStartTick() {
+  return startWaitTick + 1;
+}
 export function identifyOpponent() {
   //identify tigga
   if (tick === startWaitTick - 1) {

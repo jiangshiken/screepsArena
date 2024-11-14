@@ -1,5 +1,9 @@
 import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
 
+import {
+  CS,
+  enemySpawn,
+} from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { Cre } from "../gameObjects/Cre";
 import { Cre_move } from "../gameObjects/Cre_move";
 import {
@@ -7,10 +11,9 @@ import {
   givePositionToImpartantFriend,
 } from "../gameObjects/CreCommands";
 import { hasThreat, Role } from "../gameObjects/CreTool";
-import { CS } from "../gameObjects/CS";
 import { enemies, friends, oppoCSs } from "../gameObjects/GameObjectInitialize";
 import { moveAndBePulled } from "../gameObjects/pull";
-import { enemySpawn, inEnBaseRan } from "../gameObjects/spawn";
+import { inEnBaseRan } from "../gameObjects/spawn";
 import { blocked, inOppoRampart } from "../gameObjects/UnitTool";
 import { best, divideReduce } from "../utils/JS";
 import {

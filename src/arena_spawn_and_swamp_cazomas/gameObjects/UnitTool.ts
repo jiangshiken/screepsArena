@@ -5,9 +5,14 @@ import { inResourceArea, isTerrainWall } from "../utils/game";
 import { getRangePoss, GR, Pos } from "../utils/Pos";
 import { Cre } from "./Cre";
 import { GameObj } from "./GameObj";
-import { BlockGO, containers, HasStore } from "./GameObjectInitialize";
-import { findGO, overallMap } from "./overallMap";
-import { enemySpawn, spawn } from "./spawn";
+import {
+  BlockGO,
+  containers,
+  enemySpawn,
+  HasStore,
+  spawn,
+} from "./GameObjectInitialize";
+import { findGO, hasGO, overallMap } from "./overallMap";
 import { Con, Ext, Ram, Res, Roa, Spa, Stru, Tow } from "./Stru";
 
 export type CanBeAttacked = Stru | Cre;
@@ -140,4 +145,11 @@ export function hasResourceOnGround(pos: Pos, amount: number) {
 }
 export function aroundBlock(pos: Pos) {
   return getRangePoss(pos, 1).find(i => !blocked(i)) === undefined;
+}
+export function isTerrainRoad(pos: Pos): boolean {
+  return hasGO(pos, Roa);
+}
+export let isTurtleContainer: boolean = false;
+export function setIsTurtleContainer(b: boolean) {
+  isTurtleContainer = b;
 }

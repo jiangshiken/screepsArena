@@ -1,6 +1,6 @@
+import { spawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { createCS, supplyCS } from "../gameObjects/CS";
 import {
-  spawn,
   spawnCleared,
   spawnCreep,
   spawnCreepInFront,
@@ -19,11 +19,11 @@ import { defender_rampart } from "../roles/defender";
 import { harvester } from "../roles/harvester";
 import { leftRate } from "../utils/game";
 import { sum } from "../utils/JS";
-import { getRangePoss } from "../utils/Pos";
+import { getRangePoss, Pos_C } from "../utils/Pos";
 /**use a standard mode of turtling at base*/
 export function useStandardTurtling(st: number, strength: number = 0) {
-  SA(displayPos(), "Citilize strength=" + strength);
-  if (st === 1) {
+  SA(displayPos(), "standardTurtling strength=" + strength);
+  if (st === 0) {
     if (strength === 0) {
       spawnCreep(TB("AWCM"), builderTurtle); //200
     } else if (strength === 1) {
@@ -31,37 +31,32 @@ export function useStandardTurtling(st: number, strength: number = 0) {
     } else {
       spawnCreep(TB("3A2R2WCM"), builderTurtle); //200
     }
-    //240+300+300+100+150
-    // spawnCreep([ATTACK,ATTACK,ATTACK,RANGED_ATTACK,RANGED_ATTACK,WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE,MOVE],builder);//200
-
     if (strength >= 2) {
       createCS(spawn, StructureRampart, 10, false, true);
     }
     createCS(spawn, StructureRampart, 10, false, true);
   }
-  supplyCS({ x: spawn.x, y: spawn.y + 1 }, StructureRampart, 10);
-  supplyCS({ x: spawn.x, y: spawn.y - 1 }, StructureRampart, 10);
+  supplyCS(new Pos_C(spawn.x, spawn.y + 1), StructureRampart, 10);
+  supplyCS(new Pos_C(spawn.x, spawn.y - 1), StructureRampart, 10);
   if (strength > 0) {
-    supplyCS({ x: spawn.x + leftRate(), y: spawn.y }, StructureRampart, 10);
+    supplyCS(new Pos_C(spawn.x + leftRate(), spawn.y), StructureRampart, 10);
   }
-  supplyCS({ x: spawn.x - leftRate(), y: spawn.y }, StructureRampart, 10);
+  supplyCS(new Pos_C(spawn.x - leftRate(), spawn.y), StructureRampart, 10);
   // supply
   supplyHarvester(st);
   //
   const startRebuildTick = 200;
-  let transRebuildTime: number;
-  let transRebuildTimeRange2: number = 2000;
-  if (strength <= 0) {
-    transRebuildTime = 600;
-  } else if (strength <= 1) {
-    transRebuildTime = 400;
-  } else if (strength <= 2) {
-    transRebuildTime = 200;
-  } else {
-    transRebuildTime = 200;
-    transRebuildTimeRange2 = 500;
-  }
-  if (st >= startRebuildTick && st <= transRebuildTime) {
+  // let transRebuildTime: number;
+  // if (strength === 0) {
+  //   transRebuildTime = 600;
+  // } else if (strength === 1) {
+  //   transRebuildTime = 400;
+  // } else if (strength === 2) {
+  //   transRebuildTime = 200;
+  // } else {
+  //   transRebuildTime = 200;
+  // }
+  if (st >= startRebuildTick) {
     reBuildBaseRampart();
   }
   if (st === 370) {
@@ -73,10 +68,6 @@ export function useStandardTurtling(st: number, strength: number = 0) {
       } else {
         spawnCreepInFront(TB("2arm"), defender_rampart);
       }
-      // spawnCreepInFront(
-      // 	TB("2arm"),
-      // 	defender_rampart
-      // );
     } else if (strength === 1) {
       if (AW < 0.2) {
         //450+50
@@ -98,25 +89,12 @@ export function useStandardTurtling(st: number, strength: number = 0) {
 /**use 4 ramparts to defend the base*/
 export function use4RamDefend(st: number, exposeSpawnSimple: boolean = false) {
   SA(displayPos(), "use4RamDefend");
-  // spawnStartHarvester(3)
-
-  // if (st === 1) {
-  // spawnCreep(TB("CM"), harvester); //
-  // spawnCreep(TB("CM"), harvester); //
-  // spawnCreep(TB("m2cm"), harvester); //
-  // if (!exposeSpawnSimple) {
-  // }
   supplyCS(spawn, StructureRampart, 10);
   supplyCS({ x: spawn.x, y: spawn.y + 1 }, StructureRampart, 10);
   supplyCS({ x: spawn.x, y: spawn.y - 1 }, StructureRampart, 10);
   supplyCS({ x: spawn.x - leftRate(), y: spawn.y }, StructureRampart, 10);
-  // }
   supplyBuilder();
   spawnStartHarvester(1, true);
-  // if (st >= 2) {
-  // 	supplyHarvester(st);
-  // 	reBuildBaseRampart();
-  // }
 }
 function supplyBuilder() {
   if (
@@ -143,6 +121,6 @@ export function supplyHarvester(st: number) {
  */
 export function reBuildBaseRampart() {
   if (baseLoseRampart()) {
-    createCS(spawn, StructureRampart, 10);
+    supplyCS(spawn, StructureRampart, 10, false, false);
   }
 }

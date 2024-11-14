@@ -1,66 +1,16 @@
 import { createConstructionSite } from "game";
-import { ConstructionSite, StructureRampart } from "game/prototypes";
+import { StructureRampart } from "game/prototypes";
 import { getTicks } from "game/utils";
 
-import { Event } from "../utils/Event";
-import { best, divide0 } from "../utils/JS";
-import { atPos, HasPos, Pos } from "../utils/Pos";
+import { best } from "../utils/JS";
+import { atPos, Pos } from "../utils/Pos";
 import { SA } from "../utils/visual";
 import { S } from "./export";
 import { GameObj } from "./GameObj";
-import { CSs, myCSs } from "./GameObjectInitialize";
-import { HasMy, isMyGO, isOppoGO } from "./HasMy";
+import { CS, CSs, myCSs } from "./GameObjectInitialize";
 import { findGO_lambda } from "./overallMap";
 import { inMyRampart } from "./ramparts";
 
-// export let CSs: CS[] = []
-/** extend of ConstructionSite */
-export class CS extends GameObj implements HasPos, HasMy {
-  readonly master: ConstructionSite;
-  decayEvent: Event | undefined;
-  useDecay: boolean = false;
-  worth: number = 0;
-  constructor(cons: ConstructionSite) {
-    super(cons);
-    this.master = cons;
-    this.useDecay = (<any>cons).useDecay;
-    this.worth = (<any>cons).worth;
-  }
-  get my() {
-    return isMyGO(this.master);
-  }
-  get oppo() {
-    return isOppoGO(this.master);
-  }
-  get x(): number {
-    return this.master.x;
-  }
-  get y(): number {
-    return this.master.y;
-  }
-  /**the progress of a construction site*/
-  get progress(): number {
-    if (this.master.progress) {
-      return this.master.progress;
-    } else {
-      return 0;
-    }
-  }
-  /**the progress total of a construction site*/
-  get progressTotal(): number {
-    if (this.master.progressTotal) {
-      return this.master.progressTotal;
-    } else {
-      return 0;
-    }
-  }
-  /**
-   * get the progress rate of a `ConstructionSite`
-   */
-  get progressRate(): number {
-    return divide0(this.progress, this.progressTotal);
-  }
-}
 /**has a construction site of specific type at a pos*/
 export function hasConstructionSiteByType(pos: Pos, type: any): boolean {
   return (

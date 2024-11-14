@@ -26,6 +26,7 @@ import {
   containers,
   creeps,
   cres,
+  enemySpawn,
   getGOs,
   initialCSsAtLoopStart,
   initialGameObjectsAtLoopStart_advance,
@@ -35,6 +36,9 @@ import {
   mySpawns,
   oppoSpawns,
   set_cres,
+  setEnemySpawn,
+  setSpawn,
+  spawn,
   strus,
 } from "./gameObjects/GameObjectInitialize";
 import {} from "./gameObjects/HasHits";
@@ -44,14 +48,7 @@ import {
   setGameObjectsThisTick,
   setOverallMap,
 } from "./gameObjects/overallMap";
-import {
-  checkSpawns,
-  enemySpawn,
-  setEnemySpawn,
-  setSpawn,
-  spawn,
-  spawnList,
-} from "./gameObjects/spawn";
+import { checkSpawns, spawnList } from "./gameObjects/spawn";
 import { Con } from "./gameObjects/Stru";
 import {
   blockCost,

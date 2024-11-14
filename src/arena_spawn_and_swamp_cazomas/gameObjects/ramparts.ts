@@ -4,9 +4,8 @@ import { Event } from "../utils/Event";
 import { relu, sum } from "../utils/JS";
 import { Adj, getRangePoss, GR, Pos } from "../utils/Pos";
 import { SA } from "../utils/visual";
-import { enemies, friends, myRamparts } from "./GameObjectInitialize";
+import { enemies, friends, myRamparts, spawn } from "./GameObjectInitialize";
 import { findGO } from "./overallMap";
-import { spawn } from "./spawn";
 import { OwnedStru, Ram } from "./Stru";
 import { blocked } from "./UnitTool";
 
