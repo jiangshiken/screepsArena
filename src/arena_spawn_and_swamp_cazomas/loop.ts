@@ -59,10 +59,13 @@ import {
   isBlockGO,
   set_moveBlockCostMatrix,
 } from "./gameObjects/UnitTool";
-import { showEnemies, showHits } from "./gameObjects/visual_Cre";
+import {
+  showEnemies,
+  showHealthBars,
+  showHits,
+} from "./gameObjects/visual_Cre";
 import { initSpawnWallCostMatrix } from "./roles/extStealer";
-import { sum_snakePart0 } from "./strategies/snakeRush";
-import { ct, getCPUPercent, pt, ptL, ptSum } from "./utils/CPU";
+import { ct, getCPUPercent, pt, ptL } from "./utils/CPU";
 import {
   creepBodyPartNum,
   inResourceArea,
@@ -162,6 +165,7 @@ export function loopStart() {
   pt("checkSpawns", st_checkSpawns);
   const st5 = ct();
   setWorthForContainers();
+  showHealthBars();
   pt("setWorthForContainers", st5);
   P("loopStart end");
 }
@@ -246,9 +250,7 @@ export function printCPU() {
   P("cpu=\t" + cpuK + "K\t/ " + maxCpuK + "K");
   SA(displayPos(), "cpu=\t" + cpuK + "K\t/ " + maxCpuK + "K");
 }
-function displayRoleCPU() {
-  ptSum("sum_snakePart0", sum_snakePart0);
-}
+function displayRoleCPU() {}
 export function initCre(creep: Creep): Cre {
   let cre: Cre;
   if (creepBodyPartNum(creep, WORK) > 0) {

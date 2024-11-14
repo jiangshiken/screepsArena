@@ -519,7 +519,7 @@ function tailMeleeJob(cre: Cre_battle) {
 }
 function pullAction(
   cre: Cre_move,
-  followers: Cre[],
+  followers: Cre_move[],
   tar: Pos,
   goSide: boolean = false
 ) {
@@ -547,18 +547,7 @@ function pullAction(
       }
     }
   }
-  new PullTarsTask(
-    cre,
-    followers,
-    tar,
-    10,
-    undefined,
-    false,
-    false,
-    costMat,
-    1,
-    2
-  );
+  new PullTarsTask(cre, followers, tar, 10, costMat, 1, 2);
 }
 function stopAction(cre: Cre_move, head: Cre, myGroup: Cre_move[]) {
   SA(cre, "STOP");
@@ -586,7 +575,7 @@ function cleanFatigue(myGroup: Cre_move[]) {
     if (topMoves > bottomMoves) {
       if (tarTop.length > 0) {
         const sortedTarTop = tarTop.sort((a, b) => tailIndex(b) - tailIndex(a));
-        new PullTarsTask(tar, sortedTarTop, spawn, 10, undefined, false, true);
+        new PullTarsTask(tar, sortedTarTop, spawn, 10);
         if (tarBottom.length >= 2) {
           SA(tar, "bottom");
           cleanFatigue(tarBottom);
@@ -597,15 +586,7 @@ function cleanFatigue(myGroup: Cre_move[]) {
         const sortedTarBottom = tarTop.sort(
           (a, b) => tailIndex(a) - tailIndex(b)
         );
-        new PullTarsTask(
-          tar,
-          sortedTarBottom,
-          spawn,
-          10,
-          undefined,
-          false,
-          true
-        );
+        new PullTarsTask(tar, sortedTarBottom, spawn, 10);
         if (tarTop.length >= 2) {
           SA(tar, "top");
           cleanFatigue(tarTop);
@@ -819,10 +800,7 @@ function fleeAction(
             fatigueHolder,
             sortedFollowers,
             fatigueHolderNext,
-            10,
-            undefined,
-            true,
-            true
+            10
           );
         }
         const direct = getDirectionByPos(fatigueHolder, fatigueHolderNext);

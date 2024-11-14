@@ -7,7 +7,7 @@ import {
 } from "game/constants";
 import { StructureRampart } from "game/prototypes";
 import { Event } from "../utils/Event";
-import { GR, atPos } from "../utils/Pos";
+import { InShotRan, atPos } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA, drawLineLight } from "../utils/visual";
 import { Cre, Task_Cre } from "./Cre";
@@ -88,7 +88,7 @@ export class Cre_build extends Cre_battle {
     const css = myCSs.filter(i => canBeBuildByCre(i, this));
     const cs = getMaxWorthCSS(css);
     this.buildStatic();
-    if (cs && GR(cs, this.master) > 3) {
+    if (cs && !InShotRan(cs, this.master)) {
       this.MTJ(cs);
     } else {
       this.stop();
@@ -97,7 +97,7 @@ export class Cre_build extends Cre_battle {
   /** build static*/
   buildStatic(): CS | undefined {
     const css = myCSs.filter(
-      i => GR(i, this.master) <= 3 && canBeBuildByCre(i, this)
+      i => InShotRan(i, this.master) && canBeBuildByCre(i, this)
     );
     const cs = getMaxWorthCSS(css);
     if (cs) SA(cs, "buildStatic cs here");

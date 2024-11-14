@@ -1,5 +1,5 @@
 import { Cre, Task_Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
-import { id, isMyTick, Role } from "../gameObjects/CreTool";
+import { isMyTick, Role } from "../gameObjects/CreTool";
 import {
   containers,
   Harvable,
@@ -114,7 +114,7 @@ export class HarvestTask extends Task_Cre {
         // overallMap.set(cre, new ResourceDropEvent(PosToPos_C(cre)));
         cre.MTJ(transTarget);
       } else {
-        SA(cre, "normal move to " + id(transTarget));
+        SA(cre, "normal move to " + transTarget.id);
         const sRtn = searchPathByCreCost(cre, transTarget);
         if (inMyBaseRan(cre)) {
           drawPoly(sRtn.path, 0.8, "#8822aa");

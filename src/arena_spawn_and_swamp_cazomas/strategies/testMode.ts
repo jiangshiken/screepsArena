@@ -11,12 +11,12 @@ import { StructureExtension } from "game/prototypes";
 
 import { Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
 import { Cre_move } from "../gameObjects/Cre_move";
-import { id, Role } from "../gameObjects/CreTool";
+import { Role } from "../gameObjects/CreTool";
 import { createCS } from "../gameObjects/CS";
 import { S } from "../gameObjects/export";
 import { friends } from "../gameObjects/GameObjectInitialize";
 import { moveTo_basic } from "../gameObjects/MoveTask";
-import { pullTar } from "../gameObjects/pull";
+import { normalPull } from "../gameObjects/pull";
 import { enemySpawn, spawn, spawnCreep } from "../gameObjects/spawn";
 import { builder4Ram } from "../roles/builder";
 import { harvester } from "../roles/harvester";
@@ -62,7 +62,7 @@ export function tester_PFC2_Job(cre: Cre_move) {
       if (nextTar) {
         if (!atPos(cre, nextTar)) {
           cre.master.moveTo(nextTar);
-        } else if (pullTar(cre, target)) {
+        } else if (normalPull(cre, target)) {
           cre.master.moveTo(enemySpawn);
         }
       }
@@ -93,7 +93,7 @@ export function tester_PFC_Job(cre: Cre) {
     if (cre.getBodyPartsNum(TOUGH) === 0) {
       const otherFri = findOtherTester(cre, tester_PFC);
       if (otherFri) {
-        pullTar(cre, otherFri);
+        normalPull(cre, otherFri);
         cre.master.moveTo(pos4);
       }
     }
@@ -105,7 +105,7 @@ export function tester_MSS_Job(cre: Cre) {
   const pos2 = posPlusVec(spawn, { vec_x: 1, vec_y: 1 });
   const pos3 = posPlusVec(spawn, { vec_x: 2, vec_y: 0 });
   if (tick <= 20) {
-    if (id(cre) % 2 === 0) {
+    if (cre.id % 2 === 0) {
       cre.master.moveTo(pos1);
     } else {
       cre.master.moveTo(pos2);
@@ -126,7 +126,7 @@ export function tester_DCB_Job(cre: Cre) {
   SA(cre, "i'm tester_DCB");
   const pos1 = posPlusVec(spawn, { vec_x: 1, vec_y: -1 });
   const pos2 = posPlusVec(spawn, { vec_x: 1, vec_y: 0 });
-  if (id(cre) % 2 === 0) {
+  if (cre.id % 2 === 0) {
     if (tick <= 20) {
       cre.master.moveTo(pos1);
     } else {
