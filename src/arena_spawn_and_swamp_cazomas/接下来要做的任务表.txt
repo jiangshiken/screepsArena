@@ -1,9 +1,14 @@
 @current
 add Cre_findPath Cre_pull
-recover turtle and header
-arrange worm rush
+pullTarsTask stop all pulling part and notice them
+    by record a high priority task mark on them
 combine pullList and swampCost and plainCost
-use builder and support tailPart
+arrange worm rush
+arrange tailStrategy
+    use builder and support tailPart
+recover headStrategy
+recover turtle
+    turtle exchange pos change to top level
 
 #short distance fight
 	change to add to SDF list
