@@ -272,6 +272,13 @@ export function getReverseDirection(dir: DirectionConstant): DirectionConstant {
 export function leftRotateDirection(dir: DirectionConstant): DirectionConstant {
   return ((dir + 1) % 8) as DirectionConstant;
 }
+export function directionToDiagonal(dir: DirectionConstant): DirectionConstant {
+  if (dir % 2 === 1) {
+    return leftRotateDirection(dir);
+  } else {
+    return dir;
+  }
+}
 /** reverse as clock */
 export function rightRotateDirection(
   dir: DirectionConstant

@@ -255,12 +255,14 @@ function supplyRamparts() {
   }
 }
 /**supply the roads around the base*/
-export function supplyRoads(simpleRoad: boolean = false) {
+export function supplyRoads(strength: number = 2) {
   let rangePos;
-  if (simpleRoad) {
+  if (strength === 0) {
     rangePos = getRangePoss(spawn, 1).filter(
       i => X_axisDistance(spawn, i) === 0 || Y_axisDistance(spawn, i) === 0
     );
+  } else if (strength === 1) {
+    rangePos = getRangePoss(spawn);
   } else {
     const rectPos = getRangePoss(spawn, 2).filter(
       i =>
@@ -268,7 +270,7 @@ export function supplyRoads(simpleRoad: boolean = false) {
         X_axisDistance(spawn, i) === 2 &&
         Y_axisDistance(spawn, i) <= 1
     );
-    rangePos = getRangePoss(spawn, 1).concat(rectPos);
+    rangePos = getRangePoss(spawn).concat(rectPos);
   }
   for (let pos of rangePos) {
     if (!atPos(pos, spawn)) {

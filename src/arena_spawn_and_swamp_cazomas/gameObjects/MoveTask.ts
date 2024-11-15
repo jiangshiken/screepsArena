@@ -15,7 +15,13 @@ import {
   searchPath_area,
 } from "./findPath";
 import { GameObj } from "./GameObj";
-import { blockCost, blocked, moveBlockCostMatrix } from "./UnitTool";
+import {
+  blockCost,
+  blocked,
+  enRamBlockCostMatrix,
+  friendBlockCostMatrix,
+  moveBlockCostMatrix,
+} from "./UnitTool";
 
 /**
  * a task used to move
@@ -152,4 +158,10 @@ export function moveTo_direct(cre: Cre, tar: Pos): void {
 }
 export function moveBlockCostMatrix_setBlock(pos: Pos) {
   moveBlockCostMatrix.set(pos.x, pos.y, blockCost);
+}
+export function friendBlockCostMatrix_setBlock(pos: Pos) {
+  friendBlockCostMatrix.set(pos.x, pos.y, blockCost);
+}
+export function enRamBlockCostMatrix_setBlock(pos: Pos) {
+  enRamBlockCostMatrix.set(pos.x, pos.y, blockCost);
 }

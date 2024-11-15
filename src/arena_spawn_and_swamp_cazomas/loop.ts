@@ -18,7 +18,7 @@ import {
   getMyProducers,
 } from "./gameObjects/Cre_harvest";
 import { Cre_move } from "./gameObjects/Cre_move";
-import { controlCreeps, isMyTick } from "./gameObjects/CreTool";
+import { controlCreeps, isMelee, isMyTick } from "./gameObjects/CreTool";
 import { S } from "./gameObjects/export";
 import { initGateCost, searchPath_area } from "./gameObjects/findPath";
 import {
@@ -34,6 +34,7 @@ import {
   initialressAtLoopStart,
   initialStrusAtLoopStart,
   mySpawns,
+  oppoRamparts,
   oppoSpawns,
   set_cres,
   setEnemySpawn,
@@ -42,8 +43,13 @@ import {
   strus,
 } from "./gameObjects/GameObjectInitialize";
 import {} from "./gameObjects/HasHits";
-import { moveBlockCostMatrix_setBlock } from "./gameObjects/MoveTask";
 import {
+  enRamBlockCostMatrix_setBlock,
+  friendBlockCostMatrix_setBlock,
+  moveBlockCostMatrix_setBlock,
+} from "./gameObjects/MoveTask";
+import {
+  findGO_lambda,
   overallMapInit,
   setGameObjectsThisTick,
   setOverallMap,
@@ -54,6 +60,8 @@ import {
   blockCost,
   getEnergy,
   isBlockGO,
+  set_enRamBlockCostMatrix,
+  set_friendBlockCostMatrix,
   set_moveBlockCostMatrix,
 } from "./gameObjects/UnitTool";
 import {
@@ -69,7 +77,7 @@ import {
   setTick,
 } from "./utils/game";
 import { divideReduce } from "./utils/JS";
-import { GR, Pos, Pos_C } from "./utils/Pos";
+import { getRangePoss, GR, Pos, Pos_C } from "./utils/Pos";
 import { PL } from "./utils/print";
 import {
   append_largeSizeText,
@@ -154,6 +162,7 @@ export function loopStart() {
 
   const st_predictOppos = ct();
   setBlockCostMatrix();
+  setFriendBlockCostMatrix();
   pt("predictOppos and setRamMoveMapValue", st_predictOppos);
   const st_checkSpawns = ct();
   checkSpawns();
@@ -163,6 +172,30 @@ export function loopStart() {
   showHealthBars();
   pt("setWorthForContainers", st5);
   P("loopStart end");
+}
+export function setFriendBlockCostMatrix() {
+  set_friendBlockCostMatrix(new CostMatrix());
+  const blockGOs = (<BlockGO[]>cres).concat(strus);
+  blockGOs.forEach(i => {
+    if (isBlockGO(i, false, true)) {
+      friendBlockCostMatrix_setBlock(i);
+    }
+  });
+}
+export function setEnRamBlockCostMatrix() {
+  set_enRamBlockCostMatrix(new CostMatrix());
+  const enRams = oppoRamparts.filter(
+    i =>
+      findGO_lambda(i, en => en instanceof Cre && en.oppo && isMelee(en)) !==
+      undefined
+  );
+  enRams.forEach(i => {
+    const rangePoss = getRangePoss(i);
+    for (let rp of rangePoss) {
+      enRamBlockCostMatrix_setBlock(rp);
+      drawText(rp, "B");
+    }
+  });
 }
 export function setBlockCostMatrix() {
   set_moveBlockCostMatrix(new CostMatrix());

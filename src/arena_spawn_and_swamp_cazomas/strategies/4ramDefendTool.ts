@@ -24,6 +24,7 @@ import { harvester } from "../roles/harvester";
 import { leftRate } from "../utils/game";
 import { sum } from "../utils/JS";
 import { getRangePoss, Pos_C } from "../utils/Pos";
+import { supplyRoads } from "./turtle";
 /**use a standard mode of turtling at base*/
 export function useStandardTurtling(st: number, strength: number = 0) {
   SA(displayPos(), "standardTurtling strength=" + strength);
@@ -49,6 +50,7 @@ export function useStandardTurtling(st: number, strength: number = 0) {
   supplyCS(new Pos_C(spawn.x - leftRate(), spawn.y), StructureRampart, 10);
   // supply
   supplyHarvester(st);
+
   //
   const startRebuildTick = 200;
   if (st >= startRebuildTick) {
@@ -90,6 +92,7 @@ export function useStandardTurtling(st: number, strength: number = 0) {
     }
   }
   if (st >= 550) {
+    supplyRoads(1);
     const ranPoss = getRangePoss(spawn);
     ranPoss.forEach(pos => supplyCS(pos, StructureRampart));
   }

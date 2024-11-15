@@ -1,4 +1,4 @@
-import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
+import { WORK } from "game/constants";
 
 import {
   CS,
@@ -10,64 +10,56 @@ import {
   cpuBreakJudge,
   givePositionToImpartantFriend,
 } from "../gameObjects/CreCommands";
-import { hasThreat, Role } from "../gameObjects/CreTool";
+import { Role } from "../gameObjects/CreTool";
 import { enemies, friends, oppoCSs } from "../gameObjects/GameObjectInitialize";
-import { moveAndBePulled } from "../gameObjects/pull";
 import { inEnBaseRan } from "../gameObjects/spawn";
 import { blocked, inOppoRampart } from "../gameObjects/UnitTool";
 import { best, divideReduce } from "../utils/JS";
 import {
-  Adj,
   atPos,
+  closest,
   COO,
+  directionToDiagonal,
+  DirectionToVec,
+  getDirectionByPos,
+  getReverseDirection,
   GR,
-  InShotRan,
   midPoint,
+  posPlusVec,
+  VecMultiplyConst,
   Y_axisDistance,
 } from "../utils/Pos";
-import { SA, SAB } from "../utils/visual";
+import { drawText, SA, SAB } from "../utils/visual";
 import { spawnWallCostMatrix } from "./extStealer";
 
 /**used to jam the opponent's construction site*/
 export const jamer: Role = new Role("jamer", jamerJob);
 export function jamerJob(cre: Cre_move) {
   SA(cre, "jamer");
-  const use_oldJamer = true;
-  if (use_oldJamer) {
-    jamerOldJob(cre);
-    return;
-  }
-  const leader = friends.find(
-    i => i.getBodyPartsNum(ATTACK) >= 9 || i.getBodyPartsNum(RANGED_ATTACK) >= 5
-  );
-  if (leader) {
-    if (
-      friends.filter(i => Adj(i, leader) && i.role === jamer).length >= 3 &&
-      !Adj(cre, leader)
-    ) {
-      if (enemies.filter(i => hasThreat(i) && InShotRan(i, cre)).length > 0) {
-        cre.flee(6, 12);
-      } else {
-        cre.stop();
-      }
-    } else {
-      if (leader.upgrade.isPush === true) {
-        cre.MT(leader);
-      } else {
-        moveAndBePulled(cre, leader);
-      }
-    }
-  } else {
-    jamerOldJob(cre);
-  }
-}
-export function jamerOldJob(cre: Cre_move) {
   SA(cre, "JO");
   if (inOppoRampart(cre)) {
     SA(cre, "inOppoRampart");
     cre.stop();
   } else {
-    let fleeing: boolean = fleeWeakComplex(cre);
+    const fleeCM = spawnWallCostMatrix.clone();
+    const myJamers = friends.filter(
+      i => i !== cre && i.role === jamer && GR(i, cre) <= 5
+    );
+    const closestJamer = closest(cre, myJamers);
+    if (closestJamer) {
+      const dir = getDirectionByPos(cre, closestJamer);
+      const diagonalDir = directionToDiagonal(dir);
+      const chooseDir = getReverseDirection(diagonalDir);
+      const setLen = 6;
+      const vec = DirectionToVec(chooseDir);
+      for (let i = 0; i < setLen; i++) {
+        const tarVec = VecMultiplyConst(vec, i + 1);
+        const tarPos = posPlusVec(cre, tarVec);
+        fleeCM.set(tarPos.x, tarPos.y, 1);
+        drawText(tarPos, "E", 1);
+      }
+    }
+    const fleeing: boolean = cre.flee(6, 12, fleeCM, 2, 2);
     SAB(cre, "FL", fleeing);
     if (fleeing) {
       cre.stop();
@@ -113,7 +105,39 @@ export function jamerOldJob(cre: Cre_move) {
       }
     }
   }
-} /**flee from every threated enemy*/
+}
+//   const use_oldJamer = true;
+//   if (use_oldJamer) {
+//     jamerOldJob(cre);
+//     return;
+//   }
+//   const leader = friends.find(
+//     i => i.getBodyPartsNum(ATTACK) >= 9 || i.getBodyPartsNum(RANGED_ATTACK) >= 5
+//   );
+//   if (leader) {
+//     if (
+//       friends.filter(i => Adj(i, leader) && i.role === jamer).length >= 3 &&
+//       !Adj(cre, leader)
+//     ) {
+//       if (enemies.filter(i => hasThreat(i) && InShotRan(i, cre)).length > 0) {
+//         cre.flee(6, 12);
+//       } else {
+//         cre.stop();
+//       }
+//     } else {
+//       if (leader.upgrade.isPush === true) {
+//         cre.MT(leader);
+//       } else {
+//         moveAndBePulled(cre, leader);
+//       }
+//     }
+//   } else {
+//     jamerOldJob(cre);
+//   }
+// }
+// export function jamerOldJob(cre: Cre_move) {
+
+// } /**flee from every threated enemy*/
 export function fleeWeakComplex(cre: Cre_move) {
   if (cre.flee(6, 12, spawnWallCostMatrix, 1, 1)) {
     SA(cre, "flee");

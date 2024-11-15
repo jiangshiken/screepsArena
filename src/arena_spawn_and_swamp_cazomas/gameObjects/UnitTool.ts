@@ -34,6 +34,14 @@ export function getEnergy(a: GameObj): number {
     return 0;
   }
 }
+export let friendBlockCostMatrix: CostMatrix = new CostMatrix();
+export function set_friendBlockCostMatrix(c: CostMatrix) {
+  friendBlockCostMatrix = c;
+}
+export let enRamBlockCostMatrix: CostMatrix = new CostMatrix();
+export function set_enRamBlockCostMatrix(c: CostMatrix) {
+  enRamBlockCostMatrix = c;
+}
 export let moveBlockCostMatrix: CostMatrix = new CostMatrix();
 export function set_moveBlockCostMatrix(c: CostMatrix) {
   moveBlockCostMatrix = c;
@@ -58,9 +66,15 @@ export function blocked(pos: Pos, avoidFriendBlock: boolean = false): boolean {
     return false;
   }
 }
-export function isBlockGO(go: BlockGO, avoidFriendBlock: boolean = false) {
+export function isBlockGO(
+  go: BlockGO,
+  avoidFriendBlock: boolean = false,
+  avoidEnemyBlock: boolean = false
+) {
   if (go instanceof Cre) {
     if (avoidFriendBlock && go.my) {
+      return false;
+    } else if (avoidEnemyBlock && go.oppo) {
       return false;
     } else {
       return true;
@@ -69,6 +83,12 @@ export function isBlockGO(go: BlockGO, avoidFriendBlock: boolean = false) {
     return false;
   } else if (go instanceof Con || go instanceof Roa) {
     return false;
+  } else if (go instanceof Ext) {
+    if (avoidEnemyBlock && go.oppo) {
+      return false;
+    } else {
+      return true;
+    }
   } else {
     return true;
   }

@@ -1,20 +1,30 @@
 import {
+  enemies,
   enemySpawn,
+  oppoSpawns,
   spawn,
 } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
+import { ATTACK } from "game/constants";
 import { Cre_battle } from "../gameObjects/Cre_battle";
 import { Cre_move } from "../gameObjects/Cre_move";
 import { defendInArea } from "../gameObjects/CreCommands";
-import { isHealer, Role } from "../gameObjects/CreTool";
+import { isHealer, isMelee, Role, set_spawnDps } from "../gameObjects/CreTool";
 import { friends } from "../gameObjects/GameObjectInitialize";
-import { damaged } from "../gameObjects/HasHits";
+import { damaged, healthRate } from "../gameObjects/HasHits";
+import { Dooms, getGuessPlayer } from "../gameObjects/player";
 import { newPullTarsTask, PullTarsTask } from "../gameObjects/pull";
 import { spawnCreep } from "../gameObjects/spawn";
+import {
+  enRamBlockCostMatrix,
+  friendBlockCostMatrix,
+  inRampart,
+} from "../gameObjects/UnitTool";
+import { jamer } from "../roles/jamer";
 import { TB } from "../utils/autoBodys";
 import { Event } from "../utils/Event";
 import { addStrategyTick, strategyTick, tick } from "../utils/game";
 import { best } from "../utils/JS";
-import { atPos, closest, GR, Pos_C } from "../utils/Pos";
+import { atPos, closest, GR, InRan2, Pos_C } from "../utils/Pos";
 import { ERR_rtn } from "../utils/print";
 import { findTask } from "../utils/Task";
 import { SA } from "../utils/visual";
@@ -33,9 +43,13 @@ let wormStartWait: Event | undefined = undefined;
 export function useWormRush(
   wpn: number,
   tailSize: number = 0,
-  turtleStrength: number = 1
+  turtleStrength: number = 1,
+  spawnJamerNum: number = 0
 ) {
   wormPartNum = wpn;
+  if (oppoSpawns.length >= 2) {
+    set_spawnDps(10);
+  }
   if (strategyTick >= 0) {
     if (wpn === 8) {
       if (tick >= assembleTick || wormGo) {
@@ -46,14 +60,23 @@ export function useWormRush(
     }
   }
   if (strategyTick === 0) {
+    for (let i = 0; i < spawnJamerNum; i++) {
+      spawnCreep(TB("M"), jamer);
+    }
     if (wpn >= 6) {
       //150+640+50
       spawnCreep(TB("3MR8AM"), wormPart, new WormInfo(0));
-      //350+320+250+50
-      spawnCreep(TB("7M4AHM"), wormPart, new WormInfo(1));
+      if (getGuessPlayer() === Dooms) {
+        //200+240+500+50
+        spawnCreep(TB("4M3A2HM"), wormPart, new WormInfo(1));
+      } else {
+        //350+320+250+50
+        spawnCreep(TB("7M4AHM"), wormPart, new WormInfo(1));
+      }
       spawnCreep(TB("9M6AM"), wormPart, new WormInfo(2));
       spawnCreep(TB("9M6AM"), wormPart, new WormInfo(3));
       spawnCreep(TB("9M6AM"), wormPart, new WormInfo(4));
+
       spawnCreep(TB("9M6AM"), wormPart, new WormInfo(5));
     }
     if (wpn >= 7) {
@@ -82,6 +105,7 @@ export function useWormRush(
 function wormPartJob(cre: Cre_battle) {
   SA(cre, "WPJ");
   cre.group_Index = getWormInfo(cre).index;
+  SA(cre, "I=" + cre.group_Index);
   cre.fight();
   const creInd = wormIndex(cre);
   if (!wormGo) {
@@ -97,7 +121,11 @@ function wormPartJob(cre: Cre_battle) {
       if (isHealer(cre)) {
         const scanRange = 8;
         const tars = friends.filter(
-          i => i.role === wormPart && GR(cre, i) <= scanRange && damaged(i)
+          i =>
+            i !== cre &&
+            i.role === wormPart &&
+            GR(cre, i) <= scanRange &&
+            damaged(i)
         );
         const tar = closest(cre, tars);
         if (tar) {
@@ -122,7 +150,8 @@ function wormPartJob(cre: Cre_battle) {
         const followers = wormParts().filter(i => i !== head);
         const startGateUp = getStartGateAvoidFromEnemies();
         head.startGateUp = startGateUp;
-        newPullTarsTask(head, followers, enemySpawn, 5);
+        const target = enemySpawn;
+        newPullTarsTask(head, followers, target, 5);
         const scanCloseDis = 6;
         if (GR(cre, enemySpawn) <= scanCloseDis) {
           wormStartWait = new Event();
@@ -142,7 +171,110 @@ function wormPartJob(cre: Cre_battle) {
         cre.MT(new Pos_C(assembleX, assembleY));
       } else {
         SA(cre, "AS");
-        cre.MT_stop(enemySpawn);
+        if (getGuessPlayer() === Dooms) {
+          if (oppoSpawns.length >= 2) {
+            //first spawn
+            if (isHealer(cre)) {
+              SA(cre, "IH1");
+              const targets = friends.filter(
+                i => i !== cre && damaged(i) && i.role === wormPart
+              );
+              const target = closest(cre, targets);
+              if (target) {
+                cre.MT(target, [cre], 1, friendBlockCostMatrix);
+              } else {
+                cre.MT_stop(enemySpawn, [cre], 1, friendBlockCostMatrix);
+              }
+            } else {
+              SA(cre, "IA1");
+              const enemyMelees = enemies.filter(
+                i => i.getBodyPartsNum(ATTACK) > 0 && GR(i, enemySpawn) <= 7
+              );
+              const target = closest(cre, enemyMelees);
+              if (target) {
+                cre.MT_stop(target, [cre], 1, friendBlockCostMatrix);
+              } else {
+                cre.MT_stop(enemySpawn, [cre], 1, friendBlockCostMatrix);
+              }
+            }
+          } else {
+            //second spawn
+            const waitRange = 7;
+            if (GR(cre, enemySpawn) > waitRange) {
+              const damagedFriend = friends.find(
+                i => i.role === wormPart && healthRate(i) < 0.95
+              );
+              if (damagedFriend) {
+                if (isHealer(cre)) {
+                  SA(cre, "IH1.5");
+                  cre.MT(damagedFriend, [cre], 1, friendBlockCostMatrix);
+                } else {
+                  defendInArea(cre, damagedFriend, 4);
+                }
+              } else {
+                SA(cre, "GEn");
+                const restFri = wormParts().filter(
+                  i => GR(i, enemySpawn) > waitRange
+                );
+                const hasPullTask =
+                  restFri.find(i => findTask(i, PullTarsTask) !== undefined) !==
+                  undefined;
+                if (hasPullTask) {
+                  // cre.stop();
+                  // findTask(cre, PullTarsTask)?.end();
+                } else {
+                  const followers = restFri.filter(i => i !== cre);
+                  newPullTarsTask(cre, followers, enemySpawn);
+                }
+              }
+            } else {
+              //in range 7
+              findTask(cre, PullTarsTask)?.end();
+              if (isHealer(cre)) {
+                SA(cre, "IH");
+                const targets = friends.filter(
+                  i => i !== cre && damaged(i) && i.role === wormPart
+                );
+                const target = closest(cre, targets);
+                const dangerEns = enemies.filter(
+                  i => isMelee(i) && inRampart(i) && InRan2(cre, i)
+                );
+                const closestEn = closest(cre, dangerEns);
+                if (closestEn) {
+                  SA(cre, "Fl");
+                  cre.flee(2, 4, enRamBlockCostMatrix);
+                } else {
+                  if (target) {
+                    SA(cre, "MTS");
+                    cre.MT_stop(target, [cre], 1, enRamBlockCostMatrix);
+                  } else {
+                    SA(cre, "S");
+                    cre.stop();
+                  }
+                }
+              } else {
+                //Melee
+                SA(cre, "IMe");
+                if (healthRate(cre) < 0.7) {
+                  SA(cre, "Av");
+                  const healCre = friends.find(
+                    i => i.role === wormPart && isHealer(i)
+                  );
+                  if (healCre) {
+                    cre.MT(healCre, [cre], 1, enRamBlockCostMatrix);
+                  } else {
+                    cre.MT_stop(enemySpawn, [cre], 1, friendBlockCostMatrix);
+                  }
+                } else {
+                  SA(cre, "F");
+                  cre.MT_stop(enemySpawn, [cre], 1, friendBlockCostMatrix);
+                }
+              }
+            }
+          }
+        } else {
+          cre.MT_stop(enemySpawn, [cre], 1, friendBlockCostMatrix);
+        }
       }
     }
   }

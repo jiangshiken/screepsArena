@@ -79,6 +79,7 @@ export class Cre_move extends Cre {
       if (spf.path.length > 0) {
         const tar = spf.path[0];
         moveTo_direct(this, tar);
+        this.stop();
         return true;
       } else {
         return false;
@@ -124,6 +125,7 @@ export class Cre_move extends Cre {
     drawLineLight(this.master, tar);
     if (Adj(this, tar) && !atPos(this, tar)) {
       moveTo_direct(this, tar);
+      this.stop();
       return;
     }
     //cancel old task

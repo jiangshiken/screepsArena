@@ -267,7 +267,7 @@ export function getDps(cre: Unit, valueMode: boolean = false): StNumber {
       } else {
         totalForce = sumForceByArr(getEnemyArmies());
       }
-      rtn = spawnDps * (1 + 0.5 * totalForce);
+      rtn = spawnDps * (1 + 0.25 * totalForce);
     } else if (cre instanceof Ext) {
       const enBonus = 1 + (2 * getEnergy(cre)) / 100;
       rtn = 13 * enBonus;

@@ -129,6 +129,12 @@ export function isWorker(cre: Cre): boolean {
 export function isHealer(cre: Cre): boolean {
   return cre.getBodyPartsNum(HEAL) > 0;
 }
+export function isMelee(cre: Cre): boolean {
+  return cre.getBodyPartsNum(ATTACK) > 0;
+}
+export function isRanged(cre: Cre): boolean {
+  return cre.getBodyPartsNum(RANGED_ATTACK) > 0;
+}
 export function isHealer_restrict(cre: Cre): boolean {
   return (
     cre.getBodyPartsNum(HEAL) > 0 &&
