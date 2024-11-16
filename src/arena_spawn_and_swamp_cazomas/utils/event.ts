@@ -5,7 +5,7 @@ import { HasPos, Pos } from "./Pos";
 /**
  *  initial the tick by the current game tick
  */
-export class Event {
+export class Event_ori {
   readonly invokeTick: number;
   constructor() {
     this.invokeTick = getTicks();
@@ -23,7 +23,7 @@ export class Event {
 /**
  *  a Event combined with a number
  */
-export class Event_Number extends Event {
+export class Event_Number extends Event_ori {
   num: number;
   constructor(num: number) {
     super();
@@ -33,7 +33,7 @@ export class Event_Number extends Event {
 /**
  *  have a `pos` member attribute
  */
-export class Event_Pos extends Event implements HasPos {
+export class Event_Pos extends Event_ori implements HasPos {
   readonly x: number;
   readonly y: number;
   constructor(pos: Pos) {

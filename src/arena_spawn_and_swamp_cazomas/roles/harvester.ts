@@ -1,4 +1,4 @@
-import { Cre, Task_Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
+import { Task_Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
 import { isMyTick, Role } from "../gameObjects/CreTool";
 import {
   containers,
@@ -7,9 +7,8 @@ import {
   ress,
 } from "../gameObjects/GameObjectInitialize";
 
-import { getMoveTime_pull } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre_pull";
 import { spawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
-import { searchPathByCreCost } from "../gameObjects/Cre_findPath";
+import { Cre_findPath } from "../gameObjects/Cre_findPath";
 import { Cre_harvest, validRes } from "../gameObjects/Cre_harvest";
 import { S } from "../gameObjects/export";
 import { inMyBaseRan } from "../gameObjects/spawn";
@@ -28,8 +27,8 @@ import { drawPoly, SA } from "../utils/visual";
 import { energyStealerJob } from "./energyStealer";
 
 /**get the move time assume its capacity is full*/
-export function getTimeAfterFull(cre: Cre) {
-  return getMoveTime_pull([cre], getEmptyCapacity(cre));
+export function getTimeAfterFull(cre: Cre_findPath) {
+  return cre.getMoveTime(getEmptyCapacity(cre));
 }
 /**the task used on harvester.Will auto pick drop when it moves too slow*/
 export class HarvestTask extends Task_Cre {
@@ -105,7 +104,7 @@ export class HarvestTask extends Task_Cre {
         transTarget = this.targetProducer;
       }
       const tRtn = cre.transToTargetProducer(transTarget);
-      const moveTimeTooMuch: boolean = getMoveTime_pull([cre]) > 2;
+      const moveTimeTooMuch: boolean = cre.getMoveTime() > 2;
       if (tRtn) {
         //if trans success
         this.withDrawMode();
@@ -117,7 +116,7 @@ export class HarvestTask extends Task_Cre {
         cre.MT(transTarget);
       } else {
         SA(cre, "normal move to " + transTarget.id);
-        const sRtn = searchPathByCreCost(cre, transTarget);
+        const sRtn = cre.searchPathByCreCost(transTarget);
         if (inMyBaseRan(cre)) {
           drawPoly(sRtn.path, 0.8, "#8822aa");
           SA(cre, "path " + S(sRtn.path));

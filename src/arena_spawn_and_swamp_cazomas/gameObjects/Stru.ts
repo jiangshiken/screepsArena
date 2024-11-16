@@ -10,7 +10,7 @@ import {
   StructureTower,
   StructureWall,
 } from "game/prototypes";
-import { Event, Event_Number } from "../utils/Event";
+import { Event_Number, Event_ori } from "../utils/Event";
 import { HasPos } from "../utils/Pos";
 import { ExtraTauntEvent } from "./battle";
 import { GameObj } from "./GameObj";
@@ -50,7 +50,7 @@ export class OwnedStru extends Stru implements HasHits, HasMy, HasBattleStats {
 }
 export class Spa extends OwnedStru {
   master: StructureSpawn;
-  spawnEvent: Event | undefined;
+  spawnEvent: Event_ori | undefined;
   constructor(master: StructureSpawn) {
     super(master);
     this.master = master;

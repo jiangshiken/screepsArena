@@ -15,7 +15,7 @@ import {
 import { getObjectsByPrototype } from "game/utils";
 
 import { PL } from "arena_spawn_and_swamp_cazomas/utils/print";
-import { Event } from "../utils/Event";
+import { Event_ori } from "../utils/Event";
 import { divide0 } from "../utils/JS";
 import { HasPos } from "../utils/Pos";
 import { P } from "../utils/visual";
@@ -219,7 +219,7 @@ export function initialGameObjectsAtLoopStart_advance() {
 
 export class CS extends GameObj implements HasPos, HasMy {
   readonly master: ConstructionSite;
-  decayEvent: Event | undefined;
+  decayEvent: Event_ori | undefined;
   useDecay: boolean = false;
   worth: number = 0;
   constructor(cons: ConstructionSite) {

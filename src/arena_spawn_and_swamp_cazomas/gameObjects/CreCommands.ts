@@ -20,15 +20,16 @@ import {
 } from "../utils/visual";
 
 import { closest } from "arena_spawn_and_swamp_cazomas/utils/Pos";
+import { Event_Pos } from "../utils/Event";
 import { tick } from "../utils/game";
 import { calculateForce, getTaunt } from "./battle";
 import { rangeReduce } from "./bonus";
 import { Cre } from "./Cre";
 import { Cre_battle } from "./Cre_battle";
 import { Cre_build } from "./Cre_build";
-import { searchPath_noArea, searchPathByCreCost } from "./Cre_findPath";
-import { Cre_move, moveTo_basic } from "./Cre_move";
-import { getMoveTime_pull, getSpeed_general_pull } from "./Cre_pull";
+import { Cre_findPath, searchPath_noArea } from "./Cre_findPath";
+import { Cre_move } from "./Cre_move";
+import { getSpeed_general_pull } from "./Cre_pull";
 import {
   getEarning,
   getEnemyArmies,
@@ -211,7 +212,7 @@ export function goinRampartAssign(cre: Cre_move, calBlocked: Pos[]) {
   if (aroundRams.length > 0) {
     if (aroundEmptyRam) {
       SA(cre, "go around empty ram" + COO(aroundEmptyRam));
-      cre.moveTo_setAppointment(aroundEmptyRam);
+      cre.appointmentMovement = new Event_Pos(aroundEmptyRam);
     } else if (calBlocked.length < 6) {
       SA(cre, "need assign again");
       const aroundRamNotCaled = aroundRams.find(i => {
@@ -231,7 +232,7 @@ export function goinRampartAssign(cre: Cre_move, calBlocked: Pos[]) {
           SA(cre, "new friend:" + COO(newFriend));
           calBlocked.push(newFriend);
           drawLineComplex(cre, newFriend, 0.8, "#654321");
-          cre.moveTo_setAppointment(aroundRamNotCaled);
+          cre.appointmentMovement = new Event_Pos(aroundRamNotCaled);
           goinRampartAssign(newFriend, calBlocked);
         } else {
           SA(cre, "no new friend " + COO(aroundRamNotCaled));
@@ -252,16 +253,6 @@ export function goinRampartAssign(cre: Cre_move, calBlocked: Pos[]) {
     }
   }
 }
-//functions
-export function moveToRandomEmptyAround(cre: Cre_move): void {
-  SA(cre, "MTREA");
-  const poss = getRangePoss(cre, 1);
-  const empPoss = poss.filter(i => !blocked(i));
-  const pos = ranGet(empPoss);
-  if (pos) {
-    moveTo_basic(cre, pos);
-  }
-}
 export function attackWeakRampart(cre: Cre_battle) {
   SA(cre, "try attackWeakRampart");
   let myRamAround = myRamparts.filter(i => GR(i, cre) <= 1);
@@ -278,12 +269,12 @@ export function getRoundFightAndAvoidNum(
   scanFilter: (cre: Cre) => boolean,
   scanRange: number = 8
 ) {
-  const roundOtherAttackers = getOtherFriends(cre).filter(
-    i => GR(cre, i) <= scanRange && scanFilter(cre)
+  const roundOtherAttackers = <Cre_findPath[]>(
+    getOtherFriends(cre).filter(i => GR(cre, i) <= scanRange && scanFilter(cre))
   );
   const fightNum = sum(roundOtherAttackers, i =>
     i.upgrade.fight === true
-      ? (0.5 + getSpeed_general_pull([i])) *
+      ? (0.5 + i.getSpeed_general()) *
         divideReduce(GR(i, cre), scanRange / 2) *
         calculateForce(i)
       : 0
@@ -357,7 +348,7 @@ export function givePositionToImpartantFriend(cre: Cre_move): boolean {
   );
   if (importantFriend) {
     SA(cre, "give pos to important");
-    moveToRandomEmptyAround(cre);
+    cre.randomMove();
     return true;
   } else return false;
 }
@@ -384,7 +375,7 @@ export function findFitDamagedFriend(cre: Cre_battle): {
 } {
   const ifSelf = damaged(cre) ? friends : getOtherFriends(cre);
   const targets = ifSelf.filter(i => damaged(i));
-  return findFitUnits(cre, targets, true, 8 * getMoveTime_pull([cre]));
+  return findFitUnits(cre, targets, true, 8 * cre.getMoveTime());
 }
 /**find a fit target of opponent unit*/
 export function findFitOppoUnit(
@@ -398,7 +389,7 @@ export function findFitOppoUnit(
 }
 /**get the fit rate of a target*/
 export function getFitRate(
-  cre: Cre,
+  cre: Cre_findPath,
   unit: Unit,
   isHealer: boolean,
   extraBonus?: (tar: Unit) => number
@@ -437,7 +428,7 @@ export function getFitRate(
     cost = 3 * range;
   } else {
     //get the searchRtnCost
-    const searchRtn = searchPathByCreCost(cre, unit);
+    const searchRtn = cre.searchPathByCreCost(unit);
     cost = searchRtn.cost;
   }
   //other parameter
@@ -449,8 +440,8 @@ export function getFitRate(
     unit instanceof Cre ? 1 + 0.5 * unit.getBodyPartsNum(ATTACK) : 1;
   const healerBonus = isHealer ? damagedBonus * attackBodyPartBonus : 1;
   const speedEnoughBonus =
-    unit instanceof Cre
-      ? getSpeed_general_pull([cre]) > getSpeed_general_pull([unit])
+    unit instanceof Cre_findPath
+      ? getSpeed_general_pull([cre]) > unit.getSpeed_general()
         ? 1
         : 0.5
       : 1;

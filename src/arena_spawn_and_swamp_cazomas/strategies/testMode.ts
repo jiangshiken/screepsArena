@@ -10,13 +10,13 @@ import { CostMatrix, searchPath } from "game/path-finder";
 import { StructureExtension } from "game/prototypes";
 
 import { Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
-import { moveTo_basic } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre_move";
 import {
   enemySpawn,
   spawn,
 } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
+import { Cre_findPath } from "../gameObjects/Cre_findPath";
 import { Cre_move } from "../gameObjects/Cre_move";
-import { normalPull } from "../gameObjects/Cre_pull";
+import { Cre_pull } from "../gameObjects/Cre_pull";
 import { Role } from "../gameObjects/CreTool";
 import { createCS } from "../gameObjects/CS";
 import { S } from "../gameObjects/export";
@@ -49,15 +49,15 @@ function findOtherTester(cre: Cre, role: Role) {
   return friends.find(i => i !== cre && i.role === role);
 }
 //## TEST and LOOP
-export function tester_PFC2_Job(cre: Cre_move) {
+export function tester_PFC2_Job(cre: Cre_pull) {
   SA(cre, "i'm tester_PFC2");
   if (cre.getBodyPartsNum(TOUGH) > 0) {
     SA(cre, "i'm tougher");
     if (!cre.bePulledEvent?.validEvent()) {
-      moveTo_basic(cre, enemySpawn);
+      cre.moveTo_basic(enemySpawn);
     }
   } else {
-    const tougher = friends.find(i => i.getBodyPartsNum(TOUGH) > 0);
+    const tougher = <Cre_move>friends.find(i => i.getBodyPartsNum(TOUGH) > 0);
     const target = tougher;
     // const target = friends.find(i => !i.canMove())
     // if(cre.canMove()){
@@ -66,7 +66,7 @@ export function tester_PFC2_Job(cre: Cre_move) {
       if (nextTar) {
         if (!atPos(cre, nextTar)) {
           cre.master.moveTo(nextTar);
-        } else if (normalPull(cre, target)) {
+        } else if (cre.normalPull(target)) {
           cre.master.moveTo(enemySpawn);
         }
       }
@@ -74,7 +74,7 @@ export function tester_PFC2_Job(cre: Cre_move) {
     // }
   }
 }
-export function tester_PFC_Job(cre: Cre) {
+export function tester_PFC_Job(cre: Cre_pull) {
   SA(cre, "i'm tester_PFC");
   const pos1 = posPlusVec(spawn, { vec_x: 1, vec_y: -1 });
   const pos2 = posPlusVec(spawn, { vec_x: 1, vec_y: 0 });
@@ -95,9 +95,9 @@ export function tester_PFC_Job(cre: Cre) {
   }
   if (tick === testTick + 2) {
     if (cre.getBodyPartsNum(TOUGH) === 0) {
-      const otherFri = findOtherTester(cre, tester_PFC);
+      const otherFri = <Cre_findPath>findOtherTester(cre, tester_PFC);
       if (otherFri) {
-        normalPull(cre, otherFri);
+        cre.normalPull(otherFri);
         cre.master.moveTo(pos4);
       }
     }

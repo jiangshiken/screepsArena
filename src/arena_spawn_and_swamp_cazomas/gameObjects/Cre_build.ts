@@ -6,7 +6,7 @@ import {
   WORK,
 } from "game/constants";
 import { StructureRampart } from "game/prototypes";
-import { Event } from "../utils/Event";
+import { Event_ori } from "../utils/Event";
 import { InShotRan, atPos } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA, drawLineLight } from "../utils/visual";
@@ -78,7 +78,7 @@ export class Cre_build extends Cre_battle {
     let rtn = this.master.build(cs.master);
     SA(this, "rtn=" + rtn);
     if (rtn === OK) {
-      (<CS>cs).decayEvent = new Event();
+      (<CS>cs).decayEvent = new Event_ori();
     }
     return rtn;
   }

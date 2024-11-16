@@ -143,11 +143,13 @@ export function builderTurtleJob(cre: Cre_build) {
   const spawnHasRam = myRampartAt(spawn) !== undefined;
   SA(cre, "spawnHasRam=" + spawnHasRam);
   cre.setIsWorking(false);
+  const appointmentValidTick = 1;
   if (!inMyRampart(cre) && hasEmptyRampart) {
     //if not in ram,move to ram
     SA(cre, "not in ram");
-    if (cre.appointMovementIsActived()) {
+    if (cre.appointMovementIsActived(appointmentValidTick)) {
       SA(cre, "appointMovementIsActived");
+      cre.useAppointMovement();
       return;
     }
     defendTheRampart(cre);
@@ -157,16 +159,18 @@ export function builderTurtleJob(cre: Cre_build) {
     !(tick >= 1900 && cs && canUseEnergy >= 200)
   ) {
     SA(cre, "enemyAround");
-    if (cre.appointMovementIsActived()) {
+    if (cre.appointMovementIsActived(appointmentValidTick)) {
       SA(cre, "appointMovementIsActived");
+      cre.useAppointMovement();
       return;
     }
     defendTheRampart(cre);
   } else if (cs) {
     cre.setIsWorking(true);
     SA(cre, "build");
-    if (cre.appointMovementIsActived()) {
+    if (cre.appointMovementIsActived(appointmentValidTick)) {
       SA(cre, "appointMovementIsActived");
+      cre.useAppointMovement();
     } else {
       defendTheRampart(cre);
     }
@@ -230,8 +234,9 @@ export function builderTurtleJob(cre: Cre_build) {
           cre.transferNormal(spawn);
         }
         SA(cre, "normal defend");
-        if (cre.appointMovementIsActived()) {
+        if (cre.appointMovementIsActived(appointmentValidTick)) {
           SA(cre, "appointMovementIsActived");
+          cre.useAppointMovement();
           return;
         }
         defendTheRampart(cre);

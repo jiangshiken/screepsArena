@@ -1,5 +1,7 @@
 import { CARRY, MOVE } from "game/constants";
 import { CostMatrix, FindPathResult, searchPath } from "game/path-finder";
+import { getDirection } from "game/utils";
+import { Event_ori } from "../utils/Event";
 import {
   Area,
   Y_bottomGate,
@@ -17,10 +19,12 @@ import {
   isTerrainSwamp,
 } from "../utils/game";
 import { divide0 } from "../utils/JS";
-import { Pos, Pos_C, atPos } from "../utils/Pos";
+import { Adj, Pos, Pos_C, atPos } from "../utils/Pos";
 import { ERR } from "../utils/print";
 import { SA, drawLineComplex, drawPoly, drawPolyLight } from "../utils/visual";
 import { Cre } from "./Cre";
+import { moveBlockCostMatrix_setBlock } from "./Cre_move";
+import { PullEvent } from "./CreTool";
 import {
   getCapacity,
   getEnergy,
@@ -44,6 +48,24 @@ export const def_timeOnSwamp = 0.4;
 export const def_stepTime = 10;
 export class Cre_findPath extends Cre {
   startGateUp: boolean | undefined;
+  pullEvent: PullEvent | undefined; //get cre that pulled by this
+  bePulledEvent: PullEvent | undefined; //get cre that pull this
+  highPriorityMoveTaskEvent: Event_ori | undefined;
+  moveTo_direct(tar: Pos) {
+    SA(this, "DirMove");
+    if (atPos(this, tar)) {
+      ERR("ERR dirMove atPos");
+    } else if (Adj(this, tar)) {
+      moveBlockCostMatrix_setBlock(tar);
+      const dx = tar.x - this.x;
+      const dy = tar.y - this.y;
+      const direc = getDirection(dx, dy);
+      SA(this, "" + direc);
+      this.master.move(direc);
+    } else {
+      ERR("ERR dirMove");
+    }
+  }
   getMoveAndFatigueNum(
     extraEnergy: number = 0,
     purePlain: boolean = false,
@@ -105,8 +127,8 @@ export class Cre_findPath extends Cre {
       plainCost = 1;
       swampCost = 2;
     } else {
-      plainCost = this.getMoveTimeByTerrain(0, true);
-      swampCost = this.getMoveTimeByTerrain(0, false, true);
+      plainCost = this.getMoveTime(0, true);
+      swampCost = this.getMoveTime(0, false, true);
     }
     return searchPath_noArea(
       this,
@@ -115,7 +137,7 @@ export class Cre_findPath extends Cre {
       getPSC(plainCost, swampCost)
     );
   }
-  getMoveTimeByTerrain(
+  getMoveTime(
     extraEnergy: number = 0,
     purePlain: boolean = false,
     pureSwamp: boolean = false
@@ -125,21 +147,21 @@ export class Cre_findPath extends Cre {
     return Math.max(1, time);
   }
   getMoveTime_general(): number {
-    const timeOnPlain = this.getMoveTimeByTerrain(0, true);
-    const timeOnSwamp = this.getMoveTimeByTerrain(0, false, true);
+    const timeOnPlain = this.getMoveTime(0, true);
+    const timeOnSwamp = this.getMoveTime(0, false, true);
     return def_timeOnPlain * timeOnPlain + def_timeOnSwamp * timeOnSwamp;
   }
   getSpeed(): number {
-    return 1 / this.getMoveTimeByTerrain();
+    return 1 / this.getMoveTime();
   }
   getSpeed_general(): number {
     return 1 / this.getMoveTime_general();
   }
   isFullSpeed(): boolean {
-    return this.getMoveTimeByTerrain() === 1;
+    return this.getMoveTime() === 1;
   }
   getMoveStepDef(): number {
-    return def_stepTime * this.getMoveTimeByTerrain();
+    return def_stepTime * this.getMoveTime();
   }
 }
 

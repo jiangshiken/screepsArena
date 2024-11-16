@@ -21,7 +21,7 @@ import {
 } from "../gameObjects/UnitTool";
 import { jamer } from "../roles/jamer";
 import { TB } from "../utils/autoBodys";
-import { Event } from "../utils/Event";
+import { Event_ori } from "../utils/Event";
 import { addStrategyTick, strategyTick, tick } from "../utils/game";
 import { best } from "../utils/JS";
 import { atPos, closest, GR, InRan2, Pos_C } from "../utils/Pos";
@@ -39,7 +39,7 @@ let wormPartNum: number;
 const wormPart: Role = new Role("wormPart", wormPartJob);
 const assembleTick: number = 380;
 let wormGo: boolean = false;
-let wormStartWait: Event | undefined = undefined;
+let wormStartWait: Event_ori | undefined = undefined;
 export function useWormRush(
   wpn: number,
   tailSize: number = 0,
@@ -154,7 +154,7 @@ function wormPartJob(cre: Cre_battle) {
         newPullTarsTask(head, followers, target, 5);
         const scanCloseDis = 6;
         if (GR(cre, enemySpawn) <= scanCloseDis) {
-          wormStartWait = new Event();
+          wormStartWait = new Event_ori();
           findTask(head, PullTarsTask)?.end();
         }
       }

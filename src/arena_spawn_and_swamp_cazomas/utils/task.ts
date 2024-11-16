@@ -1,6 +1,6 @@
 import { getTicks } from "game/utils";
 
-import { Event } from "./Event";
+import { Event_ori } from "./Event";
 import { remove } from "./JS";
 
 export function findTask<E extends Task>(
@@ -27,7 +27,7 @@ export function useTasks(hasTasks: HasTasks) {
       if (!taskNeedLoop.pause) {
         taskNeedLoop.loop_task();
       }
-      taskNeedLoop.looped = new Event();
+      taskNeedLoop.looped = new Event_ori();
     } else {
       break;
     }
@@ -41,7 +41,7 @@ export function useTasks(hasTasks: HasTasks) {
 export class Task {
   /** if task completed */
   complete: boolean = false;
-  looped: Event | undefined;
+  looped: Event_ori | undefined;
   /** master of task*/
   readonly master: HasTasks;
   /** the birth tick of task*/

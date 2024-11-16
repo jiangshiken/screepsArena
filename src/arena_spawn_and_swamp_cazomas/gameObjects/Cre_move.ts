@@ -1,12 +1,10 @@
 import { CostMatrix, FindPathResult } from "game/path-finder";
-import { getDirection } from "game/utils";
 import { ct, et } from "../utils/CPU";
-import { Event, Event_Pos } from "../utils/Event";
+import { Event_Pos, Event_ori } from "../utils/Event";
 import { last } from "../utils/JS";
 import { Adj, COO, GR, Pos, atPos } from "../utils/Pos";
-import { findTask } from "../utils/Task";
+import { Task, findTask } from "../utils/Task";
 import { tick } from "../utils/game";
-import { ERR } from "../utils/print";
 import { SA, drawLineComplex, drawLineLight } from "../utils/visual";
 import { Cre, Task_Cre } from "./Cre";
 import {
@@ -31,7 +29,13 @@ import {
   friendBlockCostMatrix,
   moveBlockCostMatrix,
 } from "./UnitTool";
-
+export class TaskEvent extends Event_ori {
+  task: Task;
+  constructor(task: Task) {
+    super();
+    this.task = task;
+  }
+}
 export class Cre_move extends Cre_findPath {
   appointmentMovement: Event_Pos | undefined;
   moveEvent: MoveEvent | undefined;
@@ -40,22 +44,6 @@ export class Cre_move extends Cre_findPath {
     SA(this, "moveTo_basic");
     moveBlockCostMatrix_setBlock(tar);
     this.master.moveTo(tar);
-  }
-  //move to ,use move() that use direction,not find path
-  moveTo_direct(tar: Pos): void {
-    SA(this, "DirMove");
-    if (atPos(this, tar)) {
-      ERR("ERR dirMove atPos");
-    } else if (Adj(this, tar)) {
-      moveBlockCostMatrix_setBlock(tar);
-      const dx = tar.x - this.x;
-      const dy = tar.y - this.y;
-      const direc = getDirection(dx, dy);
-      SA(this, "" + direc);
-      this.master.move(direc);
-    } else {
-      ERR("ERR dirMove");
-    }
   }
   /** if the target of current `MoveTask` is `tar` ,cancel it*/
   appointMovementIsActived(time: number): boolean {
@@ -111,9 +99,9 @@ export class Cre_move extends Cre_findPath {
       return false;
     }
   }
-  useAppointMovement(validTick: number = 0): boolean {
+  useAppointMovement(): boolean {
     const app = this.appointmentMovement;
-    if (app && app.validEvent(validTick)) {
+    if (app) {
       this.MT(app);
       return true;
     } else {
@@ -286,7 +274,7 @@ export function friendBlockCostMatrix_setBlock(pos: Pos) {
 export function enRamBlockCostMatrix_setBlock(pos: Pos) {
   enRamBlockCostMatrix.set(pos.x, pos.y, blockCost);
 } /** represent a event of move function */
-export class MoveEvent extends Event {
+export class MoveEvent extends Event_ori {
   readonly tar: Pos;
   readonly nextStep: Pos;
   constructor(tar: Cre, nextStep: Cre) {

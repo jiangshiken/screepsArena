@@ -8,7 +8,7 @@ import {
   WORK,
 } from "game/constants";
 import { findClosestByRange } from "game/utils";
-import { Event, Event_Number } from "../utils/Event";
+import { Event_Number, Event_ori } from "../utils/Event";
 import { StNumber } from "../utils/game";
 import { divide0, maxWorth_lamb, removeIf, sum } from "../utils/JS";
 import { Adj, GR, InShotRan, Pos, X_axisDistance } from "../utils/Pos";
@@ -27,7 +27,7 @@ import { findGO } from "./overallMap";
 import { Ext, Ram, Spa, Tow } from "./Stru";
 import { CanBeAttacked, getEnergy, inRampart } from "./UnitTool";
 
-export class TauntEvent extends Event {
+export class TauntEvent extends Event_ori {
   readonly from: Cre;
   readonly taunt: number;
   constructor(from: Cre, taunt: number) {

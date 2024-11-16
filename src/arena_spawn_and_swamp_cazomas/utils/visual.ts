@@ -2,7 +2,7 @@ import { getTicks } from "game/utils";
 import { Visual } from "game/visual";
 
 import { overallMap } from "../gameObjects/overallMap";
-import { Event, Event_Number } from "./Event";
+import { Event_Number, Event_ori } from "./Event";
 import { leftRate } from "./game";
 import { d2 } from "./JS";
 import { HasPos, Pos, pos00, Pos_C, Pos_free, Pos_free_C } from "./Pos";
@@ -20,7 +20,7 @@ export let visual_layer10: Visual;
 export class SAVis extends Visual implements HasPos {
   readonly data_x: number;
   readonly data_y: number;
-  readonly startTick: Event;
+  readonly startTick: Event_ori;
   readonly invokeTick: number = getTicks();
   /** the text to show */
   sayText = "";
@@ -32,7 +32,7 @@ export class SAVis extends Visual implements HasPos {
     super(layer, false);
     this.data_x = pos.x;
     this.data_y = pos.y;
-    this.startTick = new Event();
+    this.startTick = new Event_ori();
     this.textPos = getSATextPos(pos);
     this.sayLine = drawLineComplex(pos, this.textPos, 0.5, "#0000ff");
     //

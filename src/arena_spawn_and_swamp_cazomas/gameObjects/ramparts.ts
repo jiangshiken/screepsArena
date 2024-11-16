@@ -1,6 +1,6 @@
 import { ATTACK, RANGED_ATTACK } from "game/constants";
 import { CostMatrix } from "game/path-finder";
-import { Event } from "../utils/Event";
+import { Event_ori } from "../utils/Event";
 import { relu, sum } from "../utils/JS";
 import { Adj, getRangePoss, GR, Pos } from "../utils/Pos";
 import { SA } from "../utils/visual";
@@ -58,7 +58,7 @@ export function inMyHealthyRampart(pos: Pos) {
   const ram = <Ram | undefined>findGO(pos, Ram);
   return ram && ram.my && rampartIsHealthy(ram);
 }
-export let ramSaveCostMatrix_Event: Event = new Event();
+export let ramSaveCostMatrix_Event: Event_ori = new Event_ori();
 export let ramSaveCostMatrix: CostMatrix | undefined;
 
 export function refreshRampartSaveCostMatrix(pos: Pos, range: number) {
@@ -80,7 +80,7 @@ export function refreshRampartSaveCostMatrix(pos: Pos, range: number) {
     }
     ramSaveCostMatrix.set(pos.x, pos.y, cost);
   }
-  ramSaveCostMatrix_Event = new Event();
+  ramSaveCostMatrix_Event = new Event_ori();
 }
 export function getMyHealthyRamparts(): OwnedStru[] {
   return myRamparts.filter(i => rampartIsHealthy(i));

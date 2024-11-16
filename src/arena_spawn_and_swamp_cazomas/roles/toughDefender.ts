@@ -29,7 +29,7 @@ export function toughDefenderJob(cre: Cre_battle) {
   if (en) {
     //if not at spawn dont chase
     if (GR(en, cre) > 1 || GR(en, spawn) === 1) {
-      cre.MT(en, [cre], 1, cm);
+      cre.MT(en, 1, cm);
     }
   }
 }

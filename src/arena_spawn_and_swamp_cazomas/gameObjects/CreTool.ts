@@ -11,23 +11,24 @@ import {
 import { Creep } from "game/prototypes";
 import { getTicks } from "game/utils";
 import { ct, et, ptSum } from "../utils/CPU";
-import { Event, Event_Number } from "../utils/Event";
+import { Event_Number, Event_ori } from "../utils/Event";
 import { StNumber } from "../utils/game";
 import { divide0, pow2, ranGet, sum } from "../utils/JS";
 import { GR, Pos, getRangePoss } from "../utils/Pos";
 import { useTasks } from "../utils/Task";
 import { P, SA } from "../utils/visual";
 import { Cre } from "./Cre";
+import { Cre_findPath } from "./Cre_findPath";
 import { GameObj } from "./GameObj";
 import { cres, enemies, friends } from "./GameObjectInitialize";
 import { findGO } from "./overallMap";
 import { blocked } from "./UnitTool";
 
 /** represent a event of pull function */
-export class PullEvent extends Event {
-  readonly pullOne: Cre;
-  readonly bePulledOne: Cre;
-  constructor(pullOne: Cre, bePulledOne: Cre) {
+export class PullEvent extends Event_ori {
+  readonly pullOne: Cre_findPath;
+  readonly bePulledOne: Cre_findPath;
+  constructor(pullOne: Cre_findPath, bePulledOne: Cre_findPath) {
     super();
     this.pullOne = pullOne;
     this.bePulledOne = bePulledOne;

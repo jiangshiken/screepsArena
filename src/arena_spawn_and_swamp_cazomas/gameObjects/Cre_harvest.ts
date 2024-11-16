@@ -6,7 +6,6 @@ import { best, divideReduce } from "../utils/JS";
 import { Adj, COO, GR, Pos, X_axisDistance, getRangePoss } from "../utils/Pos";
 import { SA, drawLineComplex, drawLineLight } from "../utils/visual";
 import { Cre } from "./Cre";
-import { searchPathByCreCost } from "./Cre_findPath";
 import { Cre_pull } from "./Cre_pull";
 import { S } from "./export";
 import {
@@ -230,7 +229,7 @@ export class Cre_harvest extends Cre_pull {
     // calculate worth of free producer
     const myProducers: Producer[] = getMyProducers();
     const target = best(myProducers, producer => {
-      const sRtnFree = searchPathByCreCost(this, producer);
+      const sRtnFree = this.searchPathByCreCost(producer);
       const costFree = sRtnFree.cost;
       let typeRate: number;
       if (producer instanceof Cre) {

@@ -54,6 +54,7 @@ export class Cre
   group_ID: number | undefined;
   group_Index: number | undefined;
   /**extra infomation*/
+
   readonly upgrade: any = {};
   constructor(creep: Creep) {
     super(creep);

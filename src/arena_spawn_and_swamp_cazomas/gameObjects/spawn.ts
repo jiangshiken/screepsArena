@@ -11,7 +11,7 @@ import {
 } from "game/constants";
 
 import { Creep } from "game/prototypes";
-import { Event } from "../utils/Event";
+import { Event_ori } from "../utils/Event";
 import { arrayEqual } from "../utils/JS";
 import {
   getRangePoss,
@@ -140,7 +140,7 @@ export function spawnIt(theSpawn: Spa) {
       SA(theSpawn, "role =" + spawnRole.roleName);
       SA(theSpawn, "spawnInfo =" + S(spawnInfo));
       spawnList.shift();
-      theSpawn.spawnEvent = new Event();
+      theSpawn.spawnEvent = new Event_ori();
       SA(theSpawn, "spawnListLength=" + spawnList.length);
     }
   }

@@ -5,6 +5,7 @@ import {
   enemySpawn,
 } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { Cre } from "../gameObjects/Cre";
+import { getPSC } from "../gameObjects/Cre_findPath";
 import { Cre_move } from "../gameObjects/Cre_move";
 import {
   cpuBreakJudge,
@@ -59,7 +60,7 @@ export function jamerJob(cre: Cre_move) {
         drawText(tarPos, "E", 1);
       }
     }
-    const fleeing: boolean = cre.flee(6, 12, fleeCM, 2, 2);
+    const fleeing: boolean = cre.flee(6, 12, fleeCM, getPSC(2, 2));
     SAB(cre, "FL", fleeing);
     if (fleeing) {
       cre.stop();
@@ -98,7 +99,7 @@ export function jamerJob(cre: Cre_move) {
       });
       SA(cre, "target=" + COO(target));
       if (target) {
-        cre.MT(target, [cre], 5, undefined, 1, 1.5);
+        cre.MT(target, 5, undefined, getPSC(1, 1.5));
         cre.upgrade.target = target;
       } else {
         cre.MT(midPoint);
@@ -139,10 +140,10 @@ export function jamerJob(cre: Cre_move) {
 
 // } /**flee from every threated enemy*/
 export function fleeWeakComplex(cre: Cre_move) {
-  if (cre.flee(6, 12, spawnWallCostMatrix, 1, 1)) {
+  if (cre.flee(6, 12, spawnWallCostMatrix, getPSC(1, 1))) {
     SA(cre, "flee");
     return true;
-  } else if (cre.flee(8, 16, spawnWallCostMatrix, 1, 1)) {
+  } else if (cre.flee(8, 16, spawnWallCostMatrix, getPSC(1, 1))) {
     SA(cre, "flee2");
     return true;
   } else {
