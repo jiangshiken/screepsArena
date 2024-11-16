@@ -7,7 +7,7 @@ import { GR, Pos, X_axisDistance } from "../utils/Pos";
 import { sumForceByArr } from "./battle";
 import { getHarvables } from "./Cre_harvest";
 import { enemyAttackNum, hasThreat, is5MA } from "./CreTool";
-import { enemies, friends, spawn } from "./GameObjectInitialize";
+import { enemies, friends, mySpawn } from "./GameObjectInitialize";
 import { spawnAndExtensionsEnergy, spawnNearBlockedAround } from "./spawn";
 import { getEnergy } from "./UnitTool";
 
@@ -58,7 +58,7 @@ export function enemyAttackReduce(rate: number): StNumber {
 }
 export function richBonus(rate: number): StNumber {
   //en=200 r=1	en=0 r=0.5	en=1000 r=2
-  const en = spawnAndExtensionsEnergy(spawn);
+  const en = spawnAndExtensionsEnergy(mySpawn);
   if (en < 200) {
     return 0.5 + rate * 0.0025 * en;
   } else {
@@ -66,7 +66,7 @@ export function richBonus(rate: number): StNumber {
   }
 }
 export function poorBonus(rate: number) {
-  const en = spawnAndExtensionsEnergy(spawn);
+  const en = spawnAndExtensionsEnergy(mySpawn);
   return 1 + relu(0.001 * (1000 - en));
 }
 export function totalInferiorityBonus(): StNumber {
@@ -82,20 +82,20 @@ export function enemy5MABonus(rate: number): StNumber {
   return goInRange(rate, 1, Infinity) * 1 * sum;
 }
 export function spawnEnergyBonus(): StNumber {
-  return 1 + spawnAndExtensionsEnergy(spawn) / 1000;
+  return 1 + spawnAndExtensionsEnergy(mySpawn) / 1000;
 }
 export function spawnEnergyAroundBonus(): StNumber {
-  const harvables = getHarvables().filter(i => GR(i, spawn) <= 6);
+  const harvables = getHarvables().filter(i => GR(i, mySpawn) <= 6);
   const totalEnergy =
     harvables.length === 0
       ? 0
       : harvables.map(i => getEnergy(i)).reduce((a, b) => a + b);
-  return 1 + (spawnAndExtensionsEnergy(spawn) + totalEnergy) / 1000;
+  return 1 + (spawnAndExtensionsEnergy(mySpawn) + totalEnergy) / 1000;
 }
 export function spawnBlockBonus(): StNumber {
-  const sb3 = spawnNearBlockedAround(spawn, 3);
-  const sb2 = spawnNearBlockedAround(spawn, 2);
-  const sb1 = spawnNearBlockedAround(spawn, 1);
+  const sb3 = spawnNearBlockedAround(mySpawn, 3);
+  const sb2 = spawnNearBlockedAround(mySpawn, 2);
+  const sb1 = spawnNearBlockedAround(mySpawn, 1);
   if (sb1) return 15;
   else if (sb2) return 10;
   else if (sb3) return 5;
@@ -110,7 +110,7 @@ export function enemyArmyBonus(rate: number): StNumber {
   return goInRange(rate, 1, Infinity) * 0.5 * sumForce;
 }
 export function getBaseRangeBonus(pos: Pos): StNumber {
-  return 1 + 25 / GR(pos, spawn);
+  return 1 + 25 / GR(pos, mySpawn);
 }
 /**from strength+1 to 1 by tick=0 to n */
 export function ticksBonus(n: number, strength: number = 2): StNumber {
@@ -124,7 +124,7 @@ export function ticksReduce(n: number, strength: number = 2): StNumber {
 
 export function spawnDangerousBonus(rate: number): StNumber {
   const ets = enemies.filter(
-    i => hasThreat(i) && X_axisDistance(i, spawn) <= 10
+    i => hasThreat(i) && X_axisDistance(i, mySpawn) <= 10
   );
   const ef = sumForceByArr(ets);
   return goInRange(rate, 1, Infinity) * 3 * ef;

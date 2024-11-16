@@ -10,7 +10,7 @@ import {
   ress,
 } from "../gameObjects/GameObjectInitialize";
 
-import { spawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
+import { mySpawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { Cre_findPath } from "../gameObjects/Cre_findPath";
 import { Cre_harvest, validRes } from "../gameObjects/Cre_harvest";
 import { S } from "../gameObjects/export";
@@ -93,9 +93,9 @@ export class HarvestTask extends Task_Cre {
     } else {
       SA(cre, "have energy");
       let transTarget: Producer;
-      if (this.targetProducer === spawn && getFreeEnergy(spawn) === 0) {
+      if (this.targetProducer === mySpawn && getFreeEnergy(mySpawn) === 0) {
         const spawnAroundFreeContainer = containers.find(
-          i => GR(i, spawn) <= 1 && getFreeEnergy(i) > 0
+          i => GR(i, mySpawn) <= 1 && getFreeEnergy(i) > 0
         );
         if (spawnAroundFreeContainer) {
           transTarget = spawnAroundFreeContainer;

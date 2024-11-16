@@ -41,9 +41,9 @@ import {
   enemies,
   friends,
   myRamparts,
+  mySpawn,
   oppoUnits,
   resources,
-  spawn,
   Unit,
 } from "./GameObjectInitialize";
 import { damaged, damagedRate } from "./HasHits";
@@ -100,9 +100,9 @@ export function defendTheRampart(cre: Cre_move) {
     const aroundRam3 = myRamparts.find(i => GR(i, en) <= 3);
     const aroundBonus = aroundRam ? 4 : aroundRam2 ? 2.4 : aroundRam3 ? 1.6 : 1;
     const RANum = en.getHealthyBodyPartsNum(RANGED_ATTACK);
-    const inBaseRange3 = GR(en, spawn) <= 3;
+    const inBaseRange3 = GR(en, mySpawn) <= 3;
     const shotBaseBonus = inBaseRange3 ? 1 + 0.5 * RANum : 1;
-    const baseRangeReduce = rangeReduce(en, spawn, 1);
+    const baseRangeReduce = rangeReduce(en, mySpawn, 1);
     const creRangeReduce = rangeReduce(en, cre, 1);
     const worth =
       shotBaseBonus * aroundBonus * baseRangeReduce * creRangeReduce;
@@ -201,7 +201,7 @@ export function gotoTargetRampart(cre: Cre_move, targetRampart: Pos) {
     }
   } else {
     SA(cre, "quickly go into rampart");
-    goinRampartAssign(cre, [spawn, cre]);
+    goinRampartAssign(cre, [mySpawn, cre]);
   }
 }
 export function goinRampartAssign(cre: Cre_move, calBlocked: Pos[]) {
@@ -257,7 +257,7 @@ export function attackWeakRampart(cre: Cre_battle) {
   SA(cre, "try attackWeakRampart");
   let myRamAround = myRamparts.filter(i => GR(i, cre) <= 1);
   let weakMyRamAround = myRamAround.find(
-    i => !rampartIsHealthy(i, true, false) && !atPos(i, spawn)
+    i => !rampartIsHealthy(i, true, false) && !atPos(i, mySpawn)
   );
   if (weakMyRamAround) {
     SA(cre, "attacking WeakRampart");

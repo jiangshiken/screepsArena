@@ -10,7 +10,7 @@ import {
 import {
   CS,
   enemySpawn,
-  spawn,
+  mySpawn,
 } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { Adj, closest } from "arena_spawn_and_swamp_cazomas/utils/Pos";
 import { protectSelfExtraTaunt } from "../gameObjects/battle";
@@ -93,10 +93,10 @@ export class builder4RamJob extends Task_Role {
     const cre = this.master;
     SA(cre, "builder4RamJob");
     const scanCSRange = 8;
-    if (myCSs.find(i => GR(spawn, i) <= scanCSRange)) {
+    if (myCSs.find(i => GR(mySpawn, i) <= scanCSRange)) {
       let css = <CS[]>(
         myCSs.filter(
-          i => GR(i, spawn) <= scanCSRange && canBeBuildByCre(i, cre)
+          i => GR(i, mySpawn) <= scanCSRange && canBeBuildByCre(i, cre)
         )
       );
       let cs = getMaxWorthCSS(css);
@@ -124,7 +124,7 @@ export function spawnAndBuilderEnergy() {
   for (let builder of builders) {
     rtn += getEnergy(builder);
   }
-  rtn += getEnergy(spawn);
+  rtn += getEnergy(mySpawn);
   return rtn;
 }
 /**Builder that used in trutling,will not go to wild resource.
@@ -155,14 +155,14 @@ export class builderTurtleJob extends Task_Role {
     //
     const scanCSRange = 4;
     const css = myCSs.filter(
-      i => canBeBuildByCre(i, cre) && GR(i, spawn) <= scanCSRange
+      i => canBeBuildByCre(i, cre) && GR(i, mySpawn) <= scanCSRange
     );
     const canUseEnergy = getEnergy(cre) + getSpawnAndBaseContainerEnergy();
     SAN(cre, "canUseEnergy", canUseEnergy);
     const cs = getMaxWorthCSS(css);
     const emptyRamparts = myRamparts.filter(i => !blocked(i));
     const hasEmptyRampart: boolean = emptyRamparts.length > 0;
-    const spawnHasRam = myRampartAt(spawn) !== undefined;
+    const spawnHasRam = myRampartAt(mySpawn) !== undefined;
     SA(cre, "spawnHasRam=" + spawnHasRam);
     cre.setIsWorking(false);
     const appointmentValidTick = 1;
@@ -208,8 +208,8 @@ export class builderTurtleJob extends Task_Role {
         //time for build ramparts
         SA(cre, "collectResource");
         const harvables = (<HasEnergy[]>(
-          getHarvables().filter(i => GR(i, spawn) <= 3)
-        )).concat(spawn);
+          getHarvables().filter(i => GR(i, mySpawn) <= 3)
+        )).concat(mySpawn);
         const harvable = <HasEnergy>closest(cre, harvables);
         if (harvable) {
           cre.directWithdraw(harvable);
@@ -222,7 +222,7 @@ export class builderTurtleJob extends Task_Role {
     } else {
       cre.setIsWorking(false);
       //assign spawn energy to container
-      if (energyFull(spawn)) {
+      if (energyFull(mySpawn)) {
         SA(cre, "withdraw spawn to container");
         if (getEnergy(cre) > 0) {
           SA(cre, "has en");
@@ -238,10 +238,10 @@ export class builderTurtleJob extends Task_Role {
           }
         } else {
           SA(cre, "no en");
-          if (GR(cre, spawn) <= 1) {
-            cre.withdrawNormal(spawn);
+          if (GR(cre, mySpawn) <= 1) {
+            cre.withdrawNormal(mySpawn);
           } else {
-            gotoTargetRampart(cre, spawn);
+            gotoTargetRampart(cre, mySpawn);
           }
         }
       } else {
@@ -256,8 +256,8 @@ export class builderTurtleJob extends Task_Role {
           SA(cre, "withdraw backup energy");
           builderTurtleWithdrawNormal(cre);
         } else {
-          if (returnMod && energylive(cre) && Adj(cre, spawn)) {
-            cre.transferNormal(spawn);
+          if (returnMod && energylive(cre) && Adj(cre, mySpawn)) {
+            cre.transferNormal(mySpawn);
           }
           SA(cre, "normal defend");
           if (cre.appointMovementIsActived(appointmentValidTick)) {
@@ -280,7 +280,7 @@ export function builderTurtleWithdrawNormal(cre: Cre_build) {
     target = con;
   } else {
     SA(cre, "withdraw spawn");
-    target = spawn;
+    target = mySpawn;
   }
   if (GR(cre, target) <= 1) {
     SA(cre, "withdraw it");
@@ -472,7 +472,7 @@ export class BuilderStandardTask extends Task_Cre {
     } else {
       let harvestables = getHarvables().filter(i => {
         let j0 = getEnergy(i) > 500;
-        let j1 = GR(i, spawn) >= 5;
+        let j1 = GR(i, mySpawn) >= 5;
         let j2 = !(hasBuilderStandardAround(i) && !(GR(cre, i) <= 1));
         let j3 = cre.reachableHarvable(i);
         return j0 && j1 && j2 && j3;

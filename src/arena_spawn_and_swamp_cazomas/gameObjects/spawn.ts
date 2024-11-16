@@ -32,9 +32,9 @@ import {
   friends,
   gameObjects,
   myExtensions,
+  mySpawn,
   mySpawns,
   oppoExtensions,
-  spawn,
   structures,
 } from "./GameObjectInitialize";
 import { Spa } from "./Stru";
@@ -111,7 +111,7 @@ export function getSpawnCost(bodies: BodyPartConstant[]): number {
   return rtn;
 }
 export function fromSpawnPos(x: number, y: number) {
-  return posPlusVec(spawn, new Vec(x, y));
+  return posPlusVec(mySpawn, new Vec(x, y));
 }
 export function getExistListAndSpawningFriendsNum(
   lamb: (i: Cre) => boolean,
@@ -119,7 +119,7 @@ export function getExistListAndSpawningFriendsNum(
   lambSpawnInfo: (i: SpawnInfo) => boolean
 ): number {
   const existFri = friends.filter(lamb).length;
-  const isSpawningNum = lambCreep(spawn.spawningCreep) ? 1 : 0;
+  const isSpawningNum = lambCreep(mySpawn.spawningCreep) ? 1 : 0;
   const inListHarvesterNum = spawnList.filter(i => lambSpawnInfo(i)).length;
   return existFri + isSpawningNum + inListHarvesterNum;
 }
@@ -146,15 +146,15 @@ export function spawnIt(theSpawn: Spa) {
   }
 }
 export function getSpawnAndBaseContainerEnergy(): number {
-  const baseCon = containers.find(i => GR(i, spawn) <= 1);
-  return getEnergy(spawn) + (baseCon ? getEnergy(baseCon) : 0);
+  const baseCon = containers.find(i => GR(i, mySpawn) <= 1);
+  return getEnergy(mySpawn) + (baseCon ? getEnergy(baseCon) : 0);
 }
 function remainingTime(theSpawn: Spa) {
   return theSpawn.master.spawning?.remainingTime;
 }
 /** check if can spawn */
 export function checkSpawn(theSpawn: Spa) {
-  SA(spawn, "checkSpawn");
+  SA(mySpawn, "checkSpawn");
   try {
     if (remainingTime(theSpawn) === undefined) {
       if (spawnList.length > 0) {
@@ -221,14 +221,14 @@ export function spawnCreep_ifHasEnergy(
   role: Role,
   extraMessage?: any
 ) {
-  const hasEnergy = spawnAndExtensionsEnergy(spawn);
+  const hasEnergy = spawnAndExtensionsEnergy(mySpawn);
   if (hasEnergy >= getBodiesCost(bodies)) {
     spawnCreep(bodies, role, extraMessage);
   }
 }
 //energyEnoughBonus
 export function EEB(amount: number, rate: number): number {
-  return spawnAndExtensionsEnergy(spawn) >= amount ? rate : 1;
+  return spawnAndExtensionsEnergy(mySpawn) >= amount ? rate : 1;
 }
 export function spawnAndSpawnListEmpty(theSpawn: Spa): boolean {
   return !theSpawn.spawningCreep && spawnList.length === 0;
@@ -258,5 +258,5 @@ export function inEnBaseRan(cre: Pos): boolean {
   return X_axisDistance(cre, enemySpawn) <= 7;
 }
 export function inMyBaseRan(cre: Pos): boolean {
-  return X_axisDistance(cre, spawn) <= 7;
+  return X_axisDistance(cre, mySpawn) <= 7;
 }

@@ -42,13 +42,13 @@ import {
   initialGameObjectsAtLoopStart_basic,
   initialressAtLoopStart,
   initialStrusAtLoopStart,
+  mySpawn,
   mySpawns,
   oppoRamparts,
   oppoSpawns,
   set_cres,
   setEnemySpawn,
-  setSpawn,
-  spawn,
+  setMySpawn,
   strus,
 } from "./gameObjects/GameObjectInitialize";
 import {} from "./gameObjects/HasHits";
@@ -154,10 +154,10 @@ export function loopStart() {
   //set overall map
   const st4 = ct();
   setGameObjectsThisTick(<Pos[]>getGOs());
-  setSpawn(mySpawns[0]);
+  setMySpawn(mySpawns[0]);
   setEnemySpawn(oppoSpawns[0]);
   if (getTicks() === 1) {
-    set_spawn_left(spawn.x < 50);
+    set_spawn_left(mySpawn.x < 50);
     initGateCost();
   }
   setOverallMap();
@@ -232,7 +232,7 @@ export function setWorthForContainer(cont: Con): void {
     const enemyProducerCost = enemyProducer ? GR(enemyProducer, cont) : 100;
     const enemyDisProducerExtra = -divideReduce(enemyProducerCost, 10);
     //
-    const mySpCost = searchPath_area(cont, spawn).cost;
+    const mySpCost = searchPath_area(cont, mySpawn).cost;
     const enSpCost = searchPath_area(cont, enemySpawn).cost;
     // const mySpCost = searchPath(cont, spawnPos).cost
     // const enSpCost = searchPath(cont, enemySpawnPos).cost

@@ -5,7 +5,7 @@ import { P, SA } from "../utils/visual";
 import { Cre } from "./Cre";
 import { Role } from "./CreTool";
 import { S } from "./export";
-import { friends, spawn } from "./GameObjectInitialize";
+import { friends, mySpawn } from "./GameObjectInitialize";
 import { enoughEnergy, spawnAndSpawnListEmpty, spawnCreep } from "./spawn";
 
 export function spawnBySpawnTypeList(spl: SpawnType[]) {
@@ -13,7 +13,7 @@ export function spawnBySpawnTypeList(spl: SpawnType[]) {
     //every spawnType
     if (s.onlyEnoughEnergy) {
       //if it is 'only enough energy'
-      if (!enoughEnergy(spawn, s.body)) {
+      if (!enoughEnergy(mySpawn, s.body)) {
         //if not enough ,pass
         return 0;
       }
@@ -36,11 +36,11 @@ export function spawnBySpawnTypeList(spl: SpawnType[]) {
   });
   //spawn maxNeedSpawnType
   if (
-    spawnAndSpawnListEmpty(spawn) &&
+    spawnAndSpawnListEmpty(mySpawn) &&
     maxNeedSpawnType &&
-    enoughEnergy(spawn, maxNeedSpawnType.body)
+    enoughEnergy(mySpawn, maxNeedSpawnType.body)
   ) {
-    SA(spawn, "decide spawn " + S(maxNeedSpawnType));
+    SA(mySpawn, "decide spawn " + S(maxNeedSpawnType));
     spawnCreep(maxNeedSpawnType.body, maxNeedSpawnType.role);
   }
 }

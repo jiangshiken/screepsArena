@@ -1,7 +1,7 @@
 import { ConstructionSite } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
-import { spawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
+import { mySpawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { Task_Role } from "../gameObjects/Cre";
 import { Cre_battle } from "../gameObjects/Cre_battle";
 import {
@@ -40,10 +40,10 @@ export class defender_RampartJob extends Task_Role {
     SA(cre, "defender_RampartJob");
     P("defender_RampartJob");
     cre.fight();
-    const EnemyAroundSpawn = getEnemyThreats().filter(i => GR(i, spawn) <= 1);
+    const EnemyAroundSpawn = getEnemyThreats().filter(i => GR(i, mySpawn) <= 1);
     if (
       EnemyAroundSpawn.length > 0 &&
-      ((tick > 1950 && !findGO(spawn, ConstructionSite)) || tick > 1965)
+      ((tick > 1950 && !findGO(mySpawn, ConstructionSite)) || tick > 1965)
     ) {
       SA(cre, "final protect mode");
       const tar = findClosestByRange(cre, EnemyAroundSpawn);

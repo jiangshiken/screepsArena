@@ -16,10 +16,10 @@ import {
   Unit,
   containers,
   myExtensions,
+  mySpawn,
   myUnits,
   oppoUnits,
   ress,
-  spawn,
 } from "./GameObjectInitialize";
 import { findGO, overallMap } from "./overallMap";
 import { Con, Ext, Res, Spa, Stru } from "./Stru";
@@ -134,7 +134,7 @@ export class Cre_harvest extends Cre_pull {
     }[] = needTransHarvable.map(harvable => {
       const range = GR(this.master, harvable);
       const baseRangeBonus =
-        1 + 3 * divideReduce(X_axisDistance(harvable, spawn), 10);
+        1 + 3 * divideReduce(X_axisDistance(harvable, mySpawn), 10);
       const volumn = getCapacity(this);
       const energy = Math.min(getEnergy(harvable), volumn);
       const worth = (baseRangeBonus * energy) / (range + 4);
@@ -237,7 +237,7 @@ export class Cre_harvest extends Cre_pull {
       } else if (producer instanceof Spa) {
         typeRate = 1;
       } else if (producer instanceof Ext) {
-        if (GR(producer, spawn) <= 7) {
+        if (GR(producer, mySpawn) <= 7) {
           typeRate = 0.75;
         } else {
           typeRate = 0.5;
@@ -275,7 +275,7 @@ export function getHarvables(): Harvable[] {
         i.master.exists &&
         energylive(i) &&
         !isOppoBaseContainer(i) &&
-        !(Adj(i, spawn) && (energyFull(spawn) || isTurtleContainer))
+        !(Adj(i, mySpawn) && (energyFull(mySpawn) || isTurtleContainer))
     )
   );
 }

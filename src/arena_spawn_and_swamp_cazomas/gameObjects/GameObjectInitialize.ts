@@ -265,9 +265,9 @@ export class CS extends GameObj implements HasPos, HasMy {
 }
 /** your first StructureSpawn*/
 
-export let spawn: Spa;
-export function setSpawn(s: Spa) {
-  spawn = s;
+export let mySpawn: Spa;
+export function setMySpawn(s: Spa) {
+  mySpawn = s;
 } /** the first StructureSpawn of your opponent*/
 export let enemySpawn: Spa;
 export function setEnemySpawn(s: Spa) {

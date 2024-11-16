@@ -1,6 +1,6 @@
 import { CARRY, MOVE } from "game/constants";
 
-import { spawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
+import { mySpawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import {
   enemyAWeight,
   getEnemyThreats,
@@ -35,8 +35,8 @@ export function spawnStartHarvester(
   needCarryNum: number,
   is2C2M: boolean = false
 ) {
-  SA(displayPos(), "spawnCleared(spawn)" + spawnCleared(spawn));
-  if (tick <= 300 && spawnCleared(spawn)) {
+  SA(displayPos(), "spawnCleared(spawn)" + spawnCleared(mySpawn));
+  if (tick <= 300 && spawnCleared(mySpawn)) {
     const tarHarvesters = friends.filter(
       i => i.role === harvester && i.getHealthyBodyPartsNum(MOVE) > 0
     );
@@ -55,7 +55,7 @@ export function spawnStartHarvester(
 }
 /** set startGate by enemy num*/
 export function getStartGateAvoidFromEnemies(avoid: boolean = true): boolean {
-  const spawnY = spawn.y;
+  const spawnY = mySpawn.y;
   const upEnemies = enemies.filter(i => i.y < spawnY && hasThreat(i));
   const downEnemies = enemies.filter(i => i.y > spawnY && hasThreat(i));
   const upNum = upEnemies.length;
@@ -79,7 +79,7 @@ export function assemblePoint(ind: number): Pos {
   else if (ind == 7) vecCre = new Vec(1 * lr, 1);
   else if (ind == 8) vecCre = new Vec(2 * lr, 1);
   else vecCre = new Vec(-3, 1);
-  return posPlusVec(spawn, vecPlusVec(vecCre, leftOrRight));
+  return posPlusVec(mySpawn, vecPlusVec(vecCre, leftOrRight));
 }
 export function supplyToughDefender(
   defenderNum: number = 1,
@@ -88,16 +88,16 @@ export function supplyToughDefender(
   //first defender
   SA(displayPos(), "supplyToughDefender");
   if (
-    spawnCleared(spawn) &&
+    spawnCleared(mySpawn) &&
     friends.filter(i => i.role === toughDefender).length < defenderNum
   ) {
     SA(displayPos(), "spawn defender");
     const spEns = getEnemyThreats().filter(i => inMyBaseRan(i));
-    const spEn = closest(spawn, spEns);
+    const spEn = closest(mySpawn, spEns);
     const aRate = enemyAWeight();
     if (spEn) {
-      const range = GR(spEn, spawn);
-      const myEnergy = spawnAndExtensionsEnergy(spawn);
+      const range = GR(spEn, mySpawn);
+      const myEnergy = spawnAndExtensionsEnergy(mySpawn);
       let restPart;
       if (aRate > 0.6) {
         //100+320

@@ -4,7 +4,7 @@ import { Event_ori } from "../utils/Event";
 import { relu, sum } from "../utils/JS";
 import { Adj, getRangePoss, GR, Pos } from "../utils/Pos";
 import { SA } from "../utils/visual";
-import { enemies, friends, myRamparts, spawn } from "./GameObjectInitialize";
+import { enemies, friends, myRamparts, mySpawn } from "./GameObjectInitialize";
 import { findGO } from "./overallMap";
 import { OwnedStru, Ram } from "./Stru";
 import { blocked } from "./UnitTool";
@@ -48,10 +48,10 @@ export function inMyRampart(pos: Pos): boolean {
   return ram !== undefined && ram.my;
 }
 export function baseLoseRampart(): boolean {
-  return !inMyRampart(spawn);
+  return !inMyRampart(mySpawn);
 }
 export function baseLoseRampartAround(): boolean {
-  const roundPos = getRangePoss(spawn, 1);
+  const roundPos = getRangePoss(mySpawn, 1);
   return roundPos.find(i => !inMyRampart(i)) !== undefined;
 }
 export function inMyHealthyRampart(pos: Pos) {

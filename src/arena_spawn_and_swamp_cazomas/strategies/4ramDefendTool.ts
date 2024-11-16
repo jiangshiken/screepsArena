@@ -1,4 +1,4 @@
-import { spawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
+import { mySpawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { createCS, supplyCS } from "../gameObjects/CS";
 import {
   spawnCleared,
@@ -38,16 +38,20 @@ export function useStandardTurtling(st: number, strength: number = 0) {
       spawnCreep(TB("3A2R2WCM"), builderTurtle, builderInfo); //200
     }
     if (strength >= 2) {
-      createCS(spawn, StructureRampart, 10, false, true);
+      createCS(mySpawn, StructureRampart, 10, false, true);
     }
-    createCS(spawn, StructureRampart, 10, false, true);
+    createCS(mySpawn, StructureRampart, 10, false, true);
   }
-  supplyCS(new Pos_C(spawn.x, spawn.y + 1), StructureRampart, 10);
-  supplyCS(new Pos_C(spawn.x, spawn.y - 1), StructureRampart, 10);
+  supplyCS(new Pos_C(mySpawn.x, mySpawn.y + 1), StructureRampart, 10);
+  supplyCS(new Pos_C(mySpawn.x, mySpawn.y - 1), StructureRampart, 10);
   if (strength > 0) {
-    supplyCS(new Pos_C(spawn.x + leftRate(), spawn.y), StructureRampart, 10);
+    supplyCS(
+      new Pos_C(mySpawn.x + leftRate(), mySpawn.y),
+      StructureRampart,
+      10
+    );
   }
-  supplyCS(new Pos_C(spawn.x - leftRate(), spawn.y), StructureRampart, 10);
+  supplyCS(new Pos_C(mySpawn.x - leftRate(), mySpawn.y), StructureRampart, 10);
   // supply
   supplyHarvester(st);
 
@@ -93,23 +97,23 @@ export function useStandardTurtling(st: number, strength: number = 0) {
   }
   if (st >= 550) {
     supplyRoads(1);
-    const ranPoss = getRangePoss(spawn);
+    const ranPoss = getRangePoss(mySpawn);
     ranPoss.forEach(pos => supplyCS(pos, StructureRampart));
   }
 }
 /**use 4 ramparts to defend the base*/
 export function use4RamDefend(st: number, exposeSpawnSimple: boolean = false) {
   SA(displayPos(), "use4RamDefend");
-  supplyCS(spawn, StructureRampart, 10);
-  supplyCS({ x: spawn.x, y: spawn.y + 1 }, StructureRampart, 10);
-  supplyCS({ x: spawn.x, y: spawn.y - 1 }, StructureRampart, 10);
-  supplyCS({ x: spawn.x - leftRate(), y: spawn.y }, StructureRampart, 10);
+  supplyCS(mySpawn, StructureRampart, 10);
+  supplyCS({ x: mySpawn.x, y: mySpawn.y + 1 }, StructureRampart, 10);
+  supplyCS({ x: mySpawn.x, y: mySpawn.y - 1 }, StructureRampart, 10);
+  supplyCS({ x: mySpawn.x - leftRate(), y: mySpawn.y }, StructureRampart, 10);
   supplyBuilder();
   spawnStartHarvester(1, true);
 }
 function supplyBuilder() {
   if (
-    spawnCleared(spawn) &&
+    spawnCleared(mySpawn) &&
     friends.find(i => i.role === builder4Ram) === undefined
   ) {
     spawnCreep(TB("2C5MCW"), builder4Ram);
@@ -117,7 +121,7 @@ function supplyBuilder() {
 }
 export function supplyHarvester(st: number) {
   //supply harvester
-  if (st >= 2 && st <= 300 && spawnCleared(spawn)) {
+  if (st >= 2 && st <= 300 && spawnCleared(mySpawn)) {
     let carryNum = sum(
       friends.filter(i => i.role === harvester),
       i => i.getBodyPartsNum(CARRY)
@@ -132,6 +136,6 @@ export function supplyHarvester(st: number) {
  */
 export function reBuildBaseRampart() {
   if (baseLoseRampart()) {
-    supplyCS(spawn, StructureRampart, 10, false, false);
+    supplyCS(mySpawn, StructureRampart, 10, false, false);
   }
 }

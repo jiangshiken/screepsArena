@@ -11,7 +11,7 @@ import {
   containers,
   friends,
   myCSs,
-  spawn,
+  mySpawn,
 } from "../gameObjects/GameObjectInitialize";
 import { findGO } from "../gameObjects/overallMap";
 import { currentGuessPlayer, Dooms } from "../gameObjects/player";
@@ -55,8 +55,8 @@ export function useTurtleStrategy() {
   supplyDefenders();
   supplyRoads();
   supplyContainer();
-  const tarProtectPoss = getRangePoss(spawn).filter(
-    i => absRange(spawn, i) === 2
+  const tarProtectPoss = getRangePoss(mySpawn).filter(
+    i => absRange(mySpawn, i) === 2
   );
   const SCEnergy = getSpawnAndBaseContainerEnergy();
   SAN(displayPos(), "SCEnergy", SCEnergy);
@@ -98,7 +98,7 @@ export function supplyJamers() {
     SA(displayPos(), "no jamer");
   } else {
     SA(displayPos(), "has jamer");
-    if (spawnCleared(spawn) && tick <= 350) {
+    if (spawnCleared(mySpawn) && tick <= 350) {
       const js = friends.filter(i => i.role === jamer);
       const jsl = js.length;
       if (jsl < 6) {
@@ -109,7 +109,7 @@ export function supplyJamers() {
 }
 export function supplyBuilders() {
   if (
-    spawnCleared(spawn) &&
+    spawnCleared(mySpawn) &&
     friends.find(i => i.role === builderTurtle) === undefined
   ) {
     if (currentGuessPlayer === Dooms) {
@@ -128,7 +128,7 @@ export function supplyBuilders() {
   // }
 }
 export function supplyDefenders() {
-  if (spawnCleared(spawn)) {
+  if (spawnCleared(mySpawn)) {
     const bts = friends.filter(i => i.role === defender_rampart);
     const btsl = bts.length;
     //2A5RM=>160+750+50
@@ -186,7 +186,7 @@ function supplyExtraRamparts() {
     const increaseBias = 0.15;
     if (buildExtraRamRate > startBias + 5 * increaseBias) {
       supplyCS(
-        { x: spawn.x - 2 * leftRate(), y: spawn.y + 1 },
+        { x: mySpawn.x - 2 * leftRate(), y: mySpawn.y + 1 },
         StructureRampart,
         ramWorth,
         false,
@@ -195,7 +195,7 @@ function supplyExtraRamparts() {
     }
     if (buildExtraRamRate > startBias + 4 * increaseBias) {
       supplyCS(
-        { x: spawn.x - 2 * leftRate(), y: spawn.y - 1 },
+        { x: mySpawn.x - 2 * leftRate(), y: mySpawn.y - 1 },
         StructureRampart,
         ramWorth,
         false,
@@ -204,28 +204,28 @@ function supplyExtraRamparts() {
     }
     if (buildExtraRamRate > startBias + 3 * increaseBias) {
       supplyCS(
-        { x: spawn.x - 2 * leftRate(), y: spawn.y },
+        { x: mySpawn.x - 2 * leftRate(), y: mySpawn.y },
         StructureRampart,
         ramWorth
       );
     }
     if (buildExtraRamRate > startBias + 2 * increaseBias) {
       supplyCS(
-        { x: spawn.x + 2 * leftRate(), y: spawn.y + 1 },
+        { x: mySpawn.x + 2 * leftRate(), y: mySpawn.y + 1 },
         StructureRampart,
         ramWorth
       );
     }
     if (buildExtraRamRate > startBias + 1 * increaseBias) {
       supplyCS(
-        { x: spawn.x + 2 * leftRate(), y: spawn.y - 1 },
+        { x: mySpawn.x + 2 * leftRate(), y: mySpawn.y - 1 },
         StructureRampart,
         ramWorth
       );
     }
     if (buildExtraRamRate > startBias) {
       supplyCS(
-        { x: spawn.x + 2 * leftRate(), y: spawn.y },
+        { x: mySpawn.x + 2 * leftRate(), y: mySpawn.y },
         StructureRampart,
         ramWorth
       );
@@ -234,20 +234,20 @@ function supplyExtraRamparts() {
 }
 /**supply the ramparts around the base*/
 function supplyRamparts() {
-  const cssAtSpawn = myCSs.filter(i => atPos(i, spawn));
+  const cssAtSpawn = myCSs.filter(i => atPos(i, mySpawn));
   const hasEnemyArmyAround =
-    getEnemyArmies().find(i => GR(i, spawn) <= 4) !== undefined;
+    getEnemyArmies().find(i => GR(i, mySpawn) <= 4) !== undefined;
   const baseRamNum = currentGuessPlayer === Dooms ? 2 : 3;
   if (hasEnemyArmyAround) {
-    createCS_wait(spawn, StructureRampart, 15);
+    createCS_wait(mySpawn, StructureRampart, 15);
   } else {
     if (cssAtSpawn.length < baseRamNum) {
-      createCS_wait(spawn, StructureRampart, 15, false, true);
+      createCS_wait(mySpawn, StructureRampart, 15, false, true);
     }
   }
-  const rangePos = getRangePoss(spawn).filter(i => !findGO(i, StructureWall));
+  const rangePos = getRangePoss(mySpawn).filter(i => !findGO(i, StructureWall));
   for (let pos of rangePos) {
-    if (!atPos(pos, spawn)) {
+    if (!atPos(pos, mySpawn)) {
       if (supplyCS(pos, StructureRampart, 10)) {
         break;
       }
@@ -258,22 +258,22 @@ function supplyRamparts() {
 export function supplyRoads(strength: number = 2) {
   let rangePos;
   if (strength === 0) {
-    rangePos = getRangePoss(spawn, 1).filter(
-      i => X_axisDistance(spawn, i) === 0 || Y_axisDistance(spawn, i) === 0
+    rangePos = getRangePoss(mySpawn, 1).filter(
+      i => X_axisDistance(mySpawn, i) === 0 || Y_axisDistance(mySpawn, i) === 0
     );
   } else if (strength === 1) {
-    rangePos = getRangePoss(spawn);
+    rangePos = getRangePoss(mySpawn);
   } else {
-    const rectPos = getRangePoss(spawn, 2).filter(
+    const rectPos = getRangePoss(mySpawn, 2).filter(
       i =>
-        GR(spawn, i) === 2 &&
-        X_axisDistance(spawn, i) === 2 &&
-        Y_axisDistance(spawn, i) <= 1
+        GR(mySpawn, i) === 2 &&
+        X_axisDistance(mySpawn, i) === 2 &&
+        Y_axisDistance(mySpawn, i) <= 1
     );
-    rangePos = getRangePoss(spawn).concat(rectPos);
+    rangePos = getRangePoss(mySpawn).concat(rectPos);
   }
   for (let pos of rangePos) {
-    if (!atPos(pos, spawn)) {
+    if (!atPos(pos, mySpawn)) {
       if (supplyCS(pos, StructureRoad, 9)) {
         break;
       }
@@ -282,10 +282,10 @@ export function supplyRoads(strength: number = 2) {
 }
 /**supply base container*/
 function supplyContainer() {
-  const aroundCon = containers.find(i => Adj(i, spawn) && !energyFull(i));
+  const aroundCon = containers.find(i => Adj(i, mySpawn) && !energyFull(i));
   SA(displayPos(), "supplyContainer aroundCon=" + COO(aroundCon));
   if (!aroundCon) {
-    const pos = posPlusVec(spawn, leftVector());
+    const pos = posPlusVec(mySpawn, leftVector());
     SA(displayPos(), "pos=" + COO(pos));
     createCS_wait(pos, StructureContainer, 13);
   }

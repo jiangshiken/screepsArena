@@ -10,7 +10,7 @@ import {
   containers,
   enemySpawn,
   HasStore,
-  spawn,
+  mySpawn,
 } from "./GameObjectInitialize";
 import { findGO, hasGO, overallMap } from "./overallMap";
 import { Con, Ext, Ram, Res, Roa, Spa, Stru, Tow } from "./Stru";
@@ -127,16 +127,16 @@ export function isOutsideContainer(con: Con) {
   return inResourceArea(con);
 }
 export function isMyBaseContainer(con: Con) {
-  return GR(con, spawn) <= 7;
+  return GR(con, mySpawn) <= 7;
 }
 export function isOppoBaseContainer(con: Con) {
   return GR(con, enemySpawn) <= 7;
 }
 export function getSpawnAroundFreeContainers() {
-  return containers.filter(i => GR(i, spawn) <= 1 && getFreeEnergy(i) > 0);
+  return containers.filter(i => GR(i, mySpawn) <= 1 && getFreeEnergy(i) > 0);
 }
 export function getSpawnAroundLiveContainers() {
-  return containers.filter(i => GR(i, spawn) <= 1 && getEnergy(i) > 0);
+  return containers.filter(i => GR(i, mySpawn) <= 1 && getEnergy(i) > 0);
 }
 export function getTowerDamage(range: number) {
   if (range <= 5) {

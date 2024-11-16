@@ -1,6 +1,6 @@
 import {
   enemySpawn,
-  spawn,
+  mySpawn,
 } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { ATTACK, HEAL, MOVE, RANGED_ATTACK, WORK } from "game/constants";
 import { getTicks } from "game/utils";
@@ -180,7 +180,7 @@ export function useTailStrategy() {
     }
   }
   if (getTicks() > 50) {
-    if (spawnCleared(spawn)) {
+    if (spawnCleared(mySpawn)) {
       // if(friends.filter(i=>i.role===jamer).length<=8){
       //     spawnCreep(TB('M'),jamer)
       // }else{
@@ -277,8 +277,8 @@ function ESDCompare(en: Pos, fri: Pos): number {
   }
 }
 function enemySpawnDistance(pos: Pos): number {
-  if (X_axisDistance(pos, spawn) <= 7 && inRange(pos.y, 11, 88)) {
-    return 200 - Y_axisDistance(pos, spawn);
+  if (X_axisDistance(pos, mySpawn) <= 7 && inRange(pos.y, 11, 88)) {
+    return 200 - Y_axisDistance(pos, mySpawn);
   } else if (X_axisDistance(pos, enemySpawn) <= 7 && inRange(pos.y, 11, 88)) {
     return Y_axisDistance(pos, enemySpawn);
   } else {
@@ -595,7 +595,7 @@ function cleanFatigue(myGroup: Cre_move[]) {
     if (topMoves > bottomMoves) {
       if (tarTop.length > 0) {
         const sortedTarTop = tarTop.sort((a, b) => tailIndex(b) - tailIndex(a));
-        new PullTarsTask(tar, sortedTarTop, spawn, 10);
+        new PullTarsTask(tar, sortedTarTop, mySpawn, 10);
         if (tarBottom.length >= 2) {
           SA(tar, "bottom");
           cleanFatigue(tarBottom);
@@ -606,7 +606,7 @@ function cleanFatigue(myGroup: Cre_move[]) {
         const sortedTarBottom = tarTop.sort(
           (a, b) => tailIndex(a) - tailIndex(b)
         );
-        new PullTarsTask(tar, sortedTarBottom, spawn, 10);
+        new PullTarsTask(tar, sortedTarBottom, mySpawn, 10);
         if (tarTop.length >= 2) {
           SA(tar, "top");
           cleanFatigue(tarTop);
@@ -616,7 +616,7 @@ function cleanFatigue(myGroup: Cre_move[]) {
   }
 }
 function arrangeTail_all(cre: Cre, myGroup: Cre_move[]): boolean {
-  if (inMyBaseRan(cre) && Y_axisDistance(cre, spawn) <= 20) {
+  if (inMyBaseRan(cre) && Y_axisDistance(cre, mySpawn) <= 20) {
     return false;
   } else if (arrangeTail(cre, myGroup)) {
     return true;
@@ -665,7 +665,7 @@ function arrangeTail2(cre: Cre, myGroup: Cre_move[]): boolean {
         );
         SA(creMid1, "MD");
         moveTo_direct(creMid1, tarPos);
-        if (tail) pullAction(tail, sortedFollowers, spawn);
+        if (tail) pullAction(tail, sortedFollowers, mySpawn);
         return true;
       }
     }
@@ -697,7 +697,7 @@ function arrangeTail(cre: Cre, myGroup: Cre_move[]): boolean {
       const sortedFollowers = followers.sort(
         (a, b) => tailIndex(b) - tailIndex(a)
       );
-      if (tail) pullAction(tail, sortedFollowers, spawn);
+      if (tail) pullAction(tail, sortedFollowers, mySpawn);
       return true;
     }
   }
@@ -790,7 +790,7 @@ function fleeAction(
     const sortedFollowers2 = followers2.sort(
       (a, b) => tailIndex(b) - tailIndex(a)
     );
-    pullAction(tail, sortedFollowers2, spawn);
+    pullAction(tail, sortedFollowers2, mySpawn);
   } else {
     SA(cre, "Norm");
     const fatigueHolder = best(
@@ -835,12 +835,12 @@ function fleeAction(
         );
         SA(tail, "Tail=" + sortedFollowers2.length);
         if (sortedFollowers2.length === 0) {
-          tail.MT(spawn);
+          tail.MT(mySpawn);
         } else {
-          pullAction(tail, sortedFollowers2, spawn);
+          pullAction(tail, sortedFollowers2, mySpawn);
         }
       } else {
-        pullAction(fatigueHolder, sortedFollowers, spawn);
+        pullAction(fatigueHolder, sortedFollowers, mySpawn);
       }
     } else {
       SA(cre, "no fatigueHolder");
@@ -848,7 +848,7 @@ function fleeAction(
       const sortedFollowers = followers.sort(
         (a, b) => tailIndex(b) - tailIndex(a)
       );
-      pullAction(tail, sortedFollowers, spawn);
+      pullAction(tail, sortedFollowers, mySpawn);
     }
   }
 }

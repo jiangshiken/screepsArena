@@ -12,7 +12,7 @@ import { StructureExtension } from "game/prototypes";
 import { Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
 import {
   enemySpawn,
-  spawn,
+  mySpawn,
 } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { Cre_findPath } from "../gameObjects/Cre_findPath";
 import { Cre_move } from "../gameObjects/Cre_move";
@@ -76,10 +76,10 @@ export function tester_PFC2_Job(cre: Cre_pull) {
 }
 export function tester_PFC_Job(cre: Cre_pull) {
   SA(cre, "i'm tester_PFC");
-  const pos1 = posPlusVec(spawn, { vec_x: 1, vec_y: -1 });
-  const pos2 = posPlusVec(spawn, { vec_x: 1, vec_y: 0 });
-  const pos3 = posPlusVec(spawn, { vec_x: 2, vec_y: 0 });
-  const pos4 = posPlusVec(spawn, { vec_x: 1, vec_y: 1 });
+  const pos1 = posPlusVec(mySpawn, { vec_x: 1, vec_y: -1 });
+  const pos2 = posPlusVec(mySpawn, { vec_x: 1, vec_y: 0 });
+  const pos3 = posPlusVec(mySpawn, { vec_x: 2, vec_y: 0 });
+  const pos4 = posPlusVec(mySpawn, { vec_x: 1, vec_y: 1 });
   const testTick = 50;
   if (tick <= testTick) {
     if (cre.getBodyPartsNum(TOUGH) > 0) {
@@ -105,9 +105,9 @@ export function tester_PFC_Job(cre: Cre_pull) {
 }
 export function tester_MSS_Job(cre: Cre) {
   SA(cre, "i'm tester_MSS");
-  const pos1 = posPlusVec(spawn, { vec_x: 1, vec_y: -1 });
-  const pos2 = posPlusVec(spawn, { vec_x: 1, vec_y: 1 });
-  const pos3 = posPlusVec(spawn, { vec_x: 2, vec_y: 0 });
+  const pos1 = posPlusVec(mySpawn, { vec_x: 1, vec_y: -1 });
+  const pos2 = posPlusVec(mySpawn, { vec_x: 1, vec_y: 1 });
+  const pos3 = posPlusVec(mySpawn, { vec_x: 2, vec_y: 0 });
   if (tick <= 20) {
     if (cre.id % 2 === 0) {
       cre.master.moveTo(pos1);
@@ -122,14 +122,14 @@ export function tester_MSS_Job(cre: Cre) {
 export function tester_MCB_Job(cre: Cre) {
   SA(cre, "i'm tester_MCB");
   if (tick >= 34) {
-    const csPos = posPlusVec(spawn, { vec_x: 2, vec_y: -1 });
+    const csPos = posPlusVec(mySpawn, { vec_x: 2, vec_y: -1 });
     cre.master.moveTo(csPos);
   }
 }
 export function tester_DCB_Job(cre: Cre) {
   SA(cre, "i'm tester_DCB");
-  const pos1 = posPlusVec(spawn, { vec_x: 1, vec_y: -1 });
-  const pos2 = posPlusVec(spawn, { vec_x: 1, vec_y: 0 });
+  const pos1 = posPlusVec(mySpawn, { vec_x: 1, vec_y: -1 });
+  const pos2 = posPlusVec(mySpawn, { vec_x: 1, vec_y: 0 });
   if (cre.id % 2 === 0) {
     if (tick <= 20) {
       cre.master.moveTo(pos1);
@@ -189,7 +189,7 @@ export function useTest() {
   } else if (mode === "MCB") {
     if (tick === 1) {
       spawnCreep(TB("CM"), harvester);
-      const csPos = posPlusVec(spawn, { vec_x: 2, vec_y: -1 });
+      const csPos = posPlusVec(mySpawn, { vec_x: 2, vec_y: -1 });
       createCS(csPos, StructureExtension);
       spawnCreep(TB("WCM"), builder4Ram);
       spawnCreep(TB("M"), tester_MCB);

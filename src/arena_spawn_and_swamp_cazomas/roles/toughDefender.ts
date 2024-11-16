@@ -1,6 +1,6 @@
 import { CostMatrix } from "game/path-finder";
 
-import { spawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
+import { mySpawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { closest } from "arena_spawn_and_swamp_cazomas/utils/Pos";
 import { Task_Role } from "../gameObjects/Cre";
 import { Cre_battle } from "../gameObjects/Cre_battle";
@@ -27,20 +27,20 @@ export class toughDefenderJob extends Task_Role {
     const cre = this.master;
     cre.fight();
     const cm = new CostMatrix();
-    const rps = getRangePoss(spawn, 2);
+    const rps = getRangePoss(mySpawn, 2);
     for (let pos of rps) {
-      if (absRange(pos, spawn) === 1) {
+      if (absRange(pos, mySpawn) === 1) {
         cm.set(pos.x, pos.y, 1);
-      } else if (GR(pos, spawn) === 1) {
+      } else if (GR(pos, mySpawn) === 1) {
         cm.set(pos.x, pos.y, 5);
       } else {
         cm.set(pos.x, pos.y, blockCost);
       }
     }
-    const en = closest(spawn, enemies);
+    const en = closest(mySpawn, enemies);
     if (en) {
       //if not at spawn dont chase
-      if (GR(en, cre) > 1 || GR(en, spawn) === 1) {
+      if (GR(en, cre) > 1 || GR(en, mySpawn) === 1) {
         cre.MT(en, 1, cm);
       }
     }

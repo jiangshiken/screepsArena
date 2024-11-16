@@ -21,7 +21,7 @@ import {
   spawnDps,
   spawnExtraTaunt,
 } from "./CreTool";
-import { oppoUnits, spawn, Unit } from "./GameObjectInitialize";
+import { mySpawn, oppoUnits, Unit } from "./GameObjectInitialize";
 import { damagedRate, healthRate } from "./HasHits";
 import { findGO } from "./overallMap";
 import { Ext, Ram, Spa, Tow } from "./Stru";
@@ -152,14 +152,14 @@ export function getTaunt(cre: Unit, valueMode: boolean = false): StNumber {
   //calculate the enemy approach my Spawn
   let spawnThreatBonus = 1;
   if (cre.oppo) {
-    const range = GR(cre, spawn);
+    const range = GR(cre, mySpawn);
     const spawnScanRange = 7;
     const spawnVertiScanRange = 10;
     if (range <= 1) {
       spawnThreatBonus = 1 + 2 * spawnExtraTaunt;
     } else if (range <= spawnScanRange) {
       spawnThreatBonus = 1 + 1 * spawnExtraTaunt;
-    } else if (X_axisDistance(cre, spawn) <= spawnVertiScanRange) {
+    } else if (X_axisDistance(cre, mySpawn) <= spawnVertiScanRange) {
       spawnThreatBonus = 1 + 0.5 * spawnExtraTaunt;
     }
   }
