@@ -39,6 +39,13 @@ export class TaskEvent extends Event_ori {
 export class Cre_move extends Cre_findPath {
   appointmentMovement: Event_Pos | undefined;
   moveEvent: MoveEvent | undefined;
+  normalPull(tar: Cre_findPath): boolean {
+    const p_rtn = super.normalPull(tar);
+    if (p_rtn) {
+      if (tar instanceof Cre_move) tar.stop();
+    }
+    return p_rtn;
+  }
   /** normal moveTo,but will block to the tile it want to move next tick */
   moveTo_basic(tar: Pos): void {
     SA(this, "moveTo_basic");

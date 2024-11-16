@@ -19,7 +19,7 @@ import {
   isTerrainSwamp,
 } from "../utils/game";
 import { divide0 } from "../utils/JS";
-import { Adj, Pos, Pos_C, atPos } from "../utils/Pos";
+import { Adj, COO, Pos, Pos_C, atPos } from "../utils/Pos";
 import { ERR } from "../utils/print";
 import { SA, drawLineComplex, drawPoly, drawPolyLight } from "../utils/visual";
 import { Cre } from "./Cre";
@@ -51,6 +51,24 @@ export class Cre_findPath extends Cre {
   pullEvent: PullEvent | undefined; //get cre that pulled by this
   bePulledEvent: PullEvent | undefined; //get cre that pull this
   highPriorityMoveTaskEvent: Event_ori | undefined;
+  /** pull  */
+  normalPull(tar: Cre_findPath): boolean {
+    if (Adj(this, tar)) {
+      //draw green line
+      drawLineComplex(this, tar, 0.7, "#00ff22");
+      //pull
+      this.master.pull(tar.master);
+      //set Event
+      const pullEve = new PullEvent(this, tar);
+      this.pullEvent = pullEve;
+      tar.bePulledEvent = pullEve;
+      //tar move this
+      SA(tar, "PMTD " + COO(this));
+      tar.moveTo_direct(this);
+      tar.highPriorityMoveTaskEvent = pullEve;
+      return true;
+    } else return false;
+  }
   moveTo_direct(tar: Pos) {
     SA(this, "DirMove");
     if (atPos(this, tar)) {

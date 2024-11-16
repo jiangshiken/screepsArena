@@ -5,7 +5,7 @@ import { arrayEqual, divide0, last } from "../utils/JS";
 import { Adj, COO, Pos, atPos } from "../utils/Pos";
 import { ERR } from "../utils/print";
 import { findTask } from "../utils/Task";
-import { P, SA, drawLineComplex } from "../utils/visual";
+import { P, SA } from "../utils/visual";
 import { Cre, Task_Cre } from "./Cre";
 import {
   Cre_findPath,
@@ -104,25 +104,7 @@ export class Cre_pull extends Cre_move {
       return false;
     }
   }
-  /** pull  */
-  normalPull(tar: Cre_findPath): boolean {
-    if (Adj(this, tar)) {
-      //draw green line
-      drawLineComplex(this, tar, 0.7, "#00ff22");
-      //pull
-      this.master.pull(tar.master);
-      //set Event
-      const pullEve = new PullEvent(this, tar);
-      this.pullEvent = pullEve;
-      tar.bePulledEvent = pullEve;
-      //tar move this
-      SA(tar, "PMTD " + COO(this));
-      tar.moveTo_direct(this);
-      if (tar instanceof Cre_move) tar.stop();
-      tar.highPriorityMoveTaskEvent = pullEve;
-      return true;
-    } else return false;
-  }
+
   /** move and pull */
   moveAndBePulled(tar: Cre_pull): boolean {
     if (Adj(this, tar)) {
