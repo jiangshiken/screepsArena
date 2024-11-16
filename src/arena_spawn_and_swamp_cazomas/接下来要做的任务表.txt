@@ -1,5 +1,4 @@
 @current
-no move creep can also pull?
 arrange worm rush
 arrange tailStrategy
     use builder and support tailPart
