@@ -8,14 +8,12 @@ import { inMyBaseRan, spawnCleared, spawnCreep } from "../gameObjects/spawn";
 import { jamer } from "../roles/jamer";
 
 import { Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
-import { moveTo_direct } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre_findPath";
 import { MoveTask } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre_move";
 import { CostMatrix } from "game/path-finder";
 import { calculateForce, getTaunt } from "../gameObjects/battle";
 import { Cre_battle } from "../gameObjects/Cre_battle";
-import { getMoveAndFatigueNum } from "../gameObjects/Cre_findPath";
 import { Cre_move } from "../gameObjects/Cre_move";
-import { newPullTarsTask, PullTarsTask } from "../gameObjects/Cre_pull";
+import { PullTarsTask } from "../gameObjects/Cre_pull";
 import { hasThreat, isArmy, Role } from "../gameObjects/CreTool";
 import {
   enemies,

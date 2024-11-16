@@ -1,6 +1,7 @@
 @current
-arrange worm rush
 arrange tailStrategy
+    tailer
+    wormTailer
     use builder and support tailPart
 recover headStrategy
 recover turtle
