@@ -1,4 +1,7 @@
-import { Task_Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
+import {
+  Task_Cre,
+  Task_Role,
+} from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
 import { isMyTick, Role } from "../gameObjects/CreTool";
 import {
   containers,
@@ -24,7 +27,6 @@ import { inResourceArea, tick } from "../utils/game";
 import { COO, GR } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { drawPoly, SA } from "../utils/visual";
-import { energyStealerJob } from "./energyStealer";
 
 /**get the move time assume its capacity is full*/
 export function getTimeAfterFull(cre: Cre_findPath) {
@@ -128,7 +130,10 @@ export class HarvestTask extends Task_Cre {
   }
 }
 /**harvester.Used to transport energy from harvables to producers*/
-export const harvester: Role = new Role("harvester", harvesterJob);
+export const harvester: Role = new Role(
+  "harvester",
+  cre => new harvesterJob(<Cre_harvest>cre)
+);
 export let harvesterNotFleeAtStart: boolean = false;
 export function set_harvesterNotFleeAtStart(b: boolean) {
   harvesterNotFleeAtStart = b;
@@ -140,39 +145,48 @@ export function set_energyStealMode(b: boolean) {
 /**job of harvester.It will flee from threat enemies,find the fit harvable
  * and producer,new a HarvestTask when it hasn't.
  */
-export function harvesterJob(cre: Cre_harvest) {
-  if (energyStealMode && tick >= 400) {
-    energyStealerJob(cre);
-    return;
+export class harvesterJob extends Task_Role {
+  master: Cre_harvest;
+  constructor(master: Cre_harvest) {
+    super(master);
+    this.master = master;
+    this.cancelOldTask(harvesterJob);
   }
-  if (!harvesterNotFleeAtStart && cre.flee(5, 10)) {
-    SA(cre, "flee");
-    cre.dropEnergy();
-    findTask(cre, HarvestTask)?.end();
-  } else {
-    SA(cre, "harve");
-    const contDropScanRange = 20;
-    const targetCont = getWildCons().find(
-      i =>
-        GR(i, cre) <= contDropScanRange &&
-        i.worth > 0 &&
-        getEnergy(i) > 0 &&
-        cre.reachableHarvable(i)
-    );
-    SA(cre, "targetCont=" + COO(targetCont));
-    if (inResourceArea(cre) && targetCont) {
-      dropCont(cre, targetCont);
+  loop_task(): void {
+    const cre = this.master;
+    if (energyStealMode && tick >= 400) {
+      // energyStealerJob(cre);
+      return;
+    }
+    if (!harvesterNotFleeAtStart && cre.flee(5, 10)) {
+      SA(cre, "flee");
+      cre.dropEnergy();
       findTask(cre, HarvestTask)?.end();
-    } else if (!findTask(cre, HarvestTask) || isMyTick(cre, 20)) {
-      SA(cre, "scan fit harvable and producer");
-      const targetHarvable = cre.findFitHarvable();
-      SA(cre, "targetHarvable " + targetHarvable);
-      const targetProducer = cre.findFitProducer();
-      SA(cre, "targetProducer " + targetProducer);
-      findTask(cre, HarvestTask)?.end();
-      if (targetHarvable && targetProducer) {
-        SA(cre, " new HarvestTask");
-        new HarvestTask(cre, targetHarvable, targetProducer);
+    } else {
+      SA(cre, "harve");
+      const contDropScanRange = 20;
+      const targetCont = getWildCons().find(
+        i =>
+          GR(i, cre) <= contDropScanRange &&
+          i.worth > 0 &&
+          getEnergy(i) > 0 &&
+          cre.reachableHarvable(i)
+      );
+      SA(cre, "targetCont=" + COO(targetCont));
+      if (inResourceArea(cre) && targetCont) {
+        dropCont(cre, targetCont);
+        findTask(cre, HarvestTask)?.end();
+      } else if (!findTask(cre, HarvestTask) || isMyTick(cre, 20)) {
+        SA(cre, "scan fit harvable and producer");
+        const targetHarvable = cre.findFitHarvable();
+        SA(cre, "targetHarvable " + targetHarvable);
+        const targetProducer = cre.findFitProducer();
+        SA(cre, "targetProducer " + targetProducer);
+        findTask(cre, HarvestTask)?.end();
+        if (targetHarvable && targetProducer) {
+          SA(cre, " new HarvestTask");
+          new HarvestTask(cre, targetHarvable, targetProducer);
+        }
       }
     }
   }

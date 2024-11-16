@@ -4,9 +4,10 @@ import {
   CS,
   enemySpawn,
 } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
-import { Cre } from "../gameObjects/Cre";
+import { Cre, Task_Role } from "../gameObjects/Cre";
 import { getPSC } from "../gameObjects/Cre_findPath";
 import { Cre_move } from "../gameObjects/Cre_move";
+import { Cre_pull } from "../gameObjects/Cre_pull";
 import {
   cpuBreakJudge,
   givePositionToImpartantFriend,
@@ -34,75 +35,87 @@ import { drawText, SA, SAB } from "../utils/visual";
 import { spawnWallCostMatrix } from "./extStealer";
 
 /**used to jam the opponent's construction site*/
-export const jamer: Role = new Role("jamer", jamerJob);
-export function jamerJob(cre: Cre_move) {
-  SA(cre, "jamer");
-  SA(cre, "JO");
-  if (inOppoRampart(cre)) {
-    SA(cre, "inOppoRampart");
-    cre.stop();
-  } else {
-    const fleeCM = spawnWallCostMatrix.clone();
-    const myJamers = friends.filter(
-      i => i !== cre && i.role === jamer && GR(i, cre) <= 5
-    );
-    const closestJamer = closest(cre, myJamers);
-    if (closestJamer) {
-      const dir = getDirectionByPos(cre, closestJamer);
-      const diagonalDir = directionToDiagonal(dir);
-      const chooseDir = getReverseDirection(diagonalDir);
-      const setLen = 6;
-      const vec = DirectionToVec(chooseDir);
-      for (let i = 0; i < setLen; i++) {
-        const tarVec = VecMultiplyConst(vec, i + 1);
-        const tarPos = posPlusVec(cre, tarVec);
-        fleeCM.set(tarPos.x, tarPos.y, 1);
-        drawText(tarPos, "E", 1);
-      }
-    }
-    const fleeing: boolean = cre.flee(6, 12, fleeCM, getPSC(2, 2));
-    SAB(cre, "FL", fleeing);
-    if (fleeing) {
+export const jamer: Role = new Role(
+  "jamer",
+  cre => new jamerJob(<Cre_pull>cre)
+);
+export class jamerJob extends Task_Role {
+  master: Cre_pull;
+  constructor(master: Cre_pull) {
+    super(master);
+    this.master = master;
+    this.cancelOldTask(jamerJob);
+  }
+  loop_task(): void {
+    const cre = this.master;
+    SA(cre, "jamer");
+    SA(cre, "JO");
+    if (inOppoRampart(cre)) {
+      SA(cre, "inOppoRampart");
       cre.stop();
     } else {
-      if (cpuBreakJudge(cre)) {
-        return;
+      const fleeCM = spawnWallCostMatrix.clone();
+      const myJamers = friends.filter(
+        i => i !== cre && i.role === jamer && GR(i, cre) <= 5
+      );
+      const closestJamer = closest(cre, myJamers);
+      if (closestJamer) {
+        const dir = getDirectionByPos(cre, closestJamer);
+        const diagonalDir = directionToDiagonal(dir);
+        const chooseDir = getReverseDirection(diagonalDir);
+        const setLen = 6;
+        const vec = DirectionToVec(chooseDir);
+        for (let i = 0; i < setLen; i++) {
+          const tarVec = VecMultiplyConst(vec, i + 1);
+          const tarPos = posPlusVec(cre, tarVec);
+          fleeCM.set(tarPos.x, tarPos.y, 1);
+          drawText(tarPos, "E", 1);
+        }
       }
-      const jamers = friends.filter(i => i.role === jamer);
-      givePositionToImpartantFriend(cre);
-      const enemyCSsHasEnemyBuilderAround = oppoCSs.filter(
-        i =>
-          enemies.find(j => j.getBodyPartsNum(WORK) > 0 && GR(i, j) <= 3) !==
-            undefined && !(blocked(i) && !atPos(i, cre))
-      );
-      const enBuilders = enemies.filter(
-        i =>
-          i.getBodyPartsNum(WORK) > 0 &&
-          !(inEnBaseRan(i) && Y_axisDistance(i, enemySpawn) <= 7)
-      );
-      const targets = (<(Cre | CS)[]>enBuilders).concat(
-        enemyCSsHasEnemyBuilderAround
-      );
-      const target = best(targets, tar => {
-        const typeBonus = tar instanceof CS ? 2 : 1;
-        const progressRateBonus = tar instanceof CS ? tar.progressRate : 1;
-        const dis = GR(cre, tar);
-        const disReduce = divideReduce(dis, 10);
-        const selfBonus = cre.upgrade.target === tar ? 1.5 : 1;
-        const friTargetNum = jamers.filter(
-          i => i.upgrade.target === tar
-        ).length;
-        const splitReduce = divideReduce(friTargetNum, 1);
-        return (
-          typeBonus * progressRateBonus * disReduce * selfBonus * splitReduce
-        );
-      });
-      SA(cre, "target=" + COO(target));
-      if (target) {
-        cre.MT(target, 5, undefined, getPSC(1, 1.5));
-        cre.upgrade.target = target;
+      const fleeing: boolean = cre.flee(6, 12, fleeCM, getPSC(2, 2));
+      SAB(cre, "FL", fleeing);
+      if (fleeing) {
+        cre.stop();
       } else {
-        cre.MT(midPoint);
+        if (cpuBreakJudge(cre)) {
+          return;
+        }
+        const jamers = friends.filter(i => i.role === jamer);
+        givePositionToImpartantFriend(cre);
+        const enemyCSsHasEnemyBuilderAround = oppoCSs.filter(
+          i =>
+            enemies.find(j => j.getBodyPartsNum(WORK) > 0 && GR(i, j) <= 3) !==
+              undefined && !(blocked(i) && !atPos(i, cre))
+        );
+        const enBuilders = enemies.filter(
+          i =>
+            i.getBodyPartsNum(WORK) > 0 &&
+            !(inEnBaseRan(i) && Y_axisDistance(i, enemySpawn) <= 7)
+        );
+        const targets = (<(Cre | CS)[]>enBuilders).concat(
+          enemyCSsHasEnemyBuilderAround
+        );
+        const target = best(targets, tar => {
+          const typeBonus = tar instanceof CS ? 2 : 1;
+          const progressRateBonus = tar instanceof CS ? tar.progressRate : 1;
+          const dis = GR(cre, tar);
+          const disReduce = divideReduce(dis, 10);
+          const selfBonus = cre.upgrade.target === tar ? 1.5 : 1;
+          const friTargetNum = jamers.filter(
+            i => i.upgrade.target === tar
+          ).length;
+          const splitReduce = divideReduce(friTargetNum, 1);
+          return (
+            typeBonus * progressRateBonus * disReduce * selfBonus * splitReduce
+          );
+        });
+        SA(cre, "target=" + COO(target));
+        if (target) {
+          cre.MT(target, 5, undefined, getPSC(1, 1.5));
+          cre.upgrade.target = target;
+        } else {
+          cre.MT(midPoint);
+        }
       }
     }
   }

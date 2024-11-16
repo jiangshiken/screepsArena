@@ -72,20 +72,6 @@ export class builderTurtleInfo {
     this.returnEnergy = returnEnergy;
   }
 }
-/**Builder that used in trutling,will not go to wild resource.
- * Only stay at ramparts.
- */
-export const builderTurtle: Role = new Role(
-  "builderTurtle",
-  cre => new builderTurtleJob(<Cre_build>cre)
-);
-/**Builder that will only harvest wild resources,if you give it an ATTACK part
- * it will rush enemySpawn when game near end
- */
-export const builderStandard: Role = new Role(
-  "builderStandard",
-  cre => new builderStandardJob(<Cre_build>cre)
-);
 
 /**this type of builder will harvest outside after base building tasks finished*/
 export const builder4Ram: Role = new Role(
@@ -141,6 +127,13 @@ export function spawnAndBuilderEnergy() {
   rtn += getEnergy(spawn);
   return rtn;
 }
+/**Builder that used in trutling,will not go to wild resource.
+ * Only stay at ramparts.
+ */
+export const builderTurtle: Role = new Role(
+  "builderTurtle",
+  cre => new builderTurtleJob(<Cre_build>cre)
+);
 /**builder that build base structures and assign base containers.
  * Can be used as defender
  */
@@ -335,6 +328,13 @@ export function builderNormalControl(cre: Cre_build, tar: CS): boolean {
     return true;
   }
 }
+/**Builder that will only harvest wild resources,if you give it an ATTACK part
+ * it will rush enemySpawn when game near end
+ */
+export const builderStandard: Role = new Role(
+  "builderStandard",
+  cre => new builderStandardJob(<Cre_build>cre)
+);
 /**the job of builderStandard*/
 export class builderStandardJob extends Task_Role {
   master: Cre_build;
@@ -366,6 +366,7 @@ const goto_outside_resource: string = "goto outside resource";
 const drop_on_the_ground = "drop on the ground";
 const build_rampart = "build rampart";
 const build_extensions = "build extensions";
+
 export class BuilderStandardTask extends Task_Cre {
   master: Cre_build;
   step: string = goto_outside_resource;

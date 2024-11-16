@@ -1,5 +1,4 @@
 @current
-change role function to task_role
 arrange worm rush
 arrange tailStrategy
     use builder and support tailPart
