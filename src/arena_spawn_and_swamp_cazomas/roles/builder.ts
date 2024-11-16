@@ -2,7 +2,11 @@ import { ATTACK, WORK } from "game/constants";
 import { StructureExtension, StructureRampart } from "game/prototypes";
 import { findClosestByRange } from "game/utils";
 
-import { Cre, Task_Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
+import {
+  Cre,
+  Task_Cre,
+  Task_Role,
+} from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
 import {
   CS,
   enemySpawn,
@@ -71,42 +75,60 @@ export class builderTurtleInfo {
 /**Builder that used in trutling,will not go to wild resource.
  * Only stay at ramparts.
  */
-export const builderTurtle: Role = new Role("builderTurtle", builderTurtleJob);
+export const builderTurtle: Role = new Role(
+  "builderTurtle",
+  cre => new builderTurtleJob(<Cre_build>cre)
+);
 /**Builder that will only harvest wild resources,if you give it an ATTACK part
  * it will rush enemySpawn when game near end
  */
 export const builderStandard: Role = new Role(
   "builderStandard",
-  builderStandardJob
+  cre => new builderStandardJob(<Cre_build>cre)
 );
+
 /**this type of builder will harvest outside after base building tasks finished*/
-export const builder4Ram: Role = new Role("builder4Ram", builder4RamJob);
+export const builder4Ram: Role = new Role(
+  "builder4Ram",
+  cre => new builder4RamJob(<Cre_build>cre)
+);
 export function isBuilderOutSide(role: Role | undefined): boolean {
   return role === builderStandard || role === builder4Ram;
 }
 /**job of builder4Ram*/
-export function builder4RamJob(cre: Cre_build) {
-  SA(cre, "builder4RamJob");
-  const scanCSRange = 8;
-  if (myCSs.find(i => GR(spawn, i) <= scanCSRange)) {
-    let css = <CS[]>(
-      myCSs.filter(i => GR(i, spawn) <= scanCSRange && canBeBuildByCre(i, cre))
-    );
-    let cs = getMaxWorthCSS(css);
-    if (cs) {
-      SA(cre, "builderNormalControl");
-      builderNormalControl(cre, cs);
-    } else {
-      SA(cre, "job has no cs");
-      if (myCSs.find(i => atPos(i, cre))) {
-        SA(cre, "random move");
-        cre.randomMove();
+export class builder4RamJob extends Task_Role {
+  master: Cre_build;
+  constructor(master: Cre_build) {
+    super(master);
+    this.master = master;
+    this.cancelOldTask(builder4RamJob);
+  }
+  loop_task() {
+    const cre = this.master;
+    SA(cre, "builder4RamJob");
+    const scanCSRange = 8;
+    if (myCSs.find(i => GR(spawn, i) <= scanCSRange)) {
+      let css = <CS[]>(
+        myCSs.filter(
+          i => GR(i, spawn) <= scanCSRange && canBeBuildByCre(i, cre)
+        )
+      );
+      let cs = getMaxWorthCSS(css);
+      if (cs) {
+        SA(cre, "builderNormalControl");
+        builderNormalControl(cre, cs);
+      } else {
+        SA(cre, "job has no cs");
+        if (myCSs.find(i => atPos(i, cre))) {
+          SA(cre, "random move");
+          cre.randomMove();
+        }
       }
+      // builderControl(cre);
+    } else {
+      SA(cre, "builderStandardControl");
+      new builderStandardJob(cre);
     }
-    // builderControl(cre);
-  } else {
-    SA(cre, "builderStandardControl");
-    builderStandardJob(cre);
   }
 }
 /**get the energy of spawn and builderTurtles*/
@@ -122,124 +144,136 @@ export function spawnAndBuilderEnergy() {
 /**builder that build base structures and assign base containers.
  * Can be used as defender
  */
-export function builderTurtleJob(cre: Cre_build) {
-  SA(cre, "builderTurtleControl");
-  cre.fight();
-  cre.taskPriority = 9;
-  //
-  if (cre.useAppointMovement()) {
-    return;
+export class builderTurtleJob extends Task_Role {
+  master: Cre_build;
+  constructor(master: Cre_build) {
+    super(master);
+    this.master = master;
   }
-  //
-  const scanCSRange = 4;
-  const css = myCSs.filter(
-    i => canBeBuildByCre(i, cre) && GR(i, spawn) <= scanCSRange
-  );
-  const canUseEnergy = getEnergy(cre) + getSpawnAndBaseContainerEnergy();
-  SAN(cre, "canUseEnergy", canUseEnergy);
-  const cs = getMaxWorthCSS(css);
-  const emptyRamparts = myRamparts.filter(i => !blocked(i));
-  const hasEmptyRampart: boolean = emptyRamparts.length > 0;
-  const spawnHasRam = myRampartAt(spawn) !== undefined;
-  SA(cre, "spawnHasRam=" + spawnHasRam);
-  cre.setIsWorking(false);
-  const appointmentValidTick = 1;
-  if (!inMyRampart(cre) && hasEmptyRampart) {
-    //if not in ram,move to ram
-    SA(cre, "not in ram");
-    if (cre.appointMovementIsActived(appointmentValidTick)) {
-      SA(cre, "appointMovementIsActived");
-      cre.useAppointMovement();
+  loop_task(): void {
+    const cre = this.master;
+    SA(cre, "builderTurtleControl");
+    cre.fight();
+    cre.taskPriority = 9;
+    //
+    if (cre.useAppointMovement()) {
       return;
     }
-    defendTheRampart(cre);
-  } else if (
-    hasEnemyArmyAround(cre, 1) &&
-    spawnHasRam &&
-    !(tick >= 1900 && cs && canUseEnergy >= 200)
-  ) {
-    SA(cre, "enemyAround");
-    if (cre.appointMovementIsActived(appointmentValidTick)) {
-      SA(cre, "appointMovementIsActived");
-      cre.useAppointMovement();
-      return;
-    }
-    defendTheRampart(cre);
-  } else if (cs) {
-    cre.setIsWorking(true);
-    SA(cre, "build");
-    if (cre.appointMovementIsActived(appointmentValidTick)) {
-      SA(cre, "appointMovementIsActived");
-      cre.useAppointMovement();
-    } else {
+    //
+    const scanCSRange = 4;
+    const css = myCSs.filter(
+      i => canBeBuildByCre(i, cre) && GR(i, spawn) <= scanCSRange
+    );
+    const canUseEnergy = getEnergy(cre) + getSpawnAndBaseContainerEnergy();
+    SAN(cre, "canUseEnergy", canUseEnergy);
+    const cs = getMaxWorthCSS(css);
+    const emptyRamparts = myRamparts.filter(i => !blocked(i));
+    const hasEmptyRampart: boolean = emptyRamparts.length > 0;
+    const spawnHasRam = myRampartAt(spawn) !== undefined;
+    SA(cre, "spawnHasRam=" + spawnHasRam);
+    cre.setIsWorking(false);
+    const appointmentValidTick = 1;
+    if (!inMyRampart(cre) && hasEmptyRampart) {
+      //if not in ram,move to ram
+      SA(cre, "not in ram");
+      if (cre.appointMovementIsActived(appointmentValidTick)) {
+        SA(cre, "appointMovementIsActived");
+        cre.useAppointMovement();
+        return;
+      }
       defendTheRampart(cre);
-    }
-    const cond1 =
-      tick > 600 &&
-      !spawnHasRam &&
-      getEnergy(cre) >= 5 * cre.getBodyPartsNum(WORK);
-    const cond2 = cre.getIsBuilding();
-    if (cond1 || cond2) {
-      SA(cre, "normalBuild");
-      cre.normalBuild(cs);
-    } else if (tick <= 300) {
-      //time for build ramparts
-      SA(cre, "collectResource");
-      const harvables = (<HasEnergy[]>(
-        getHarvables().filter(i => GR(i, spawn) <= 3)
-      )).concat(spawn);
-      const harvable = <HasEnergy>closest(cre, harvables);
-      if (harvable) {
-        cre.directWithdraw(harvable);
+    } else if (
+      hasEnemyArmyAround(cre, 1) &&
+      spawnHasRam &&
+      !(tick >= 1900 && cs && canUseEnergy >= 200)
+    ) {
+      SA(cre, "enemyAround");
+      if (cre.appointMovementIsActived(appointmentValidTick)) {
+        SA(cre, "appointMovementIsActived");
+        cre.useAppointMovement();
+        return;
+      }
+      defendTheRampart(cre);
+    } else if (cs) {
+      cre.setIsWorking(true);
+      SA(cre, "build");
+      if (cre.appointMovementIsActived(appointmentValidTick)) {
+        SA(cre, "appointMovementIsActived");
+        cre.useAppointMovement();
+      } else {
+        defendTheRampart(cre);
+      }
+      const cond1 =
+        tick > 600 &&
+        !spawnHasRam &&
+        getEnergy(cre) >= 5 * cre.getBodyPartsNum(WORK);
+      const cond2 = cre.getIsBuilding();
+      if (cond1 || cond2) {
+        SA(cre, "normalBuild");
+        cre.normalBuild(cs);
+      } else if (tick <= 300) {
+        //time for build ramparts
+        SA(cre, "collectResource");
+        const harvables = (<HasEnergy[]>(
+          getHarvables().filter(i => GR(i, spawn) <= 3)
+        )).concat(spawn);
+        const harvable = <HasEnergy>closest(cre, harvables);
+        if (harvable) {
+          cre.directWithdraw(harvable);
+        }
+      } else {
+        //time after tick 300
+        SA(cre, "withdrawNormal");
+        builderTurtleWithdrawNormal(cre);
       }
     } else {
-      //time after tick 300
-      SA(cre, "withdrawNormal");
-      builderTurtleWithdrawNormal(cre);
-    }
-  } else {
-    cre.setIsWorking(false);
-    //assign spawn energy to container
-    if (energyFull(spawn)) {
-      SA(cre, "withdraw spawn to container");
-      if (getEnergy(cre) > 0) {
-        SA(cre, "has en");
-        const cons = getSpawnAroundFreeContainers();
-        const con = findClosestByRange(cre, cons);
-        if (con) {
-          SA(cre, "has container");
-          if (Adj(con, cre)) {
-            cre.transferNormal(con);
+      cre.setIsWorking(false);
+      //assign spawn energy to container
+      if (energyFull(spawn)) {
+        SA(cre, "withdraw spawn to container");
+        if (getEnergy(cre) > 0) {
+          SA(cre, "has en");
+          const cons = getSpawnAroundFreeContainers();
+          const con = findClosestByRange(cre, cons);
+          if (con) {
+            SA(cre, "has container");
+            if (Adj(con, cre)) {
+              cre.transferNormal(con);
+            } else {
+              gotoTargetRampart(cre, con);
+            }
+          }
+        } else {
+          SA(cre, "no en");
+          if (GR(cre, spawn) <= 1) {
+            cre.withdrawNormal(spawn);
           } else {
-            gotoTargetRampart(cre, con);
+            gotoTargetRampart(cre, spawn);
           }
         }
       } else {
-        SA(cre, "no en");
-        if (GR(cre, spawn) <= 1) {
-          cre.withdrawNormal(spawn);
+        const em = cre.extraMessage;
+        const returnMod =
+          em && em instanceof builderTurtleInfo && em.returnEnergy;
+        if (
+          !returnMod &&
+          !energyFull(cre) &&
+          canUseEnergy >= getCapacity(cre)
+        ) {
+          SA(cre, "withdraw backup energy");
+          builderTurtleWithdrawNormal(cre);
         } else {
-          gotoTargetRampart(cre, spawn);
+          if (returnMod && energylive(cre) && Adj(cre, spawn)) {
+            cre.transferNormal(spawn);
+          }
+          SA(cre, "normal defend");
+          if (cre.appointMovementIsActived(appointmentValidTick)) {
+            SA(cre, "appointMovementIsActived");
+            cre.useAppointMovement();
+            return;
+          }
+          defendTheRampart(cre);
         }
-      }
-    } else {
-      const em = cre.extraMessage;
-      const returnMod =
-        em && em instanceof builderTurtleInfo && em.returnEnergy;
-      if (!returnMod && !energyFull(cre) && canUseEnergy >= getCapacity(cre)) {
-        SA(cre, "withdraw backup energy");
-        builderTurtleWithdrawNormal(cre);
-      } else {
-        if (returnMod && energylive(cre) && Adj(cre, spawn)) {
-          cre.transferNormal(spawn);
-        }
-        SA(cre, "normal defend");
-        if (cre.appointMovementIsActived(appointmentValidTick)) {
-          SA(cre, "appointMovementIsActived");
-          cre.useAppointMovement();
-          return;
-        }
-        defendTheRampart(cre);
       }
     }
   }
@@ -302,18 +336,27 @@ export function builderNormalControl(cre: Cre_build, tar: CS): boolean {
   }
 }
 /**the job of builderStandard*/
-export function builderStandardJob(cre: Cre_build) {
-  SA(cre, "melee");
-  cre.fight();
-  //
-  const task = findTask(cre, BuilderStandardTask);
-  if (!task) {
-    if (cre.getBodyPartsNum(ATTACK) > 0) {
-      SA(cre, "new ArmedBuilderTask(cre)");
-      new ArmedBuilderTask(cre);
-    } else {
-      SA(cre, "new BuilderStandardTask(cre)");
-      new BuilderStandardTask(cre);
+export class builderStandardJob extends Task_Role {
+  master: Cre_build;
+  constructor(master: Cre_build) {
+    super(master);
+    this.master = master;
+    this.cancelOldTask(builderStandardJob);
+  }
+  loop_task(): void {
+    const cre = this.master;
+    SA(cre, "melee");
+    cre.fight();
+    //
+    const task = findTask(cre, BuilderStandardTask);
+    if (!task) {
+      if (cre.getBodyPartsNum(ATTACK) > 0) {
+        SA(cre, "new ArmedBuilderTask(cre)");
+        new ArmedBuilderTask(cre);
+      } else {
+        SA(cre, "new BuilderStandardTask(cre)");
+        new BuilderStandardTask(cre);
+      }
     }
   }
 }

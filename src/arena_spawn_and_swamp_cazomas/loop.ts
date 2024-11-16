@@ -9,7 +9,7 @@ import {
 
 import { ATTACK, CARRY, HEAL, MOVE, RANGED_ATTACK, WORK } from "game/constants";
 import { Creep } from "game/prototypes";
-import { Cre, Task_Role } from "./gameObjects/Cre";
+import { Cre } from "./gameObjects/Cre";
 import { Cre_battle } from "./gameObjects/Cre_battle";
 import { Cre_build } from "./gameObjects/Cre_build";
 import {
@@ -58,7 +58,7 @@ import {
   setGameObjectsThisTick,
   setOverallMap,
 } from "./gameObjects/overallMap";
-import { checkSpawns, spawnList } from "./gameObjects/spawn";
+import { checkSpawns, SpawnInfo, spawnList } from "./gameObjects/spawn";
 import { Con } from "./gameObjects/Stru";
 import {
   blockCost,
@@ -300,10 +300,11 @@ export function initCre(creep: Creep): Cre {
   } else {
     cre = new Cre_findPath(creep);
   }
-  const si = (<any>creep).spawnInfo;
+  const si = <SpawnInfo | undefined>(<any>creep).spawnInfo;
   if (si) {
     cre.spawnInfo = si;
-    new Task_Role(cre, si.role);
+    const task_role_class = si.role.roleTask;
+    task_role_class(cre);
   }
   cres.push(cre);
   return cre;

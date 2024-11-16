@@ -43,7 +43,7 @@ export class Role {
   readonly roleName: string;
   /**the Function that will be called every tick
    */
-  readonly roleFunc: Function | undefined;
+  readonly roleTask: (master: Cre) => void;
   /**
    * used to calculate CPU cost
    */
@@ -52,9 +52,9 @@ export class Role {
    * used to calculate CPU cost of move action
    */
   findPathAndMoveTaskCpuTime: Event_Number = new Event_Number(0);
-  constructor(roleName: string, roleFunc: Function) {
+  constructor(roleName: string, roleTask: (master: Cre) => void) {
     this.roleName = roleName;
-    this.roleFunc = roleFunc;
+    this.roleTask = roleTask;
     roleList.push(this);
   }
 }

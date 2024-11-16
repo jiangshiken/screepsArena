@@ -2,6 +2,7 @@ import { BodyPartConstant, CARRY, MOVE } from "game/constants";
 import { Creep } from "game/prototypes";
 import { Event_Number } from "../utils/Event";
 import { HasTasks, Task } from "../utils/Task";
+import { SA } from "../utils/visual";
 import { ExtraTauntEvent } from "./battle";
 import { Role } from "./CreTool";
 import { GameObj } from "./GameObj";
@@ -21,18 +22,15 @@ export class Task_Cre extends Task {
 }
 /** a Task of the Role Function of Creep */
 export class Task_Role extends Task_Cre {
-  readonly role: Role;
-  constructor(master: Cre, role: Role) {
+  constructor(master: Cre) {
     super(master);
-    this.role = role;
-    this.cancelOldTask(Task_Role);
   }
   loop_task(): void {
-    // SA(this.master,"Task_Role_loop")
-    if (this.role.roleFunc) {
-      // SA(this.master,"Task_Role_loop roleFunc")
-      this.role.roleFunc(this.master);
-    }
+    SA(this.master, "Task_Role_loop");
+    // if (this.role.roleTask) {
+    //   // SA(this.master,"Task_Role_loop roleFunc")
+    //   this.role.roleTask(this.master);
+    // }
   }
 }
 export type BodyCre = {
