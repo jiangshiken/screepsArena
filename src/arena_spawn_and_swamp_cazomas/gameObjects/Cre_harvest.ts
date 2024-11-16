@@ -6,9 +6,9 @@ import { best, divideReduce } from "../utils/JS";
 import { Adj, COO, GR, Pos, X_axisDistance, getRangePoss } from "../utils/Pos";
 import { SA, drawLineComplex, drawLineLight } from "../utils/visual";
 import { Cre } from "./Cre";
-import { Cre_move } from "./Cre_move";
+import { searchPathByCreCost } from "./Cre_findPath";
+import { Cre_pull } from "./Cre_pull";
 import { S } from "./export";
-import { searchPathByCreCost } from "./findPath";
 import {
   Harvable,
   HasEnergy,
@@ -34,7 +34,7 @@ import {
   isTurtleContainer,
 } from "./UnitTool";
 
-export class Cre_harvest extends Cre_move {
+export class Cre_harvest extends Cre_pull {
   /** withdraw by amount */
   withdrawByAmount(tar: HasStore, amount: number) {
     if (getEnergy(tar) < amount) {

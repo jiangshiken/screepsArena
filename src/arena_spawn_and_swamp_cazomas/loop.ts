@@ -12,15 +12,20 @@ import { Creep } from "game/prototypes";
 import { Cre, Task_Role } from "./gameObjects/Cre";
 import { Cre_battle } from "./gameObjects/Cre_battle";
 import { Cre_build } from "./gameObjects/Cre_build";
+import { initGateCost, searchPath_area } from "./gameObjects/Cre_findPath";
 import {
   Cre_harvest,
   getEnemyProducers,
   getMyProducers,
 } from "./gameObjects/Cre_harvest";
-import { Cre_move } from "./gameObjects/Cre_move";
+import {
+  Cre_move,
+  enRamBlockCostMatrix_setBlock,
+  friendBlockCostMatrix_setBlock,
+  moveBlockCostMatrix_setBlock,
+} from "./gameObjects/Cre_move";
 import { controlCreeps, isMelee, isMyTick } from "./gameObjects/CreTool";
 import { S } from "./gameObjects/export";
-import { initGateCost, searchPath_area } from "./gameObjects/findPath";
 import {
   BlockGO,
   containers,
@@ -43,11 +48,6 @@ import {
   strus,
 } from "./gameObjects/GameObjectInitialize";
 import {} from "./gameObjects/HasHits";
-import {
-  enRamBlockCostMatrix_setBlock,
-  friendBlockCostMatrix_setBlock,
-  moveBlockCostMatrix_setBlock,
-} from "./gameObjects/MoveTask";
 import {
   findGO_lambda,
   overallMapInit,

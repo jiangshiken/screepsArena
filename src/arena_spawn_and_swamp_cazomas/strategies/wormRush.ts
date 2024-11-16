@@ -7,12 +7,12 @@ import {
 import { ATTACK } from "game/constants";
 import { Cre_battle } from "../gameObjects/Cre_battle";
 import { Cre_move } from "../gameObjects/Cre_move";
+import { newPullTarsTask, PullTarsTask } from "../gameObjects/Cre_pull";
 import { defendInArea } from "../gameObjects/CreCommands";
 import { isHealer, isMelee, Role, set_spawnDps } from "../gameObjects/CreTool";
 import { friends } from "../gameObjects/GameObjectInitialize";
 import { damaged, healthRate } from "../gameObjects/HasHits";
 import { Dooms, getGuessPlayer } from "../gameObjects/player";
-import { newPullTarsTask, PullTarsTask } from "../gameObjects/pull";
 import { spawnCreep } from "../gameObjects/spawn";
 import {
   enRamBlockCostMatrix,

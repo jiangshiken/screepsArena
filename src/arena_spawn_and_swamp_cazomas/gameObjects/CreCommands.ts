@@ -26,7 +26,13 @@ import { rangeReduce } from "./bonus";
 import { Cre } from "./Cre";
 import { Cre_battle } from "./Cre_battle";
 import { Cre_build } from "./Cre_build";
-import { Cre_move } from "./Cre_move";
+import {
+  getMoveTime,
+  getSpeed_general,
+  searchPath_noArea,
+  searchPathByCreCost,
+} from "./Cre_findPath";
+import { Cre_move, moveTo_basic } from "./Cre_move";
 import {
   getEarning,
   getEnemyArmies,
@@ -34,12 +40,6 @@ import {
   hasEnemyThreatAround,
   isMyTick,
 } from "./CreTool";
-import {
-  getMoveTime,
-  getSpeed_general,
-  searchPath_noArea,
-  searchPathByCreCost,
-} from "./findPath";
 import {
   enemies,
   friends,
@@ -50,7 +50,6 @@ import {
   Unit,
 } from "./GameObjectInitialize";
 import { damaged, damagedRate } from "./HasHits";
-import { moveTo_basic } from "./MoveTask";
 import { findGO } from "./overallMap";
 import { currentGuessPlayer, Dooms } from "./player";
 import {

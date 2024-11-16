@@ -7,13 +7,17 @@ import { ERR } from "../utils/print";
 import { findTask } from "../utils/Task";
 import { SA, drawLineComplex } from "../utils/visual";
 import { Cre, Task_Cre } from "./Cre";
-import { Cre_move } from "./Cre_move";
+import { def_plainCost, def_swampCost, getMoveStepDef } from "./Cre_findPath";
+import {
+  Cre_move,
+  FindPathAndMoveTask,
+  MoveTask,
+  moveTo_direct,
+} from "./Cre_move";
 import { moveToRandomEmptyAround } from "./CreCommands";
 import { PullEvent } from "./CreTool";
-import { def_plainCost, def_swampCost, getMoveStepDef } from "./findPath";
-import { FindPathAndMoveTask, MoveTask, moveTo_direct } from "./MoveTask";
 import { moveBlockCostMatrix } from "./UnitTool";
-
+export class Cre_pull extends Cre_move {}
 /**
  * new a {@link PullTask}, will cancel if already have same task
  */

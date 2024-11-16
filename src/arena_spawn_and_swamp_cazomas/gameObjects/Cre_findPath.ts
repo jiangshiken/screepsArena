@@ -32,7 +32,7 @@ import {
   isTerrainRoad,
   moveBlockCostMatrix,
 } from "./UnitTool";
-
+export class Cre_findPath extends Cre {}
 /** search the closest path of multiple targets ,like findPath but will
  * calculate terrain cost by this creep
  */
