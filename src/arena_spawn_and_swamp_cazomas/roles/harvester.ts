@@ -7,8 +7,9 @@ import {
   ress,
 } from "../gameObjects/GameObjectInitialize";
 
+import { getMoveTime_pull } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre_pull";
 import { spawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
-import { getMoveTime, searchPathByCreCost } from "../gameObjects/Cre_findPath";
+import { searchPathByCreCost } from "../gameObjects/Cre_findPath";
 import { Cre_harvest, validRes } from "../gameObjects/Cre_harvest";
 import { S } from "../gameObjects/export";
 import { inMyBaseRan } from "../gameObjects/spawn";
@@ -28,7 +29,7 @@ import { energyStealerJob } from "./energyStealer";
 
 /**get the move time assume its capacity is full*/
 export function getTimeAfterFull(cre: Cre) {
-  return getMoveTime([cre], getEmptyCapacity(cre));
+  return getMoveTime_pull([cre], getEmptyCapacity(cre));
 }
 /**the task used on harvester.Will auto pick drop when it moves too slow*/
 export class HarvestTask extends Task_Cre {
@@ -104,7 +105,7 @@ export class HarvestTask extends Task_Cre {
         transTarget = this.targetProducer;
       }
       const tRtn = cre.transToTargetProducer(transTarget);
-      const moveTimeTooMuch: boolean = getMoveTime([cre]) > 2;
+      const moveTimeTooMuch: boolean = getMoveTime_pull([cre]) > 2;
       if (tRtn) {
         //if trans success
         this.withDrawMode();

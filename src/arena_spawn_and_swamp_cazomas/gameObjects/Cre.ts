@@ -1,10 +1,9 @@
 import { BodyPartConstant, CARRY, MOVE } from "game/constants";
 import { Creep } from "game/prototypes";
-import { Event, Event_Number } from "../utils/Event";
-import { Pos } from "../utils/Pos";
+import { Event_Number } from "../utils/Event";
 import { HasTasks, Task } from "../utils/Task";
 import { ExtraTauntEvent } from "./battle";
-import { PullEvent, Role } from "./CreTool";
+import { Role } from "./CreTool";
 import { GameObj } from "./GameObj";
 import { HasBattleStats } from "./HasBattleStats";
 import { HasHits } from "./HasHits";
@@ -40,19 +39,6 @@ export type BodyCre = {
   type: BodyPartConstant;
   hits: number;
 };
-/** represent a event of pull function */
-
-export class MoveEvent extends Event {
-  /** one who pulled other creep */
-  readonly tar: Pos;
-  /** one who be pulled */
-  readonly nextStep: Pos;
-  constructor(tar: Cre, nextStep: Cre) {
-    super();
-    this.tar = tar;
-    this.nextStep = nextStep;
-  }
-}
 /** extend of `Creep` */
 
 export class Cre
@@ -61,12 +47,8 @@ export class Cre
 {
   readonly master: Creep;
   spawnInfo: SpawnInfo | undefined;
-  pullEvent: PullEvent | undefined; //get cre that pulled by this
-  bePulledEvent: PullEvent | undefined; //get cre that pull this
-  moveEvent: MoveEvent | undefined;
   /** tasks list */
   readonly tasks: Task[] = [];
-  startGateUp: boolean | undefined;
   /**task execute order */
   taskPriority: number = 10;
   group_ID: number | undefined;

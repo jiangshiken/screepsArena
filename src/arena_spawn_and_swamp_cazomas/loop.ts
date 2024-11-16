@@ -12,18 +12,22 @@ import { Creep } from "game/prototypes";
 import { Cre, Task_Role } from "./gameObjects/Cre";
 import { Cre_battle } from "./gameObjects/Cre_battle";
 import { Cre_build } from "./gameObjects/Cre_build";
-import { initGateCost, searchPath_area } from "./gameObjects/Cre_findPath";
+import {
+  Cre_findPath,
+  initGateCost,
+  searchPath_area,
+} from "./gameObjects/Cre_findPath";
 import {
   Cre_harvest,
   getEnemyProducers,
   getMyProducers,
 } from "./gameObjects/Cre_harvest";
 import {
-  Cre_move,
   enRamBlockCostMatrix_setBlock,
   friendBlockCostMatrix_setBlock,
   moveBlockCostMatrix_setBlock,
 } from "./gameObjects/Cre_move";
+import { Cre_pull } from "./gameObjects/Cre_pull";
 import { controlCreeps, isMelee, isMyTick } from "./gameObjects/CreTool";
 import { S } from "./gameObjects/export";
 import {
@@ -292,9 +296,9 @@ export function initCre(creep: Creep): Cre {
   } else if (creepBodyPartNum(creep, CARRY) > 0) {
     cre = new Cre_harvest(creep);
   } else if (creepBodyPartNum(creep, MOVE) > 0) {
-    cre = new Cre_move(creep);
+    cre = new Cre_pull(creep);
   } else {
-    cre = new Cre(creep);
+    cre = new Cre_findPath(creep);
   }
   const si = (<any>creep).spawnInfo;
   if (si) {

@@ -18,13 +18,8 @@ import {
 } from "../utils/game";
 import { divide0 } from "../utils/JS";
 import { Pos, Pos_C, atPos } from "../utils/Pos";
-import {
-  P,
-  SA,
-  drawLineComplex,
-  drawPoly,
-  drawPolyLight,
-} from "../utils/visual";
+import { ERR } from "../utils/print";
+import { SA, drawLineComplex, drawPoly, drawPolyLight } from "../utils/visual";
 import { Cre } from "./Cre";
 import {
   getCapacity,
@@ -32,169 +27,142 @@ import {
   isTerrainRoad,
   moveBlockCostMatrix,
 } from "./UnitTool";
-export class Cre_findPath extends Cre {}
-/** search the closest path of multiple targets ,like findPath but will
- * calculate terrain cost by this creep
- */
-export function searchPathByCreCost(
-  cre: Cre,
-  tar: Pos,
-  useWorkerCost: boolean = true
-): FindPathResult {
-  let plainCost, swampCost;
-  if (useWorkerCost && cre.onlyHasMoveAndCarry()) {
-    plainCost = 1;
-    swampCost = 2;
-  } else {
-    plainCost = getMoveTimeByTerrain([cre], 0, true);
-    swampCost = getMoveTimeByTerrain([cre], 0, false, true);
-  }
-  return searchPath_noArea(cre, tar, undefined, plainCost, swampCost);
-}
-export function getMoveAndFatigueNum_single(
-  cre: Cre,
-  extraEnergy: number = 0,
-  purePlain: boolean = false,
-  pureSwamp: boolean = false,
-  terrainPos: Pos | undefined = undefined
-): {
-  moveNum: number;
-  bodyNum: number;
-  fatigueNum: number;
-} {
-  const tarBody = cre.master.body;
-  if (tarBody) {
-    const moveNum = cre.getHealthyBodyParts(MOVE).length;
-    const tarBodyNum = tarBody.filter(
-      i => i.type !== MOVE && i.type !== CARRY
-    ).length;
-    const tarEnergy = Math.min(getEnergy(cre) + extraEnergy, getCapacity(cre));
-    const notEmptyCarryNum = Math.ceil(tarEnergy / 50);
-    const bodyNum = tarBodyNum + notEmptyCarryNum;
-    let fatigueNum;
-    if (pureSwamp) {
-      fatigueNum = 10 * bodyNum;
-    } else if (purePlain) {
-      fatigueNum = 2 * bodyNum;
-    } else {
-      let scanPos;
-      if (terrainPos !== undefined) {
-        scanPos = terrainPos;
-      } else {
-        scanPos = cre;
-      }
-      if (isTerrainSwamp(scanPos)) {
-        fatigueNum = 10 * bodyNum;
-      } else if (isTerrainRoad(scanPos)) {
-        fatigueNum = 1 * bodyNum;
-      } else {
-        fatigueNum = 2 * bodyNum;
-      }
-    }
-    return {
-      moveNum: moveNum,
-      bodyNum: bodyNum,
-      fatigueNum: fatigueNum,
-    };
-  } else {
-    return {
-      moveNum: 0,
-      bodyNum: 0,
-      fatigueNum: 0,
-    };
-  }
-}
-/** get move and fatigue number of a creep ,all pulling and bePulled will
- *  be calculate too
- */
-export function getMoveAndFatigueNum(
-  pullList: Cre[],
-  extraEnergy: number = 0,
-  purePlain: boolean = false,
-  pureSwamp: boolean = false
-): {
-  moveNum: number;
-  bodyNum: number;
-  fatigueNum: number;
-} {
-  try {
-    const pl = pullList;
-    let moveNum = 0;
-    let fatigueNum = 0;
-    let bodyNum = 0;
-    for (let tar of pl) {
-      const mfRtn = getMoveAndFatigueNum_single(
-        tar,
-        extraEnergy,
-        purePlain,
-        pureSwamp
-      );
-      moveNum += mfRtn.moveNum;
-      bodyNum += mfRtn.bodyNum;
-      fatigueNum += mfRtn.fatigueNum;
-    }
-    const rtn = {
-      moveNum: moveNum,
-      bodyNum: bodyNum,
-      fatigueNum: fatigueNum,
-    };
-    return rtn;
-  } catch (ex) {
-    P(ex);
-    throw new ReferenceError();
-  }
-}
-export function getMoveTimeByTerrain(
-  pullList: Cre[],
-  extraEnergy: number = 0,
-  purePlain: boolean = false,
-  pureSwamp: boolean = false
-): number {
-  const mb = getMoveAndFatigueNum(pullList, extraEnergy, purePlain, pureSwamp);
-  const moveNum = mb.moveNum;
-  const fatiugeNum = mb.fatigueNum;
-  const time = Math.max(
-    1,
-    Math.ceil(divide0(fatiugeNum, 2 * moveNum, Infinity))
-  );
-  return time;
-}
-export function getMoveTime(pullList: Cre[], extraEnergy: number = 0): number {
-  return getMoveTimeByTerrain(pullList, extraEnergy);
-}
-export function getMoveTime_general(pullList: Cre[]): number {
-  const timeOnTerrain = getMoveTimeByTerrain(pullList);
-  const timeOnSawmp = getMoveTimeByTerrain(pullList);
-  return 0.5 * timeOnTerrain + 0.5 * timeOnSawmp;
-}
-export function getSpeed(pullList: Cre[]): number {
-  return 1 / getMoveTime(pullList);
-}
-export function getSpeed_general(pullList: Cre[]): number {
-  return 1 / getMoveTime_general(pullList);
-}
-export function isFullSpeed(pullList: Cre[]): boolean {
-  return getMoveTime(pullList) === 1;
-}
+export const std_maxOps = 1000;
+export type type_PSC_Cre = type_PSC | Cre;
+export type type_PSC = { plainCost: number; swampCost: number };
 export const def_plainCost = 1;
 export const def_swampCost = 3;
+export const def_PSC = { plainCost: def_plainCost, swampCost: def_swampCost };
+export type type_MBF = {
+  moveNum: number;
+  bodyNum: number;
+  fatigueNum: number;
+};
+
+export const def_timeOnPlain = 0.6;
+export const def_timeOnSwamp = 0.4;
+export const def_stepTime = 10;
+export class Cre_findPath extends Cre {
+  startGateUp: boolean | undefined;
+  getMoveAndFatigueNum(
+    extraEnergy: number = 0,
+    purePlain: boolean = false,
+    pureSwamp: boolean = false,
+    terrainPos: Pos | undefined = undefined
+  ): type_MBF {
+    const tarBody = this.master.body;
+    if (tarBody) {
+      const moveNum = this.getHealthyBodyParts(MOVE).length;
+      const tarBodyNum = tarBody.filter(
+        i => i.type !== MOVE && i.type !== CARRY
+      ).length;
+      const tarEnergy = Math.min(
+        getEnergy(this) + extraEnergy,
+        getCapacity(this)
+      );
+      const notEmptyCarryNum = Math.ceil(tarEnergy / 50);
+      const bodyNum = tarBodyNum + notEmptyCarryNum;
+      let fatigueNum;
+      if (pureSwamp) {
+        fatigueNum = 10 * bodyNum;
+      } else if (purePlain) {
+        fatigueNum = 2 * bodyNum;
+      } else {
+        let scanPos;
+        if (terrainPos !== undefined) {
+          scanPos = terrainPos;
+        } else {
+          scanPos = this;
+        }
+        if (isTerrainSwamp(scanPos)) {
+          fatigueNum = 10 * bodyNum;
+        } else if (isTerrainRoad(scanPos)) {
+          fatigueNum = 1 * bodyNum;
+        } else {
+          fatigueNum = 2 * bodyNum;
+        }
+      }
+      return {
+        moveNum: moveNum,
+        bodyNum: bodyNum,
+        fatigueNum: fatigueNum,
+      };
+    } else {
+      ERR("no body");
+      return {
+        moveNum: 0,
+        bodyNum: 0,
+        fatigueNum: 0,
+      };
+    }
+  }
+  /** search the closest path of multiple targets ,like findPath but will
+   * calculate terrain cost by this creep
+   */
+  searchPathByCreCost(tar: Pos, useWorkerCost: boolean = true): FindPathResult {
+    let plainCost, swampCost;
+    if (useWorkerCost && this.onlyHasMoveAndCarry()) {
+      plainCost = 1;
+      swampCost = 2;
+    } else {
+      plainCost = this.getMoveTimeByTerrain(0, true);
+      swampCost = this.getMoveTimeByTerrain(0, false, true);
+    }
+    return searchPath_noArea(
+      this,
+      tar,
+      undefined,
+      getPSC(plainCost, swampCost)
+    );
+  }
+  getMoveTimeByTerrain(
+    extraEnergy: number = 0,
+    purePlain: boolean = false,
+    pureSwamp: boolean = false
+  ): number {
+    const mb = this.getMoveAndFatigueNum(extraEnergy, purePlain, pureSwamp);
+    const time = Math.ceil(divide0(mb.fatigueNum, 2 * mb.moveNum, Infinity));
+    return Math.max(1, time);
+  }
+  getMoveTime_general(): number {
+    const timeOnPlain = this.getMoveTimeByTerrain(0, true);
+    const timeOnSwamp = this.getMoveTimeByTerrain(0, false, true);
+    return def_timeOnPlain * timeOnPlain + def_timeOnSwamp * timeOnSwamp;
+  }
+  getSpeed(): number {
+    return 1 / this.getMoveTimeByTerrain();
+  }
+  getSpeed_general(): number {
+    return 1 / this.getMoveTime_general();
+  }
+  isFullSpeed(): boolean {
+    return this.getMoveTimeByTerrain() === 1;
+  }
+  getMoveStepDef(): number {
+    return def_stepTime * this.getMoveTimeByTerrain();
+  }
+}
+
+export function getPSC(plainCost: number, swampCost: number): type_PSC {
+  return { plainCost: plainCost, swampCost: swampCost };
+}
+
 export function searchPath_area(
   ori: Pos,
   tar: Pos,
   costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
-  plainCost: number = def_plainCost,
-  swampCost: number = def_swampCost
+  PSC: type_PSC = def_PSC
 ): FindPathResult {
   // drawLineComplex(ori, tar, 1, "#22ffff", dashed);
   const newTar: Pos = getNewTarByArea(ori, tar);
-  let SR1 = searchPath_noArea(ori, newTar, costMatrix, plainCost, swampCost);
+  let SR1 = searchPath_noArea(ori, newTar, costMatrix, PSC);
   let SR2: FindPathResult | undefined;
   let SR3: FindPathResult | undefined;
   if (!atPos(newTar, tar)) {
     const newTar2 = getNewTarByArea(newTar, tar);
-    SR2 = searchPath_noArea(newTar, newTar2, costMatrix, plainCost, swampCost);
+    SR2 = searchPath_noArea(newTar, newTar2, costMatrix, PSC);
     if (!atPos(newTar2, tar)) {
-      SR3 = searchPath_noArea(newTar2, tar, costMatrix, plainCost, swampCost);
+      SR3 = searchPath_noArea(newTar2, tar, costMatrix, PSC);
     }
   }
   let newPath: Pos[] = SR1.path;
@@ -232,14 +200,13 @@ export function searchPath_noArea(
   ori: Pos,
   tar: Pos,
   costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
-  plainCost: number = def_plainCost,
-  swampCost: number = def_swampCost
+  PSC: type_PSC = def_PSC
 ): FindPathResult {
   const rtn = searchPath(ori, tar, {
     costMatrix: costMatrix,
-    plainCost: plainCost,
-    swampCost: swampCost,
-    maxOps: 1000,
+    plainCost: PSC.plainCost,
+    swampCost: PSC.swampCost,
+    maxOps: std_maxOps,
   });
   drawPolyLight(rtn.path);
   return rtn;
@@ -249,8 +216,7 @@ export function searchPath_flee(
   tars: Pos[],
   range: number,
   costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
-  plainCost: number = def_plainCost,
-  swampCost: number = def_swampCost
+  PSC: type_PSC = def_PSC
 ): FindPathResult {
   const tarRangeArr = tars.map(i => {
     return { pos: i, range: range };
@@ -258,8 +224,8 @@ export function searchPath_flee(
   const rtn = searchPath(ori, tarRangeArr, {
     flee: true,
     costMatrix: costMatrix,
-    plainCost: plainCost,
-    swampCost: swampCost,
+    plainCost: PSC.plainCost,
+    swampCost: PSC.swampCost,
     maxOps: 2000,
   });
   drawPolyLight(rtn.path);
@@ -269,13 +235,13 @@ export function searchPath_flee(
  * path len from `ori` to `tar`
  */
 export function pathLen(ori: Pos, tar: Pos) {
-  let p = searchPath_area(ori, tar);
+  const p = searchPath_area(ori, tar);
   if (p) {
     return p.path.length;
   } else return Infinity;
 }
-export function getArea_std(cre: Pos): Area {
-  return getArea(cre, border_L1, border_R2, border_mid);
+export function getArea_std(pos: Pos): Area {
+  return getArea(pos, border_L1, border_R2, border_mid);
 }
 export let costLT_RT: number;
 export let costLT_RB: number;
@@ -316,7 +282,7 @@ export function getNewTarByArea(cre: Pos, tar: Pos): Pos {
   const creArea = getArea_std(cre);
   const tarArea = getArea_std(tar);
   let current_startGateUp = undefined;
-  if (cre instanceof Cre && cre.startGateUp !== undefined) {
+  if (cre instanceof Cre_findPath && cre.startGateUp !== undefined) {
     SA(cre, "SG1");
     current_startGateUp = cre.startGateUp;
   }
@@ -365,7 +331,4 @@ export function getNewTarByArea(cre: Pos, tar: Pos): Pos {
   }
   drawLineComplex(cre, newTar, 0.25, "#222222");
   return newTar;
-}
-export function getMoveStepDef(pullList: Cre[]): number {
-  return 10 * getMoveTime(pullList);
 }

@@ -1,34 +1,38 @@
 //functions
 
 import { CostMatrix } from "game/path-finder";
-import { arrayEqual, last } from "../utils/JS";
+import { arrayEqual, divide0, last } from "../utils/JS";
 import { Adj, COO, Pos, atPos } from "../utils/Pos";
 import { ERR } from "../utils/print";
 import { findTask } from "../utils/Task";
-import { SA, drawLineComplex } from "../utils/visual";
+import { P, SA, drawLineComplex } from "../utils/visual";
 import { Cre, Task_Cre } from "./Cre";
-import { def_plainCost, def_swampCost, getMoveStepDef } from "./Cre_findPath";
 import {
-  Cre_move,
-  FindPathAndMoveTask,
-  MoveTask,
-  moveTo_direct,
-} from "./Cre_move";
+  def_PSC,
+  def_plainCost,
+  def_swampCost,
+  type_MBF,
+  type_PSC,
+} from "./Cre_findPath";
+import { Cre_move, FindPathAndMoveTask, MoveTask } from "./Cre_move";
 import { moveToRandomEmptyAround } from "./CreCommands";
 import { PullEvent } from "./CreTool";
 import { moveBlockCostMatrix } from "./UnitTool";
-export class Cre_pull extends Cre_move {}
+export type type_PSC_pull = type_PSC | Cre[];
+export class Cre_pull extends Cre_move {
+  pullEvent: PullEvent | undefined; //get cre that pulled by this
+  bePulledEvent: PullEvent | undefined; //get cre that pull this
+}
 /**
  * new a {@link PullTask}, will cancel if already have same task
  */
 export function newPullTask(
-  master: Cre_move,
+  master: Cre_pull,
   tarCre: Cre,
   tarPos: Pos,
-  step: number = getMoveStepDef([master, tarCre]),
+  step: number = getMoveStepDef_pull([master, tarCre]),
   costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
-  plainCost: number = def_plainCost,
-  swampCost: number = def_swampCost
+  PSC: type_PSC = def_PSC
 ) {
   if (master === tarCre) {
     ERR("pullTask same tar");
@@ -42,9 +46,9 @@ export function newPullTask(
   if (oldTask) {
     if (oldTask.tarCre !== tarCre || oldTask.tarPos !== tarPos) {
       ifNewTask = true;
-    } else if (oldTask.plainCost !== plainCost) {
+    } else if (oldTask.PSC.plainCost !== PSC.plainCost) {
       ifNewTask = true;
-    } else if (oldTask.swampCost !== swampCost) {
+    } else if (oldTask.PSC.swampCost !== PSC.swampCost) {
       ifNewTask = true;
     } else if (oldTask.costMatrix !== costMatrix) {
       ifNewTask = true;
@@ -53,15 +57,7 @@ export function newPullTask(
     ifNewTask = true;
   }
   if (ifNewTask) {
-    new PullTask(
-      master,
-      tarCre,
-      tarPos,
-      step,
-      costMatrix,
-      plainCost,
-      swampCost
-    );
+    new PullTask(master, tarCre, tarPos, step, costMatrix, PSC);
   }
 }
 /**
@@ -70,7 +66,7 @@ export function newPullTask(
  *  if is undefined the creep will move random at last position of path
  */
 export class PullTask extends Task_Cre {
-  readonly master: Cre_move;
+  readonly master: Cre_pull;
   readonly tarCre: Cre;
   readonly tarPos: Pos;
   readonly step: number;
@@ -78,17 +74,15 @@ export class PullTask extends Task_Cre {
   moveTask1: FindPathAndMoveTask | undefined = undefined;
   moveTask2: FindPathAndMoveTask | undefined = undefined;
   readonly costMatrix: CostMatrix | undefined;
-  readonly plainCost: number;
-  readonly swampCost: number;
+  readonly PSC: type_PSC;
   readonly randomMoveAtEnd: boolean;
   constructor(
-    master: Cre_move,
+    master: Cre_pull,
     tarCre: Cre,
     tarPos: Pos,
-    step: number = getMoveStepDef([master, tarCre]),
+    step: number = getMoveStepDef_pull([master, tarCre]),
     costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
-    plainCost: number = def_plainCost,
-    swampCost: number = def_swampCost,
+    PSC: type_PSC = def_PSC,
     randomMoveAtEnd: boolean = false
   ) {
     super(master);
@@ -97,8 +91,7 @@ export class PullTask extends Task_Cre {
     this.tarPos = tarPos;
     this.step = step;
     this.costMatrix = costMatrix;
-    this.plainCost = plainCost;
-    this.swampCost = swampCost;
+    this.PSC = PSC;
     this.randomMoveAtEnd = randomMoveAtEnd;
     this.cancelOldTask(PullTask);
     if (Adj(this.master, this.tarCre)) {
@@ -107,16 +100,13 @@ export class PullTask extends Task_Cre {
       this.moveTaskTar = new FindPathAndMoveTask(
         this.tarCre,
         this.master,
-        [this.tarCre],
         this.step,
         this.costMatrix,
-        this.plainCost,
-        this.swampCost
+        this.PSC
       );
       this.moveTask1 = new FindPathAndMoveTask(
         this.master,
         this.tarCre,
-        [this.master],
         this.step,
         this.costMatrix,
         this.plainCost,
@@ -129,7 +119,7 @@ export class PullTask extends Task_Cre {
     this.moveTask1?.end();
     this.moveTask2?.end();
   }
-  getMaster(): Cre_move {
+  getMaster(): Cre_pull {
     return this.master;
   }
   loop_task(): void {
@@ -168,7 +158,7 @@ export class PullTask extends Task_Cre {
 }
 
 /** go to a target Creep ,and let it pull this */
-export function directBePulled(cre: Cre_move, tar: Cre): boolean {
+export function directBePulled(cre: Cre_pull, tar: Cre): boolean {
   SA(tar, "directBePulled");
   const pullingList = getPullingTargetList(tar);
   const lastOne = <Cre>last(pullingList);
@@ -197,7 +187,7 @@ export function normalPull(cre: Cre, tar: Cre): boolean {
   } else return false;
 }
 /** move and pull */
-export function moveAndBePulled(cre: Cre_move, tar: Cre): boolean {
+export function moveAndBePulled(cre: Cre_pull, tar: Cre): boolean {
   if (Adj(cre, tar)) {
     normalPull(tar, cre);
     return true;
@@ -248,10 +238,10 @@ export function getAllPullTargetList(cre: Cre): Cre[] {
  * new a {@link PullTarsTask}, will cancel if already have same task
  */
 export function newPullTarsTask(
-  master: Cre_move,
-  tarCres: Cre_move[],
+  master: Cre_pull,
+  tarCres: Cre_pull[],
   tarPos: Pos,
-  step: number = getMoveStepDef(tarCres.concat([master])),
+  step: number = getMoveStepDef_pull(tarCres.concat([master])),
   costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
   plainCost: number = def_plainCost,
   swampCost: number = def_swampCost
@@ -283,18 +273,18 @@ export function newPullTarsTask(
  * pull a group of creep to a position
  */
 export class PullTarsTask extends Task_Cre {
-  readonly master: Cre_move;
-  tarCres: Cre_move[];
+  readonly master: Cre_pull;
+  tarCres: Cre_pull[];
   readonly tarPos: Pos;
   readonly step: number;
   readonly costMatrix: CostMatrix | undefined;
   readonly plainCost: number;
   readonly swampCost: number;
   constructor(
-    master: Cre_move,
-    tarCres: Cre_move[],
+    master: Cre_pull,
+    tarCres: Cre_pull[],
     tarPos: Pos,
-    step: number = getMoveStepDef(tarCres.concat([master])),
+    step: number = getMoveStepDef_pull(tarCres.concat([master])),
     costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
     plainCost: number = def_plainCost,
     swampCost: number = def_swampCost
@@ -352,4 +342,72 @@ export class PullTarsTask extends Task_Cre {
       this.master.MT(this.tarPos);
     }
   }
+}
+/** get move and fatigue number of a creep ,all pulling and bePulled will
+ *  be calculate too
+ */
+export function getMoveAndFatigueNum_pull(
+  pullList: Cre[],
+  extraEnergy: number = 0,
+  purePlain: boolean = false,
+  pureSwamp: boolean = false
+): type_MBF {
+  try {
+    const pl = pullList;
+    let moveNum = 0;
+    let bodyNum = 0;
+    let fatigueNum = 0;
+    for (let tar of pl) {
+      const mfRtn = getMoveAndFatigueNum(
+        tar,
+        extraEnergy,
+        purePlain,
+        pureSwamp
+      );
+      moveNum += mfRtn.moveNum;
+      bodyNum += mfRtn.bodyNum;
+      fatigueNum += mfRtn.fatigueNum;
+    }
+    const rtn = {
+      moveNum: moveNum,
+      bodyNum: bodyNum,
+      fatigueNum: fatigueNum,
+    };
+    return rtn;
+  } catch (ex) {
+    P(ex);
+    throw new ReferenceError();
+  }
+}
+export function getMoveTimeByTerrain_pull(
+  pullList: Cre[],
+  extraEnergy: number = 0,
+  purePlain: boolean = false,
+  pureSwamp: boolean = false
+): number {
+  const mb = getMoveAndFatigueNum_pull(
+    pullList,
+    extraEnergy,
+    purePlain,
+    pureSwamp
+  );
+  const time = Math.ceil(divide0(mb.fatigueNum, 2 * mb.moveNum, Infinity));
+  return Math.max(1, time);
+}
+export function getMoveTime_general_pull(pullList: Cre[]): number {
+  const timeOnPlain = getMoveTimeByTerrain_pull(pullList, 0, true);
+  const timeOnSwamp = getMoveTimeByTerrain_pull(pullList, 0, false, true);
+  return def_plainCost * timeOnPlain + def_swampCost * timeOnSwamp;
+}
+export function getSpeed_pull(pullList: Cre[]): number {
+  return 1 / getMoveTimeByTerrain_pull(pullList);
+}
+export function getSpeed_general_pull(pullList: Cre[]): number {
+  return 1 / getMoveTime_general_pull(pullList);
+}
+export function isFullSpeed_pull(pullList: Cre[]): boolean {
+  return getMoveTimeByTerrain_pull(pullList) === 1;
+}
+export function getMoveStepDef_pull(pullList: Cre[]): number {
+  return def_stepTime * getMoveTimeByTerrain_pull(pullList);
 }

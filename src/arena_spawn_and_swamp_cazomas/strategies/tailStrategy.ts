@@ -15,7 +15,7 @@ import {
 import { CostMatrix } from "game/path-finder";
 import { calculateForce, getTaunt } from "../gameObjects/battle";
 import { Cre_battle } from "../gameObjects/Cre_battle";
-import { getMoveAndFatigueNum_single } from "../gameObjects/Cre_findPath";
+import { getMoveAndFatigueNum } from "../gameObjects/Cre_findPath";
 import { Cre_move } from "../gameObjects/Cre_move";
 import { newPullTarsTask, PullTarsTask } from "../gameObjects/Cre_pull";
 import { hasThreat, isArmy, Role } from "../gameObjects/CreTool";
@@ -765,7 +765,7 @@ function fleeAction(
   SA(cre, "FLEE");
   const oneAfterFirst = getNextMember(myGroup, 0);
   const oneAfterSecond = getNextMember(myGroup, 1);
-  const moveFatigueRtn_head = getMoveAndFatigueNum_single(
+  const moveFatigueRtn_head = getMoveAndFatigueNum(
     head,
     0,
     false,
@@ -773,7 +773,7 @@ function fleeAction(
     oneAfterFirst
   );
   const moveFatigueRtn_second = healer
-    ? getMoveAndFatigueNum_single(healer, 0, false, false, oneAfterSecond)
+    ? getMoveAndFatigueNum(healer, 0, false, false, oneAfterSecond)
     : {
         moveNum: 0,
         bodyNum: 0,

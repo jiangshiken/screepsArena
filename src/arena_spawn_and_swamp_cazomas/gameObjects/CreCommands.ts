@@ -26,13 +26,9 @@ import { rangeReduce } from "./bonus";
 import { Cre } from "./Cre";
 import { Cre_battle } from "./Cre_battle";
 import { Cre_build } from "./Cre_build";
-import {
-  getMoveTime,
-  getSpeed_general,
-  searchPath_noArea,
-  searchPathByCreCost,
-} from "./Cre_findPath";
+import { searchPath_noArea, searchPathByCreCost } from "./Cre_findPath";
 import { Cre_move, moveTo_basic } from "./Cre_move";
+import { getMoveTime_pull, getSpeed_general_pull } from "./Cre_pull";
 import {
   getEarning,
   getEnemyArmies,
@@ -287,14 +283,14 @@ export function getRoundFightAndAvoidNum(
   );
   const fightNum = sum(roundOtherAttackers, i =>
     i.upgrade.fight === true
-      ? (0.5 + getSpeed_general([i])) *
+      ? (0.5 + getSpeed_general_pull([i])) *
         divideReduce(GR(i, cre), scanRange / 2) *
         calculateForce(i)
       : 0
   );
   const avoidNum = sum(roundOtherAttackers, i =>
     i.upgrade.fight === false
-      ? (0.5 + getSpeed_general([i])) *
+      ? (0.5 + getSpeed_general_pull([i])) *
         divideReduce(GR(i, cre), scanRange / 2) *
         calculateForce(i)
       : 0
@@ -388,7 +384,7 @@ export function findFitDamagedFriend(cre: Cre_battle): {
 } {
   const ifSelf = damaged(cre) ? friends : getOtherFriends(cre);
   const targets = ifSelf.filter(i => damaged(i));
-  return findFitUnits(cre, targets, true, 8 * getMoveTime([cre]));
+  return findFitUnits(cre, targets, true, 8 * getMoveTime_pull([cre]));
 }
 /**find a fit target of opponent unit*/
 export function findFitOppoUnit(
@@ -454,7 +450,7 @@ export function getFitRate(
   const healerBonus = isHealer ? damagedBonus * attackBodyPartBonus : 1;
   const speedEnoughBonus =
     unit instanceof Cre
-      ? getSpeed_general([cre]) > getSpeed_general([unit])
+      ? getSpeed_general_pull([cre]) > getSpeed_general_pull([unit])
         ? 1
         : 0.5
       : 1;
