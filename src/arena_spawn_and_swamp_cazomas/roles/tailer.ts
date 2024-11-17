@@ -141,7 +141,7 @@ function arrangeTail2(myGroup: Cre_pull[]): boolean {
         );
         SA(creMid1, "MD");
         creMid1.moveTo_direct(tarPos);
-        if (tail) tailChainPullAction(tail, sortedFollowers, mySpawn);
+        if (tail) tailPullAction(tail, sortedFollowers, mySpawn);
         return true;
       }
     }
@@ -164,7 +164,7 @@ function arrangeTail(myGroup: Cre_pull[]): boolean {
       const sortedFollowers = followers.sort(
         (a, b) => tailIndex(b) - tailIndex(a)
       );
-      if (tail) tailChainPullAction(tail, sortedFollowers, mySpawn);
+      if (tail) tailPullAction(tail, sortedFollowers, mySpawn);
       return true;
     }
   }
@@ -186,13 +186,9 @@ export function getNextMember(
   const selectGroup = myGroup.filter(i => tailIndex(i) > ind);
   return best(selectGroup, i => -tailIndex(i));
 }
-export function tailChainPullAction(
-  cre: Cre_pull,
-  myGroup: Cre_pull[],
-  tar: Pos
-) {
-  SA(cre, "FLEE");
+export function tailChainPullAction(myGroup: Cre_pull[], tar: Pos) {
   const tail = <Cre_pull>last(myGroup);
+  SA(tail, "FLEE");
   let sumFatigue = 0;
   for (let i = 0; i < myGroup.length - 1; i++) {
     const cre0 = myGroup[i];
@@ -214,12 +210,12 @@ export function tailChainPullAction(
   );
   const candecreaseAllFatigue = allFatigue <= allMove * 2;
   if (candecreaseAllFatigue || tail.master.fatigue > 0) {
-    SA(cre, "CanD");
+    SA(tail, "CanD");
     const followers2 = myGroup.filter(i => i !== tail);
     const sortedFollowers2 = arrReverse(followers2);
-    tailChainPullAction(tail, sortedFollowers2, tar);
+    tailPullAction(tail, sortedFollowers2, tar);
   } else {
-    SA(cre, "Norm");
+    SA(tail, "Norm");
     const fatigueHolder = best(
       myGroup.filter(i => i !== tail && i.master.fatigue === 0),
       i => tailIndex(i)
@@ -262,16 +258,16 @@ export function tailChainPullAction(
         if (sortedFollowers2.length === 0) {
           tail.MT(tar);
         } else {
-          tailChainPullAction(tail, sortedFollowers2, tar);
+          tailPullAction(tail, sortedFollowers2, tar);
         }
       } else {
-        tailChainPullAction(fatigueHolder, sortedFollowers, tar);
+        tailPullAction(fatigueHolder, sortedFollowers, tar);
       }
     } else {
-      SA(cre, "no fatigueHolder");
+      SA(tail, "no fatigueHolder");
       const followers = myGroup.filter(i => i !== tail);
       const sortedFollowers = arrReverse(followers);
-      tailChainPullAction(tail, sortedFollowers, tar);
+      tailPullAction(tail, sortedFollowers, tar);
     }
   }
 }

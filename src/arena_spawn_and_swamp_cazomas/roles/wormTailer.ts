@@ -4,7 +4,6 @@ import { calculateForce, getTaunt } from "../gameObjects/battle";
 import { Cre, Task_Role } from "../gameObjects/Cre";
 import { Cre_battle } from "../gameObjects/Cre_battle";
 import { getPSC } from "../gameObjects/Cre_findPath";
-import { MoveTask } from "../gameObjects/Cre_move";
 import { Cre_pull, PullTarsTask } from "../gameObjects/Cre_pull";
 import { hasThreat, isArmy, Role } from "../gameObjects/CreTool";
 import {
@@ -23,7 +22,6 @@ import { border_L1, border_R1, spawn_left } from "../utils/game";
 import {
   best,
   divideReduce,
-  first,
   goInRange,
   inRange,
   last,
@@ -33,7 +31,6 @@ import {
 } from "../utils/JS";
 import {
   Adj,
-  atPos,
   closest,
   GR,
   inBorder,
@@ -122,7 +119,7 @@ export class tailHealerJob extends Task_Role {
           i.tasks.find(i => i instanceof PullTarsTask)?.end()
         );
         if (damaged(cre)) {
-          tailChainPullAction(cre, myGroup, mySpawn);
+          tailChainPullAction(myGroup, mySpawn);
         } else {
           const targets = friends.filter(i => i.role === tailMelee);
           const target = closest(cre, targets);
@@ -353,10 +350,10 @@ export class tailMeleeJob extends Task_Role {
           pullAction(healer, sortedFollowers, head);
         } else if (tailHasThreat || healerHasThreat) {
           SA(cre, "BttTt");
-          tailChainPullAction(cre, myGroup, head);
+          tailChainPullAction(myGroup, mySpawn);
         } else if (XAxisThreat) {
           SA(cre, "XAxisTt");
-          tailChainPullAction(cre, myGroup, head);
+          tailChainPullAction(myGroup, mySpawn);
         } else if (damaged_light) {
           SA(cre, "damage_light");
           const enemyMeleesThreat = enemyMelees.filter(
@@ -369,10 +366,10 @@ export class tailMeleeJob extends Task_Role {
             SA(cre, "wait");
             stopAction(cre, head, myGroup);
           } else if (headIsRange) {
-            tailChainPullAction(cre, myGroup, head);
+            tailChainPullAction(myGroup, mySpawn);
           } else if (damaged) {
             //heavy damaged
-            tailChainPullAction(cre, myGroup, head);
+            tailChainPullAction(myGroup, mySpawn);
           } else {
             //light damaged
             stopAction(cre, head, myGroup);
@@ -414,14 +411,14 @@ export class tailMeleeJob extends Task_Role {
             SAN(cre, "CTD", closestThreatDis);
             if (closestThreatDis <= 2) {
               if (hasMeleeEnemy) {
-                tailChainPullAction(cre, myGroup, head);
+                tailChainPullAction(myGroup, mySpawn);
               } else {
                 stopAction(cre, head, myGroup);
               }
             } else if (closestThreatDis === 3) {
               if (hasMeleeEnemy) {
                 if (ranBool(hasAllyMelee ? 0.1 : 0.6)) {
-                  tailChainPullAction(cre, myGroup, head);
+                  tailChainPullAction(myGroup, mySpawn);
                 } else {
                   stopAction(cre, head, myGroup);
                 }
@@ -498,36 +495,25 @@ export function stopAction(cre: Cre_pull, head: Cre, myGroup: Cre_pull[]) {
 }
 export function pushAction(cre: Cre_pull, target: Unit, myGroup: Cre_pull[]) {
   SA(cre, "PUSH");
+  const tail = <Cre_pull>last(myGroup);
   if (arrangeTail_all(cre, myGroup)) {
     return;
   }
   if (tail.master.fatigue !== 0) {
-    stopAction(cre, head, myGroup);
+    stopAction(cre, cre, myGroup);
     return;
   }
   const NofatLen = myGroup.filter(i => i.master.fatigue === 0).length;
   const totalFatigue = sum(myGroup, i => i.master.fatigue);
   if (NofatLen <= 0.5 * myGroup.length || totalFatigue >= 150) {
     SA(cre, "FtqResst" + NofatLen + " " + totalFatigue);
-    stopAction(cre, head, myGroup);
+    stopAction(cre, cre, myGroup);
   } else {
-    const followers = myGroup.filter(i => i !== head);
+    const followers = myGroup.filter(i => i !== cre);
     const sortedFollowers = followers.sort(
       (a, b) => tailIndex(a) - tailIndex(b)
     );
     tail.tasks.find(i => i instanceof PullTarsTask)?.end();
     pullAction(cre, sortedFollowers, target, true);
-    const moveTask = cre.tasks.find(i => i instanceof MoveTask);
-    if (healer && moveTask && moveTask instanceof MoveTask) {
-      const tempTar = first(moveTask.path);
-      if (tempTar) {
-        drawLineComplex(cre, tempTar, 0.8, "#ff22ff");
-        if (friends.find(i => atPos(i, tempTar)) !== undefined) {
-          SA(cre, "CONFLICT");
-          cre.tasks.find(i => i instanceof PullTarsTask)?.end();
-          tailChainPullAction(cre, myGroup, head, tail, healer);
-        }
-      }
-    }
   }
 }

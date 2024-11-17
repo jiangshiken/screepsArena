@@ -3,7 +3,7 @@ import { getTicks } from "game/utils";
 import { spawnCleared, spawnCreep } from "../gameObjects/spawn";
 import { jamer } from "../roles/jamer";
 
-import { getGuessPlayer, Kerob, Tigga } from "../gameObjects/player";
+import { getGuessPlayer, Tigga } from "../gameObjects/player";
 import { drawFatigue } from "../gameObjects/visual_Cre";
 import { extStealer, initSpawnWallCostMatrix } from "../roles/extStealer";
 import { set_energyStealMode } from "../roles/harvester";
@@ -32,62 +32,59 @@ export function useTailStrategy() {
         //RANGED
         if (getGuessPlayer() === Tigga) {
           //600+320+50
-          spawnCreep(TB("5R2AM"), tailMelee, new TailInfo(g, 0));
-          spawnCreep(TB("5M2HM"), tailHealer, new TailInfo(g, 1));
+          spawnCreep(TB("5R2AM"), tailMelee);
+          spawnCreep(TB("5M2HM"), tailHealer);
           const tailLen = 2;
           for (let i = 0; i < tailLen; i++) {
-            spawnCreep(TB("M"), tailer, new TailInfo(g, 2 + i));
+            spawnCreep(TB("M"), tailer);
           }
           const tailLen2 = 8;
           for (let i = 0; i < tailLen2; i++) {
-            spawnCreep(TB("2M"), tailer, new TailInfo(g, 2 + tailLen + i));
+            spawnCreep(TB("2M"), tailer);
           }
         } else {
           //DOOMS
-          spawnCreep(TB("4R4AM"), tailMelee, new TailInfo(g, 0));
-          spawnCreep(TB("5MHM"), tailHealer, new TailInfo(g, 1));
+          spawnCreep(TB("4R4AM"), tailMelee);
+          spawnCreep(TB("5MHM"), tailHealer);
           const tailLen = 8;
           for (let i = 0; i < tailLen; i++) {
-            spawnCreep(TB("M"), tailer, new TailInfo(g, 2 + i));
+            spawnCreep(TB("M"), tailer);
           }
           const tailLen2 = 4;
           for (let i = 0; i < tailLen2; i++) {
-            spawnCreep(TB("2M"), tailer, new TailInfo(g, 2 + tailLen + i));
+            spawnCreep(TB("2M"), tailer);
           }
         }
       } else {
         //MELEE
         if (getGuessPlayer() === Tigga) {
-          if (g === 0) spawnCreep(TB("3MR8AM"), tailMelee, new TailInfo(g, 0));
-          else spawnCreep(TB("3M10AM"), tailMelee, new TailInfo(g, 0));
-          spawnCreep(TB("4M3HM"), tailHealer, new TailInfo(g, 1));
+          if (g === 0) spawnCreep(TB("3MR8AM"), tailMelee);
+          else spawnCreep(TB("3M10AM"), tailMelee);
+          spawnCreep(TB("4M3HM"), tailHealer);
           const tailLen = 3;
           for (let i = 0; i < tailLen; i++) {
-            spawnCreep(TB("M"), tailer, new TailInfo(g, 2 + i));
+            spawnCreep(TB("M"), tailer);
           }
           const tailLen2 = 4;
           for (let i = 0; i < tailLen2; i++) {
-            spawnCreep(TB("2M"), tailer, new TailInfo(g, 2 + tailLen + i));
+            spawnCreep(TB("2M"), tailer);
           }
         } else {
           //DOOMS
-          if (g === 0) spawnCreep(TB("3MR8AM"), tailMelee, new TailInfo(g, 0));
-          else spawnCreep(TB("3M10AM"), tailMelee, new TailInfo(g, 0));
-          if (g === 0) spawnCreep(TB("4M3HM"), tailHealer, new TailInfo(g, 1));
-          else spawnCreep(TB("4M2HM"), tailHealer, new TailInfo(g, 1));
+          if (g === 0) spawnCreep(TB("3MR8AM"), tailMelee);
+          else spawnCreep(TB("3M10AM"), tailMelee);
+          if (g === 0) spawnCreep(TB("4M3HM"), tailHealer);
+          else spawnCreep(TB("4M2HM"), tailHealer);
           const tailLen = g === 0 ? 7 : 5;
           for (let i = 0; i < tailLen; i++) {
-            spawnCreep(TB("2M"), tailer, new TailInfo(g, 2 + i));
+            spawnCreep(TB("2M"), tailer);
           }
-          spawnCreep(TB("3M"), tailer, new TailInfo(g, 2 + tailLen));
+          spawnCreep(TB("3M"), tailer);
         }
       }
     }
     //700
-    //250+400+50
-    if (getGuessPlayer() === Kerob) {
-      spawnCreep(TB("10TRM"), toughDefender);
-    } else if (getGuessPlayer() === Tigga) {
+    if (getGuessPlayer() === Tigga) {
       // spawnCreep(TB("3MA"), extStealer);
       //150+240+50
       spawnCreep(TB("5TAM"), toughDefender);
