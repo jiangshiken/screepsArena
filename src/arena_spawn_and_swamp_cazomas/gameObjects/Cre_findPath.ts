@@ -23,9 +23,11 @@ import { Adj, COO, Pos, Pos_C, atPos } from "../utils/Pos";
 import { ERR } from "../utils/print";
 import { SA, drawLineComplex, drawPoly, drawPolyLight } from "../utils/visual";
 import { Cre } from "./Cre";
-import { moveBlockCostMatrix_setBlock } from "./Cre_move";
 import { PullEvent } from "./CreTool";
 import {
+  blockCost,
+  enRamBlockCostMatrix,
+  friendBlockCostMatrix,
   getCapacity,
   getEnergy,
   isTerrainRoad,
@@ -372,3 +374,12 @@ export function getNewTarByArea(cre: Pos, tar: Pos): Pos {
   drawLineComplex(cre, newTar, 0.25, "#222222");
   return newTar;
 }
+export function moveBlockCostMatrix_setBlock(pos: Pos) {
+  moveBlockCostMatrix.set(pos.x, pos.y, blockCost);
+}
+export function friendBlockCostMatrix_setBlock(pos: Pos) {
+  friendBlockCostMatrix.set(pos.x, pos.y, blockCost);
+}
+export function enRamBlockCostMatrix_setBlock(pos: Pos) {
+  enRamBlockCostMatrix.set(pos.x, pos.y, blockCost);
+} /** represent a event of move function */

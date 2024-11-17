@@ -97,6 +97,9 @@ class wormPart_doomsJob extends wormPartJob {
     this.master = master;
     this.cancelOldTask(wormPart_doomsJob);
   }
+  isWormPart(cre: Cre_pull): boolean {
+    return cre.role === wormPart_dooms;
+  }
   rushSpawn() {
     const cre = this.master;
     if (oppoSpawns.length >= 2) {

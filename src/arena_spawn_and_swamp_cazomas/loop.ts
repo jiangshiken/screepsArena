@@ -14,7 +14,10 @@ import { Cre_battle } from "./gameObjects/Cre_battle";
 import { Cre_build } from "./gameObjects/Cre_build";
 import {
   Cre_findPath,
+  enRamBlockCostMatrix_setBlock,
+  friendBlockCostMatrix_setBlock,
   initGateCost,
+  moveBlockCostMatrix_setBlock,
   searchPath_area,
 } from "./gameObjects/Cre_findPath";
 import {
@@ -22,11 +25,6 @@ import {
   getEnemyProducers,
   getMyProducers,
 } from "./gameObjects/Cre_harvest";
-import {
-  enRamBlockCostMatrix_setBlock,
-  friendBlockCostMatrix_setBlock,
-  moveBlockCostMatrix_setBlock,
-} from "./gameObjects/Cre_move";
 import { Cre_pull } from "./gameObjects/Cre_pull";
 import { controlCreeps, isMelee, isMyTick } from "./gameObjects/CreTool";
 import { S } from "./gameObjects/export";

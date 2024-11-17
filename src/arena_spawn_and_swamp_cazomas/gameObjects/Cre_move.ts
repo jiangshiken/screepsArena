@@ -16,19 +16,14 @@ import {
 import {
   Cre_findPath,
   def_PSC,
+  moveBlockCostMatrix_setBlock,
   searchPath_area,
   searchPath_flee,
   type_PSC,
 } from "./Cre_findPath";
 import { GameObj } from "./GameObj";
 import { enemies } from "./GameObjectInitialize";
-import {
-  blockCost,
-  blocked,
-  enRamBlockCostMatrix,
-  friendBlockCostMatrix,
-  moveBlockCostMatrix,
-} from "./UnitTool";
+import { blocked, moveBlockCostMatrix } from "./UnitTool";
 export class TaskEvent extends Event_ori {
   task: Task;
   constructor(task: Task) {
@@ -272,15 +267,6 @@ export class FindPathAndMoveTask extends MoveTask {
     return path;
   }
 }
-export function moveBlockCostMatrix_setBlock(pos: Pos) {
-  moveBlockCostMatrix.set(pos.x, pos.y, blockCost);
-}
-export function friendBlockCostMatrix_setBlock(pos: Pos) {
-  friendBlockCostMatrix.set(pos.x, pos.y, blockCost);
-}
-export function enRamBlockCostMatrix_setBlock(pos: Pos) {
-  enRamBlockCostMatrix.set(pos.x, pos.y, blockCost);
-} /** represent a event of move function */
 export class MoveEvent extends Event_ori {
   readonly tar: Pos;
   readonly nextStep: Pos;

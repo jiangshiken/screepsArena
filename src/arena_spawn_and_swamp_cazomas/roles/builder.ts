@@ -149,7 +149,8 @@ export class builderTurtleJob extends Task_Role {
     cre.fight();
     cre.taskPriority = 9;
     //
-    if (cre.useAppointMovement()) {
+    if (cre.appointMovementIsActived(1)) {
+      cre.useAppointMovement();
       return;
     }
     //

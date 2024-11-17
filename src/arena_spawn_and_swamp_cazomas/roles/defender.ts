@@ -65,7 +65,8 @@ export class defender_RampartJob extends Task_Role {
       if (roundEn.length === 0) {
         attackWeakRampart(cre);
       }
-      if (cre.useAppointMovement()) {
+      if (cre.appointMovementIsActived(1)) {
+        cre.useAppointMovement();
         return;
       }
       defendTheRampart(cre);

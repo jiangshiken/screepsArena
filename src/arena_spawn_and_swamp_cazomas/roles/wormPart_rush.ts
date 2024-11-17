@@ -43,27 +43,7 @@ export function wormIndex(cre: Cre_move) {
     ? cre.group_Index
     : ERR_rtn(-1, "wrong index");
 }
-export function ifGo(): boolean {
-  if (tick >= assembleTick + 30) {
-    return true;
-  } else {
-    const finalSnakePart = findWormPart(wormPartNum - 1);
-    if (finalSnakePart) {
-      return atPos(finalSnakePart, assemblePoint(wormIndex(finalSnakePart)));
-    } else {
-      return false;
-    }
-  }
-}
-/**find the worm apart by index*/
-export function findWormPart(index: number): Cre_pull | undefined {
-  return <Cre_pull | undefined>(
-    friends.find(
-      i =>
-        i instanceof Cre_pull && i.role === wormPart && index === i.group_Index
-    )
-  );
-}
+
 export const wormPart: Role = new Role(
   "wormPart",
   cre => new wormPartJob(<Cre_battle>cre)
@@ -75,6 +55,33 @@ export class wormPartJob extends Task_Role {
     this.master = master;
     this.cancelOldTask(wormPartJob);
   }
+  ifGo(): boolean {
+    if (tick >= assembleTick + 30) {
+      return true;
+    } else {
+      const finalSnakePart = this.findWormPart(wormPartNum - 1);
+      if (finalSnakePart) {
+        return atPos(finalSnakePart, assemblePoint(wormIndex(finalSnakePart)));
+      } else {
+        return false;
+      }
+    }
+  }
+  /**find the worm apart by index*/
+  findWormPart(index: number): Cre_pull | undefined {
+    return <Cre_pull | undefined>(
+      friends.find(
+        i =>
+          i instanceof Cre_pull && this.isWormPart(i) && index === i.group_Index
+      )
+    );
+  }
+  isWormPart(cre: Cre_pull) {
+    return cre.role === wormPart;
+  }
+  getMyWormParts() {
+    return (<Cre_pull[]>friends).filter(i => this.isWormPart(i));
+  }
   loop_task(): void {
     const cre = this.master;
     SA(cre, "WPJ");
@@ -84,7 +91,7 @@ export class wormPartJob extends Task_Role {
     const creInd = wormIndex(cre);
     if (!wormGo) {
       SA(cre, "NG");
-      wormGo = ifGo();
+      wormGo = this.ifGo();
       const assP = assemblePoint(creInd);
       if (tick >= assembleTick) {
         //if start assemble
@@ -98,7 +105,8 @@ export class wormPartJob extends Task_Role {
           const tars = friends.filter(
             i =>
               i !== cre &&
-              i.role === wormPart &&
+              i instanceof Cre_pull &&
+              this.isWormPart(i) &&
               GR(cre, i) <= scanRange &&
               damaged(i)
           );
@@ -118,7 +126,7 @@ export class wormPartJob extends Task_Role {
     } else {
       //worm go
       SA(cre, "WG");
-      const myWormParts = <Cre_pull[]>friends.filter(i => i.role === wormPart);
+      const myWormParts = this.getMyWormParts();
 
       if (wormStartWait === undefined) {
         SA(cre, "RUSH");
