@@ -15,15 +15,18 @@ import { SpawnInfo } from "./spawn";
 
 export class Task_Cre extends Task {
   readonly master: Cre;
-  constructor(master: Cre) {
-    super(master);
+  constructor(master: Cre, expireTime: number) {
+    super(master, expireTime);
     this.master = master;
+  }
+  loop_task(): void {
+    super.loop_task();
   }
 }
 /** a Task of the Role Function of Creep */
 export class Task_Role extends Task_Cre {
   constructor(master: Cre) {
-    super(master);
+    super(master, Infinity);
   }
   loop_task(): void {
     SA(this.master, "Task_Role_loop");

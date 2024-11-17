@@ -65,8 +65,7 @@ export class Cre_pull extends Cre_move {
     tarPos: Pos,
     step: number = getMoveStepDef_pull(tarCres.concat([this])),
     costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
-    plainCost: number = def_plainCost,
-    swampCost: number = def_swampCost
+    PSC: type_PSC = def_PSC
   ) {
     if (tarCres.find(i => i === this)) {
       ERR("new pullTarsTask master in tarCres");
@@ -77,9 +76,9 @@ export class Cre_pull extends Cre_move {
     if (oldTask) {
       if (!arrayEqual(oldTask.tarCres, tarCres) || oldTask.tarPos !== tarPos) {
         ifNewTask = true;
-      } else if (oldTask.plainCost !== plainCost) {
+      } else if (oldTask.PSC.plainCost !== PSC.plainCost) {
         ifNewTask = true;
-      } else if (oldTask.swampCost !== swampCost) {
+      } else if (oldTask.PSC.swampCost !== PSC.swampCost) {
         ifNewTask = true;
       } else if (oldTask.costMatrix !== costMatrix) {
         ifNewTask = true;
@@ -178,9 +177,10 @@ export class PullTask extends Task_Cre {
     step: number = getMoveStepDef_pull([master, tarCre]),
     costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
     PSC: type_PSC = def_PSC,
-    randomMoveAtEnd: boolean = false
+    randomMoveAtEnd: boolean = false,
+    expireTime: number = Infinity
   ) {
-    super(master);
+    super(master, expireTime);
     this.master = master;
     this.tarCre = tarCre;
     this.tarPos = tarPos;
@@ -259,26 +259,24 @@ export class PullTarsTask extends Task_Cre {
   readonly tarPos: Pos;
   readonly step: number;
   readonly costMatrix: CostMatrix | undefined;
-  readonly plainCost: number;
-  readonly swampCost: number;
+  readonly PSC: type_PSC;
   constructor(
     master: Cre_pull,
     tarCres: Cre_pull[],
     tarPos: Pos,
     step: number = getMoveStepDef_pull(tarCres.concat([master])),
     costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
-    plainCost: number = def_plainCost,
-    swampCost: number = def_swampCost
+    PSC: type_PSC = def_PSC,
+    expireTime: number = Infinity
   ) {
-    super(master);
+    super(master, expireTime);
     this.master = master;
     SA(master, "new PT Task");
     this.tarCres = tarCres;
     this.tarPos = tarPos;
     this.step = step;
     this.costMatrix = costMatrix;
-    this.plainCost = plainCost;
-    this.swampCost = swampCost;
+    this.PSC = PSC;
     //cancel old task
     this.cancelOldTask(PullTarsTask);
   }

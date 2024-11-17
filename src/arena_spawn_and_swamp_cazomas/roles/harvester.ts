@@ -42,7 +42,7 @@ export class HarvestTask extends Task_Cre {
     targetHarvable: Harvable,
     targetProducer: Producer
   ) {
-    super(master);
+    super(master, Infinity);
     this.master = master;
     this.targetHarvable = targetHarvable;
     this.targetProducer = targetProducer;

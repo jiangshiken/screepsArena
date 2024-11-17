@@ -1,5 +1,3 @@
-import { getTicks } from "game/utils";
-
 import { Event_ori } from "./Event";
 import { remove } from "./JS";
 
@@ -25,7 +23,9 @@ export function useTasks(hasTasks: HasTasks) {
     const taskNeedLoop = tasks.find(i => !taskLooped(i));
     if (taskNeedLoop !== undefined) {
       if (!taskNeedLoop.pause) {
-        taskNeedLoop.loop_task();
+        if (!taskNeedLoop.checkExpire()) {
+          taskNeedLoop.loop_task();
+        }
       }
       taskNeedLoop.looped = new Event_ori();
     } else {
@@ -45,16 +45,26 @@ export class Task {
   /** master of task*/
   readonly master: HasTasks;
   /** the birth tick of task*/
-  readonly invokeTick: number;
+  readonly birthEvent: Event_ori;
   /** if task paused*/
   pause: boolean = false;
-  constructor(master: HasTasks) {
+  readonly expireTime: number;
+  constructor(master: HasTasks, expireTime: number) {
     this.master = master;
     this.master.tasks.push(this);
-    this.invokeTick = getTicks();
+    this.birthEvent = new Event_ori();
+    this.expireTime = expireTime;
   }
   /** will be call every tick*/
   loop_task(): void {}
+  checkExpire(): boolean {
+    if (!this.birthEvent.validEvent(this.expireTime)) {
+      this.end();
+      return true;
+    } else {
+      return false;
+    }
+  }
   /** if you want to cancel the task or the task already finished ,call this function
    * to remove it from tasks ,and set complete true
    */

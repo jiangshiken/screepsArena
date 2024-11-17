@@ -374,7 +374,7 @@ export class BuilderStandardTask extends Task_Cre {
   isWorking: boolean = true;
   fleeBias: number;
   constructor(master: Cre_build) {
-    super(master);
+    super(master, Infinity);
     this.master = master;
     // resetStartGateAvoidFromEnemies();
     if (master.getBodyPartsNum(ATTACK) > 0) {

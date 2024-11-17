@@ -172,7 +172,7 @@ export class MoveTask extends Task_Cre {
   path: Pos[];
   master: Cre_move;
   constructor(master: Cre_move, path: Pos[]) {
-    super(master);
+    super(master, Infinity);
     this.master = master;
     this.path = path;
     //cancel old task
@@ -248,7 +248,7 @@ export class FindPathAndMoveTask extends MoveTask {
     }
     const closeScanRange = 3;
     if (
-      tick === this.invokeTick ||
+      tick === this.birthEvent.invokeTick ||
       isMyTick(this.master, this.findPathStep) ||
       GR(this.tempTar, this.master) <= closeScanRange ||
       GR(this.tar, this.master) <= closeScanRange ||

@@ -175,7 +175,7 @@ export class BuildingTask extends Task_Cre {
   isBuilding: boolean = false;
   isWorking: boolean = false;
   constructor(master: Cre) {
-    super(master);
+    super(master, Infinity);
   }
   loop_task() {
     let cc = this.master;

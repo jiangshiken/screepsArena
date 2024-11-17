@@ -1,1 +1,1 @@
-export function useSingleWorm() {}
+export function useWormHeaderStrategy() {}
