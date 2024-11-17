@@ -1,6 +1,7 @@
 import { Visual } from "game/visual";
 import { valid } from "../utils/JS";
-import { drawRangeComplex, P } from "../utils/visual";
+import { Pos_free_C } from "../utils/Pos";
+import { drawLineComplex, drawRangeComplex, P } from "../utils/visual";
 import { calculateForce } from "./battle";
 import { Cre } from "./Cre";
 import { cres, enemies, friends, units } from "./GameObjectInitialize";
@@ -88,4 +89,13 @@ export function showEnemies() {
     const rad = 0.75 * Math.sqrt(f);
     drawRangeComplex(fr, rad, 0.75, "#00ff55");
   }
+}
+export function drawFatigue() {
+  friends.forEach(fri => {
+    // SA(fri, "DrawFtgLine");
+    const length = 0.03 * fri.master.fatigue;
+    const startPos = new Pos_free_C(fri.x - 0.5, fri.y + 0.5);
+    const endPos = new Pos_free_C(fri.x - 0.5, fri.y + 0.5 - length);
+    drawLineComplex(startPos, endPos, 1, "#111144");
+  });
 }

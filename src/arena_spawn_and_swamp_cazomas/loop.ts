@@ -69,6 +69,7 @@ import {
   set_moveBlockCostMatrix,
 } from "./gameObjects/UnitTool";
 import {
+  drawFatigue,
   showEnemies,
   showHealthBars,
   showHits,
@@ -106,6 +107,7 @@ export function loopEnd() {
   const st1 = ct();
   showHits();
   showEnemies();
+  drawFatigue();
   doLongProgress();
   drawText(new Pos_C(50, 58), "H");
   printCPU();
