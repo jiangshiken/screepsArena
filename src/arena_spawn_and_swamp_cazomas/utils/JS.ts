@@ -162,6 +162,9 @@ export function maxWorth_lamb<E>(
   });
   return maxWorth(weightArr);
 }
+export function arrReverse<E>(arr: E[]): E[] {
+  return arrayCopy(arr).reverse();
+}
 /**
  * go in range , `min` <= `i` <= `max`
  */

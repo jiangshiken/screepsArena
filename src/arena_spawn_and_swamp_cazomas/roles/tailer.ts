@@ -7,7 +7,7 @@ import { Role } from "../gameObjects/CreTool";
 import { friends, mySpawn } from "../gameObjects/GameObjectInitialize";
 import { inMyBaseRan } from "../gameObjects/spawn";
 import { blocked } from "../gameObjects/UnitTool";
-import { best, last, sum } from "../utils/JS";
+import { arrReverse, best, last, sum } from "../utils/JS";
 import {
   Adj,
   getDirectionByPos,
@@ -18,7 +18,9 @@ import {
 } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { drawLineComplex, drawRange, SA } from "../utils/visual";
-
+export function getTailerTask(cre: Cre_pull): tailerJob {
+  return <tailerJob>findTask(cre, tailerJob);
+}
 export function getGroup_all(tailTar: Cre): Cre_pull[] {
   const tailMembers = <Cre_pull[]>(
     friends.filter(i => i instanceof Cre_pull && tailGroup(i) === tailTar)
@@ -139,7 +141,7 @@ function arrangeTail2(myGroup: Cre_pull[]): boolean {
         );
         SA(creMid1, "MD");
         creMid1.moveTo_direct(tarPos);
-        if (tail) tailPullAction(tail, sortedFollowers, mySpawn);
+        if (tail) tailChainPullAction(tail, sortedFollowers, mySpawn);
         return true;
       }
     }
@@ -162,7 +164,7 @@ function arrangeTail(myGroup: Cre_pull[]): boolean {
       const sortedFollowers = followers.sort(
         (a, b) => tailIndex(b) - tailIndex(a)
       );
-      if (tail) tailPullAction(tail, sortedFollowers, mySpawn);
+      if (tail) tailChainPullAction(tail, sortedFollowers, mySpawn);
       return true;
     }
   }
@@ -184,13 +186,17 @@ export function getNextMember(
   const selectGroup = myGroup.filter(i => tailIndex(i) > ind);
   return best(selectGroup, i => -tailIndex(i));
 }
-export function fleeAction(cre: Cre_pull, mySortedGroup: Cre_pull[]) {
+export function tailChainPullAction(
+  cre: Cre_pull,
+  myGroup: Cre_pull[],
+  tar: Pos
+) {
   SA(cre, "FLEE");
-  const tail = <Cre_pull>last(mySortedGroup);
+  const tail = <Cre_pull>last(myGroup);
   let sumFatigue = 0;
-  for (let i = 0; i < mySortedGroup.length - 1; i++) {
-    const cre0 = mySortedGroup[i];
-    const cre1 = mySortedGroup[i + 1];
+  for (let i = 0; i < myGroup.length - 1; i++) {
+    const cre0 = myGroup[i];
+    const cre1 = myGroup[i + 1];
     const cre0_fatigue: number = cre0.getMoveAndFatigueNum(
       0,
       false,
@@ -203,32 +209,28 @@ export function fleeAction(cre: Cre_pull, mySortedGroup: Cre_pull[]) {
   }
   const allFatigue = sumFatigue;
   const allMove = sum(
-    mySortedGroup.filter(i => i.master.fatigue === 0),
+    myGroup.filter(i => i.master.fatigue === 0),
     i => i.getHealthyBodyPartsNum(MOVE)
   );
   const candecreaseAllFatigue = allFatigue <= allMove * 2;
   if (candecreaseAllFatigue || tail.master.fatigue > 0) {
     SA(cre, "CanD");
-    const followers2 = mySortedGroup.filter(i => i !== tail);
-    const sortedFollowers2 = followers2.sort(
-      (a, b) => tailIndex(b) - tailIndex(a)
-    );
-    tailPullAction(tail, sortedFollowers2, mySpawn);
+    const followers2 = myGroup.filter(i => i !== tail);
+    const sortedFollowers2 = arrReverse(followers2);
+    tailChainPullAction(tail, sortedFollowers2, tar);
   } else {
     SA(cre, "Norm");
     const fatigueHolder = best(
-      mySortedGroup.filter(i => i !== tail && i.master.fatigue === 0),
+      myGroup.filter(i => i !== tail && i.master.fatigue === 0),
       i => tailIndex(i)
     );
     if (fatigueHolder) {
       SA(fatigueHolder, "fatigueHolder");
-      const followers = mySortedGroup.filter(
+      const followers = myGroup.filter(
         i => tailIndex(i) < tailIndex(fatigueHolder)
       );
-      const sortedFollowers = followers.sort(
-        (a, b) => tailIndex(b) - tailIndex(a)
-      );
-      const fatigueHolderNext = mySortedGroup.find(
+      const sortedFollowers = arrReverse(followers);
+      const fatigueHolderNext = myGroup.find(
         i => tailIndex(i) === tailIndex(fatigueHolder) + 1
       );
       if (fatigueHolderNext) {
@@ -236,41 +238,40 @@ export function fleeAction(cre: Cre_pull, mySortedGroup: Cre_pull[]) {
         SA(fatigueHolder, "SFL=" + sortedFollowers.length);
         if (sortedFollowers.length === 0) {
           SA(fatigueHolder, "MD");
-          fatigueHolder.moveTo_direct(fatigueHolderNext);
+          fatigueHolder.MD(fatigueHolderNext);
         } else {
           new PullTarsTask(
             fatigueHolder,
             sortedFollowers,
             fatigueHolderNext,
-            10
+            10,
+            undefined,
+            def_PSC,
+            1
           );
         }
         const direct = getDirectionByPos(fatigueHolder, fatigueHolderNext);
         SA(fatigueHolder, "direct=" + direct);
         fatigueHolder.stop();
         fatigueHolder.master.move(direct);
-        const followers2 = mySortedGroup.filter(
+        const followers2 = myGroup.filter(
           i => i !== tail && tailIndex(i) > tailIndex(fatigueHolder)
         );
-        const sortedFollowers2 = followers2.sort(
-          (a, b) => tailIndex(b) - tailIndex(a)
-        );
+        const sortedFollowers2 = arrReverse(followers2);
         SA(tail, "Tail=" + sortedFollowers2.length);
         if (sortedFollowers2.length === 0) {
-          tail.MT(mySpawn);
+          tail.MT(tar);
         } else {
-          tailPullAction(tail, sortedFollowers2, mySpawn);
+          tailChainPullAction(tail, sortedFollowers2, tar);
         }
       } else {
-        tailPullAction(fatigueHolder, sortedFollowers, mySpawn);
+        tailChainPullAction(fatigueHolder, sortedFollowers, tar);
       }
     } else {
       SA(cre, "no fatigueHolder");
-      const followers = mySortedGroup.filter(i => i !== tail);
-      const sortedFollowers = followers.sort(
-        (a, b) => tailIndex(b) - tailIndex(a)
-      );
-      tailPullAction(tail, sortedFollowers, mySpawn);
+      const followers = myGroup.filter(i => i !== tail);
+      const sortedFollowers = arrReverse(followers);
+      tailChainPullAction(tail, sortedFollowers, tar);
     }
   }
 }
@@ -293,8 +294,8 @@ export class tailerJob extends Task_Role {
     const groupNum = tailGroup(cre);
     if (groupNum) {
       const tailInd = tailIndex(cre);
-      SA(cre, "TP G" + groupNum?.id + "_" + tailInd);
       const myGroup = getGroup_adj(groupNum);
+      SA(cre, "TP G" + groupNum?.id + "_" + tailInd);
     }
   }
 }
