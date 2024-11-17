@@ -4,7 +4,6 @@ import { spawnCleared, spawnCreep } from "../gameObjects/spawn";
 import { jamer } from "../roles/jamer";
 
 import { getGuessPlayer, Tigga } from "../gameObjects/player";
-import { drawFatigue } from "../gameObjects/visual_Cre";
 import { extStealer, initSpawnWallCostMatrix } from "../roles/extStealer";
 import { set_energyStealMode } from "../roles/harvester";
 import { tailer } from "../roles/tailer";
@@ -15,7 +14,6 @@ import { TB } from "../utils/autoBodys";
 export function useTailStrategy() {
   set_energyStealMode(true);
   initSpawnWallCostMatrix();
-  drawFatigue();
   if (getTicks() === 50) {
     const jamerNum = getGuessPlayer() === Tigga ? 7 : 4;
     for (let i = 0; i < jamerNum; i++) {

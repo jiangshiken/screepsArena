@@ -214,9 +214,10 @@ export class tailMeleeJob extends Task_Role {
     const allTailers = <Cre_pull[]>(
       friends.filter(i => i instanceof Cre_pull && i.role === tailer)
     );
-    const myTailers = allTailers
-      .filter(i => getTailerTask(i).tailGroupTarget === this.master)
-      .sort((a, b) => tailIndex(a) - tailIndex(b));
+    const myTailers_raw = allTailers.filter(
+      i => getTailerTask(i).tailGroupTarget === this.healer
+    );
+    const myTailers = myTailers_raw.sort((a, b) => tailIndex(a) - tailIndex(b));
 
     const myGroup = (<Cre_pull[]>[this.master, this.healer]).concat(myTailers);
     const myGroupLen = myGroup.length;
