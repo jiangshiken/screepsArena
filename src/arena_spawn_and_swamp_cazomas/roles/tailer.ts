@@ -171,7 +171,7 @@ export function tailPullAction(
   costMat: CostMatrix | undefined = undefined,
   PSC: type_PSC = def_PSC
 ) {
-  leader.newPullTarsTask(followers, tar, 10, costMat, PSC);
+  leader.newPullTarsTask(followers, tar, 10, costMat, PSC, 1);
 }
 export function getNextMember(
   myGroup: Cre_pull[],

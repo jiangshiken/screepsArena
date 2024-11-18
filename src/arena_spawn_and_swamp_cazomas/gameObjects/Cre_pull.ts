@@ -65,7 +65,8 @@ export class Cre_pull extends Cre_move {
     tarPos: Pos,
     step: number = getMoveStepDef_pull(tarCres.concat([this])),
     costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
-    PSC: type_PSC = def_PSC
+    PSC: type_PSC = def_PSC,
+    expireTime: number = Infinity
   ) {
     if (tarCres.find(i => i === this)) {
       ERR("new pullTarsTask master in tarCres");
@@ -87,7 +88,15 @@ export class Cre_pull extends Cre_move {
       ifNewTask = true;
     }
     if (ifNewTask) {
-      new PullTarsTask(this, tarCres, tarPos, step);
+      new PullTarsTask(
+        this,
+        tarCres,
+        tarPos,
+        step,
+        costMatrix,
+        PSC,
+        expireTime
+      );
     }
   }
   /** go to a target Creep ,and let it pull this */

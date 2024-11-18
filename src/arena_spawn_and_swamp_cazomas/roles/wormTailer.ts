@@ -428,72 +428,67 @@ export class tailMeleeJob extends Task_Role {
       return final;
     });
   }
-  pullAction(tar: Pos, goSide: boolean = false) {
+  pushPullAction(followers: Cre_pull[], tar: Pos) {
     const cre = this.master;
-
+    SA(cre, "push pull");
     let costMat = undefined;
-    if (goSide) {
-      costMat = new CostMatrix();
-      if (inRange(tar.x, border_L1, border_R1)) {
-        const range = 25;
-        for (let i = 0; i < range * 2; i++) {
-          const setValue = 10;
-          const setY = tar.y + i - range;
-          if (inBorder(tar.x, setY)) {
-            const absRan = Math.abs(setY - tar.y);
-            const setValue_final = Math.floor(2 + (setValue * absRan) / range);
-            costMat.set(tar.x, setY, setValue_final);
-            if (spawn_left) {
-              costMat.set(tar.x + 1, setY, setValue_final);
-              costMat.set(tar.x + 2, setY, setValue_final);
-            } else {
-              costMat.set(tar.x - 1, setY, setValue_final);
-              costMat.set(tar.x - 2, setY, setValue_final);
-            }
-            drawText(new Pos_C(tar.x, setY), "" + setValue_final);
+    costMat = new CostMatrix();
+    if (inRange(tar.x, border_L1, border_R1)) {
+      const range = 25;
+      for (let i = 0; i < range * 2; i++) {
+        const setValue = 10;
+        const setY = tar.y + i - range;
+        if (inBorder(tar.x, setY)) {
+          const absRan = Math.abs(setY - tar.y);
+          const setValue_final = Math.floor(2 + (setValue * absRan) / range);
+          costMat.set(tar.x, setY, setValue_final);
+          if (spawn_left) {
+            costMat.set(tar.x + 1, setY, setValue_final);
+            costMat.set(tar.x + 2, setY, setValue_final);
+          } else {
+            costMat.set(tar.x - 1, setY, setValue_final);
+            costMat.set(tar.x - 2, setY, setValue_final);
           }
+          drawText(new Pos_C(tar.x, setY), "" + setValue_final);
         }
       }
     }
     this.master.newPullTarsTask(followers, tar, 10, costMat, getPSC(1, 2));
   }
+  endHeadTask() {
+    SA(this.master, "endHeadTask");
+    findTask(this.master, PullTarsTask)?.end();
+  }
   stopAction() {
     const cre = this.master;
     SA(cre, "STOP");
     if (arrangeTail_all(cre, this.myGroup)) {
-      return;
+      SA(cre, "wait arrange tail");
+    } else {
+      SA(cre, "stop action");
+      this.endHeadTask();
+      SA(cre, "try cleanFatigue");
+      cleanFatigue(this.myGroup);
     }
-    this.myGroup.forEach(mem =>
-      mem.tasks.find(i => i instanceof PullTarsTask)?.end()
-    );
-    this.myGroup.forEach(mem => mem.stop());
-    SA(cre, "cleanFatigue");
-    cleanFatigue(this.myGroup);
   }
   pushAction(target: Unit) {
     const cre = this.master;
-
     SA(cre, "PUSH");
     const tail = <Cre_pull>last(this.myGroup);
-    if (arrangeTail_all(cre, this.myGroup)) {
-      return;
-    }
-    if (tail.master.fatigue !== 0) {
-      this.stopAction();
-      return;
-    }
     const NofatLen = this.myGroup.filter(i => i.master.fatigue === 0).length;
     const totalFatigue = sum(this.myGroup, i => i.master.fatigue);
-    if (NofatLen <= 0.5 * this.myGroup.length || totalFatigue >= 150) {
+    if (tail.master.fatigue !== 0) {
+      SA(cre, "wait tail Ftq");
+      this.stopAction();
+    } else if (NofatLen <= 0.5 * this.myGroup.length || totalFatigue >= 150) {
       SA(cre, "FtqResst" + NofatLen + " " + totalFatigue);
       this.stopAction();
+    } else if (arrangeTail_all(cre, this.myGroup)) {
+      SA(cre, "wait arrange tail");
     } else {
+      SA(cre, "normal pull");
       const followers = this.myGroup.filter(i => i !== cre);
-      const sortedFollowers = followers.sort(
-        (a, b) => tailIndex(a) - tailIndex(b)
-      );
-      tail.tasks.find(i => i instanceof PullTarsTask)?.end();
-      pullAction(cre, sortedFollowers, target, true);
+      this.pushPullAction(followers, target);
     }
   }
   refreshStartGate(cre: Cre_pull, tail: Cre_pull, myGroup: Cre_pull[]) {
