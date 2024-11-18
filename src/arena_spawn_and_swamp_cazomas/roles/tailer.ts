@@ -10,6 +10,7 @@ import { blocked } from "../gameObjects/UnitTool";
 import { arrReverse, best, last, sum } from "../utils/JS";
 import {
   Adj,
+  COO,
   getDirectionByPos,
   getRangePoss,
   InRan2,
@@ -21,14 +22,22 @@ import { drawLineComplex, drawRange, SA } from "../utils/visual";
 export function getTailerTask(cre: Cre_pull): tailerJob {
   return <tailerJob>findTask(cre, tailerJob);
 }
-export function getGroup_all(tailTar: Cre): Cre_pull[] {
+export function getTailers_all(): Cre_pull[] {
+  return <Cre_pull[]>(
+    friends.filter(i => i instanceof Cre_pull && i.role === tailer)
+  );
+}
+export function getTailers_inGroup(tailTar: Cre): Cre_pull[] {
   const tailMembers = <Cre_pull[]>(
-    friends.filter(i => i instanceof Cre_pull && tailGroup(i) === tailTar)
+    friends.filter(
+      i =>
+        i instanceof Cre_pull && i.role === tailer && tailGroup(i) === tailTar
+    )
   );
   return tailMembers.sort((a, b) => tailIndex(a) - tailIndex(b));
 }
-export function getGroup_adj(tailTar: Cre): Cre_pull[] {
-  const tailMembers = getGroup_all(tailTar);
+export function getTailers_inGroup_adj(tailTar: Cre): Cre_pull[] {
+  const tailMembers = getTailers_inGroup(tailTar);
   const head = tailMembers[0];
   const rtn = [head];
   for (let i = 0; i < tailMembers.length - 1; i++) {
@@ -61,7 +70,7 @@ export function cleanFatigue(myGroup: Cre_pull[]) {
     );
     if (topMoves > bottomMoves) {
       if (tarTop.length > 0) {
-        const sortedTarTop = tarTop.sort((a, b) => tailIndex(b) - tailIndex(a));
+        const sortedTarTop = arrReverse(tarTop);
         new PullTarsTask(tar, sortedTarTop, mySpawn, 10, undefined, def_PSC, 0);
         if (tarBottom.length >= 2) {
           SA(tar, "bottom");
@@ -70,18 +79,7 @@ export function cleanFatigue(myGroup: Cre_pull[]) {
       }
     } else {
       if (tarBottom.length > 0) {
-        const sortedTarBottom = tarTop.sort(
-          (a, b) => tailIndex(a) - tailIndex(b)
-        );
-        new PullTarsTask(
-          tar,
-          sortedTarBottom,
-          mySpawn,
-          10,
-          undefined,
-          def_PSC,
-          0
-        );
+        new PullTarsTask(tar, tarTop, mySpawn, 10, undefined, def_PSC, 0);
         if (tarTop.length >= 2) {
           SA(tar, "top");
           cleanFatigue(tarTop);
@@ -136,9 +134,7 @@ function arrangeTail2(myGroup: Cre_pull[]): boolean {
         const followers = myGroup.filter(
           i => i !== tail && tailIndex(i) >= tailIndex(creMid2)
         );
-        const sortedFollowers = followers.sort(
-          (a, b) => tailIndex(b) - tailIndex(a)
-        );
+        const sortedFollowers = arrReverse(followers);
         SA(creMid1, "MD");
         creMid1.moveTo_direct(tarPos);
         if (tail) tailPullAction(tail, sortedFollowers, mySpawn);
@@ -161,9 +157,7 @@ function arrangeTail(myGroup: Cre_pull[]): boolean {
       const followers = myGroup.filter(
         i => i !== tail && tailIndex(i) >= tailIndex(creMid)
       );
-      const sortedFollowers = followers.sort(
-        (a, b) => tailIndex(b) - tailIndex(a)
-      );
+      const sortedFollowers = arrReverse(followers);
       if (tail) tailPullAction(tail, sortedFollowers, mySpawn);
       return true;
     }
@@ -287,11 +281,12 @@ export class tailerJob extends Task_Role {
   }
   loop_task(): void {
     const cre = this.master;
-    const groupNum = tailGroup(cre);
-    if (groupNum) {
+    if (this.tailGroupTarget) {
       const tailInd = tailIndex(cre);
-      const myGroup = getGroup_adj(groupNum);
-      SA(cre, "TP G" + groupNum?.id + "_" + tailInd);
+      SA(cre, "Tar=" + COO(this.tailGroupTarget) + "_" + tailInd);
+      // const myGroup = getTailers_inGroup_adj(groupNum);
+    } else {
+      SA(cre, "NO Target");
     }
   }
 }
