@@ -269,6 +269,7 @@ export class tailerJob extends Task_Role {
   master: Cre_pull;
   tailGroupTarget: Cre | undefined;
   tailIndex: number = 0;
+  tailTarget: Cre | undefined;
   constructor(master: Cre_pull) {
     super(master);
     this.master = master;
@@ -276,20 +277,30 @@ export class tailerJob extends Task_Role {
   }
   loop_task(): void {
     const cre = this.master;
+    if (this.tailGroupTarget && !this.tailGroupTarget.exists) {
+      this.tailGroupTarget = undefined;
+    }
+    if (this.tailTarget && !this.tailTarget.exists) {
+      this.tailTarget = undefined;
+    }
     const tar = this.tailGroupTarget;
     if (tar) {
       const tailInd = tailIndex(cre);
       SA(cre, "Tar=" + COO(this.tailGroupTarget) + "_" + tailInd);
-      const myTailsInGroup = getTailers_inGroup_adj(tar);
-      const tar_tail = last(myTailsInGroup);
-      if (tar_tail) {
-        if (!Adj(cre, tar_tail)) {
-          cre.MT(tar_tail);
+      const myTailsInGroup = getTailers_inGroup(tar).filter(
+        i => i !== this.master
+      );
+      if (this.tailTarget) {
+        if (!Adj(cre, this.tailTarget)) {
+          SA(cre, "HTT");
+          cre.MT(this.tailTarget);
+        } else {
+          SA(cre, "OK");
         }
       } else {
-        if (!Adj(cre, tar)) {
-          cre.MT(tar);
-        }
+        SA(cre, "set TT");
+        const tar_tail = last(myTailsInGroup);
+        this.tailTarget = tar_tail ? tar_tail : tar;
       }
     } else {
       SA(cre, "NO Target");
