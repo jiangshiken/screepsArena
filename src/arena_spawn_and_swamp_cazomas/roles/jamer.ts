@@ -26,6 +26,7 @@ import {
   getDirectionByPos,
   getReverseDirection,
   GR,
+  inBorder,
   midPoint,
   posPlusVec,
   VecMultiplyConst,
@@ -67,9 +68,11 @@ export class jamerJob extends Task_Role {
         const vec = DirectionToVec(chooseDir);
         for (let i = 0; i < setLen; i++) {
           const tarVec = VecMultiplyConst(vec, i + 1);
-          const tarPos = posPlusVec(cre, tarVec);
-          fleeCM.set(tarPos.x, tarPos.y, 1);
-          drawText(tarPos, "E", 1);
+          if (inBorder(cre.x + tarVec.vec_x, cre.y + tarVec.vec_y)) {
+            const tarPos = posPlusVec(cre, tarVec);
+            fleeCM.set(tarPos.x, tarPos.y, 1);
+            drawText(tarPos, "E", 1);
+          }
         }
       }
       const fleeing: boolean = cre.flee(6, 12, fleeCM, getPSC(2, 2));

@@ -60,8 +60,9 @@ export function cleanFatigue(myGroup: Cre_pull[]) {
   if (tar.master.fatigue > 20) {
     SA(tar, "cleanFatigue");
     drawRange(tar, 0.7, "#00aaaa");
-    const tarTop = myGroup.filter(i => tailIndex(i) < tailIndex(tar));
-    const tarBottom = myGroup.filter(i => tailIndex(i) > tailIndex(tar));
+    const tar_ind = myGroup.indexOf(tar);
+    const tarTop = myGroup.slice(0, tar_ind);
+    const tarBottom = myGroup.slice(tar_ind + 1);
     const topMoves = sum(tarTop, i =>
       i.master.fatigue === 0 ? i.getHealthyBodyPartsNum(MOVE) : 0
     );
@@ -112,7 +113,7 @@ export function allAdj(myGroup: Cre[]): boolean {
 }
 function arrangeTail2(myGroup: Cre_pull[]): boolean {
   if (!allAdj(myGroup)) return false;
-  const tail = best(myGroup, i => tailIndex(i));
+  const tail = last(myGroup);
   for (let i = 0; i < myGroup.length - 3; i++) {
     const cre0 = myGroup[i];
     const creMid1 = myGroup[i + 1];
@@ -131,9 +132,7 @@ function arrangeTail2(myGroup: Cre_pull[]): boolean {
       if (tarPos) {
         drawLineComplex(cre0, cre1, 0.8, "#ff7700");
         SA(cre0, "arrangeTail2");
-        const followers = myGroup.filter(
-          i => i !== tail && tailIndex(i) >= tailIndex(creMid2)
-        );
+        const followers = myGroup.filter(i => i !== tail).slice(i + 2);
         const sortedFollowers = arrReverse(followers);
         SA(creMid1, "MD");
         creMid1.moveTo_direct(tarPos);
@@ -146,17 +145,16 @@ function arrangeTail2(myGroup: Cre_pull[]): boolean {
 }
 function arrangeTail(myGroup: Cre_pull[]): boolean {
   if (!allAdj(myGroup)) return false;
-  const tail = best(myGroup, i => tailIndex(i));
-  for (let i = 0; i < myGroup.length - 2; i++) {
+  const tail = <Cre_pull>last(myGroup);
+  const groupLen = myGroup.length;
+  for (let i = 0; i < groupLen - 2; i++) {
     const cre0 = myGroup[i];
     const creMid = myGroup[i + 1];
     const cre1 = myGroup[i + 2];
     if (Adj(cre0, cre1)) {
       drawLineComplex(cre0, cre1, 0.8, "#ff7700");
       SA(cre0, "arrangeTail");
-      const followers = myGroup.filter(
-        i => i !== tail && tailIndex(i) >= tailIndex(creMid)
-      );
+      const followers = myGroup.slice(i + 1, groupLen - 1);
       const sortedFollowers = arrReverse(followers);
       if (tail) tailPullAction(tail, sortedFollowers, mySpawn);
       return true;
@@ -177,8 +175,7 @@ export function getNextMember(
   myGroup: Cre_pull[],
   ind: number
 ): Cre_pull | undefined {
-  const selectGroup = myGroup.filter(i => tailIndex(i) > ind);
-  return best(selectGroup, i => -tailIndex(i));
+  return myGroup[ind + 1];
 }
 export function tailChainPullAction(myGroup: Cre_pull[], tar: Pos) {
   const tail = <Cre_pull>last(myGroup);
@@ -210,19 +207,16 @@ export function tailChainPullAction(myGroup: Cre_pull[], tar: Pos) {
     tailPullAction(tail, sortedFollowers2, tar);
   } else {
     SA(tail, "Norm");
-    const fatigueHolder = best(
-      myGroup.filter(i => i !== tail && i.master.fatigue === 0),
-      i => tailIndex(i)
+    const findFatiueHolder_prepare = myGroup.filter(
+      i => i !== tail && i.master.fatigue === 0
     );
+    const fatigueHolder = last(findFatiueHolder_prepare);
     if (fatigueHolder) {
       SA(fatigueHolder, "fatigueHolder");
-      const followers = myGroup.filter(
-        i => tailIndex(i) < tailIndex(fatigueHolder)
-      );
+      const fatigueHolder_ind = myGroup.indexOf(fatigueHolder);
+      const followers = myGroup.slice(0, fatigueHolder_ind);
       const sortedFollowers = arrReverse(followers);
-      const fatigueHolderNext = myGroup.find(
-        i => tailIndex(i) === tailIndex(fatigueHolder) + 1
-      );
+      const fatigueHolderNext = myGroup[fatigueHolder_ind + 1];
       if (fatigueHolderNext) {
         SA(fatigueHolderNext, "fatigueHolderNext");
         SA(fatigueHolder, "SFL=" + sortedFollowers.length);
@@ -244,9 +238,10 @@ export function tailChainPullAction(myGroup: Cre_pull[], tar: Pos) {
         SA(fatigueHolder, "direct=" + direct);
         fatigueHolder.stop();
         fatigueHolder.master.move(direct);
-        const followers2 = myGroup.filter(
-          i => i !== tail && tailIndex(i) > tailIndex(fatigueHolder)
-        );
+        const followers2 = myGroup
+          .filter(i => i !== tail)
+          .slice(fatigueHolder_ind + 1);
+
         const sortedFollowers2 = arrReverse(followers2);
         SA(tail, "Tail=" + sortedFollowers2.length);
         if (sortedFollowers2.length === 0) {
@@ -281,10 +276,21 @@ export class tailerJob extends Task_Role {
   }
   loop_task(): void {
     const cre = this.master;
-    if (this.tailGroupTarget) {
+    const tar = this.tailGroupTarget;
+    if (tar) {
       const tailInd = tailIndex(cre);
       SA(cre, "Tar=" + COO(this.tailGroupTarget) + "_" + tailInd);
-      // const myGroup = getTailers_inGroup_adj(groupNum);
+      const myTailsInGroup = getTailers_inGroup_adj(tar);
+      const tar_tail = last(myTailsInGroup);
+      if (tar_tail) {
+        if (!Adj(cre, tar_tail)) {
+          cre.MT(tar_tail);
+        }
+      } else {
+        if (!Adj(cre, tar)) {
+          cre.MT(tar);
+        }
+      }
     } else {
       SA(cre, "NO Target");
     }

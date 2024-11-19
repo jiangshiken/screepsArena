@@ -59,7 +59,6 @@ import {
   getTailers_inGroup_adj,
   getTailerTask,
   tailChainPullAction,
-  tailIndex,
 } from "./tailer";
 export const tailHealer: Role = new Role(
   "tailHealer",
@@ -88,7 +87,8 @@ export class tailHealerJob extends Task_Role {
     const allTailers = getTailers_all();
     const myTailers = getTailers_inGroup(this.master);
     const myAdjTailers = getTailers_inGroup_adj(this.master);
-    if (allTailers.length < 6) {
+    SA(cre, "MTL=" + myTailers.length);
+    if (myTailers.length < 6) {
       const idleTailers = allTailers.filter(
         i => getTailerTask(i).tailGroupTarget === undefined
       );
@@ -96,7 +96,8 @@ export class tailHealerJob extends Task_Role {
       if (tarTailer) {
         getTailerTask(tarTailer).tailGroupTarget = this.master;
         const tail = <Cre_pull>last(myTailers);
-        getTailerTask(tarTailer).tailIndex = getTailerTask(tail).tailIndex + 1;
+        const tailIndex = tail ? getTailerTask(tail).tailIndex : 0;
+        getTailerTask(tarTailer).tailIndex = tailIndex + 1;
       }
     }
     if (!this.head) {
@@ -141,6 +142,8 @@ export class tailHealerJob extends Task_Role {
       if (!Adj(cre, this.head)) {
         SA(cre, "MTH");
         cre.MT(this.head);
+      }
+      for (let tails of myTailers) {
       }
     }
   }
@@ -217,14 +220,8 @@ export class tailMeleeJob extends Task_Role {
       if (target) {
         drawLineComplex(cre, target, 1, "#ee3333", "dashed");
         this.target = target;
-        const head = <Cre_battle>best(this.myGroup, i => -tailIndex(i));
-        const tail = <Cre_pull>best(this.myGroup, i => tailIndex(i));
-        const second = best(
-          this.myGroup.filter(i => i !== head),
-          i => -tailIndex(i)
-        );
-        // const healer = this.myGroup.find(i => tailIndex(i) === 1);
-        const healer = this.myGroup.find(i => tailIndex(i) === 1);
+        const head = this.myGroup[0];
+        const tail = <Cre_pull>last(this.myGroup);
         const scanRange_threat = 5 + myGroupLen + (this.headIsRange ? 7 : 0);
         const enemyThreats = enemies.filter(
           i =>
@@ -241,13 +238,15 @@ export class tailMeleeJob extends Task_Role {
           enemies.find(
             i => i.getBodyPartsNum(ATTACK) >= 3 && GR(i, head) <= 5
           ) !== undefined;
-        const healerHead = this.myGroup.filter(i => tailIndex(i) <= 4);
-        const sumDamage = sum(healerHead, i => damageAmount(i));
+        const healerCanReach = this.myGroup.slice(0, 5);
+        const sumDamage = sum(healerCanReach, i => damageAmount(i));
         const closestThreat = closest(cre, enemyThreats);
         const closestThreatDis = closestThreat
           ? GR(cre, closestThreat)
           : Infinity;
-        const healPerTick = healer ? healer.getHealthyBodyPartsNum(HEAL) : 0;
+        const healPerTick = this.healer
+          ? this.healer.getHealthyBodyPartsNum(HEAL)
+          : 0;
         const disExtra = healPerTick * Math.min(tarDistance, closestThreatDis);
         const ranEns = enemyMelees.filter(i => InRan2(i, head));
         const sumForce = sum(ranEns, i => {
@@ -261,12 +260,10 @@ export class tailMeleeJob extends Task_Role {
         const tailHasThreat =
           enemyThreats.find(i => GR(i, tail) < this.myGroup.length - 3) !==
           undefined;
-
+        const healer = this.healer;
         const healerHasThreat =
-          healer && enemyMelees.find(i => Adj(i, healer)) !== undefined;
-        // SA(cre, "ESD=" + enemySpawnDistance(cre));
+          this.healer && enemyMelees.find(i => Adj(i, healer)) !== undefined;
         const XAxisThreatsArr = enemyThreats.filter(i => {
-          // SA(i, "ESD=" + enemySpawnDistance(i));
           return ESDGreaterThan(i, cre, this.headIsRange ? 2 : 0);
         });
         const XAxisThreat = XAxisThreatsArr.length > 0;

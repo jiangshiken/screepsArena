@@ -269,7 +269,7 @@ function drawAllSAViss(): void {
   for (let vis of SAVisList) {
     const tarPos = vis.textPos;
     vis.clear().text(vis.sayText, tarPos, {
-      color: "#ffdddd",
+      color: "#ff0000",
       font: "0.2",
       opacity: 1,
     });
