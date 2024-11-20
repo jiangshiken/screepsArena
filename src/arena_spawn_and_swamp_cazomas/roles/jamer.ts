@@ -9,7 +9,7 @@ import { getPSC } from "../gameObjects/Cre_findPath";
 import { Cre_move } from "../gameObjects/Cre_move";
 import { Cre_pull } from "../gameObjects/Cre_pull";
 import { givePositionToImpartantFriend } from "../gameObjects/CreCommands";
-import { Role } from "../gameObjects/CreTool";
+import { hasThreat, Role } from "../gameObjects/CreTool";
 import { enemies, friends, oppoCSs } from "../gameObjects/GameObjectInitialize";
 import { inEnBaseRan } from "../gameObjects/spawn";
 import { blocked, inOppoRampart } from "../gameObjects/UnitTool";
@@ -53,26 +53,35 @@ export class jamerJob extends Task_Role {
       cre.stop();
     } else {
       const fleeCM = spawnWallCostMatrix.clone();
-      const myJamers = friends.filter(
-        i => i !== cre && i.role === jamer && GR(i, cre) <= 5
-      );
-      const closestJamer = closest(cre, myJamers);
-      if (closestJamer) {
-        const dir = getDirectionByPos(cre, closestJamer);
-        const diagonalDir = directionToDiagonal(dir);
-        const chooseDir = getReverseDirection(diagonalDir);
-        const setLen = 6;
-        const vec = DirectionToVec(chooseDir);
-        for (let i = 0; i < setLen; i++) {
-          const tarVec = VecMultiplyConst(vec, i + 1);
-          if (inBorder(cre.x + tarVec.vec_x, cre.y + tarVec.vec_y)) {
-            const tarPos = posPlusVec(cre, tarVec);
-            fleeCM.set(tarPos.x, tarPos.y, 1);
-            drawText(tarPos, "E", 1);
+      const scan_range = 6;
+      const eht = enemies.filter(i => hasThreat(i) && GR(i, cre) <= scan_range);
+      if (eht) {
+        const myJamers = friends.filter(
+          i => i !== cre && i.role === jamer && GR(i, cre) <= 5
+        );
+        const closestJamer = closest(cre, myJamers);
+        if (closestJamer) {
+          const dir = getDirectionByPos(cre, closestJamer);
+          const diagonalDir = directionToDiagonal(dir);
+          const chooseDir = getReverseDirection(diagonalDir);
+          const setLen = 6;
+          const vec = DirectionToVec(chooseDir);
+          for (let i = 0; i < setLen; i++) {
+            const tarVec = VecMultiplyConst(vec, i + 1);
+            if (inBorder(cre.x + tarVec.vec_x, cre.y + tarVec.vec_y)) {
+              const tarPos = posPlusVec(cre, tarVec);
+              fleeCM.set(tarPos.x, tarPos.y, 1);
+              drawText(tarPos, "E", 1);
+            }
           }
         }
       }
-      const fleeing: boolean = cre.flee(6, 12, fleeCM, getPSC(2, 2));
+      const fleeing: boolean = cre.flee(
+        scan_range,
+        scan_range * 2,
+        fleeCM,
+        getPSC(2, 2)
+      );
       SAB(cre, "FL", fleeing);
       if (fleeing) {
         cre.stop();

@@ -39,7 +39,8 @@ export function loop(): void {
       set_harvesterNotFleeAtStart(true);
       // useWormRush(7);
       // useTailStrategy();
-      useTurtleStrategy();
+      // useTurtleStrategy();
+      useWormHeaderStrategy(1);
     } else if (gp === Kerob) {
       set_harvesterNotFleeAtStart(true);
       useWormHeaderStrategy();

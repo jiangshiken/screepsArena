@@ -1,9 +1,9 @@
 @current
+headerStrategy
+    protect tail
+    heal tail by exchange position :get parts index
 arrange tailStrategy
     use builder and support tailPart
-recover headStrategy
-recover turtle
-    turtle exchange pos change to top level
 #short distance fight
 	change to add to SDF list
 	use SDF action at after creep control

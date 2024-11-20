@@ -24,14 +24,12 @@ export function useWormRush(
   if (oppoSpawns.length >= 2) {
     set_spawnDps(10);
   }
-  if (strategyTick >= 0) {
-    if (wpn === 8) {
-      if (tick >= assembleTick || wormGo) {
-        supplyToughDefender(2, false);
-      }
-    } else {
-      useStandardTurtling(strategyTick, turtleStrength);
+  if (wpn === 8) {
+    if (tick >= assembleTick || wormGo) {
+      supplyToughDefender(2, false);
     }
+  } else {
+    useStandardTurtling(strategyTick, turtleStrength);
   }
   if (strategyTick === 0) {
     for (let i = 0; i < spawnJamerNum; i++) {
