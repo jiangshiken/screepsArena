@@ -129,7 +129,8 @@ export class Cre_move extends Cre_findPath {
     tar: Pos,
     step: number = this.getMoveStepDef(),
     costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
-    PSC: type_PSC = def_PSC
+    PSC: type_PSC = def_PSC,
+    expireTime: number = Infinity
   ): void {
     // SA(this,"moveTo1="+coordinate(tar));
     drawLineLight(this.master, tar);
@@ -150,11 +151,13 @@ export class Cre_move extends Cre_findPath {
         ifNewTask = true;
       } else if (oldTask.costMatrix !== costMatrix) {
         ifNewTask = true;
+      } else if (oldTask.expireTime !== expireTime) {
+        ifNewTask = true;
       }
     } else ifNewTask = true;
     if (ifNewTask) {
       //add new move task
-      new FindPathAndMoveTask(this, tar, step, costMatrix, PSC);
+      new FindPathAndMoveTask(this, tar, step, costMatrix, PSC, expireTime);
     }
   }
 }
@@ -166,8 +169,8 @@ export class MoveTask extends Task_Cre {
   /** memoryed path*/
   path: Pos[];
   master: Cre_move;
-  constructor(master: Cre_move, path: Pos[]) {
-    super(master, Infinity);
+  constructor(master: Cre_move, path: Pos[], expireTime: number = Infinity) {
+    super(master, expireTime);
     this.master = master;
     this.path = path;
     //cancel old task
@@ -208,9 +211,10 @@ export class FindPathAndMoveTask extends MoveTask {
     tar: Pos,
     step: number = master.getMoveStepDef(),
     costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
-    PSC: type_PSC = def_PSC
+    PSC: type_PSC = def_PSC,
+    expireTime: number = Infinity
   ) {
-    super(master, []);
+    super(master, [], expireTime);
     SA(master, "new FPAM Task");
     this.master = master;
     this.tar = tar;

@@ -169,7 +169,7 @@ export function tailPullAction(
   costMat: CostMatrix | undefined = undefined,
   PSC: type_PSC = def_PSC
 ) {
-  leader.newPullTarsTask(followers, tar, 10, costMat, PSC, 1);
+  leader.newPullTarsTask(followers, tar, 10, costMat, PSC, 0);
 }
 export function getNextMember(
   myGroup: Cre_pull[],
@@ -231,7 +231,7 @@ export function tailChainPullAction(myGroup: Cre_pull[], tar: Pos) {
             10,
             undefined,
             def_PSC,
-            1
+            0
           );
         }
         const direct = getDirectionByPos(fatigueHolder, fatigueHolderNext);

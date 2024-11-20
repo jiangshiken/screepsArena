@@ -1,7 +1,5 @@
 @current
 arrange tailStrategy
-    tailer
-    wormTailer
     use builder and support tailPart
 recover headStrategy
 recover turtle
