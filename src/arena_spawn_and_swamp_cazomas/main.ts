@@ -9,7 +9,6 @@ import {
 import { loopEnd, loopStart } from "./loop";
 import { set_harvesterNotFleeAtStart } from "./roles/harvester";
 import { spawnStartHarvester } from "./strategies/strategyTool";
-import { useTailStrategy } from "./strategies/tailStrategy";
 import { useTurtleStrategy } from "./strategies/turtle";
 import { useWormHeaderStrategy } from "./strategies/wormHeaderStrategy";
 import { useWormRush } from "./strategies/wormRush";
@@ -39,7 +38,8 @@ export function loop(): void {
       // useTurtleStrategy();
       set_harvesterNotFleeAtStart(true);
       // useWormRush(7);
-      useTailStrategy();
+      // useTailStrategy();
+      useTurtleStrategy();
     } else if (gp === Kerob) {
       set_harvesterNotFleeAtStart(true);
       useWormHeaderStrategy();

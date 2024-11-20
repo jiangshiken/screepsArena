@@ -14,7 +14,7 @@ import {
   mySpawn,
 } from "../gameObjects/GameObjectInitialize";
 import { findGO } from "../gameObjects/overallMap";
-import { currentGuessPlayer, Dooms } from "../gameObjects/player";
+import { Dooms, guessPlayer, Tigga } from "../gameObjects/player";
 import {
   getSpawnAndBaseContainerEnergy,
   spawnCleared,
@@ -94,7 +94,7 @@ export function supplyWalls(tarProtectPoss: Pos[]) {
   }
 }
 export function supplyJamers() {
-  if (currentGuessPlayer === Dooms) {
+  if (guessPlayer === Dooms) {
     SA(displayPos(), "no jamer");
   } else {
     SA(displayPos(), "has jamer");
@@ -112,13 +112,16 @@ export function supplyBuilders() {
     spawnCleared(mySpawn) &&
     friends.find(i => i.role === builderTurtle) === undefined
   ) {
-    if (currentGuessPlayer === Dooms) {
+    if (guessPlayer === Dooms) {
       //5A4W2C2M=>400+400+100+100
       //6A3W2C2M=>480+300+100+100
       //6A3WC3M=>480+300+50+150
       //7A2M2WCM=>560+100+200+50+50
       spawnCreep(TB("7A2M2WCM"), builderTurtle);
       // spawnCreep(TB("6A3W2C2M"), builderTurtle)
+    } else if (guessPlayer === Tigga) {
+      //80+300+100+100
+      spawnCreep(TB("A3W2C2M"), builderTurtle);
     } else {
       //5A4W2CM=>240+150+400+100+100
       spawnCreep(TB("3AR4W2C2M"), builderTurtle);
@@ -139,7 +142,7 @@ export function supplyDefenders() {
     //9AR2M=>720+150+100
     //11A2M=>880+100		speed=11/4=3
     //10A3M=>800+150		speed=10/6=2
-    if (currentGuessPlayer === Dooms) {
+    if (guessPlayer === Dooms) {
       if (btsl <= 3) {
         spawnCreep(TB("8AR3M"), defender_rampart);
       }
@@ -151,6 +154,17 @@ export function supplyDefenders() {
       }
       if (btsl <= 0) {
         spawnCreep(TB("10A3M"), defender_rampart);
+      }
+    } else if (guessPlayer === Tigga) {
+      if (btsl <= 2) {
+        //80+750+50
+        spawnCreep(TB("A5RM"), defender_rampart);
+      }
+      if (btsl <= 1) {
+        spawnCreep(TB("A5RM"), defender_rampart);
+      }
+      if (btsl <= 0) {
+        spawnCreep(TB("A5RM"), defender_rampart);
       }
     } else {
       if (btsl <= 3) {
@@ -237,7 +251,7 @@ function supplyRamparts() {
   const cssAtSpawn = myCSs.filter(i => atPos(i, mySpawn));
   const hasEnemyArmyAround =
     getEnemyArmies().find(i => GR(i, mySpawn) <= 4) !== undefined;
-  const baseRamNum = currentGuessPlayer === Dooms ? 2 : 3;
+  const baseRamNum = guessPlayer === Dooms ? 2 : 3;
   if (hasEnemyArmyAround) {
     createCS_wait(mySpawn, StructureRampart, 15);
   } else {

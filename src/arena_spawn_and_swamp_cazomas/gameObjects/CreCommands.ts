@@ -56,7 +56,7 @@ import {
 } from "./GameObjectInitialize";
 import { damaged, damagedRate } from "./HasHits";
 import { findGO } from "./overallMap";
-import { currentGuessPlayer, Dooms } from "./player";
+import { Dooms, guessPlayer } from "./player";
 import {
   getMyHealthyRamparts,
   getMyHealthyRamparts_around,
@@ -261,8 +261,8 @@ export function goinRampartAssign(cre: Cre_move, calBlocked: Pos[]) {
 }
 export function attackWeakRampart(cre: Cre_battle) {
   SA(cre, "try attackWeakRampart");
-  let myRamAround = myRamparts.filter(i => GR(i, cre) <= 1);
-  let weakMyRamAround = myRamAround.find(
+  const myRamAround = myRamparts.filter(i => GR(i, cre) <= 1);
+  const weakMyRamAround = myRamAround.find(
     i => !rampartIsHealthy(i, true, false) && !atPos(i, mySpawn)
   );
   if (weakMyRamAround) {
@@ -417,7 +417,7 @@ export function getFitRate(
   }
   //dooms high taunt
   if (
-    currentGuessPlayer === Dooms &&
+    guessPlayer === Dooms &&
     unit instanceof Cre &&
     unit.getBodyPartsNum(WORK) >= 2
   ) {

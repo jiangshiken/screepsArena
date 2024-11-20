@@ -6,6 +6,7 @@ import { Adj, getRangePoss, GR, Pos } from "../utils/Pos";
 import { SA } from "../utils/visual";
 import { enemies, friends, myRamparts, mySpawn } from "./GameObjectInitialize";
 import { findGO } from "./overallMap";
+import { guessPlayer, Tigga } from "./player";
 import { OwnedStru, Ram } from "./Stru";
 import { blocked } from "./UnitTool";
 
@@ -15,7 +16,7 @@ export function myRampartAt(pos: Pos): Ram | undefined {
 export function myRoundRamparts(cre: Pos, range: number): OwnedStru[] {
   return myRamparts.filter(i => GR(i, cre) <= range);
 }
-export const rampartHealthBias0: number = 1000;
+export const rampartHealthBias0: number = guessPlayer === Tigga ? 250 : 1000;
 export function enemyRampartIsHealthy(ram: OwnedStru) {
   return rampartIsHealthy(ram, false);
 }

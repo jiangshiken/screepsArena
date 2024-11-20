@@ -78,7 +78,7 @@ export const builder4Ram: Role = new Role(
   cre => new builder4RamJob(<Cre_build>cre)
 );
 export function isBuilderOutSide(role: Role | undefined): boolean {
-  return role === builderStandard;
+  return role === builderStandard || role === builder4Ram;
 }
 /**job of builder4Ram*/
 export class builder4RamJob extends Task_Role {

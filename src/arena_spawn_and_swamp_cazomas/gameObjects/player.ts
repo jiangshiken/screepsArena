@@ -39,7 +39,7 @@ export const Capta: Player = new Player("Capta");
 export const Kerob: Player = new Player("Kerob");
 export const Other: Player = new Player("Other");
 export const startWaitTick = 44;
-export let currentGuessPlayer = Other;
+export let guessPlayer = Other;
 export function strategyStartTick() {
   return startWaitTick + 1;
 }
@@ -98,13 +98,16 @@ export function identifyOpponent() {
     }
   }
   //
+  setGuessPlayer();
   SA(displayPos(), "guessPlayer=" + getGuessPlayer().name);
 }
 function addSupport(player: Player, evidenceIndex: string, worth: number) {
   player.supportList[evidenceIndex] = worth;
 }
-export function getGuessPlayer(): Player {
+function setGuessPlayer() {
   const rtn = <Player>best(playerList, i => i.getWorth());
-  currentGuessPlayer = rtn;
-  return rtn;
+  guessPlayer = rtn;
+}
+export function getGuessPlayer(): Player {
+  return guessPlayer;
 }
