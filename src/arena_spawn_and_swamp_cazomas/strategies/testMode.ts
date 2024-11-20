@@ -9,7 +9,7 @@ import { TOUGH } from "game/constants";
 import { CostMatrix, searchPath } from "game/path-finder";
 import { StructureExtension } from "game/prototypes";
 
-import { Cre } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
+import { Cre, Task_Role } from "arena_spawn_and_swamp_cazomas/gameObjects/Cre";
 import {
   enemySpawn,
   mySpawn,
@@ -22,7 +22,7 @@ import { createCS } from "../gameObjects/CS";
 import { S } from "../gameObjects/export";
 import { friends } from "../gameObjects/GameObjectInitialize";
 import { spawnCreep } from "../gameObjects/spawn";
-import { builder4Ram } from "../roles/builder";
+import { builderTurtle } from "../roles/builder";
 import { harvester } from "../roles/harvester";
 import { TB } from "../utils/autoBodys";
 import { ct, pt } from "../utils/CPU";
@@ -40,108 +40,169 @@ import {
 
 //这个是测试脚本集合，将所有的测试保留在这里，以便版本变更时确认是否还有以下的特性
 //Role
-export const tester_MSS: Role = new Role("tester_MSS", tester_MSS_Job);
-export const tester_DCB: Role = new Role("tester_DCB", tester_DCB_Job);
-export const tester_MCB: Role = new Role("tester_MCB", tester_MCB_Job);
-export const tester_PFC: Role = new Role("tester_PFC", tester_PFC_Job);
-export const tester_PFC2: Role = new Role("tester_PFC2", tester_PFC2_Job);
+export const tester_MSS: Role = new Role(
+  "tester_MSS",
+  cre => new tester_MSS_Job(<Cre_pull>cre)
+);
+export const tester_DCB: Role = new Role(
+  "tester_DCB",
+  cre => new tester_DCB_Job(<Cre_pull>cre)
+);
+export const tester_MCB: Role = new Role(
+  "tester_MCB",
+  cre => new tester_MCB_Job(<Cre_pull>cre)
+);
+export const tester_PFC: Role = new Role(
+  "tester_PFC",
+  cre => new tester_PFC_Job(<Cre_pull>cre)
+);
+export const tester_PFC2: Role = new Role(
+  "tester_PFC2",
+  cre => new tester_PFC2_Job(<Cre_pull>cre)
+);
+
 function findOtherTester(cre: Cre, role: Role) {
   return friends.find(i => i !== cre && i.role === role);
 }
 //## TEST and LOOP
-export function tester_PFC2_Job(cre: Cre_pull) {
-  SA(cre, "i'm tester_PFC2");
-  if (cre.getBodyPartsNum(TOUGH) > 0) {
-    SA(cre, "i'm tougher");
-    if (!cre.bePulledEvent?.validEvent()) {
-      cre.moveTo_basic(enemySpawn);
+export class tester_PFC2_Job extends Task_Role {
+  master: Cre_pull;
+  constructor(master: Cre_pull) {
+    super(master);
+    this.master = master;
+    this.cancelOldTask(tester_PFC2_Job);
+  }
+  loop_task(): void {
+    const cre = this.master;
+    SA(cre, "i'm tester_PFC2");
+    if (cre.getBodyPartsNum(TOUGH) > 0) {
+      SA(cre, "i'm tougher");
+      if (!cre.bePulledEvent?.validEvent()) {
+        cre.moveTo_basic(enemySpawn);
+      }
+    } else {
+      const tougher = <Cre_move>friends.find(i => i.getBodyPartsNum(TOUGH) > 0);
+      const target = tougher;
+      // const target = friends.find(i => !i.canMove())
+      // if(cre.canMove()){
+      if (target && cre.master.fatigue === 0) {
+        const nextTar = target.moveEvent?.nextStep;
+        if (nextTar) {
+          if (!atPos(cre, nextTar)) {
+            cre.master.moveTo(nextTar);
+          } else if (cre.normalPull(target)) {
+            cre.master.moveTo(enemySpawn);
+          }
+        }
+      }
+      // }
     }
-  } else {
-    const tougher = <Cre_move>friends.find(i => i.getBodyPartsNum(TOUGH) > 0);
-    const target = tougher;
-    // const target = friends.find(i => !i.canMove())
-    // if(cre.canMove()){
-    if (target && cre.master.fatigue === 0) {
-      const nextTar = target.moveEvent?.nextStep;
-      if (nextTar) {
-        if (!atPos(cre, nextTar)) {
-          cre.master.moveTo(nextTar);
-        } else if (cre.normalPull(target)) {
-          cre.master.moveTo(enemySpawn);
+  }
+}
+export class tester_PFC_Job extends Task_Role {
+  master: Cre_pull;
+  constructor(master: Cre_pull) {
+    super(master);
+    this.master = master;
+    this.cancelOldTask(tester_PFC_Job);
+  }
+  loop_task(): void {
+    const cre = this.master;
+    SA(cre, "i'm tester_PFC");
+    const pos1 = posPlusVec(mySpawn, { vec_x: 1, vec_y: -1 });
+    const pos2 = posPlusVec(mySpawn, { vec_x: 1, vec_y: 0 });
+    const pos3 = posPlusVec(mySpawn, { vec_x: 2, vec_y: 0 });
+    const pos4 = posPlusVec(mySpawn, { vec_x: 1, vec_y: 1 });
+    const testTick = 50;
+    if (tick <= testTick) {
+      if (cre.getBodyPartsNum(TOUGH) > 0) {
+        cre.master.moveTo(pos1);
+      } else {
+        cre.master.moveTo(pos2);
+      }
+    }
+    if (tick === testTick + 1) {
+      if (cre.getBodyPartsNum(TOUGH) > 0) {
+        cre.master.moveTo(pos3);
+      }
+    }
+    if (tick === testTick + 2) {
+      if (cre.getBodyPartsNum(TOUGH) === 0) {
+        const otherFri = <Cre_findPath>findOtherTester(cre, tester_PFC);
+        if (otherFri) {
+          cre.normalPull(otherFri);
+          cre.master.moveTo(pos4);
         }
       }
     }
-    // }
   }
 }
-export function tester_PFC_Job(cre: Cre_pull) {
-  SA(cre, "i'm tester_PFC");
-  const pos1 = posPlusVec(mySpawn, { vec_x: 1, vec_y: -1 });
-  const pos2 = posPlusVec(mySpawn, { vec_x: 1, vec_y: 0 });
-  const pos3 = posPlusVec(mySpawn, { vec_x: 2, vec_y: 0 });
-  const pos4 = posPlusVec(mySpawn, { vec_x: 1, vec_y: 1 });
-  const testTick = 50;
-  if (tick <= testTick) {
-    if (cre.getBodyPartsNum(TOUGH) > 0) {
-      cre.master.moveTo(pos1);
-    } else {
-      cre.master.moveTo(pos2);
-    }
+export class tester_MSS_Job extends Task_Role {
+  master: Cre_pull;
+  constructor(master: Cre_pull) {
+    super(master);
+    this.master = master;
+    this.cancelOldTask(tester_MSS_Job);
   }
-  if (tick === testTick + 1) {
-    if (cre.getBodyPartsNum(TOUGH) > 0) {
+  loop_task(): void {
+    const cre = this.master;
+    SA(cre, "i'm tester_MSS");
+    const pos1 = posPlusVec(mySpawn, { vec_x: 1, vec_y: -1 });
+    const pos2 = posPlusVec(mySpawn, { vec_x: 1, vec_y: 1 });
+    const pos3 = posPlusVec(mySpawn, { vec_x: 2, vec_y: 0 });
+    if (tick <= 20) {
+      if (cre.id % 2 === 0) {
+        cre.master.moveTo(pos1);
+      } else {
+        cre.master.moveTo(pos2);
+      }
+    }
+    if (tick === 21) {
       cre.master.moveTo(pos3);
     }
   }
-  if (tick === testTick + 2) {
-    if (cre.getBodyPartsNum(TOUGH) === 0) {
-      const otherFri = <Cre_findPath>findOtherTester(cre, tester_PFC);
-      if (otherFri) {
-        cre.normalPull(otherFri);
-        cre.master.moveTo(pos4);
-      }
+}
+export class tester_MCB_Job extends Task_Role {
+  master: Cre_pull;
+  constructor(master: Cre_pull) {
+    super(master);
+    this.master = master;
+    this.cancelOldTask(tester_MCB_Job);
+  }
+  loop_task(): void {
+    const cre = this.master;
+    SA(cre, "i'm tester_MCB");
+    if (tick >= 34) {
+      const csPos = posPlusVec(mySpawn, { vec_x: 2, vec_y: -1 });
+      cre.master.moveTo(csPos);
     }
   }
 }
-export function tester_MSS_Job(cre: Cre) {
-  SA(cre, "i'm tester_MSS");
-  const pos1 = posPlusVec(mySpawn, { vec_x: 1, vec_y: -1 });
-  const pos2 = posPlusVec(mySpawn, { vec_x: 1, vec_y: 1 });
-  const pos3 = posPlusVec(mySpawn, { vec_x: 2, vec_y: 0 });
-  if (tick <= 20) {
+export class tester_DCB_Job extends Task_Role {
+  master: Cre_pull;
+  constructor(master: Cre_pull) {
+    super(master);
+    this.master = master;
+    this.cancelOldTask(tester_DCB_Job);
+  }
+  loop_task(): void {
+    const cre = this.master;
+    SA(cre, "i'm tester_DCB");
+    const pos1 = posPlusVec(mySpawn, { vec_x: 1, vec_y: -1 });
+    const pos2 = posPlusVec(mySpawn, { vec_x: 1, vec_y: 0 });
     if (cre.id % 2 === 0) {
-      cre.master.moveTo(pos1);
+      if (tick <= 20) {
+        cre.master.moveTo(pos1);
+      } else {
+        cre.master.moveTo(pos2);
+        const otherTester = findOtherTester(cre, tester_DCB);
+        if (otherTester) cre.master.attack(otherTester.master);
+      }
     } else {
-      cre.master.moveTo(pos2);
-    }
-  }
-  if (tick === 21) {
-    cre.master.moveTo(pos3);
-  }
-}
-export function tester_MCB_Job(cre: Cre) {
-  SA(cre, "i'm tester_MCB");
-  if (tick >= 34) {
-    const csPos = posPlusVec(mySpawn, { vec_x: 2, vec_y: -1 });
-    cre.master.moveTo(csPos);
-  }
-}
-export function tester_DCB_Job(cre: Cre) {
-  SA(cre, "i'm tester_DCB");
-  const pos1 = posPlusVec(mySpawn, { vec_x: 1, vec_y: -1 });
-  const pos2 = posPlusVec(mySpawn, { vec_x: 1, vec_y: 0 });
-  if (cre.id % 2 === 0) {
-    if (tick <= 20) {
-      cre.master.moveTo(pos1);
-    } else {
-      cre.master.moveTo(pos2);
-      const otherTester = findOtherTester(cre, tester_DCB);
-      if (otherTester) cre.master.attack(otherTester.master);
-    }
-  } else {
-    if (tick <= 20) {
-      cre.master.moveTo(pos2);
-    } else {
+      if (tick <= 20) {
+        cre.master.moveTo(pos2);
+      } else {
+      }
     }
   }
 }
@@ -191,7 +252,7 @@ export function useTest() {
       spawnCreep(TB("CM"), harvester);
       const csPos = posPlusVec(mySpawn, { vec_x: 2, vec_y: -1 });
       createCS(csPos, StructureExtension);
-      spawnCreep(TB("WCM"), builder4Ram);
+      spawnCreep(TB("WCM"), builderTurtle);
       spawnCreep(TB("M"), tester_MCB);
     }
   } else if (mode === "PFC") {

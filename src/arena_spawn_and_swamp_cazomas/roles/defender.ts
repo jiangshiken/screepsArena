@@ -1,20 +1,18 @@
 import { ConstructionSite } from "game/prototypes";
-import { findClosestByRange } from "game/utils";
 
 import { mySpawn } from "arena_spawn_and_swamp_cazomas/gameObjects/GameObjectInitialize";
 import { Task_Role } from "../gameObjects/Cre";
 import { Cre_battle } from "../gameObjects/Cre_battle";
 import {
   attackWeakRampart,
-  cpuBreakJudge,
   defendTheRampart,
 } from "../gameObjects/CreCommands";
 import { getEnemyThreats, Role } from "../gameObjects/CreTool";
 import { enemies } from "../gameObjects/GameObjectInitialize";
 import { findGO } from "../gameObjects/overallMap";
 import { tick } from "../utils/game";
-import { GR } from "../utils/Pos";
-import { P, SA } from "../utils/visual";
+import { Adj, closest } from "../utils/Pos";
+import { SA } from "../utils/visual";
 
 //role
 /**the defender that hide in rampart*/
@@ -38,16 +36,15 @@ export class defender_RampartJob extends Task_Role {
   loop_task(): void {
     const cre = this.master;
     SA(cre, "defender_RampartJob");
-    P("defender_RampartJob");
     cre.fight();
-    const EnemyAroundSpawn = getEnemyThreats().filter(i => GR(i, mySpawn) <= 1);
+    const EnemyAroundSpawn = getEnemyThreats().filter(i => Adj(i, mySpawn));
     if (
       EnemyAroundSpawn.length > 0 &&
       ((tick > 1950 && !findGO(mySpawn, ConstructionSite)) || tick > 1965)
     ) {
       SA(cre, "final protect mode");
-      const tar = findClosestByRange(cre, EnemyAroundSpawn);
-      if (GR(cre, tar) > 1) {
+      const tar = closest(cre, EnemyAroundSpawn);
+      if (tar && !Adj(cre, tar)) {
         SA(cre, "MTJ_follow");
         cre.MT(tar);
       } else {
@@ -55,21 +52,21 @@ export class defender_RampartJob extends Task_Role {
         cre.stop();
       }
     } else {
-      const hasEnemyAround = enemies.find(i => GR(i, cre) <= 4) !== undefined;
-      if (!hasEnemyAround) {
-        if (cpuBreakJudge(cre)) {
-          return;
-        }
-      }
-      let roundEn = enemies.filter(i => GR(i, cre) <= 1);
+      // const hasEnemyAround = enemies.find(i => GR(i, cre) <= 4) !== undefined;
+      // if (!hasEnemyAround) {
+      //   // if (cpuBreakJudge(cre)) {
+      //   //   return;
+      //   // }
+      // }
+      const roundEn = enemies.filter(i => Adj(i, cre));
       if (roundEn.length === 0) {
         attackWeakRampart(cre);
       }
       if (cre.appointMovementIsActived(1)) {
         cre.useAppointMovement();
-        return;
+      } else {
+        defendTheRampart(cre);
       }
-      defendTheRampart(cre);
     }
   }
 }

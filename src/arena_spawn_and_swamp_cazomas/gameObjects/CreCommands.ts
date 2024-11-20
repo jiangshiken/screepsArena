@@ -1,6 +1,5 @@
 import { ATTACK, RANGED_ATTACK, WORK } from "game/constants";
 
-import { getCPUPercent } from "../utils/CPU";
 import {
   best,
   divide0,
@@ -10,7 +9,16 @@ import {
   ranGet,
   sum,
 } from "../utils/JS";
-import { Adj, atPos, COO, getRangePoss, GR, Pos } from "../utils/Pos";
+import {
+  Adj,
+  atPos,
+  COO,
+  getRangePoss,
+  GR,
+  InRan2,
+  InShotRan,
+  Pos,
+} from "../utils/Pos";
 import {
   dotted,
   drawLineComplex,
@@ -55,7 +63,6 @@ import {
   inMyHealthyRampart,
   rampartIsHealthy,
   ramSaveCostMatrix,
-  refreshRampartSaveCostMatrix,
 } from "./ramparts";
 import {
   blocked,
@@ -95,12 +102,12 @@ export function defendTheRampart(cre: Cre_move) {
   const scanRange = 20;
   const enemyArmys = getEnemyArmies().filter(i => GR(i, cre) <= scanRange);
   const target = best(enemyArmys, en => {
-    const aroundRam = myRamparts.find(i => GR(i, en) <= 1);
-    const aroundRam2 = myRamparts.find(i => GR(i, en) <= 2);
-    const aroundRam3 = myRamparts.find(i => GR(i, en) <= 3);
+    const aroundRam = myRamparts.find(i => Adj(i, en));
+    const aroundRam2 = myRamparts.find(i => InRan2(i, en));
+    const aroundRam3 = myRamparts.find(i => InShotRan(i, en));
     const aroundBonus = aroundRam ? 4 : aroundRam2 ? 2.4 : aroundRam3 ? 1.6 : 1;
     const RANum = en.getHealthyBodyPartsNum(RANGED_ATTACK);
-    const inBaseRange3 = GR(en, mySpawn) <= 3;
+    const inBaseRange3 = InShotRan(en, mySpawn);
     const shotBaseBonus = inBaseRange3 ? 1 + 0.5 * RANum : 1;
     const baseRangeReduce = rangeReduce(en, mySpawn, 1);
     const creRangeReduce = rangeReduce(en, cre, 1);
@@ -153,7 +160,6 @@ export function moveToRampart(cre: Cre_move, enemy: Pos | undefined) {
 }
 export function gotoTargetRampart(cre: Cre_move, targetRampart: Pos) {
   SA(cre, "gotoTargetRampart " + COO(targetRampart));
-  refreshRampartSaveCostMatrix(cre, 20);
   const sRtn = searchPath_noArea(cre, targetRampart, ramSaveCostMatrix);
   let cost = sRtn.cost;
   const path = sRtn.path;
@@ -170,7 +176,7 @@ export function gotoTargetRampart(cre: Cre_move, targetRampart: Pos) {
         SA(cre, "path out of ram");
         const tarFriends = getOtherFriends(cre).filter(
           i =>
-            GR(i, cre) <= 1 &&
+            Adj(i, cre) &&
             inMyHealthyRampart(i) &&
             !(cre instanceof Cre_build && cre.getIsWorking()) &&
             i.getHealthyBodyPartsNum(ATTACK) <
@@ -357,17 +363,17 @@ export function exchangePositionWithImpartantFriend(cre: Cre): boolean {
   return false;
 }
 /**used on normal role ,judge if cpu over used.If it is ,return true*/
-export function cpuBreakJudge(cre: Cre): boolean {
-  if (getCPUPercent() > 0.8) {
-    if (isMyTick(cre, 5)) {
-      SA(cre, "my turn");
-    } else {
-      SA(cre, "cpu break");
-      return true;
-    }
-  }
-  return false;
-}
+// export function cpuBreakJudge(cre: Cre): boolean {
+//   if (getCPUPercent() > 0.8) {
+//     if (isMyTick(cre, 5)) {
+//       SA(cre, "my turn");
+//     } else {
+//       SA(cre, "cpu break");
+//       return true;
+//     }
+//   }
+//   return false;
+// }
 /**find a fit target of damaged friend*/
 export function findFitDamagedFriend(cre: Cre_battle): {
   maxFitEn: Unit;

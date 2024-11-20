@@ -5,14 +5,9 @@ import {
   spawnCreep,
   spawnCreepInFront,
 } from "../gameObjects/spawn";
-import {
-  builder4Ram,
-  builderTurtle,
-  builderTurtleInfo,
-} from "../roles/builder";
+import { builderTurtle, builderTurtleInfo } from "../roles/builder";
 import { TB } from "../utils/autoBodys";
 import { displayPos, SA } from "../utils/visual";
-import { spawnStartHarvester } from "./strategyTool";
 
 import { CARRY } from "game/constants";
 import { StructureRampart } from "game/prototypes";
@@ -101,28 +96,28 @@ export function useStandardTurtling(st: number, strength: number = 0) {
     ranPoss.forEach(pos => supplyCS(pos, StructureRampart));
   }
 }
-/**use 4 ramparts to defend the base*/
-export function use4RamDefend(st: number, exposeSpawnSimple: boolean = false) {
-  SA(displayPos(), "use4RamDefend");
-  supplyCS(mySpawn, StructureRampart, 10);
-  supplyCS({ x: mySpawn.x, y: mySpawn.y + 1 }, StructureRampart, 10);
-  supplyCS({ x: mySpawn.x, y: mySpawn.y - 1 }, StructureRampart, 10);
-  supplyCS({ x: mySpawn.x - leftRate(), y: mySpawn.y }, StructureRampart, 10);
-  supplyBuilder();
-  spawnStartHarvester(1, true);
-}
-function supplyBuilder() {
-  if (
-    spawnCleared(mySpawn) &&
-    friends.find(i => i.role === builder4Ram) === undefined
-  ) {
-    spawnCreep(TB("2C5MCW"), builder4Ram);
-  }
-}
+// /**use 4 ramparts to defend the base*/
+// export function use4RamDefend(st: number, exposeSpawnSimple: boolean = false) {
+//   SA(displayPos(), "use4RamDefend");
+//   supplyCS(mySpawn, StructureRampart, 10);
+//   supplyCS({ x: mySpawn.x, y: mySpawn.y + 1 }, StructureRampart, 10);
+//   supplyCS({ x: mySpawn.x, y: mySpawn.y - 1 }, StructureRampart, 10);
+//   supplyCS({ x: mySpawn.x - leftRate(), y: mySpawn.y }, StructureRampart, 10);
+//   supplyBuilder();
+//   spawnStartHarvester(1, true);
+// }
+// function supplyBuilder() {
+//   if (
+//     spawnCleared(mySpawn) &&
+//     friends.find(i => i.role === builder4Ram) === undefined
+//   ) {
+//     spawnCreep(TB("2C5MCW"), builder4Ram);
+//   }
+// }
 export function supplyHarvester(st: number) {
   //supply harvester
   if (st >= 2 && st <= 300 && spawnCleared(mySpawn)) {
-    let carryNum = sum(
+    const carryNum = sum(
       friends.filter(i => i.role === harvester),
       i => i.getBodyPartsNum(CARRY)
     );

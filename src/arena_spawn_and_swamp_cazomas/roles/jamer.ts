@@ -8,10 +8,7 @@ import { Cre, Task_Role } from "../gameObjects/Cre";
 import { getPSC } from "../gameObjects/Cre_findPath";
 import { Cre_move } from "../gameObjects/Cre_move";
 import { Cre_pull } from "../gameObjects/Cre_pull";
-import {
-  cpuBreakJudge,
-  givePositionToImpartantFriend,
-} from "../gameObjects/CreCommands";
+import { givePositionToImpartantFriend } from "../gameObjects/CreCommands";
 import { Role } from "../gameObjects/CreTool";
 import { enemies, friends, oppoCSs } from "../gameObjects/GameObjectInitialize";
 import { inEnBaseRan } from "../gameObjects/spawn";
@@ -80,9 +77,9 @@ export class jamerJob extends Task_Role {
       if (fleeing) {
         cre.stop();
       } else {
-        if (cpuBreakJudge(cre)) {
-          return;
-        }
+        // if (cpuBreakJudge(cre)) {
+        //   return;
+        // }
         const jamers = friends.filter(i => i.role === jamer);
         givePositionToImpartantFriend(cre);
         const enemyCSsHasEnemyBuilderAround = oppoCSs.filter(

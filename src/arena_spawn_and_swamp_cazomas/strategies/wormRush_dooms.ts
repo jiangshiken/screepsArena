@@ -29,7 +29,7 @@ import { addStrategyTick, strategyTick, tick } from "../utils/game";
 import { closest, GR, InRan2 } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA } from "../utils/visual";
-import { useStandardTurtling } from "./4ramDefendTool";
+import { useStandardTurtling } from "./stdTurtlingTool";
 import { supplyToughDefender } from "./strategyTool";
 export function useWormRush_dooms(
   wpn: number,

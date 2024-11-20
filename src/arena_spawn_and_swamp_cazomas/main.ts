@@ -10,9 +10,9 @@ import { loopEnd, loopStart } from "./loop";
 import { set_harvesterNotFleeAtStart } from "./roles/harvester";
 import { spawnStartHarvester } from "./strategies/strategyTool";
 import { useTailStrategy } from "./strategies/tailStrategy";
+import { useTurtleStrategy } from "./strategies/turtle";
 import { useWormHeaderStrategy } from "./strategies/wormHeaderStrategy";
 import { useWormRush } from "./strategies/wormRush";
-import { useWormRush_dooms } from "./strategies/wormRush_dooms";
 import { ct, pt } from "./utils/CPU";
 import { tick } from "./utils/game";
 
@@ -45,7 +45,8 @@ export function loop(): void {
       useWormHeaderStrategy();
     } else if (gp === Dooms) {
       set_harvesterNotFleeAtStart(true);
-      useWormRush_dooms(7, 1, 0, 2);
+      // useWormRush_dooms(7, 1, 0, 2);
+      useTurtleStrategy();
     } else {
       useWormRush(7);
     }

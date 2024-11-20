@@ -59,9 +59,8 @@ export function inMyHealthyRampart(pos: Pos) {
   return ram && ram.my && rampartIsHealthy(ram);
 }
 export let ramSaveCostMatrix_Event: Event_ori = new Event_ori();
-export let ramSaveCostMatrix: CostMatrix | undefined;
-
-export function refreshRampartSaveCostMatrix(pos: Pos, range: number) {
+export let ramSaveCostMatrix: CostMatrix = new CostMatrix();
+export function setAroundRampartSaveCostMatrix(pos: Pos, range: number) {
   SA(pos, "refreshed CM");
   const rangePoss = getRangePoss(pos, range);
   for (let pos of rangePoss) {
@@ -74,9 +73,6 @@ export function refreshRampartSaveCostMatrix(pos: Pos, range: number) {
       }
     } else {
       cost = 200;
-    }
-    if (!ramSaveCostMatrix) {
-      ramSaveCostMatrix = new CostMatrix();
     }
     ramSaveCostMatrix.set(pos.x, pos.y, cost);
   }

@@ -56,6 +56,7 @@ import {
   setGameObjectsThisTick,
   setOverallMap,
 } from "./gameObjects/overallMap";
+import { setAroundRampartSaveCostMatrix } from "./gameObjects/ramparts";
 import { checkSpawns, SpawnInfo, spawnList } from "./gameObjects/spawn";
 import { Con } from "./gameObjects/Stru";
 import {
@@ -167,6 +168,7 @@ export function loopStart() {
   const st_predictOppos = ct();
   setBlockCostMatrix();
   setFriendBlockCostMatrix();
+  setAroundRampartSaveCostMatrix(mySpawn, 6);
   pt("predictOppos and setRamMoveMapValue", st_predictOppos);
   const st_checkSpawns = ct();
   checkSpawns();

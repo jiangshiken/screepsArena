@@ -17,7 +17,6 @@ import { protectSelfExtraTaunt } from "../gameObjects/battle";
 import { canBeBuildByCre, Cre_build } from "../gameObjects/Cre_build";
 import { calAroundEnergy, getHarvables } from "../gameObjects/Cre_harvest";
 import {
-  cpuBreakJudge,
   defendTheRampart,
   gotoTargetRampart,
 } from "../gameObjects/CreCommands";
@@ -79,7 +78,7 @@ export const builder4Ram: Role = new Role(
   cre => new builder4RamJob(<Cre_build>cre)
 );
 export function isBuilderOutSide(role: Role | undefined): boolean {
-  return role === builderStandard || role === builder4Ram;
+  return role === builderStandard;
 }
 /**job of builder4Ram*/
 export class builder4RamJob extends Task_Role {
@@ -94,12 +93,12 @@ export class builder4RamJob extends Task_Role {
     SA(cre, "builder4RamJob");
     const scanCSRange = 8;
     if (myCSs.find(i => GR(mySpawn, i) <= scanCSRange)) {
-      let css = <CS[]>(
+      const css = <CS[]>(
         myCSs.filter(
           i => GR(i, mySpawn) <= scanCSRange && canBeBuildByCre(i, cre)
         )
       );
-      let cs = getMaxWorthCSS(css);
+      const cs = getMaxWorthCSS(css);
       if (cs) {
         SA(cre, "builderNormalControl");
         builderNormalControl(cre, cs);
@@ -300,11 +299,11 @@ export function buildStructureByWorth(
   worth: number = 1
 ): Pos | undefined {
   SA(pos, "buildStructure here type=" + getClassName(type));
-  let poss = getRangePoss(pos, 1);
-  let mc = myCSs;
-  let validPos = poss.find(i => !hasConstructionSite(i) && !blocked(i));
+  const poss = getRangePoss(pos);
+  const mc = myCSs;
+  const validPos = poss.find(i => !hasConstructionSite(i) && !blocked(i));
   if (validPos) {
-    let rtn = createCS(validPos, type, worth, true);
+    createCS(validPos, type, worth, true);
     return validPos;
   } else return undefined;
 }
@@ -369,11 +368,11 @@ const build_rampart = "build rampart";
 const build_extensions = "build extensions";
 
 export class BuilderStandardTask extends Task_Cre {
-  master: Cre_build;
+  readonly master: Cre_build;
   step: string = goto_outside_resource;
-  fleeRange: number;
+  readonly fleeRange: number;
   isWorking: boolean = true;
-  fleeBias: number;
+  readonly fleeBias: number;
   constructor(master: Cre_build) {
     super(master, Infinity);
     this.master = master;
@@ -389,10 +388,10 @@ export class BuilderStandardTask extends Task_Cre {
   /**control steps and run away from danger*/
   loop_task(): void {
     const cre = this.master;
-    if (cpuBreakJudge(cre)) {
-      cre.buildStatic();
-      return;
-    }
+    // if (cpuBreakJudge(cre)) {
+    //   cre.buildStatic();
+    //   return;
+    // }
     SA(cre, "step=" + this.step);
     const closestEnemy = findClosestByRange(cre, getEnemyThreats());
     const cs = <CS | undefined>(

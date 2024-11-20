@@ -11,7 +11,7 @@ import {
 } from "../roles/wormPart_rush";
 import { TB } from "../utils/autoBodys";
 import { addStrategyTick, strategyTick, tick } from "../utils/game";
-import { useStandardTurtling } from "./4ramDefendTool";
+import { useStandardTurtling } from "./stdTurtlingTool";
 import { supplyToughDefender } from "./strategyTool";
 
 export function useWormRush(
