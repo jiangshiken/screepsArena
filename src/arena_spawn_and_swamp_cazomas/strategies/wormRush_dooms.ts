@@ -1,4 +1,4 @@
-import { ATTACK } from "game/constants";
+import { ATTACK, WORK } from "game/constants";
 import { Cre_battle } from "../gameObjects/Cre_battle";
 import { Cre_pull, PullTarsTask } from "../gameObjects/Cre_pull";
 import { defendInArea } from "../gameObjects/CreCommands";
@@ -7,6 +7,7 @@ import {
   enemies,
   enemySpawn,
   friends,
+  oppoCSs,
   oppoSpawns,
 } from "../gameObjects/GameObjectInitialize";
 import { damaged, healthRate } from "../gameObjects/HasHits";
@@ -21,22 +22,23 @@ import {
   assembleTick,
   set_wormPartNum,
   wormGo,
+  wormIndex,
   WormInfo,
   wormPartJob,
 } from "../roles/wormPart_rush";
 import { TB } from "../utils/autoBodys";
 import { addStrategyTick, strategyTick, tick } from "../utils/game";
-import { closest, GR, InRan2 } from "../utils/Pos";
+import { best } from "../utils/JS";
+import { Adj, closest, GR, InRan2 } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA } from "../utils/visual";
 import { useStandardTurtling } from "./stdTurtlingTool";
 import { supplyToughDefender } from "./strategyTool";
-export function useWormRush_dooms(
-  wpn: number,
-  tailSize: number = 0,
-  turtleStrength: number = 1,
-  spawnJamerNum: number = 0
-) {
+export function useWormRush_dooms() {
+  const wpn: number = 7;
+  const tailSize: number = 0;
+  const turtleStrength: number = 0;
+  const spawnJamerNum: number = 8;
   set_wormPartNum(wpn);
   if (oppoSpawns.length >= 2) {
     set_spawnDps(10);
@@ -90,6 +92,7 @@ const wormPart_dooms: Role = new Role(
   "wormPart_dooms",
   cre => new wormPart_doomsJob(<Cre_battle>cre)
 );
+let passEnemySecondSpawn: boolean = false;
 class wormPart_doomsJob extends wormPartJob {
   master: Cre_battle;
   constructor(master: Cre_battle) {
@@ -99,6 +102,52 @@ class wormPart_doomsJob extends wormPartJob {
   }
   isWormPart(cre: Cre_pull): boolean {
     return cre.role === wormPart_dooms;
+  }
+  wormGo(): void {
+    const cre = this.master;
+    if (passEnemySecondSpawn) {
+      SA(cre, "SWG");
+      super.wormGo();
+    } else {
+      SA(cre, "GSS");
+      const secondSpawn = oppoSpawns.find(i => i !== enemySpawn);
+      const secondSpawnCS = oppoCSs.find(i => i.progress > 300);
+      // SA(cre, "secondSpawn=" + COO(secondSpawn));
+      // SA(cre, "oppoCSs=" + oppoCSs.length);
+      // for (let oppoCS of oppoCSs) {
+      //   SA(cre, "p=" + oppoCS.progress);
+      // }
+      // SA(cre, "secondSpawnCS=" + COO(secondSpawnCS));
+      const tar = secondSpawn ? secondSpawn : secondSpawnCS;
+      if (tar) {
+        const myWormParts = this.getMyWormParts();
+        const head = <Cre_battle>best(myWormParts, i => -wormIndex(i));
+        if (Adj(head, tar)) {
+          const tarBuilder = enemies.find(
+            i => i.getBodyPartsNum(WORK) >= 3 && GR(i, tar) <= 7
+          );
+          if (secondSpawn) {
+            SA(cre, "AS");
+            cre.MT_stop(secondSpawn);
+          } else if (tarBuilder) {
+            SA(cre, "AB");
+            cre.MT_stop(tarBuilder);
+            // findTask(head, PullTarsTask)?.end();
+            // passEnemySecondSpawn = true;
+          } else {
+            SA(cre, "pass");
+            passEnemySecondSpawn = true;
+          }
+        } else {
+          SA(cre, "HSS");
+          const followers = myWormParts.filter(i => i !== head);
+          head.newPullTarsTask(followers, tar, 5);
+        }
+      } else {
+        SA(cre, "NSS");
+        passEnemySecondSpawn = true;
+      }
+    }
   }
   rushSpawn() {
     const cre = this.master;

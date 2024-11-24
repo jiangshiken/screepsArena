@@ -11,8 +11,13 @@ import { Cre_pull } from "../gameObjects/Cre_pull";
 import { givePositionToImpartantFriend } from "../gameObjects/CreCommands";
 import { hasThreat, Role } from "../gameObjects/CreTool";
 import { enemies, friends, oppoCSs } from "../gameObjects/GameObjectInitialize";
+import { guessPlayer, Tigga } from "../gameObjects/player";
 import { inEnBaseRan } from "../gameObjects/spawn";
-import { blocked, inOppoRampart } from "../gameObjects/UnitTool";
+import {
+  blocked,
+  inOppoRampart,
+  moveBlockCostMatrix,
+} from "../gameObjects/UnitTool";
 import { best, divideReduce } from "../utils/JS";
 import {
   atPos,
@@ -52,8 +57,11 @@ export class jamerJob extends Task_Role {
       SA(cre, "inOppoRampart");
       cre.stop();
     } else {
-      const fleeCM = spawnWallCostMatrix.clone();
-      const scan_range = 6;
+      const fleeCM =
+        guessPlayer === Tigga
+          ? spawnWallCostMatrix.clone()
+          : moveBlockCostMatrix.clone();
+      const scan_range = guessPlayer === Tigga ? 6 : 4;
       const eht = enemies.filter(i => hasThreat(i) && GR(i, cre) <= scan_range);
       if (eht) {
         const myJamers = friends.filter(
@@ -64,7 +72,7 @@ export class jamerJob extends Task_Role {
           const dir = getDirectionByPos(cre, closestJamer);
           const diagonalDir = directionToDiagonal(dir);
           const chooseDir = getReverseDirection(diagonalDir);
-          const setLen = 6;
+          const setLen = guessPlayer === Tigga ? 6 : 2;
           const vec = DirectionToVec(chooseDir);
           for (let i = 0; i < setLen; i++) {
             const tarVec = VecMultiplyConst(vec, i + 1);
@@ -113,9 +121,16 @@ export class jamerJob extends Task_Role {
           const friTargetNum = jamers.filter(
             i => i.upgrade.target === tar
           ).length;
+          const spawnBonus =
+            tar instanceof CS && tar.progressTotal === 3000 ? 100 : 1;
           const splitReduce = divideReduce(friTargetNum, 1);
           return (
-            typeBonus * progressRateBonus * disReduce * selfBonus * splitReduce
+            typeBonus *
+            progressRateBonus *
+            disReduce *
+            selfBonus *
+            splitReduce *
+            spawnBonus
           );
         });
         SA(cre, "target=" + COO(target));

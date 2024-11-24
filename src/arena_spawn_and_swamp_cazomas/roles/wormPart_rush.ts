@@ -125,40 +125,44 @@ export class wormPartJob extends Task_Role {
       }
     } else {
       //worm go
-      SA(cre, "WG");
-      const myWormParts = this.getMyWormParts();
-
-      if (wormStartWait === undefined) {
-        SA(cre, "RUSH");
-        const head = best(myWormParts, i => -wormIndex(i));
-        if (head && head === cre) {
-          const followers = myWormParts.filter(i => i !== head);
-          const startGateUp = getStartGateAvoidFromEnemies();
-          head.startGateUp = startGateUp;
-          const target = enemySpawn;
-          head.newPullTarsTask(followers, target, 5);
-          const scanCloseDis = 6;
-          if (GR(cre, enemySpawn) <= scanCloseDis) {
-            wormStartWait = new Event_ori();
-            findTask(head, PullTarsTask)?.end();
-          }
+      this.wormGo();
+    }
+  }
+  wormGo() {
+    const cre = this.master;
+    const creInd = wormIndex(cre);
+    SA(cre, "WG");
+    const myWormParts = this.getMyWormParts();
+    if (wormStartWait === undefined) {
+      SA(cre, "RUSH");
+      const head = best(myWormParts, i => -wormIndex(i));
+      if (head && head === cre) {
+        const followers = myWormParts.filter(i => i !== head);
+        const startGateUp = getStartGateAvoidFromEnemies();
+        head.startGateUp = startGateUp;
+        const target = enemySpawn;
+        head.newPullTarsTask(followers, target, 5);
+        const scanCloseDis = 6;
+        if (GR(cre, enemySpawn) <= scanCloseDis) {
+          wormStartWait = new Event_ori();
+          findTask(head, PullTarsTask)?.end();
         }
+      }
+    } else {
+      //start wait
+      if (wormStartWait.validEvent(6)) {
+        SA(cre, "WSW");
+        const assembleX = enemySpawn.x + creInd - 3;
+        const isUp = cre.y < enemySpawn.y;
+        const keepDis = 5;
+        const assembleY = isUp
+          ? enemySpawn.y - keepDis
+          : enemySpawn.y + keepDis;
+        cre.MT(new Pos_C(assembleX, assembleY));
       } else {
-        //start wait
-        if (wormStartWait.validEvent(6)) {
-          SA(cre, "WSW");
-          const assembleX = enemySpawn.x + creInd - 3;
-          const isUp = cre.y < enemySpawn.y;
-          const keepDis = 5;
-          const assembleY = isUp
-            ? enemySpawn.y - keepDis
-            : enemySpawn.y + keepDis;
-          cre.MT(new Pos_C(assembleX, assembleY));
-        } else {
-          //rush spawn
-          SA(cre, "AS");
-          this.rushSpawn();
-        }
+        //rush spawn
+        SA(cre, "AS");
+        this.rushSpawn();
       }
     }
   }
