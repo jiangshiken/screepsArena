@@ -81,22 +81,35 @@ export class Cre_move extends Cre_findPath {
     this.moveTo_direct(tar);
     this.stop();
   }
+  getFleePos(
+    range: number = 4,
+    FleeRange: number = range * 2,
+    costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
+    PSC: type_PSC = def_PSC
+  ): Pos | undefined {
+    const eht = enemies.filter(i => hasThreat(i) && GR(i, this) <= range);
+    if (eht.length > 0) {
+      const spf = searchPath_flee(this, eht, FleeRange, costMatrix, PSC);
+      if (spf.path.length > 0) {
+        const tar = spf.path[0];
+        return tar;
+      } else {
+        return undefined;
+      }
+    } else {
+      return undefined;
+    }
+  }
   flee(
     range: number = 4,
     FleeRange: number = range * 2,
     costMatrix: CostMatrix | undefined = moveBlockCostMatrix,
     PSC: type_PSC = def_PSC
   ): boolean {
-    const eht = enemies.filter(i => hasThreat(i) && GR(i, this) <= range);
-    if (eht.length > 0) {
-      const spf = searchPath_flee(this, eht, FleeRange, costMatrix, PSC);
-      if (spf.path.length > 0) {
-        const tar = spf.path[0];
-        this.MD(tar);
-        return true;
-      } else {
-        return false;
-      }
+    const fp = this.getFleePos(range, FleeRange, costMatrix, PSC);
+    if (fp) {
+      this.MD(fp);
+      return true;
     } else {
       return false;
     }

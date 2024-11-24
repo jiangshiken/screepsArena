@@ -20,12 +20,16 @@ import { arrReverse, best, divideReduce, last, relu, sum } from "../utils/JS";
 import { Adj, GR, InRan2 } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA, SAN } from "../utils/visual";
+import { arrangeTail_all } from "./tailer";
 import { wormPartJob } from "./wormPart_rush";
 
 export const wormHeader: Role = new Role(
   "wormHeader",
   cre => new wormHeaderJob(<Cre_battle>cre)
 );
+export function wormHeaderTail_index(cre: Cre): number {
+  return cre.group_Index ? cre.group_Index : -1;
+}
 export class wormHeaderJob extends Task_Role {
   readonly master: Cre_battle;
   target: Unit;
@@ -37,14 +41,28 @@ export class wormHeaderJob extends Task_Role {
     this.cancelOldTask(wormPartJob);
     this.target = enemySpawn;
   }
+  getHeaderTails() {
+    return <Cre_pull[]>(
+      friends
+        .filter(i => i.role === wormHeaderTail)
+        .sort((a, b) => wormHeaderTail_index(a) - wormHeaderTail_index(b))
+    );
+  }
+  getHeaderHealer() {
+    return friends.find(i => i.role === wormHeaderHealer);
+  }
+  resetMyGroup() {
+    const cre = this.master;
+    const healer = this.getHeaderHealer();
+    const headerTails = this.getHeaderTails();
+    this.myGroup = (<Cre_pull[]>[cre, healer]).concat(headerTails);
+  }
   loop_task(): void {
     const cre = this.master;
     SA(cre, "WHJ");
     cre.fight();
     const healer = friends.find(i => i.role === wormHeaderHealer);
-    const headerTails = <Cre_pull[]>(
-      friends.filter(i => i.role === wormHeaderTail)
-    );
+    const headerTails = this.getHeaderTails();
     if (healer) {
       this.myGroup = (<Cre_pull[]>[cre, healer]).concat(headerTails);
       if (headerTails.length === 3) {
@@ -79,7 +97,7 @@ export class wormHeaderJob extends Task_Role {
               ? 500
               : 0;
           const sumDamage = sum(this.myGroup, i => damageAmount(i));
-          const healerDamaged = damageAmount(healer) > 300;
+          const healerDamaged = damageAmount(healer) > 50;
           const damaged =
             sumDamage > disExtra + (800 - 300 * sumForce) + pureRangeExtra;
           const damaged_light =
@@ -148,27 +166,62 @@ export class wormHeaderJob extends Task_Role {
     this.endPTTask(cre);
     const followers = this.myGroup.filter(i => i !== tail);
     const follower_sorted = arrReverse(followers);
-    tail.newPullTarsTask(follower_sorted, mySpawn, 5, undefined, getPSC(1, 1));
+    // const fleePos = cre.getFleePos(12, 12, undefined, getPSC(1, 1));
+    const fleePos = mySpawn;
+    tail.newPullTarsTask(
+      follower_sorted,
+      fleePos ? fleePos : mySpawn,
+      5,
+      undefined,
+      getPSC(1, 1)
+    );
   }
   stopAction() {
     const cre = this.master;
+    if (arrangeTail_all(cre, this.myGroup)) {
+      SA(cre, "arrangeTail_all");
+      return;
+    }
     SA(cre, "STOP");
     const tail = <Cre_pull>last(this.myGroup);
     this.endPTTask(tail);
     this.endPTTask(this.master);
-    if (this.myGroup.length >= 5) {
+    if (this.myGroup.length === 5) {
+      SA(cre, "exc");
       const tail_2 = this.myGroup[3];
       const tail_3 = this.myGroup[2];
-      if (damagedRate(tail) >= 0.05) {
-        SA(cre, "heal tail");
-      } else if (damagedRate(tail_2) >= 0.05) {
-        SA(cre, "heal tail");
-        // const pullPos
+      const dr_tail = damagedRate(tail);
+      const dr_tail2 = damagedRate(tail_2);
+      const dr_tail3 = damagedRate(tail_3);
+      const delta_12 = dr_tail - dr_tail2;
+      const delta_23 = dr_tail2 - dr_tail3;
+      if (dr_tail > 0 || dr_tail2 > 0 || dr_tail3 > 0) {
+        if (delta_12 > delta_23) {
+          SA(cre, "12");
+          tail.moveTo_direct(tail_2);
+          tail_2.moveTo_direct(tail);
+          this.exchangeIndex(tail, tail_2);
+          this.resetMyGroup();
+        } else {
+          SA(cre, "23");
+          tail_2.moveTo_direct(tail_3);
+          tail_3.moveTo_direct(tail_2);
+          this.exchangeIndex(tail_2, tail_3);
+          this.resetMyGroup();
+        }
+      } else {
+        SA(cre, "none");
       }
     }
   }
+  exchangeIndex(cre0: Cre, cre1: Cre) {
+    const i0 = cre0.group_Index;
+    cre0.group_Index = cre1.group_Index;
+    cre1.group_Index = i0;
+  }
   targetSelect(targets: Unit[]) {
     const cre = this.master;
+    const tail = <Cre_pull>last(this.myGroup);
     return best(targets, tar => {
       let typeBonus: number = 0;
       if (tar instanceof Cre) {
@@ -188,11 +241,13 @@ export class wormHeaderJob extends Task_Role {
           typeBonus = 1;
         }
       }
+      const closeTailBonus = divideReduce(GR(tar, tail), 2);
       const disBonus = divideReduce(GR(tar, cre), 1.5);
       const sameBonus = this.target === tar ? 1.5 : 1;
       const tauntBonus = 1 + 0.02 * getTaunt(tar);
       // const extraTauntBonus=calExtraTaunt()
-      const final = disBonus * sameBonus * typeBonus * tauntBonus;
+      const final =
+        disBonus * closeTailBonus * sameBonus * typeBonus * tauntBonus;
       SAN(tar, "T", final);
       // SAN(tar, "ESB", enSpawnBonus);
       return final;
@@ -209,10 +264,14 @@ export class wormHeaderTailJob extends Task_Role {
     super(master);
     this.master = master;
     this.cancelOldTask(wormHeaderTailJob);
+    this.master.group_Index = friends.filter(
+      i => i.role === wormHeaderTail
+    ).length;
   }
   loop_task(): void {
     const cre = this.master;
-    SA(cre, "WHTJ");
+    const ind = this.master.group_Index;
+    SA(cre, "WHTJ " + ind);
   }
 }
 export const wormHeaderHealer: Role = new Role(
