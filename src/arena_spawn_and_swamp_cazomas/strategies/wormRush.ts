@@ -48,7 +48,7 @@ export function useWormRush(
     if (wpn >= 7) {
       if (wpn === 7) {
         if (tailSize === 0) {
-          spawnCreep(TB("4M4A"), wormPart, new WormInfo(6));
+          spawnCreep(TB("3M3A"), wormPart, new WormInfo(6));
         } else {
           spawnCreep(TB("6M6A"), wormPart, new WormInfo(6));
         }
