@@ -194,7 +194,7 @@ export function SA(cre: Pos, str: string): void {
   return sayAppend(cre, " " + str + " ");
 }
 export function SAB(cre: Pos, str: string, b: boolean): void {
-  return SA(cre, str + "=" + b ? "T" : "F");
+  return SA(cre, str + "=" + (b ? "T" : "F"));
 }
 export function SAN(cre: Pos, str: string, n: number): void {
   return SA(cre, str + "=" + d2(n));

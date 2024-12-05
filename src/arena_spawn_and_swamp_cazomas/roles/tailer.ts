@@ -1,16 +1,15 @@
 import { MOVE } from "game/constants";
 import { CostMatrix } from "game/path-finder";
 import { Cre, Task_Role } from "../gameObjects/Cre";
-import { def_PSC, type_PSC } from "../gameObjects/Cre_findPath";
+import { def_PSC, getPSC, type_PSC } from "../gameObjects/Cre_findPath";
 import { Cre_pull, PullTarsTask } from "../gameObjects/Cre_pull";
 import { Role } from "../gameObjects/CreTool";
 import { friends, mySpawn } from "../gameObjects/GameObjectInitialize";
 import { inMyBaseRan } from "../gameObjects/spawn";
-import { blocked } from "../gameObjects/UnitTool";
+import { blocked, moveBlockCostMatrix } from "../gameObjects/UnitTool";
 import { arrReverse, best, last, sum } from "../utils/JS";
 import {
   Adj,
-  COO,
   getDirectionByPos,
   getRangePoss,
   InRan2,
@@ -38,11 +37,10 @@ export function getTailers_inGroup(tailTar: Cre): Cre_pull[] {
 }
 export function getTailers_inGroup_adj(tailTar: Cre): Cre_pull[] {
   const tailMembers = getTailers_inGroup(tailTar);
-  const head = tailMembers[0];
-  const rtn = [head];
-  for (let i = 0; i < tailMembers.length - 1; i++) {
-    const mem = tailMembers[i + 1];
-    const mem_tar = tailMembers[i];
+  const rtn = [];
+  for (let i = 0; i < tailMembers.length; i++) {
+    const mem = tailMembers[i];
+    const mem_tar = i === 0 ? tailTar : tailMembers[i - 1];
     if (Adj(mem, mem_tar)) {
       rtn.push(mem);
     }
@@ -162,12 +160,13 @@ function arrangeTail(myGroup: Cre_pull[]): boolean {
   }
   return false;
 }
+export const PSC_tail: type_PSC = getPSC(1, 1.4);
 export function tailPullAction(
   leader: Cre_pull,
   followers: Cre_pull[],
   tar: Pos,
   costMat: CostMatrix | undefined = undefined,
-  PSC: type_PSC = def_PSC
+  PSC: type_PSC = PSC_tail
 ) {
   leader.newPullTarsTask(followers, tar, 10, costMat, PSC, 0);
 }
@@ -245,7 +244,7 @@ export function tailChainPullAction(myGroup: Cre_pull[], tar: Pos) {
         const sortedFollowers2 = arrReverse(followers2);
         SA(tail, "Tail=" + sortedFollowers2.length);
         if (sortedFollowers2.length === 0) {
-          tail.MT(tar);
+          tail.MT(tar, 1, moveBlockCostMatrix, PSC_tail, 0);
         } else {
           tailPullAction(tail, sortedFollowers2, tar);
         }
@@ -286,7 +285,7 @@ export class tailerJob extends Task_Role {
     const tar = this.tailGroupTarget;
     if (tar) {
       const tailInd = tailIndex(cre);
-      SA(cre, "Tar=" + COO(this.tailGroupTarget) + "_" + tailInd);
+      SA(cre, tar.id + "_" + tailInd);
       const myTailsInGroup = getTailers_inGroup(tar).filter(
         i => i !== this.master
       );

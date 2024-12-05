@@ -27,7 +27,6 @@ import { inResourceArea, tick } from "../utils/game";
 import { COO, GR } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { drawPoly, SA } from "../utils/visual";
-
 /**get the move time assume its capacity is full*/
 export function getTimeAfterFull(cre: Cre_findPath) {
   return cre.getMoveTime(getEmptyCapacity(cre));

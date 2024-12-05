@@ -1,5 +1,7 @@
 import { Event_ori } from "./Event";
 import { remove } from "./JS";
+import { Pos_C } from "./Pos";
+import { SA } from "./visual";
 
 export function findTask<E extends Task>(
   ht: HasTasks,
@@ -25,6 +27,8 @@ export function useTasks(hasTasks: HasTasks) {
       if (!taskNeedLoop.pause) {
         if (!taskNeedLoop.checkExpire()) {
           taskNeedLoop.loop_task();
+        } else if (hasTasks instanceof Pos_C) {
+          SA(hasTasks, "expire");
         }
       }
       taskNeedLoop.looped = new Event_ori();

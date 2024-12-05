@@ -1,4 +1,4 @@
-import { ATTACK, HEAL, RANGED_ATTACK, WORK } from "game/constants";
+import { ATTACK, HEAL, RANGED_ATTACK } from "game/constants";
 import { CostMatrix } from "game/path-finder";
 import { calculateForce, getTaunt } from "../gameObjects/battle";
 import { Cre, Task_Role } from "../gameObjects/Cre";
@@ -17,7 +17,6 @@ import {
 import { damageAmount, damaged } from "../gameObjects/HasHits";
 import { Dooms, getGuessPlayer, Tigga } from "../gameObjects/player";
 import { Spa } from "../gameObjects/Stru";
-import { inRampart } from "../gameObjects/UnitTool";
 import { border_L1, border_R1, spawn_left } from "../utils/game";
 import {
   best,
@@ -35,6 +34,7 @@ import {
   GR,
   inBorder,
   InRan2,
+  InShotRan,
   Pos,
   Pos_C,
   X_axisDistance,
@@ -61,7 +61,7 @@ import {
   tailChainPullAction,
 } from "./tailer";
 export const def_meleeTailNum = 5;
-export const def_rangedTailNum = 9;
+export const def_rangedTailNum = 7;
 export const tailHealer: Role = new Role(
   "tailHealer",
   cre => new tailHealerJob(<Cre_battle>cre)
@@ -84,7 +84,15 @@ export class tailHealerJob extends Task_Role {
   loop_task(): void {
     const cre = this.master;
     SA(cre, "tailHealerJob");
-    cre.fight();
+    const allInRan3Friend = friends.filter(
+      i => damaged(i) && InShotRan(i, cre)
+    );
+    if (this.head && allInRan3Friend.length === 0) {
+      SA(cre, "HeaH");
+      cre.healTar(this.head);
+    } else {
+      cre.fight();
+    }
     // const
     const allTailers = getTailers_all();
     const myTailers = getTailers_inGroup(this.master);
@@ -306,30 +314,18 @@ export class tailMeleeJob extends Task_Role {
             }
           } else {
             let ifChase: boolean;
-            if (target instanceof Cre && target.getBodyPartsNum(ATTACK) === 0) {
-              ifChase = true;
-            } else if (
-              target instanceof Cre &&
-              target.getBodyPartsNum(WORK) > 0 &&
-              inRampart(target)
-            ) {
+            if (target instanceof Cre && target.getBodyPartsNum(ATTACK) > 0) {
               ifChase = false;
-            } else if (
-              target instanceof Cre &&
-              target.getBodyPartsNum(WORK) > 0 &&
-              !inRampart(target)
-            ) {
-              ifChase = true;
             } else {
-              ifChase = false;
+              ifChase = true;
             }
-            if (Adj(head, target) && !ifChase) {
-              SA(cre, "ADJ");
-              this.stopAction();
-            } else if (this.headIsRange) {
+            if (this.headIsRange) {
               this.rangedTypeAction(closestThreatDis);
+            } else if (Adj(head, target) && !ifChase) {
+              SA(cre, "MELEE ADJ");
+              this.stopAction();
             } else {
-              SA(cre, "MELEE");
+              SA(cre, "MELEE PUSH");
               this.pushAction(target);
             }
           }
@@ -466,6 +462,8 @@ export class tailMeleeJob extends Task_Role {
     findTask(this.master, PullTarsTask)?.end();
   }
   fleeAction() {
+    const cre = this.master;
+    SA(cre, "FLEE");
     tailChainPullAction(this.myGroup, mySpawn);
     this.endHeadTask();
   }

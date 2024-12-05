@@ -111,7 +111,7 @@ class wormPart_doomsJob extends wormPartJob {
     } else {
       SA(cre, "GSS");
       const secondSpawn = oppoSpawns.find(i => i !== enemySpawn);
-      const secondSpawnCS = oppoCSs.find(i => i.progress > 300);
+      const secondSpawnCS = oppoCSs.find(i => i.progress > 2000);
       // SA(cre, "secondSpawn=" + COO(secondSpawn));
       // SA(cre, "oppoCSs=" + oppoCSs.length);
       // for (let oppoCS of oppoCSs) {

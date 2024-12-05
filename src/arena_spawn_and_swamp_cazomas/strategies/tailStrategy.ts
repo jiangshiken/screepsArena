@@ -26,59 +26,34 @@ export function useTailStrategy() {
     for (let g = 0; g < 3; g++) {
       let ifRanged = false;
       if (getGuessPlayer() === Tigga) {
-        ifRanged = g === 0;
+        ifRanged = g <= 1;
       } else {
         ifRanged = false;
       }
       if (ifRanged) {
         //RANGED
-        if (getGuessPlayer() === Tigga) {
-          //600+320+50
-          spawnCreep(TB("5R2AM"), tailMelee);
-          spawnCreep(TB("5M2HM"), tailHealer);
-          const tailLen2 = def_rangedTailNum;
-          for (let i = 0; i < tailLen2; i++) {
-            spawnCreep(TB("2M"), tailer);
-          }
-        } else {
-          // //DOOMS
-          // spawnCreep(TB("4R4AM"), tailMelee);
-          // spawnCreep(TB("5MHM"), tailHealer);
-          // const tailLen = 8;
-          // for (let i = 0; i < tailLen; i++) {
-          //   spawnCreep(TB("M"), tailer);
-          // }
-          // const tailLen2 = 4;
-          // for (let i = 0; i < tailLen2; i++) {
-          //   spawnCreep(TB("2M"), tailer);
-          // }
+        //600+320+50
+        spawnCreep(TB("5R2AM"), tailMelee);
+        spawnCreep(TB("5M2HM"), tailHealer);
+        spawnCreep(TB("4M"), tailer);
+        const tailLen2 = def_rangedTailNum - 1;
+        for (let i = 0; i < tailLen2; i++) {
+          spawnCreep(TB("2M"), tailer);
         }
       } else {
         //MELEE
-        if (getGuessPlayer() === Tigga) {
-          // if (g === 0) spawnCreep(TB("3MR8AM"), tailMelee);
-          // else
-          spawnCreep(TB("3M10AM"), tailMelee);
-          spawnCreep(TB("4M3HM"), tailHealer);
-          // const tailLen = 3;
-          // for (let i = 0; i < tailLen; i++) {
-          //   spawnCreep(TB("M"), tailer);
-          // }
-          const tailLen2 = def_meleeTailNum;
-          for (let i = 0; i < tailLen2; i++) {
-            spawnCreep(TB("2M"), tailer);
-          }
-        } else {
-          // //DOOMS
-          // if (g === 0) spawnCreep(TB("3MR8AM"), tailMelee);
-          // else spawnCreep(TB("3M10AM"), tailMelee);
-          // if (g === 0) spawnCreep(TB("4M3HM"), tailHealer);
-          // else spawnCreep(TB("4M2HM"), tailHealer);
-          // const tailLen = g === 0 ? 7 : 5;
-          // for (let i = 0; i < tailLen; i++) {
-          //   spawnCreep(TB("2M"), tailer);
-          // }
-          // spawnCreep(TB("3M"), tailer);
+        // if (g === 0) spawnCreep(TB("3MR8AM"), tailMelee);
+        // else
+        spawnCreep(TB("3M10AM"), tailMelee);
+        spawnCreep(TB("4M3HM"), tailHealer);
+        // const tailLen = 3;
+        // for (let i = 0; i < tailLen; i++) {
+        //   spawnCreep(TB("M"), tailer);
+        // }
+        spawnCreep(TB("4M"), tailer);
+        const tailLen2 = def_meleeTailNum - 1;
+        for (let i = 0; i < tailLen2; i++) {
+          spawnCreep(TB("2M"), tailer);
         }
       }
     }
