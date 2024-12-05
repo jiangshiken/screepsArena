@@ -45,7 +45,7 @@ export function useTailStrategy() {
         // if (g === 0) spawnCreep(TB("3MR8AM"), tailMelee);
         // else
         spawnCreep(TB("3M10AM"), tailMelee);
-        spawnCreep(TB("4M3HM"), tailHealer);
+        spawnCreep(TB("5M2HM"), tailHealer);
         // const tailLen = 3;
         // for (let i = 0; i < tailLen; i++) {
         //   spawnCreep(TB("M"), tailer);
@@ -60,8 +60,8 @@ export function useTailStrategy() {
     //700
     if (getGuessPlayer() === Tigga) {
       // spawnCreep(TB("3MA"), extStealer);
-      //150+240+50
-      spawnCreep(TB("5TAM"), toughDefender);
+      //100+80+150+50
+      spawnCreep(TB("10TARM"), toughDefender);
     } else {
       //150+240+50
       spawnCreep(TB("15T4AM"), toughDefender);

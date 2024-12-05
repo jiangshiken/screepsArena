@@ -68,7 +68,7 @@ export function useWormRush_dooms() {
     if (wpn >= 7) {
       if (wpn === 7) {
         if (tailSize === 0) {
-          spawnCreep(TB("4M4A"), wormPart_dooms, new WormInfo(6));
+          spawnCreep(TB("3M3A"), wormPart_dooms, new WormInfo(6));
         } else {
           spawnCreep(TB("6M6A"), wormPart_dooms, new WormInfo(6));
         }
@@ -111,7 +111,7 @@ class wormPart_doomsJob extends wormPartJob {
     } else {
       SA(cre, "GSS");
       const secondSpawn = oppoSpawns.find(i => i !== enemySpawn);
-      const secondSpawnCS = oppoCSs.find(i => i.progress > 2000);
+      const secondSpawnCS = oppoCSs.find(i => i.progress > 950);
       // SA(cre, "secondSpawn=" + COO(secondSpawn));
       // SA(cre, "oppoCSs=" + oppoCSs.length);
       // for (let oppoCS of oppoCSs) {
