@@ -1,6 +1,6 @@
 import { ATTACK, HEAL, RANGED_ATTACK } from "game/constants";
 import { Event_Number } from "../utils/Event";
-import { Adj, GR, InShotRan } from "../utils/Pos";
+import { Adj, closest, GR, InShotRan } from "../utils/Pos";
 import { SA } from "../utils/visual";
 import {
   attackDmg,
@@ -14,8 +14,15 @@ import {
 } from "./battle";
 import { Cre } from "./Cre";
 import { Cre_harvest } from "./Cre_harvest";
-import { enemySpawn, friends, oppoUnits, walls } from "./GameObjectInitialize";
-import { CanBeAttacked } from "./UnitTool";
+import {
+  containers,
+  enemySpawn,
+  friends,
+  mySpawn,
+  oppoUnits,
+  walls,
+} from "./GameObjectInitialize";
+import { CanBeAttacked, isBlockedContainer } from "./UnitTool";
 export function healAmount(range: number): number {
   if (range <= 1) {
     return 12;
@@ -76,6 +83,27 @@ export class Cre_battle extends Cre_harvest {
     } else {
       // SA(this.master, "sr3");
       return this.shotAndRestore();
+    }
+  }
+  tryBreakBlockedContainer() {
+    const blockedContainers = containers.filter(i => isBlockedContainer(i));
+    if (blockedContainers.length > 0) {
+      const blockedContainer = blockedContainers[0];
+      const tarWall = closest(
+        mySpawn,
+        walls.filter(i => Adj(i, blockedContainer))
+      );
+      if (tarWall) {
+        SA(this, "tarWall");
+        this.MT_stop(tarWall);
+        this.attackNormal(tarWall);
+        this.shotTarget(tarWall);
+      } else {
+        SA(this, "no tarWall");
+      }
+      return true;
+    } else {
+      return false;
     }
   }
   /**attack wall*/

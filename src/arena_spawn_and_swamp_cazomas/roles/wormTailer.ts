@@ -60,8 +60,8 @@ import {
   getTailerTask,
   tailChainPullAction,
 } from "./tailer";
-export const def_meleeTailNum = 5;
-export const def_rangedTailNum = 7;
+export const def_meleeTailNum = 4;
+export const def_rangedTailNum = 6;
 export const tailHealer: Role = new Role(
   "tailHealer",
   cre => new tailHealerJob(<Cre_battle>cre)
@@ -208,7 +208,9 @@ export class tailMeleeJob extends Task_Role {
     const cre = this.master;
     SA(cre, "tailMeleeJob");
     cre.fight();
-    if (this.healer) {
+    if (cre.tryBreakBlockedContainer()) {
+      SA(cre, "BW");
+    } else if (this.healer) {
       if (this.healer.exists) {
         SA(cre, "HH");
         const myTailers = getTailers_inGroup(this.healer);

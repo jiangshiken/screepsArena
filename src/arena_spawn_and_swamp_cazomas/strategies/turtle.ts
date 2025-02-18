@@ -49,7 +49,7 @@ export function useTurtleStrategy() {
     turtleInitialed = true;
     setIsTurtleContainer(true);
   }
-  spawnStartHarvester(2);
+  spawnStartHarvester();
   supplyBuilders();
   supplyJamers();
   supplyDefenders();
@@ -186,7 +186,7 @@ export function supplyDefenders() {
   // }
 }
 function supplyExtraRamparts() {
-  if (tick > 600) {
+  if (tick > 400) {
     SA(displayPos(), "supplyExtraRamparts");
     const timeToEnd = 2000 - getTicks();
     const totalEnergy = getSpawnAndBaseContainerEnergy();

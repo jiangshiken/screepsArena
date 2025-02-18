@@ -2,7 +2,7 @@ import { CARRY, RESOURCE_ENERGY } from "game/constants";
 import { CostMatrix } from "game/path-finder";
 import { Resource } from "game/prototypes";
 import { inResourceArea, isTerrainWall } from "../utils/game";
-import { getRangePoss, GR, Pos } from "../utils/Pos";
+import { Adj, getRangePoss, GR, Pos } from "../utils/Pos";
 import { Cre } from "./Cre";
 import { GameObj } from "./GameObj";
 import {
@@ -11,6 +11,7 @@ import {
   enemySpawn,
   HasStore,
   mySpawn,
+  walls,
 } from "./GameObjectInitialize";
 import { findGO, hasGO, overallMap } from "./overallMap";
 import { Con, Ext, Ram, Res, Roa, Spa, Stru, Tow } from "./Stru";
@@ -127,7 +128,10 @@ export function isOutsideContainer(con: Con) {
   return inResourceArea(con);
 }
 export function isMyBaseContainer(con: Con) {
-  return GR(con, mySpawn) <= 7;
+  return GR(con, mySpawn) <= 7 && !isBlockedContainer(con);
+}
+export function isBlockedContainer(con: Con) {
+  return GR(con, mySpawn) <= 7 && walls.filter(i => Adj(i, con)).length === 5;
 }
 export function isOppoBaseContainer(con: Con) {
   return GR(con, enemySpawn) <= 7;

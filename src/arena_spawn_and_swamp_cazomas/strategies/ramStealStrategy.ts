@@ -22,6 +22,9 @@ export function useRamStealStrategy() {
     spawnCreep(TB("13M4A"), ramStealer);
     spawnCreep(TB("15M3A"), ramStealer);
     spawnCreep(TB("15M3A"), ramStealer);
+    spawnCreep(TB("15M3A"), ramStealer);
+    spawnCreep(TB("15M3A"), ramStealer);
+    spawnCreep(TB("15M3A"), ramStealer);
   }
   addStrategyTick();
 }
@@ -41,7 +44,10 @@ export class ramStealerJob extends Task_Role {
     cre.fight();
     //all arrive =600 tick
     if (tick <= 400) {
-      cre.stop();
+      if (cre.tryBreakBlockedContainer()) {
+      } else {
+        cre.stop();
+      }
     } else {
       cre.MT_stop(enemySpawn, 5, friendBlockCostMatrix);
     }

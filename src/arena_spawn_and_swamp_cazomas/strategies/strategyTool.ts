@@ -31,10 +31,7 @@ import {
 } from "../utils/Pos";
 import { displayPos, SA, SAN } from "../utils/visual";
 /**spawn the start harvester of every strategy*/
-export function spawnStartHarvester(
-  needCarryNum: number,
-  is2C2M: boolean = false
-) {
+export function spawnStartHarvester() {
   SA(displayPos(), "spawnCleared(spawn)" + spawnCleared(mySpawn));
   if (tick <= 300 && spawnCleared(mySpawn)) {
     const tarHarvesters = friends.filter(
@@ -43,13 +40,10 @@ export function spawnStartHarvester(
     SA(displayPos(), "tarHarvesters.length" + tarHarvesters.length);
     const carryNum = sum(tarHarvesters, i => i.getHealthyBodyPartsNum(CARRY));
     SA(displayPos(), "spawnStartHarvester carryNum=" + carryNum);
-    if (carryNum < needCarryNum) {
+    if (carryNum < 4) {
       SA(displayPos(), "supply harvester");
-      if (is2C2M) {
-        spawnCreep(TB("m2cm"), harvester); //
-      } else {
-        spawnCreep(TB("cm"), harvester); //
-      }
+      spawnCreep(TB("2c2m"), harvester);
+      spawnCreep(TB("2c2m"), harvester);
     }
   }
 }

@@ -19,7 +19,7 @@ import {
 } from "../gameObjects/UnitTool";
 import { jamer } from "../roles/jamer";
 import {
-  assembleTick,
+  getAssembleTick,
   set_wormPartNum,
   wormGo,
   wormIndex,
@@ -35,36 +35,33 @@ import { SA } from "../utils/visual";
 import { useStandardTurtling } from "./stdTurtlingTool";
 import { supplyToughDefender } from "./strategyTool";
 export function useWormRush_dooms() {
-  const wpn: number = 7;
+  const wpn: number = 8;
   const tailSize: number = 0;
-  const turtleStrength: number = 0;
+  const turtleStrength: number = 1;
   const spawnJamerNum: number = 8;
+  const st = strategyTick;
   set_wormPartNum(wpn);
   if (oppoSpawns.length >= 2) {
     set_spawnDps(10);
   }
-  if (strategyTick >= 0) {
-    if (wpn === 8) {
-      if (tick >= assembleTick || wormGo) {
-        supplyToughDefender(2, false);
-      }
-    } else {
-      useStandardTurtling(strategyTick, turtleStrength);
+  if (wpn === 9) {
+    if (tick >= getAssembleTick() || wormGo) {
+      supplyToughDefender(2, false);
     }
+  } else {
+    useStandardTurtling(strategyTick, turtleStrength);
   }
-  if (strategyTick === 0) {
+  if (st === 0) {
     for (let i = 0; i < spawnJamerNum; i++) {
       spawnCreep(TB("M"), jamer);
     }
-    if (wpn >= 6) {
-      //150+640+50
-      spawnCreep(TB("3MR8AM"), wormPart_dooms, new WormInfo(0));
-      spawnCreep(TB("4M3A2HM"), wormPart_dooms, new WormInfo(1));
-      spawnCreep(TB("9M6AM"), wormPart_dooms, new WormInfo(2));
-      spawnCreep(TB("9M6AM"), wormPart_dooms, new WormInfo(3));
-      spawnCreep(TB("9M6AM"), wormPart_dooms, new WormInfo(4));
-      spawnCreep(TB("9M6AM"), wormPart_dooms, new WormInfo(5));
-    }
+    //150+640+50
+    spawnCreep(TB("3MR8AM"), wormPart_dooms, new WormInfo(0));
+    spawnCreep(TB("4M3A2HM"), wormPart_dooms, new WormInfo(1));
+    spawnCreep(TB("9M6AM"), wormPart_dooms, new WormInfo(2));
+    spawnCreep(TB("9M6AM"), wormPart_dooms, new WormInfo(3));
+    spawnCreep(TB("9M6AM"), wormPart_dooms, new WormInfo(4));
+    spawnCreep(TB("9M6AM"), wormPart_dooms, new WormInfo(5));
     if (wpn >= 7) {
       if (wpn === 7) {
         if (tailSize === 0) {
@@ -73,16 +70,25 @@ export function useWormRush_dooms() {
           spawnCreep(TB("6M6A"), wormPart_dooms, new WormInfo(6));
         }
       } else {
-        spawnCreep(TB("10M6A"), wormPart_dooms, new WormInfo(6));
+        spawnCreep(TB("9M6AM"), wormPart_dooms, new WormInfo(6));
       }
     }
     if (wpn >= 8) {
-      if (tailSize === 0) {
-        spawnCreep(TB("4M4A"), wormPart_dooms, new WormInfo(7));
-      } else if (tailSize === 1) {
-        spawnCreep(TB("6M6A"), wormPart_dooms, new WormInfo(7));
+      if (wpn === 8) {
+        if (tailSize === 0) {
+          spawnCreep(TB("3M3A"), wormPart_dooms, new WormInfo(7));
+        } else {
+          spawnCreep(TB("6M6A"), wormPart_dooms, new WormInfo(7));
+        }
       } else {
-        spawnCreep(TB("8M7A"), wormPart_dooms, new WormInfo(7));
+        spawnCreep(TB("9M6AM"), wormPart_dooms, new WormInfo(7));
+      }
+    }
+    if (wpn >= 9) {
+      if (tailSize === 0) {
+        spawnCreep(TB("3M3A"), wormPart_dooms, new WormInfo(8));
+      } else {
+        spawnCreep(TB("6M6A"), wormPart_dooms, new WormInfo(8));
       }
     }
   }

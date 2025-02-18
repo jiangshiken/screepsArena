@@ -1,3 +1,5 @@
+import { Visual } from "game/visual";
+import { enemySpawn, mySpawn } from "./gameObjects/GameObjectInitialize";
 import {
   Dooms,
   getGuessPlayer,
@@ -18,7 +20,7 @@ import { tick } from "./utils/game";
 
 /**the loop function*/
 export function loop(): void {
-  console.log("loop start !!");
+  console.log("loop start !!3");
   //loop start
   const st0 = ct();
   loopStart();
@@ -28,10 +30,23 @@ export function loop(): void {
   identifyOpponent();
   pt("identifyOpponent", st1);
   //main strategy
-  const lockMode = false;
+  const lockMode = true;
+  // const lockMode = false;
+  // const CTFMode = false;
+  // const CTFMode = true;
+  // if (CTFMode) {
+  //   PL("CTF");
+  // } else
   if (tick <= startWaitTick) {
-    spawnStartHarvester(1, true);
+    spawnStartHarvester();
   } else if (lockMode) {
+    set_harvesterNotFleeAtStart(true);
+    // useWormRush_dooms();
+    // useWormRush(7, 1, 2);
+    useTailStrategy(true);
+    // useTurtleStrategy();
+    // useWormHeaderStrategy(1);
+    // useShoterStrategy();
   } else {
     const st = ct();
     const gp = getGuessPlayer();
@@ -51,10 +66,16 @@ export function loop(): void {
       useWormRush_dooms();
       // useTurtleStrategy();
     } else {
-      useWormRush(7);
+      set_harvesterNotFleeAtStart(true);
+      useWormRush(7, 1, 2);
+      // useTailStrategy(true);
+      // useTurtleStrategy();
+      // useWormHeaderStrategy(1);
+      // useShoterStrategy();
     }
     pt("mainStrategy", st);
   }
+  new Visual().line(mySpawn.master, enemySpawn.master);
   //loop end
   loopEnd();
 }

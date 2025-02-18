@@ -29,6 +29,7 @@ import {
   getCapacity,
   getEnergy,
   getFreeEnergy,
+  isBlockedContainer,
   isOppoBaseContainer,
   isTurtleContainer,
 } from "./UnitTool";
@@ -274,6 +275,7 @@ export function getHarvables(): Harvable[] {
       i =>
         i.master.exists &&
         energylive(i) &&
+        !isBlockedContainer(i) &&
         !isOppoBaseContainer(i) &&
         !(Adj(i, mySpawn) && (energyFull(mySpawn) || isTurtleContainer))
     )

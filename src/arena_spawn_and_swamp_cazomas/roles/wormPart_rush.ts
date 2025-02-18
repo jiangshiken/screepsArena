@@ -26,7 +26,10 @@ export let wormPartNum: number;
 export function set_wormPartNum(n: number) {
   wormPartNum = n;
 }
-export let assembleTick: number = 380;
+// export let assembleTick: number =380;
+export function getAssembleTick() {
+  return 500 + 30 * (wormPartNum - 7);
+}
 export let wormGo: boolean = false;
 export let wormStartWait: Event_ori | undefined = undefined;
 export class WormInfo {
@@ -56,7 +59,7 @@ export class wormPartJob extends Task_Role {
     this.cancelOldTask(wormPartJob);
   }
   ifGo(): boolean {
-    if (tick >= assembleTick + 30) {
+    if (tick >= getAssembleTick() + 30) {
       return true;
     } else {
       const finalSnakePart = this.findWormPart(wormPartNum - 1);
@@ -93,14 +96,16 @@ export class wormPartJob extends Task_Role {
       SA(cre, "NG");
       wormGo = this.ifGo();
       const assP = assemblePoint(creInd);
-      if (tick >= assembleTick) {
+      if (tick >= getAssembleTick()) {
         //if start assemble
         SA(cre, "AT");
         cre.MT(assP);
       } else {
         //if not assemble yet
         SA(cre, "DS");
-        if (isHealer(cre)) {
+        if (cre.tryBreakBlockedContainer()) {
+          SA(cre, "BW");
+        } else if (isHealer(cre)) {
           const scanRange = 8;
           const tars = friends.filter(
             i =>

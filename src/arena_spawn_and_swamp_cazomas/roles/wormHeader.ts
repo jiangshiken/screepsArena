@@ -1,4 +1,4 @@
-import { ATTACK, HEAL, MOVE } from "game/constants";
+import { ATTACK, HEAL, MOVE, RANGED_ATTACK } from "game/constants";
 import { calculateForce, getTaunt } from "../gameObjects/battle";
 import { Cre, Task_Role } from "../gameObjects/Cre";
 import { Cre_battle } from "../gameObjects/Cre_battle";
@@ -20,6 +20,7 @@ import { arrReverse, best, divideReduce, last, relu, sum } from "../utils/JS";
 import { Adj, GR, InRan2 } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { SA, SAN } from "../utils/visual";
+import { harvester } from "./harvester";
 import { arrangeTail_all } from "./tailer";
 import { wormPartJob } from "./wormPart_rush";
 
@@ -61,9 +62,11 @@ export class wormHeaderJob extends Task_Role {
     const cre = this.master;
     SA(cre, "WHJ");
     cre.fight();
-    const healer = friends.find(i => i.role === wormHeaderHealer);
+    const healer = <Cre_battle>friends.find(i => i.role === wormHeaderHealer);
     const headerTails = this.getHeaderTails();
-    if (healer) {
+    if (cre.tryBreakBlockedContainer()) {
+      SA(cre, "BW");
+    } else if (healer) {
       this.myGroup = (<Cre_pull[]>[cre, healer]).concat(headerTails);
       if (headerTails.length === 3) {
         const tail = <Cre_pull>last(this.myGroup);
@@ -110,9 +113,14 @@ export class wormHeaderJob extends Task_Role {
             const enemyMeleesThreat = enemyMelees.filter(
               i => i.getHealthyBodyPartsNum(ATTACK) >= 2
             );
+            const enemyRangedThreat = enemies.filter(
+              i => i.getHealthyBodyPartsNum(RANGED_ATTACK) >= 2
+            );
             const waitRange = 2;
             if (
-              enemyMeleesThreat.find(i => GR(i, cre) <= waitRange) === undefined
+              enemyMeleesThreat.find(i => GR(i, cre) <= waitRange) ===
+                undefined &&
+              enemyRangedThreat.find(i => GR(i, cre) <= 3) === undefined
             ) {
               SA(cre, "wait");
               this.stopAction();
@@ -139,6 +147,11 @@ export class wormHeaderJob extends Task_Role {
         }
       } else {
         SA(cre, "wait headertails");
+        cre.MT_stop(healer);
+        const har = friends.find(i => i.role === harvester);
+        if (har) {
+          healer.MT_stop(har);
+        }
       }
     } else {
       SA(cre, "NO Healer");
@@ -155,6 +168,7 @@ export class wormHeaderJob extends Task_Role {
     SA(cre, "PUSH");
     const tail = <Cre_pull>last(this.myGroup);
     this.endPTTask(tail);
+    this.myGroup.filter(i => i !== cre).forEach(i => this.endPTTask(i));
     const followers = this.myGroup.filter(i => i !== cre);
     cre.newPullTarsTask(followers, target, 5, undefined, getPSC(1, 1));
   }
@@ -164,6 +178,7 @@ export class wormHeaderJob extends Task_Role {
     SA(cre, "FLEE");
     const tail = <Cre_pull>last(this.myGroup);
     this.endPTTask(cre);
+    this.myGroup.filter(i => i !== tail).forEach(i => this.endPTTask(i));
     const followers = this.myGroup.filter(i => i !== tail);
     const follower_sorted = arrReverse(followers);
     // const fleePos = cre.getFleePos(12, 12, undefined, getPSC(1, 1));
@@ -184,6 +199,7 @@ export class wormHeaderJob extends Task_Role {
     }
     SA(cre, "STOP");
     const tail = <Cre_pull>last(this.myGroup);
+    this.myGroup.forEach(i => this.endPTTask(i));
     this.endPTTask(tail);
     this.endPTTask(this.master);
     if (this.myGroup.length === 5) {
@@ -241,13 +257,19 @@ export class wormHeaderJob extends Task_Role {
           typeBonus = 1;
         }
       }
+      const closeSpawnBonus = divideReduce(GR(tar, mySpawn), 10);
       const closeTailBonus = divideReduce(GR(tar, tail), 2);
       const disBonus = divideReduce(GR(tar, cre), 1.5);
-      const sameBonus = this.target === tar ? 1.5 : 1;
+      const sameBonus = this.target === tar ? 6 : 1;
       const tauntBonus = 1 + 0.02 * getTaunt(tar);
       // const extraTauntBonus=calExtraTaunt()
       const final =
-        disBonus * closeTailBonus * sameBonus * typeBonus * tauntBonus;
+        closeSpawnBonus *
+        disBonus *
+        closeTailBonus *
+        sameBonus *
+        typeBonus *
+        tauntBonus;
       SAN(tar, "T", final);
       // SAN(tar, "ESB", enSpawnBonus);
       return final;

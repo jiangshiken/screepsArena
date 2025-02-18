@@ -18,7 +18,7 @@ import { defender_rampart } from "../roles/defender";
 import { harvester } from "../roles/harvester";
 import { leftRate } from "../utils/game";
 import { sum } from "../utils/JS";
-import { getRangePoss, Pos_C } from "../utils/Pos";
+import { absRange, getRangePoss, Pos_C } from "../utils/Pos";
 import { supplyRoads } from "./turtle";
 /**use a standard mode of turtling at base*/
 export function useStandardTurtling(st: number, strength: number = 0) {
@@ -30,7 +30,8 @@ export function useStandardTurtling(st: number, strength: number = 0) {
     } else if (strength === 1) {
       spawnCreep(TB("ARWCM"), builderTurtle, builderInfo); //200
     } else {
-      spawnCreep(TB("3A2R2WCM"), builderTurtle, builderInfo); //200
+      //240+150+200+50+50
+      spawnCreep(TB("3AR2WCM"), builderTurtle, builderInfo); //200
     }
     if (strength >= 2) {
       createCS(mySpawn, StructureRampart, 10, false, true);
@@ -55,7 +56,7 @@ export function useStandardTurtling(st: number, strength: number = 0) {
   if (st >= startRebuildTick) {
     reBuildBaseRampart();
   }
-  if (st === 370) {
+  if (st === 400) {
     //defender
     const AW = enemyAWeight();
     if (strength === 0) {
@@ -80,20 +81,30 @@ export function useStandardTurtling(st: number, strength: number = 0) {
         spawnCreep(TB("3RM"), defender_rampart);
       }
     } else {
-      if (AW > 0.6) {
+      if (AW > 0.7) {
         //320+450+100
-        spawnCreep(TB("R8AM"), defender_rampart);
-        spawnCreep(TB("R8AM"), defender_rampart);
+        spawnCreep(TB("8AM"), defender_rampart);
+        spawnCreep(TB("8AM"), defender_rampart);
+      } else if (AW > 0.2) {
+        //450+50
+        spawnCreep(TB("2R4AM"), defender_rampart);
+        spawnCreep(TB("2R4AM"), defender_rampart);
       } else {
-        spawnCreep(TB("3R4AM"), defender_rampart);
-        spawnCreep(TB("3R4AM"), defender_rampart);
+        spawnCreep(TB("3RAM"), defender_rampart);
+        spawnCreep(TB("3RAM"), defender_rampart);
       }
     }
   }
   if (st >= 550) {
     supplyRoads(1);
+  }
+  if (st >= 550 || strength >= 2) {
     const ranPoss = getRangePoss(mySpawn);
-    ranPoss.forEach(pos => supplyCS(pos, StructureRampart));
+    ranPoss.forEach(pos => {
+      if (absRange(pos, mySpawn) >= 2) {
+        supplyCS(pos, StructureRampart);
+      }
+    });
   }
 }
 // /**use 4 ramparts to defend the base*/

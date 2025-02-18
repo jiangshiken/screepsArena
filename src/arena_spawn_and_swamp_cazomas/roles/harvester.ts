@@ -23,7 +23,7 @@ import {
   getFreeEnergy,
   getWildCons,
 } from "../gameObjects/UnitTool";
-import { inResourceArea, tick } from "../utils/game";
+import { inResourceArea } from "../utils/game";
 import { COO, GR } from "../utils/Pos";
 import { findTask } from "../utils/Task";
 import { drawPoly, SA } from "../utils/visual";
@@ -153,10 +153,10 @@ export class harvesterJob extends Task_Role {
   }
   loop_task(): void {
     const cre = this.master;
-    if (energyStealMode && tick >= 400) {
-      // energyStealerJob(cre);
-      return;
-    }
+    // if (energyStealMode && tick >= 400) {
+    //   // energyStealerJob(cre);
+    //   return;
+    // }
     if (!harvesterNotFleeAtStart && cre.flee(5, 10)) {
       SA(cre, "flee");
       cre.dropEnergy();
