@@ -172,6 +172,20 @@ export class wormPartJob extends Task_Role {
     }
   }
   rushSpawn() {
+    const cre = this.master;
+    // const defenders = enemies.filter(
+    //   i => i.getBodyPartsNum(ATTACK) > 0 && inRampart(i) && Adj(i, enemySpawn)
+    // );
+    // if (defenders.length > 1) {
+    //   SA(cre, "AD");
+    //   this.master.MT_stop(defenders[0], 1, friendBlockCostMatrix);
+    // } else {
+    //   SA(cre, "AS");
+    // if(InShotRan(cre,enemySpawn)){
+
+    // }else{
     this.master.MT_stop(enemySpawn, 1, friendBlockCostMatrix);
+    // }
+    // }
   }
 }

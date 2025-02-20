@@ -5,6 +5,7 @@ import {
   getGuessPlayer,
   identifyOpponent,
   Kerob,
+  Love,
   startWaitTick,
   Tigga,
 } from "./gameObjects/player";
@@ -15,6 +16,7 @@ import { useTailStrategy } from "./strategies/tailStrategy";
 import { useWormHeaderStrategy } from "./strategies/wormHeaderStrategy";
 import { useWormRush } from "./strategies/wormRush";
 import { useWormRush_dooms } from "./strategies/wormRush_dooms";
+import { useWormRush_love } from "./strategies/wormRush_love";
 import { ct, pt } from "./utils/CPU";
 import { tick } from "./utils/game";
 
@@ -30,8 +32,8 @@ export function loop(): void {
   identifyOpponent();
   pt("identifyOpponent", st1);
   //main strategy
-  const lockMode = true;
-  // const lockMode = false;
+  // const lockMode = true;
+  const lockMode = false;
   // const CTFMode = false;
   // const CTFMode = true;
   // if (CTFMode) {
@@ -42,8 +44,8 @@ export function loop(): void {
   } else if (lockMode) {
     set_harvesterNotFleeAtStart(true);
     // useWormRush_dooms();
-    // useWormRush(7, 1, 2);
-    useTailStrategy(true);
+    useWormRush(7, 1, 2);
+    // useTailStrategy(true);
     // useTurtleStrategy();
     // useWormHeaderStrategy(1);
     // useShoterStrategy();
@@ -64,6 +66,10 @@ export function loop(): void {
     } else if (gp === Dooms) {
       set_harvesterNotFleeAtStart(true);
       useWormRush_dooms();
+      // useTurtleStrategy();
+    } else if (gp === Love) {
+      set_harvesterNotFleeAtStart(true);
+      useWormRush_love();
       // useTurtleStrategy();
     } else {
       set_harvesterNotFleeAtStart(true);

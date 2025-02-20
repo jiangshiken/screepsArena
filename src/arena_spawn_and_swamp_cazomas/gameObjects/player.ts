@@ -37,6 +37,8 @@ export const Dooms: Player = new Player("Dooms");
 export const MathI: Player = new Player("MathI");
 export const Capta: Player = new Player("Capta");
 export const Kerob: Player = new Player("Kerob");
+export const Sneak: Player = new Player("Sneak");
+export const Love: Player = new Player("Love");
 export const Other: Player = new Player("Other");
 export const startWaitTick = 44;
 export let guessPlayer = Other;
@@ -95,6 +97,18 @@ export function identifyOpponent() {
     if (scanEn0) {
       SA(displayPos(), "dooms triggered");
       addSupport(Dooms, "0", 0.5);
+    }
+  }
+  //identify love
+  if (tick <= startWaitTick) {
+    const scanEn0 = creeps.find(
+      i =>
+        isOppoGO(i) &&
+        arrayEquals(getBodyArrayOfCreep(i).slice(0, 6), TB("MWCMWC"))
+    );
+    if (scanEn0) {
+      SA(displayPos(), "love triggered");
+      addSupport(Love, "0", 0.5);
     }
   }
   //
